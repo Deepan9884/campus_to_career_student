@@ -1,0 +1,97 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import { type ReactNode, useEffect } from "react";
+import { Toaster } from "sonner";
+import { useAuth } from "@/stores";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+import appCss from "../styles.css?url";
+
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "CareerForge AI — Become Internship-Ready" },
+      {
+        name: "description",
+        content:
+          "AI-powered career prep: ATS resume scoring, mock interviews, GitHub project review, skill-gap analysis and personalized learning roadmaps.",
+      },
+      { property: "og:title", content: "CareerForge AI" },
+      { property: "og:description", content: "Your AI co-pilot for landing the internship." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+      },
+    ],
+  }),
+  shellComponent: RootShell,
+  component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+});
+
+function RootShell({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
+  const { checkAuth } = useAuth();
+  useEffect(() => {
+    checkAuth();
+  }, []);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+        <Outlet />
+        <Toaster
+          position="top-right"
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: "rgba(30, 41, 59, 0.85)",
+              backdropFilter: "blur(16px)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              color: "#F1F5F9",
+            },
+          }}
+        />
+      </GoogleOAuthProvider>
+    </QueryClientProvider>
+  );
+}
+
+function NotFoundComponent() {
+  return (
+    <div className="min-h-screen grid place-items-center px-4">
+      <div className="glass-strong rounded-2xl p-10 text-center max-w-md">
+        <h1 className="text-7xl font-bold text-gradient">404</h1>
+        <p className="mt-3 text-muted-foreground">This page slipped through the cracks.</p>
+        <a
+          href="/"
+          className="mt-6 inline-block btn-gradient btn-gradient-hover rounded-xl px-5 py-2.5 text-sm font-semibold"
+        >
+          Back home
+        </a>
+      </div>
+    </div>
+  );
+}
