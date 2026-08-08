@@ -82,3 +82,11 @@ export async function getResumeById(id: string): Promise<Resume> {
 export async function deleteResume(id: string): Promise<void> {
   await authFetch<void>(`${API_BASE}/resume/${id}`, { method: "DELETE" });
 }
+
+export async function improveBulletPoint(bulletPoint: string, role?: string): Promise<{ improved: string }> {
+  return authFetch<{ improved: string }>(`${API_BASE}/resume/improve-bullet`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bulletPoint, role }),
+  });
+}

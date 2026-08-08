@@ -92,3 +92,34 @@ export async function generateLinkedInPost(payload: {
     body: JSON.stringify(payload),
   });
 }
+
+export interface PortfolioData {
+  user: {
+    name: string;
+    githubUsername: string;
+    targetRole: string;
+    skills: string[];
+  };
+  projects: {
+    _id: string;
+    repoFullName: string;
+    repoUrl: string;
+    overview: string;
+    quality: string;
+    resumeImpact: string[];
+    filesAnalyzed: string[];
+  }[];
+}
+
+export async function getPortfolio(username: string): Promise<PortfolioData> {
+  const res = await fetch(`${API_BASE}/github/portfolio/${username}`);
+  const json = await res.json();
+  if (!res.ok || json.success === false) {
+    throw new ApiError(
+      json.statusCode || res.status,
+      json.message || "Failed to fetch portfolio",
+      json.errors || [],
+    );
+  }
+  return json.data as PortfolioData;
+}

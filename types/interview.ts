@@ -1,30 +1,53 @@
-export interface InterviewQuestion {
+export interface InterviewQuestionItem {
   questionId: string | null;
   questionText: string;
-  answer: string | null;
-  answeredAt: string | null;
-  score: number | null;
-  feedback: string | null;
+  itemType: "mcq" | "open_ended";
+  options?: string[];
+  correctOptionIndex?: number | null;
+  idealAnswerPoints?: string[];
+  selectedOptionIndex?: number | null;
+  answer?: string | null;
+  isCorrect?: boolean | null;
+  score?: number | null;
+  feedback?: string | null;
+  answeredAt?: string | null;
 }
 
-export interface Interview {
+export interface InterviewRound {
+  roundType: "quiz" | "aptitude" | "core" | "technical" | "hr";
+  status: "pending" | "in-progress" | "completed" | "skipped" | "failed";
+  gradingMethod: "auto" | "gemini";
+  items: InterviewQuestionItem[];
+  roundScore?: number | null;
+  strengths?: string[] | null;
+  improvements?: string[] | null;
+  summary?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  errorMessage?: string | null;
+}
+
+export interface InterviewSession {
   _id: string;
   user: string;
-  domain: "behavioral" | "technical";
   targetRole: string | null;
-  difficulty: "easy" | "medium" | "hard" | null;
-  questions: InterviewQuestion[];
-  overallScore: number | null;
-  strengths: string[] | null;
-  improvements: string[] | null;
-  summary: string | null;
   status: "in-progress" | "completed" | "failed";
-  errorMessage: string | null;
+  currentRoundIndex: number;
+  rounds: InterviewRound[];
+  overallScore: number | null;
+  skillDimensionScores?: {
+    technicalKnowledge: number | null;
+    problemSolving: number | null;
+    handsOnTechnical: number | null;
+    communication: number | null;
+  };
   startedAt: string;
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
+
+export type Interview = InterviewSession;
 
 export interface Pagination {
   page: number;
@@ -35,26 +58,29 @@ export interface Pagination {
 
 export interface InterviewHistoryItem {
   _id: string;
-  domain: "behavioral" | "technical";
   targetRole: string | null;
   overallScore: number | null;
   status: string;
   createdAt: string;
+  rounds?: Array<{
+    roundType: string;
+    roundScore: number | null;
+  }>;
 }
 
 export interface InterviewHistoryResponse {
-  interviews: InterviewHistoryItem[];
+  sessions: InterviewHistoryItem[];
   pagination: Pagination;
 }
 
 export interface StartInterviewPayload {
-  domain: "behavioral" | "technical";
   targetRole?: string;
   difficulty?: "easy" | "medium" | "hard";
   questionCount?: number;
 }
 
 export interface AnswerPayload {
-  questionIndex: number;
-  answer: string;
+  itemIndex: number;
+  selectedOptionIndex?: number | null;
+  answer?: string | null;
 }

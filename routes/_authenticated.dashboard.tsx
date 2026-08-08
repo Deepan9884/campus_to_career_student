@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { ScoreRing, MiniRing, AnimatedCounter } from "@/components/Score";
 import { RecentActivityWidget } from "@/components/RecentActivityWidget";
@@ -43,25 +44,18 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Dashboard() {
   const { user } = useAuth();
-  const [data, setData] = useState<DashboardResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [earnedBadgeIds, setEarnedBadgeIds] = useState<Set<string>>(new Set());
+  const { data, isLoading: loadingData } = useQuery({
+    queryKey: ["dashboardStats"],
+    queryFn: getDashboardStats,
+  });
 
-  useEffect(() => {
-    getDashboardStats()
-      .then(setData)
-      .catch(() => { })
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: badgesRes, isLoading: loadingBadges } = useQuery({
+    queryKey: ["userBadges"],
+    queryFn: getBadges,
+  });
 
-  useEffect(() => {
-    getBadges()
-      .then((res) => {
-        const ids = new Set((res.data.badges || []).map((b) => b.badgeId));
-        setEarnedBadgeIds(ids);
-      })
-      .catch(() => { });
-  }, []);
+  const loading = loadingData || loadingBadges;
+  const earnedBadgeIds = new Set((badgesRes?.data?.badges || []).map((b: any) => b.badgeId));
 
   const readiness = data?.readiness;
   const stats = data?.stats;
@@ -146,10 +140,40 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="space-y-6">
+        {/* Hero Skeleton */}
+        <div className="h-40 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+        {/* Stats Skeleton */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-32 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+          ))}
+        </div>
+        {/* Content Skeleton */}
+        <div className="h-64 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
       </div>
     );
+  }
+
+  // Profile completion calculation
+  const profileChecks = [
+    { label: "Set Target Role", done: !!(user?.profile?.targetRole || user?.targetRole) },
+    { label: "Upload Resume", done: (stats?.resumeCount || 0) > 0 },
+    { label: "Take Mock Interview", done: (stats?.completedInterviewCount || 0) > 0 },
+    { label: "Analyze GitHub", done: (stats?.repoCount || 0) > 0 },
+  ];
+  const profileProgress = Math.round((profileChecks.filter(c => c.done).length / profileChecks.length) * 100);
+
+  // Today's Mission calculation
+  const todayMission = [];
+  if ((stats?.resumeCount || 0) === 0) {
+    todayMission.push({ title: "Upload your resume", desc: "Get baseline ATS score", link: "/resume", icon: Upload });
+  } else if ((stats?.gapCount || 0) === 0) {
+    todayMission.push({ title: "Check your skill gaps", desc: "See what you need to learn", link: "/skills", icon: Target });
+  } else if ((stats?.roadmapCount || 0) === 0) {
+    todayMission.push({ title: "Generate a roadmap", desc: "Plan your learning path", link: "/roadmap", icon: Map });
+  } else {
+    todayMission.push({ title: "Practice an interview", desc: "Keep your skills sharp", link: "/interview", icon: Mic });
   }
 
   return (
@@ -263,6 +287,58 @@ function Dashboard() {
             </ul>
           )}
         </GlassCard>
+        
+        {/* Today's Mission & Profile Completion */}
+        <div className="lg:col-span-1 space-y-6">
+          <GlassCard variant="strong" className="bg-gradient-to-br from-[var(--color-primary)]/10 to-transparent">
+            <div className="flex items-center gap-2 mb-4">
+              <Target className="h-5 w-5 text-[color:var(--color-primary)]" />
+              <h3 className="font-semibold">Today's Mission</h3>
+            </div>
+            <div className="space-y-4">
+              {todayMission.map((mission, i) => (
+                <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-2 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <mission.icon className="h-16 w-16 -mr-4 -mt-4 transform rotate-12" />
+                  </div>
+                  <p className="text-sm font-medium relative z-10">{mission.title}</p>
+                  <p className="text-xs text-muted-foreground relative z-10">{mission.desc}</p>
+                  <Link to={mission.link as any} className="btn-gradient rounded-lg py-1.5 px-3 text-xs text-center font-medium mt-1 relative z-10">
+                    Start Mission
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+
+          <GlassCard>
+            <h3 className="font-semibold mb-2">Profile Completion</h3>
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-medium text-[color:var(--color-primary)]">{profileProgress}%</span>
+            </div>
+            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden mb-4">
+              <div 
+                className="h-full btn-gradient transition-all duration-1000" 
+                style={{ width: `${profileProgress}%` }}
+              />
+            </div>
+            <ul className="space-y-2 text-sm">
+              {profileChecks.map((check, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  {check.done ? (
+                    <BadgeCheck className="h-4 w-4 text-[color:var(--color-success)] shrink-0" />
+                  ) : (
+                    <div className="h-4 w-4 rounded-full border border-white/20 shrink-0" />
+                  )}
+                  <span className={check.done ? "text-muted-foreground line-through opacity-70" : "text-foreground"}>
+                    {check.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </GlassCard>
+        </div>
       </div>
 
       {/* Bottom CTAs */}
@@ -326,50 +402,11 @@ function Dashboard() {
         </GlassCard>
       </div>
 
+      {/* Bottom CTAs - Hidden in favor of Profile Completion Sidebar 
       <div className="grid md:grid-cols-2 gap-4">
-        <GlassCard
-          variant="strong"
-          hover
-          className="bg-gradient-to-br from-blue-500/15 to-purple-500/15"
-        >
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl btn-gradient grid place-items-center">
-              <Sparkles className="h-6 w-6" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold">Complete Your Profile</p>
-              <p className="text-xs text-muted-foreground">Unlock personalized matching.</p>
-            </div>
-            <Link
-              to="/settings"
-              className="btn-gradient btn-gradient-hover rounded-xl px-4 py-2 text-xs font-semibold"
-            >
-              Open
-            </Link>
-          </div>
-        </GlassCard>
-        <GlassCard
-          variant="strong"
-          hover
-          className="bg-gradient-to-br from-purple-500/15 to-cyan-500/15"
-        >
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl btn-gradient grid place-items-center">
-              <Map className="h-6 w-6" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold">Start Learning Roadmap</p>
-              <p className="text-xs text-muted-foreground">Personalized path to internship-ready.</p>
-            </div>
-            <Link
-              to="/roadmap"
-              className="btn-gradient btn-gradient-hover rounded-xl px-4 py-2 text-xs font-semibold"
-            >
-              Open
-            </Link>
-          </div>
-        </GlassCard>
+        ...
       </div>
+      */}
     </div>
   );
 }

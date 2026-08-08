@@ -1,6 +1,6 @@
 import { getAccessToken } from "@/lib/api";
 import type {
-  Interview,
+  InterviewSession,
   InterviewHistoryResponse,
   StartInterviewPayload,
   AnswerPayload,
@@ -43,24 +43,31 @@ async function authFetch<T>(url: string, options: RequestInit = {}): Promise<T> 
   return json.data as T;
 }
 
-export async function startInterview(payload: StartInterviewPayload): Promise<Interview> {
-  return authFetch<Interview>(`${API_BASE}/interview/start`, {
+export async function startInterview(payload: StartInterviewPayload): Promise<InterviewSession> {
+  return authFetch<InterviewSession>(`${API_BASE}/interview/start`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 }
 
-export async function answerQuestion(id: string, payload: AnswerPayload): Promise<Interview> {
-  return authFetch<Interview>(`${API_BASE}/interview/${id}/answer`, {
+export async function submitRoundAnswer(
+  sessionId: string,
+  roundType: string,
+  payload: AnswerPayload,
+): Promise<InterviewSession> {
+  return authFetch<InterviewSession>(`${API_BASE}/interview/${sessionId}/rounds/${roundType}/answer`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 }
 
-export async function finishInterview(id: string): Promise<Interview> {
-  return authFetch<Interview>(`${API_BASE}/interview/${id}/finish`, {
+export async function finishRound(
+  sessionId: string,
+  roundType: string,
+): Promise<InterviewSession> {
+  return authFetch<InterviewSession>(`${API_BASE}/interview/${sessionId}/rounds/${roundType}/finish`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
@@ -73,8 +80,8 @@ export async function getInterviewHistory(page = 1, limit = 10): Promise<Intervi
   );
 }
 
-export async function getInterviewById(id: string): Promise<Interview> {
-  return authFetch<Interview>(`${API_BASE}/interview/${id}`);
+export async function getInterviewById(id: string): Promise<InterviewSession> {
+  return authFetch<InterviewSession>(`${API_BASE}/interview/${id}`);
 }
 
 export async function deleteInterview(id: string): Promise<void> {

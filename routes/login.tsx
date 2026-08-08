@@ -35,7 +35,8 @@ function LoginPage() {
       toast.success("Welcome back!");
       navigate({ to: "/dashboard" });
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Login failed");
+      const msg = err instanceof Error && err.message ? err.message : "Login failed";
+      toast.error(msg);
     }
   };
 

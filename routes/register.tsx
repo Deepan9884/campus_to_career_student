@@ -43,7 +43,11 @@ function RegisterPage() {
     const e: Record<string, string> = {};
     if (name.trim().length < 2) e.name = "Enter your full name";
     if (!/^\S+@\S+\.\S+$/.test(email)) e.email = "Enter a valid email";
-    if (st.score < 3) e.pw = "Use 8+ chars, mixed case, and a number";
+    if (pw.length < 8) {
+      e.pw = "Password must be at least 8 characters long";
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(pw)) {
+      e.pw = "Password must contain at least one uppercase letter, one lowercase letter, and one number";
+    }
     if (pw !== pw2) e.pw2 = "Passwords don't match";
     if (!terms) e.terms = "Please accept the terms";
     setErrors(e);
@@ -53,18 +57,42 @@ function RegisterPage() {
   const submit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
+    let success = false;
     try {
       await register({ name, email, password: pw });
-      toast.success("Account created!");
-      navigate({ to: "/dashboard" });
+      toast.success("Account created successfully!");
+      success = true;
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error && "errors" in err && Array.isArray((err as any).errors)
-          ? (err as any).errors.map((e: { message: string }) => e.message).join(". ")
-          : err instanceof Error
-            ? err.message
-            : "Registration failed";
+      const errObj = err as any;
+      let msg = "";
+      const fieldErrs: Record<string, string> = {};
+
+      if (errObj?.errors && Array.isArray(errObj.errors) && errObj.errors.length > 0) {
+        msg = errObj.errors
+          .map((e: any) => {
+            const errStr = typeof e === "string" ? e : e?.message || String(e);
+            if (e?.field) {
+              const fieldName = e.field.replace(/^body\./, "");
+              if (fieldName === "password") fieldErrs.pw = errStr;
+              else fieldErrs[fieldName] = errStr;
+            }
+            return errStr;
+          })
+          .join(". ");
+      }
+      if (Object.keys(fieldErrs).length > 0) {
+        setErrors((prev) => ({ ...prev, ...fieldErrs }));
+      }
+      if (!msg && err instanceof Error && err.message) {
+        msg = err.message;
+      }
+      if (!msg) {
+        msg = "Registration failed. Please try a different email or check credentials.";
+      }
       toast.error(msg);
+    }
+    if (success) {
+      navigate({ to: "/dashboard" });
     }
   };
 

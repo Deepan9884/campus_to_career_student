@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import {
@@ -23,6 +23,8 @@ import {
   X,
   Lock,
   Save,
+  Trophy,
+  Linkedin,
 } from "lucide-react";
 import { useAuth } from "@/stores";
 import { toast } from "sonner";
@@ -43,12 +45,15 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 const MODULES = [
+  { key: "/events", label: "Events & Proofs", icon: Trophy },
   { key: "/resume", label: "Resume Analyzer", icon: FileText },
   { key: "/interview", label: "Mock Interview", icon: Mic },
   { key: "/github", label: "GitHub Projects", icon: Github },
+  { key: "/linkedin-posts", label: "LinkedIn Post Ideas", icon: Linkedin },
   { key: "/skills", label: "Skill Gap Analysis", icon: Target },
   { key: "/roadmap", label: "Learning Roadmap", icon: Map },
   { key: "/coding-platforms", label: "Coding Platforms", icon: BarChart3 },
+  { key: "/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 function SettingsPage() {
@@ -103,8 +108,8 @@ function SettingsPage() {
     async function fetchProfiles() {
       try {
         const res = await getAllCodingProfiles();
-        // The API returns the array directly in the success response
-        setLinkedProfiles((res as any).data || []);
+        const list = Array.isArray(res) ? res : (res as any)?.data || [];
+        setLinkedProfiles(list);
       } catch (err) {
         console.error(err);
       }
@@ -282,13 +287,22 @@ function SettingsPage() {
     }
   };
 
-  const toggleVisibility = (moduleKey: string) => {
-    setPreferences((prev) => ({
-      ...prev,
-      hiddenModules: prev.hiddenModules.includes(moduleKey)
-        ? prev.hiddenModules.filter((k) => k !== moduleKey)
-        : [...prev.hiddenModules, moduleKey],
-    }));
+  const toggleVisibility = async (moduleKey: string) => {
+    const isHidden = preferences.hiddenModules.includes(moduleKey);
+    const updatedHidden = isHidden
+      ? preferences.hiddenModules.filter((k) => k !== moduleKey)
+      : [...preferences.hiddenModules, moduleKey];
+
+    const updatedPrefs = { ...preferences, hiddenModules: updatedHidden };
+    setPreferences(updatedPrefs);
+
+    try {
+      await updateUser({ preferences: updatedPrefs });
+      toast.success(isHidden ? "Module shown in sidebar" : "Module hidden from sidebar");
+    } catch (err: any) {
+      console.error("Failed to update sidebar preference:", err);
+      toast.error(err?.message || "Failed to update sidebar preference");
+    }
   };
 
   if (loading || isCheckingAuth) {
@@ -406,28 +420,55 @@ function SettingsPage() {
 
           {/* Connected Coding Profiles */}
           <GlassCard>
-            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-black dark:text-white">
-              <LinkIcon className="h-5 w-5 text-indigo-400" /> Linked Accounts
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold flex items-center gap-2 text-lg text-black dark:text-white">
+                <LinkIcon className="h-5 w-5 text-indigo-400" /> Linked Accounts
+              </h3>
+              <Link
+                to="/coding-platforms"
+                className="text-xs text-indigo-500 hover:text-indigo-400 font-medium flex items-center gap-1"
+              >
+                Manage Profiles →
+              </Link>
+            </div>
+
             {linkedProfiles.length > 0 ? (
               <div className="space-y-3">
                 {linkedProfiles.map((p, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/20">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/20">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-md">
+                      <div className="p-2 bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg">
                         <BarChart3 className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm capitalize text-black dark:text-white">{p.platform}</p>
-                        <p className="text-xs text-muted-foreground">{p.username}</p>
+                        <p className="font-semibold text-sm capitalize text-black dark:text-white flex items-center gap-2">
+                          {p.platform}
+                          {p.cachedStats?.solved !== undefined && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-medium">
+                              {p.cachedStats.solved} solved
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">@{p.username}</p>
                       </div>
                     </div>
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      <span className="text-xs text-emerald-500 font-medium">Connected</span>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No coding profiles linked yet. Go to Coding Platforms to link your accounts.</p>
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-3">No coding profiles linked yet.</p>
+                <Link
+                  to="/coding-platforms"
+                  className="btn-gradient px-4 py-2 rounded-xl text-xs font-semibold text-white inline-block"
+                >
+                  Connect Coding Profiles
+                </Link>
+              </div>
             )}
           </GlassCard>
 

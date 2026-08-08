@@ -13,6 +13,8 @@ import {
   BookOpen,
   Brain,
   BarChart3,
+  LayoutDashboard,
+  List,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -335,6 +337,7 @@ function RoadmapDetail({
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizMilestone, setQuizMilestone] = useState<RoadmapMilestone | null>(null);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
   const normalizeDifficulty = (d?: string) => d === "basic" ? "beginner" : (d || "uncategorized");
   const humanize = (str: string) => str.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -391,6 +394,25 @@ function RoadmapDetail({
           </p>
         )}
 
+        <div className="mt-4 flex items-center gap-2">
+          <button
+            onClick={() => setViewMode("list")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+              viewMode === "list" ? "bg-white/20 text-foreground" : "glass hover:bg-white/10 text-muted-foreground"
+            }`}
+          >
+            <List className="h-4 w-4" /> List
+          </button>
+          <button
+            onClick={() => setViewMode("kanban")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+              viewMode === "kanban" ? "bg-white/20 text-foreground" : "glass hover:bg-white/10 text-muted-foreground"
+            }`}
+          >
+            <LayoutDashboard className="h-4 w-4" /> Kanban
+          </button>
+        </div>
+
         {totalSubTopics > 0 && (
           <div className="mt-4 pt-3 border-t border-white/10">
             <div className="flex items-center justify-between mb-2">
@@ -427,7 +449,7 @@ function RoadmapDetail({
         </GlassCard>
       )}
 
-      {roadmap.status === "completed" && (
+      {roadmap.status === "completed" && viewMode === "list" && (
         <div className="relative pl-6">
           <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500" />
           <div className="space-y-4">
@@ -484,6 +506,55 @@ function RoadmapDetail({
            </div>
          </div>
        )}
+
+      {roadmap.status === "completed" && viewMode === "kanban" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {(["not_started", "in_progress", "passed"] as const).map((status) => {
+            const columnMilestones = roadmap.milestones.filter(
+              (m) => (subTopicStatusMap.get(m.subTopicId || "") || "not_started") === status
+            );
+            const statusTitle = status === "not_started" ? "To Do" : status === "in_progress" ? "In Progress" : "Done";
+            const statusColor = status === "passed" ? "bg-[color:var(--color-success)]" : status === "in_progress" ? "bg-[color:var(--color-warning)]" : "bg-slate-500";
+            return (
+              <div key={status} className="glass p-4 rounded-xl flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${statusColor}`} />
+                  <h3 className="font-bold">{statusTitle}</h3>
+                  <span className="text-xs text-muted-foreground ml-auto bg-black/20 px-2 py-0.5 rounded-full">
+                    {columnMilestones.length}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {columnMilestones.map((m) => {
+                    const idx = roadmap.milestones.indexOf(m);
+                    const isExpanded = expanded === idx;
+                    return (
+                      <MilestoneCard
+                        key={m.subTopicId}
+                        milestone={m}
+                        index={idx}
+                        total={roadmap.milestones.length}
+                        isExpanded={isExpanded}
+                        subTopicStatus={status}
+                        onToggle={() => setExpanded(isExpanded ? null : idx)}
+                        onQuiz={() => {
+                          setQuizMilestone(m);
+                          setQuizOpen(true);
+                        }}
+                      />
+                    );
+                  })}
+                  {columnMilestones.length === 0 && (
+                    <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-white/10 rounded-xl">
+                      Empty
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {quizMilestone && (
         <QuizDialog

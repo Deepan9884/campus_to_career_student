@@ -91,3 +91,60 @@ export async function getGapById(id: string): Promise<SkillGapAnalysis> {
 export async function deleteGapAnalysis(id: string): Promise<void> {
   await authFetch<void>(`${API_BASE}/skills/${id}`, { method: "DELETE" });
 }
+
+export interface LiveStrategyItem {
+  type: "skill" | "resume" | "interview" | "coding" | "event";
+  title: string;
+  description: string;
+  impact: string;
+}
+
+export interface CodingPlatformItem {
+  platform: string;
+  username: string;
+  profileUrl: string;
+  lastFetchedAt?: string;
+  totalSolved: number;
+  easySolved?: number;
+  mediumSolved?: number;
+  hardSolved?: number;
+  rating?: number;
+  rank?: string | number | null;
+  rawStats?: any;
+}
+
+export interface CodingPlatformAnalysis {
+  linkedPlatformsCount: number;
+  totalProblemsSolved: number;
+  totalEasySolved: number;
+  totalMediumSolved: number;
+  totalHardSolved: number;
+  platforms: CodingPlatformItem[];
+  summaryRecommendation: string;
+}
+
+export interface GrowthMetrics {
+  overallReadinessPct: number;
+  skillGapMatchPct: number;
+  resumeScore: number;
+  avgInterviewScore: number;
+  codingScore: number;
+  eventScore: number;
+  totalProblemsSolved: number;
+  repoCount: number;
+  totalEventsCount: number;
+  verifiedEventsCount: number;
+  interviewsCount: number;
+  userSkillsCount: number;
+  liveStrategy: LiveStrategyItem[];
+  codingPlatformAnalysis?: CodingPlatformAnalysis;
+}
+
+export interface LatestAnalysisResponse {
+  analysis: SkillGapAnalysis | null;
+  growthMetrics: GrowthMetrics;
+}
+
+export async function getLatestAnalysis(): Promise<LatestAnalysisResponse> {
+  return authFetch<LatestAnalysisResponse>(`${API_BASE}/skills/latest`);
+}

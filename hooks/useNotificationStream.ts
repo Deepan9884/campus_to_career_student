@@ -142,8 +142,9 @@ export function useNotificationStream() {
       });
       const json = await res.json();
       if (json.success) {
-        setNotifications(json.data.notifications);
-        setUnreadCount(json.data.notifications.filter((n: Notification) => !n.read).length);
+        const list: Notification[] = json.data?.notifications || (Array.isArray(json.data) ? json.data : []);
+        setNotifications(list);
+        setUnreadCount(list.filter((n: Notification) => !n?.read).length);
       }
     } catch {
       // silent
@@ -158,7 +159,7 @@ export function useNotificationStream() {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
-      setNotifications((prev) => prev.map((n) => (n._id === id ? { ...n, read: true } : n)));
+      setNotifications((prev) => (prev || []).map((n) => (n._id === id ? { ...n, read: true } : n)));
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch {
       // silent
@@ -173,7 +174,7 @@ export function useNotificationStream() {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotifications((prev) => (prev || []).map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch {
       // silent

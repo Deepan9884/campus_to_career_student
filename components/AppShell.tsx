@@ -17,9 +17,16 @@ import {
   CheckCheck,
   BellOff,
   Linkedin,
+  Trophy,
+  ChevronLeft,
+  ChevronRight,
+  GraduationCap,
+  HelpCircle,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/stores";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { StudentProductTour } from "@/components/StudentProductTour";
 import { useNotificationStream } from "@/hooks/useNotificationStream";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -29,6 +36,7 @@ import type { BadgeId, EarnedBadge } from "@/types/badges";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/events", label: "Events & Proofs", icon: Trophy },
   { to: "/resume", label: "Resume Analyzer", icon: FileText },
   { to: "/interview", label: "Mock Interview", icon: Mic },
   { to: "/github", label: "GitHub Projects", icon: Github },
@@ -57,6 +65,29 @@ export function AppShell() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showProductTour, setShowProductTour] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("cf-student-tour-done") !== "true";
+    }
+    return false;
+  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("cf_sidebar_collapsed") === "true";
+    }
+    return false;
+  });
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("cf_sidebar_collapsed", String(next));
+      }
+      return next;
+    });
+  };
+
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationStream();
 
   const filteredNav = nav.filter((item) => {
@@ -146,20 +177,60 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen flex">
+      <OnboardingWizard />
+      <StudentProductTour open={showProductTour} onClose={() => setShowProductTour(false)} />
       {/* Sidebar — desktop */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col glass-strong m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)]">
-        <Brand />
-        <nav className="mt-6 flex-1 space-y-1">
+      <aside
+        className={cn(
+          "hidden lg:flex flex-col glass-strong m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] transition-all duration-300 shrink-0",
+          sidebarCollapsed ? "w-20 items-center px-3" : "w-64"
+        )}
+      >
+        <div className="flex items-center justify-between w-full">
+          <Brand collapsed={sidebarCollapsed} />
+          <button
+            onClick={toggleSidebar}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-foreground/70 hover:text-foreground transition shrink-0"
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
+        </div>
+
+        <nav className="mt-6 flex-1 space-y-1 w-full">
           {filteredNav.map((item) => (
-            <NavItem key={item.to} item={item} active={pathname.startsWith(item.to)} />
+            <NavItem
+              key={item.to}
+              item={item}
+              active={pathname.startsWith(item.to)}
+              collapsed={sidebarCollapsed}
+            />
           ))}
         </nav>
-        <div className="pt-4 border-t border-white/10">
+
+        <div className="pt-4 border-t border-white/10 w-full space-y-1">
+          <button
+            onClick={() => setShowProductTour(true)}
+            title={sidebarCollapsed ? "App Tour" : undefined}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-xl text-xs font-semibold text-indigo-300 hover:bg-white/10 hover:text-white transition",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2"
+            )}
+          >
+            <HelpCircle className="h-4 w-4 shrink-0 text-indigo-400" />
+            {!sidebarCollapsed && <span>App Tour 💡</span>}
+          </button>
+
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground hover:bg-white/10 hover:text-foreground transition"
+            title={sidebarCollapsed ? "Sign out" : undefined}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-xl text-sm text-foreground hover:bg-white/10 hover:text-foreground transition",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5"
+            )}
           >
-            <LogOut className="h-4 w-4" /> Sign out
+            <LogOut className="h-4 w-4 shrink-0" />
+            {!sidebarCollapsed && <span>Sign out</span>}
           </button>
         </div>
       </aside>
@@ -205,9 +276,16 @@ export function AppShell() {
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-30 glass-strong m-3 ml-3 lg:ml-3 rounded-2xl px-4 py-3 flex items-center gap-3">
           <button
-            onClick={() => setMobileOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-white/10"
-            aria-label="Open menu"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                setMobileOpen(!mobileOpen);
+              } else {
+                toggleSidebar();
+              }
+            }}
+            className="p-2 rounded-lg hover:bg-white/10 text-foreground transition"
+            aria-label="Toggle sidebar"
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -256,16 +334,18 @@ export function AppShell() {
   );
 }
 
-function Brand() {
+function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
-    <Link to="/dashboard" className="flex items-center gap-2">
-      <div className="h-9 w-9 rounded-xl btn-gradient grid place-items-center">
-        <Sparkles className="h-5 w-5" />
+    <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
+      <div className="h-9 w-9 rounded-xl btn-gradient grid place-items-center shrink-0">
+        <Sparkles className="h-5 w-5 text-white" />
       </div>
-      <div>
-        <p className="font-display font-bold leading-none">CareerForge</p>
-        <p className="text-[10px] text-muted-foreground tracking-widest">AI</p>
-      </div>
+      {!collapsed && (
+        <div className="truncate">
+          <p className="font-display font-bold leading-none text-foreground">CareerForge</p>
+          <p className="text-[10px] text-muted-foreground tracking-widest mt-0.5">AI</p>
+        </div>
+      )}
     </Link>
   );
 }
@@ -273,10 +353,12 @@ function Brand() {
 function NavItem({
   item,
   active,
+  collapsed,
   onClick,
 }: {
   item: { to: string; label: string; icon: typeof LayoutDashboard };
   active: boolean;
+  collapsed?: boolean;
   onClick?: () => void;
 }) {
   const Icon = item.icon;
@@ -284,15 +366,17 @@ function NavItem({
     <Link
       to={item.to}
       onClick={onClick}
+      title={collapsed ? item.label : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
+        "flex items-center gap-3 rounded-xl text-sm transition-all",
+        collapsed ? "justify-center p-2.5" : "px-3 py-2.5",
         active
-          ? "btn-gradient text-white shadow-lg"
+          ? "btn-gradient text-white shadow-lg font-medium"
           : "text-foreground hover:bg-white/10 hover:text-foreground",
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      <span className="truncate">{item.label}</span>
+      {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
   );
 }
@@ -346,8 +430,8 @@ function NotificationBell({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 max-h-[28rem] overflow-hidden rounded-xl glass-strong border border-white/10 shadow-2xl z-50 flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+        <div className="absolute right-0 top-full mt-2 w-80 max-h-[28rem] overflow-hidden rounded-xl bg-slate-900/95 dark:bg-slate-950/98 backdrop-blur-2xl border border-white/15 shadow-2xl z-50 flex flex-col text-slate-100">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
             <p className="text-sm font-semibold">Notifications</p>
             {unreadCount > 0 && (
               <button
@@ -360,14 +444,14 @@ function NotificationBell({
           </div>
 
           <div className="overflow-y-auto flex-1">
-            {notifications.length === 0 ? (
+            {(!notifications || notifications.length === 0) ? (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
                 <BellOff className="h-8 w-8 mb-2 opacity-50" />
                 <p className="text-sm">No notifications yet</p>
               </div>
             ) : (
               <ul>
-                {notifications.map((n) => (
+                {(notifications || []).map((n) => (
                   <li key={n._id}>
                     <button
                       onClick={() => {
@@ -375,19 +459,19 @@ function NotificationBell({
                         setOpen(false);
                       }}
                       className={cn(
-                        "w-full text-left px-4 py-3 hover:bg-white/5 transition flex gap-3",
-                        !n.read && "bg-white/5",
+                        "w-full text-left px-4 py-3 hover:bg-white/10 transition flex gap-3 border-b border-white/5 last:border-0",
+                        !n.read ? "bg-white/10" : "bg-transparent",
                       )}
                     >
                       {!n.read && (
                         <span className="mt-1.5 h-2 w-2 rounded-full bg-[color:var(--color-primary)] shrink-0" />
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className={cn("text-sm", !n.read ? "font-medium" : "text-muted-foreground")}>
+                        <p className={cn("text-sm", !n.read ? "font-semibold text-white" : "text-slate-200")}>
                           {n.title}
                         </p>
-                        <p className="text-xs text-muted-foreground truncate mt-0.5">{n.message}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">{relativeTime(n.createdAt)}</p>
+                        <p className="text-xs text-slate-300 truncate mt-0.5">{n.message}</p>
+                        <p className="text-[10px] text-slate-400 mt-1">{relativeTime(n.createdAt)}</p>
                       </div>
                     </button>
                   </li>

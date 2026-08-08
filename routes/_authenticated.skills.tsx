@@ -15,6 +15,15 @@ import {
   FileText,
   Github,
   Target,
+  Award,
+  Code2,
+  Sparkles,
+  CheckCircle2,
+  ChevronRight,
+  Activity,
+  Zap,
+  Mic,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -26,10 +35,15 @@ import {
   getGapHistory,
   getGapById,
   deleteGapAnalysis,
+  getLatestAnalysis,
+  type GrowthMetrics,
 } from "@/lib/skills-api";
 import { useAuth } from "@/stores";
 import { getRoadmapByGapAnalysis } from "@/lib/roadmap-api";
 import type { UserSkill, Suggestion, SkillGapAnalysis, AnalysisHistoryItem } from "@/types/skills";
+import { QuizDialog } from "@/components/QuizDialog";
+import { CodingPlatformAnalyticsCharts } from "@/components/CodingPlatformAnalyticsCharts";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/skills")({
   head: () => ({ meta: [{ title: "Skill Gap — CareerForge AI" }] }),
@@ -64,6 +78,11 @@ function SkillsPage() {
   const [deleteSkillId, setDeleteSkillId] = useState<string | null>(null);
   const [quizPassTick, setQuizPassTick] = useState(0);
   const [linkedRoadmapId, setLinkedRoadmapId] = useState<string | null>(null);
+  
+  // Verification Quiz state
+  const [quizSkill, setQuizSkill] = useState<UserSkill | null>(null);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [growthMetrics, setGrowthMetrics] = useState<GrowthMetrics | null>(null);
 
   const fetchSkills = useCallback(async () => {
     setLoadingSkills(true);
@@ -74,6 +93,19 @@ function SkillsPage() {
       toast.error("Failed to load skills");
     } finally {
       setLoadingSkills(false);
+    }
+  }, []);
+
+  const fetchLatestAndGrowth = useCallback(async () => {
+    try {
+      const data = await getLatestAnalysis();
+      setGrowthMetrics(data.growthMetrics);
+      if (data.analysis) {
+        setAnalysis(data.analysis);
+        setTargetRole(data.analysis.targetRole);
+      }
+    } catch {
+      // silent fallback
     }
   }, []);
 
@@ -92,7 +124,8 @@ function SkillsPage() {
 
   useEffect(() => {
     fetchSkills();
-  }, [fetchSkills]);
+    fetchLatestAndGrowth();
+  }, [fetchSkills, fetchLatestAndGrowth]);
 
   useEffect(() => {
     if (showHistory) {
@@ -170,12 +203,12 @@ function SkillsPage() {
   const handleAnalyze = async () => {
     if (!targetRole) return;
     setAnalyzing(true);
-    setAnalysis(null);
     setShowHistory(false);
     try {
       const result = await analyzeGap({ targetRole });
       setAnalysis(result);
       toast.success("Analysis complete");
+      fetchLatestAndGrowth();
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
       if (apiErr.statusCode === 429) {
@@ -225,11 +258,189 @@ function SkillsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Skill Gap Analyzer</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">Skill Gap & Growth Strategy</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Find the exact gap between you and your target role.
+          Persistent AI skill gap analysis & real-time career growth tracking across all platform activities.
         </p>
       </div>
+
+      {/* Live Strategy & Overall Growth Header */}
+      {growthMetrics && (
+        <GlassCard className="p-6 border-indigo-500/20 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <ScoreRing score={growthMetrics.overallReadinessPct} size={90} stroke={8} label="Readiness" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-indigo-400" />
+                  <h2 className="text-xl font-bold text-foreground">Live Growth & Career Readiness</h2>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 max-w-lg">
+                  Real-time composite index calculated dynamically from your Skill Gap ({growthMetrics.skillGapMatchPct}%), ATS Resume Score ({growthMetrics.resumeScore}%), Mock Interviews ({growthMetrics.avgInterviewScore}%), Coding Problems ({growthMetrics.totalProblemsSolved} solved), and Verified Event Proofs.
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Metrics Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
+              <div className="p-3 rounded-xl glass border border-white/10 text-center">
+                <FileText className="h-4 w-4 mx-auto text-blue-400 mb-1" />
+                <p className="text-xs text-muted-foreground">ATS Resume</p>
+                <p className="text-sm font-bold text-foreground">{growthMetrics.resumeScore}%</p>
+              </div>
+              <div className="p-3 rounded-xl glass border border-white/10 text-center">
+                <Mic className="h-4 w-4 mx-auto text-purple-400 mb-1" />
+                <p className="text-xs text-muted-foreground">Mock Interview</p>
+                <p className="text-sm font-bold text-foreground">{growthMetrics.avgInterviewScore}%</p>
+              </div>
+              <div className="p-3 rounded-xl glass border border-white/10 text-center">
+                <Code2 className="h-4 w-4 mx-auto text-emerald-400 mb-1" />
+                <p className="text-xs text-muted-foreground">Coding Solved</p>
+                <p className="text-sm font-bold text-foreground">{growthMetrics.totalProblemsSolved}</p>
+              </div>
+              <div className="p-3 rounded-xl glass border border-white/10 text-center">
+                <Award className="h-4 w-4 mx-auto text-amber-400 mb-1" />
+                <p className="text-xs text-muted-foreground">Verified Proofs</p>
+                <p className="text-sm font-bold text-foreground">{growthMetrics.verifiedEventsCount}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Strategy Recommendations */}
+          {growthMetrics.liveStrategy.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Zap className="h-3.5 w-3.5 text-amber-400" /> Real-time Live Strategy & Growth Guidance
+              </p>
+              <div className="grid md:grid-cols-3 gap-3">
+                {growthMetrics.liveStrategy.map((strat, i) => (
+                  <div key={i} className="p-3.5 rounded-xl glass border border-white/10 flex flex-col justify-between hover:bg-white/10 transition">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-foreground">{strat.title}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">{strat.impact}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{strat.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Live Coding Platform Analysis Sub-section */}
+          {growthMetrics.codingPlatformAnalysis && (
+            <div className="mt-6 pt-5 border-t border-white/10">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-foreground">Live Coding Platform Analysis & Frequency Charts</h3>
+                </div>
+                <Link
+                  to="/coding-platforms"
+                  className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium"
+                >
+                  Manage Profiles <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+
+              {growthMetrics.codingPlatformAnalysis.platforms.length > 0 ? (
+                <div className="space-y-6">
+                  {/* Platform breakdown cards */}
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {growthMetrics.codingPlatformAnalysis.platforms.map((p) => (
+                      <div
+                        key={p.platform}
+                        className="p-3.5 rounded-xl glass border border-white/10 flex flex-col justify-between hover:bg-white/10 transition"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold capitalize text-foreground flex items-center gap-1.5">
+                              <Code2 className="h-3.5 w-3.5 text-emerald-400" />
+                              {p.platform}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground truncate max-w-[100px]">
+                              @{p.username}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 flex items-baseline justify-between">
+                            <span className="text-2xl font-extrabold text-foreground">{p.totalSolved}</span>
+                            <span className="text-[10px] text-muted-foreground">solved</span>
+                          </div>
+
+                          {(p.easySolved !== undefined || p.mediumSolved !== undefined || p.hardSolved !== undefined) && (
+                            <div className="mt-2 grid grid-cols-3 gap-1 text-[10px] text-center pt-2 border-t border-white/5">
+                              <div className="bg-emerald-500/10 text-emerald-400 rounded py-0.5 font-medium">
+                                E: {p.easySolved || 0}
+                              </div>
+                              <div className="bg-amber-500/10 text-amber-400 rounded py-0.5 font-medium">
+                                M: {p.mediumSolved || 0}
+                              </div>
+                              <div className="bg-rose-500/10 text-rose-400 rounded py-0.5 font-medium">
+                                H: {p.hardSolved || 0}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <a
+                          href={p.profileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 text-[11px] text-indigo-400 hover:underline flex items-center gap-1 font-medium"
+                        >
+                          View Profile <ChevronRight className="h-3 w-3" />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Frequency & Breakdown Analysis Charts */}
+                  <CodingPlatformAnalyticsCharts
+                    platforms={growthMetrics.codingPlatformAnalysis.platforms}
+                    totalProblemsSolved={growthMetrics.codingPlatformAnalysis.totalProblemsSolved}
+                  />
+
+                  {/* Summary Bar & Recommendation */}
+                  <div className="p-3.5 rounded-xl glass border border-white/10 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <div className="flex gap-2 text-xs">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-semibold">
+                          Easy: {growthMetrics.codingPlatformAnalysis.totalEasySolved}
+                        </span>
+                        <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-semibold">
+                          Medium: {growthMetrics.codingPlatformAnalysis.totalMediumSolved}
+                        </span>
+                        <span className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 font-semibold">
+                          Hard: {growthMetrics.codingPlatformAnalysis.totalHardSolved}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center sm:text-right">
+                      {growthMetrics.codingPlatformAnalysis.summaryRecommendation}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl glass border border-white/10 text-center flex flex-col items-center justify-center py-6">
+                  <Code2 className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                  <p className="text-sm font-medium text-foreground">No Coding Profiles Connected</p>
+                  <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-3">
+                    Link your LeetCode, CodeChef, HackerRank, or GeeksforGeeks profiles to track your problem-solving telemetry.
+                  </p>
+                  <Link
+                    to="/coding-platforms"
+                    className="btn-gradient px-4 py-2 rounded-xl text-xs font-semibold text-white"
+                  >
+                    Connect Coding Profiles
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </GlassCard>
+      )}
 
       <div className="grid lg:grid-cols-[1fr_2fr] gap-6">
         <div className="space-y-6 relative z-10">
@@ -250,6 +461,16 @@ function SkillsPage() {
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-muted-foreground">
                       {s.level}
                     </span>
+                    <button
+                      onClick={() => {
+                        setQuizSkill(s);
+                        setQuizOpen(true);
+                      }}
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-[color:var(--color-primary)]/20 text-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/30 font-medium"
+                      title="Verify Skill"
+                    >
+                      Verify
+                    </button>
                     <button onClick={() => setDeleteSkillId(s._id)} className="hover:text-red-400">
                       <X className="h-3 w-3" />
                     </button>
@@ -621,6 +842,20 @@ function SkillsPage() {
             </div>
           </GlassCard>
         </div>
+      )}
+
+      {quizSkill && (
+        <QuizDialog
+          open={quizOpen}
+          onOpenChange={setQuizOpen}
+          roadmapItemId={quizSkill._id}
+          subTopicName={quizSkill.name}
+          skillName={quizSkill.name}
+          onPassed={() => {
+            toast.success(`${quizSkill.name} verified successfully!`);
+            fetchSkills();
+          }}
+        />
       )}
     </div>
   );

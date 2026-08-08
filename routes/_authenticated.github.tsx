@@ -213,7 +213,7 @@ const [analyzing, setAnalyzing] = useState(false);
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   };
 
-  const filteredRepos = repos.filter((r) => r.name.toLowerCase().includes(query.toLowerCase()));
+  const filteredRepos = (repos || []).filter((r) => r.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="space-y-6">
@@ -305,7 +305,7 @@ const [analyzing, setAnalyzing] = useState(false);
                   </button>
                 </li>
               ))}
-              {connected && filteredRepos.length === 0 && !loadingRepos && (
+              {connected && (filteredRepos || []).length === 0 && !loadingRepos && (
                 <li className="text-xs text-muted-foreground text-center py-4">No repositories found</li>
               )}
             </ul>
@@ -334,7 +334,7 @@ const [analyzing, setAnalyzing] = useState(false);
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
-              ) : history.length === 0 ? (
+              ) : (history || []).length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">No analyses yet</p>
               ) : (
                 <>
@@ -494,7 +494,7 @@ const [analyzing, setAnalyzing] = useState(false);
                   </div>
                 )}
 
-                {analysis.filesAnalyzed.length > 0 && (
+                {analysis.filesAnalyzed?.length > 0 && (
                   <div className="mt-4 pt-3 border-t border-white/10">
                     <p className="text-xs text-muted-foreground mb-2">Files analyzed:</p>
                     <div className="flex flex-wrap gap-1">
@@ -582,7 +582,7 @@ function Overview({ analysis }: { analysis: RepoAnalysis }) {
       </div>
       <div className="glass rounded-xl p-4 space-y-2 text-sm">
         <Row k="Repository" v={analysis.repoFullName} />
-        <Row k="Files analyzed" v={String(analysis.filesAnalyzed.length)} />
+        <Row k="Files analyzed" v={String(analysis.filesAnalyzed?.length || 0)} />
         <Row k="Created" v={new Date(analysis.createdAt).toLocaleDateString()} />
       </div>
     </div>
@@ -638,7 +638,7 @@ function ResumeImpact({ analysis }: { analysis: RepoAnalysis }) {
           <p className="text-xs text-muted-foreground">How this project strengthens your resume</p>
         </div>
       </div>
-      {impacts && impacts.length > 0 ? (
+      {impacts && (impacts || []).length > 0 ? (
         <div className="space-y-2">
           {impacts.map((item, i) => (
             <div key={i} className="glass rounded-xl p-3">

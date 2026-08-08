@@ -51,9 +51,12 @@ async function tryRefresh(): Promise<void> {
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...((options.headers as Record<string, string>) || {}),
   };
+
+  if (!(options.body instanceof FormData) && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (accessToken) {
     headers["Authorization"] = `Bearer ${accessToken}`;
@@ -75,7 +78,16 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     }
   }
 
-  const json = await res.json();
+  let json: any;
+  const text = await res.text();
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    throw new ApiError(
+      res.status || 500,
+      res.ok ? "Invalid response format from server" : `Server error (${res.status}): Please check backend server`,
+    );
+  }
 
   if (!res.ok || json.success === false) {
     throw new ApiError(
@@ -91,8 +103,14 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 export const api = {
   get: <T>(endpoint: string) => request<T>(endpoint),
   post: <T>(endpoint: string, body?: unknown) =>
-    request<T>(endpoint, { method: "POST", body: body ? JSON.stringify(body) : undefined }),
+    request<T>(endpoint, {
+      method: "POST",
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    }),
   patch: <T>(endpoint: string, body?: unknown) =>
-    request<T>(endpoint, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
+    request<T>(endpoint, {
+      method: "PATCH",
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    }),
   delete: <T>(endpoint: string) => request<T>(endpoint, { method: "DELETE" }),
 };

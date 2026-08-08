@@ -15,8 +15,63 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
-import { uploadResume, getResumeHistory, getResumeById, deleteResume } from "@/lib/resume-api";
+import { uploadResume, getResumeHistory, getResumeById, deleteResume, improveBulletPoint } from "@/lib/resume-api";
 import type { Resume, ResumeHistoryResponse, Pagination } from "@/types/resume";
+
+function ImprovementItem({ imp, role }: { imp: string; role?: string }) {
+  const [loading, setLoading] = useState(false);
+  const [improved, setImproved] = useState<string | null>(null);
+
+  async function handleImprove() {
+    setLoading(true);
+    try {
+      const res = await improveBulletPoint(imp, role);
+      setImproved(res.improved);
+      toast.success("Bullet point improved!");
+    } catch {
+      toast.error("Failed to improve bullet point. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <li className="flex flex-col gap-3 p-4 rounded-xl glass text-sm group transition-all relative overflow-hidden">
+      {improved && (
+        <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--color-primary)]/10 to-transparent pointer-events-none" />
+      )}
+      
+      <div className="flex items-start gap-3 relative z-10">
+        <Sparkles className={`h-4 w-4 mt-0.5 shrink-0 ${improved ? "text-[color:var(--color-primary)]" : "text-yellow-400"}`} />
+        <div className="flex-1 space-y-3">
+          {improved ? (
+            <div className="space-y-3">
+              <div className="p-3 rounded-lg bg-[color:var(--color-primary)]/10 border border-[color:var(--color-primary)]/20 text-white font-medium">
+                <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-primary)] block mb-1 font-bold">AI Improved Version</span>
+                {improved}
+              </div>
+              <div className="text-muted-foreground opacity-50 line-through text-xs">
+                {imp}
+              </div>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">{imp}</span>
+          )}
+        </div>
+      </div>
+      
+      {!improved && (
+        <button 
+          onClick={handleImprove}
+          disabled={loading}
+          className="self-end opacity-0 group-hover:opacity-100 transition text-[10px] uppercase font-bold tracking-wider text-[color:var(--color-primary)] hover:text-white bg-[color:var(--color-primary)]/10 hover:bg-[color:var(--color-primary)] disabled:opacity-50 px-3 py-1.5 rounded flex items-center gap-1 relative z-10"
+        >
+          {loading ? <RefreshCw className="h-3 w-3 animate-spin" /> : "Improve with AI ✨"}
+        </button>
+      )}
+    </li>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/resume")({
   head: () => ({ meta: [{ title: "Resume Analyzer — CareerForge AI" }] }),
@@ -86,6 +141,36 @@ function ResumePage() {
       if (result.status === "completed") {
         setMode("completed");
         toast.success("Resume analyzed successfully");
+      } else if (result.status === "processing" && (result._id || (result as unknown as { resumeId: string }).resumeId)) {
+        const resumeId = result._id || (result as unknown as { resumeId: string }).resumeId;
+        setMode("uploading");
+        let attempts = 0;
+        const interval = setInterval(async () => {
+          attempts++;
+          try {
+            const updated = await getResumeById(resumeId);
+            if (updated.status === "completed") {
+              clearInterval(interval);
+              setCurrentAnalysis(updated);
+              setMode("completed");
+              toast.success("Resume analyzed successfully");
+              fetchHistory(1);
+            } else if (updated.status === "failed" || attempts > 30) {
+              clearInterval(interval);
+              setCurrentAnalysis(updated);
+              setMode("failed");
+              setErrorMsg(updated.errorMessage || "Analysis failed");
+              toast.error(updated.errorMessage || "Analysis failed");
+              fetchHistory(1);
+            }
+          } catch {
+            if (attempts > 30) {
+              clearInterval(interval);
+              setMode("failed");
+              setErrorMsg("Analysis timed out");
+            }
+          }
+        }, 2000);
       } else {
         setMode("failed");
         setErrorMsg(result.errorMessage || "Analysis failed");
@@ -231,8 +316,10 @@ function ResumePage() {
             Upload History
           </h4>
           {loadingHistory ? (
-            <div className="flex justify-center py-4">
-              <RefreshCw className="h-4 w-4 text-muted-foreground animate-spin" />
+            <div className="space-y-2 py-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-10 w-full bg-white/5 border border-white/10 rounded-lg animate-pulse" />
+              ))}
             </div>
           ) : history.length === 0 ? (
             <p className="text-xs text-muted-foreground py-2">No uploads yet</p>
@@ -301,7 +388,37 @@ function ResumePage() {
               </div>
             </div>
           ) : display && display.status === "completed" ? (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in">
+              {/* Version Comparison */}
+              {(() => {
+                const completedHistory = history.filter(r => r.status === "completed");
+                const currentIndex = completedHistory.findIndex(r => r._id === display._id);
+                // If there's an older resume uploaded before this one
+                if (currentIndex >= 0 && currentIndex < completedHistory.length - 1) {
+                  const previous = completedHistory[currentIndex + 1];
+                  const diff = (display.atsScore || 0) - (previous.atsScore || 0);
+                  if (diff !== 0) {
+                    const isPositive = diff > 0;
+                    return (
+                      <div className={`p-4 rounded-xl border flex items-center justify-between ${isPositive ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                        <div>
+                          <p className={`text-sm font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                            {isPositive ? 'Improvement Detected! 🎉' : 'Score Dropped'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Compared to your previous upload ({new Date(previous.createdAt).toLocaleDateString()})
+                          </p>
+                        </div>
+                        <div className={`text-xl font-bold flex items-center ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                          {isPositive ? '+' : ''}{diff} pts
+                        </div>
+                      </div>
+                    );
+                  }
+                }
+                return null;
+              })()}
+
               {/* Score Ring + Keywords */}
               <div className="grid md:grid-cols-[auto_1fr] gap-6 items-start">
                 <ScoreRing score={display.atsScore ?? 0} label="ATS Score" />
@@ -374,13 +491,7 @@ function ResumePage() {
                   <h4 className="text-sm font-semibold mb-2">Improvement Suggestions</h4>
                   <ul className="space-y-2">
                     {display.improvements.map((imp, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-2 p-3 rounded-xl glass text-sm text-muted-foreground"
-                      >
-                        <Sparkles className="h-4 w-4 text-yellow-400 mt-0.5 shrink-0" />
-                        {imp}
-                      </li>
+                      <ImprovementItem key={i} imp={imp} role={display.inferredTargetRole || undefined} />
                     ))}
                   </ul>
                 </div>
@@ -419,8 +530,20 @@ function ResumePage() {
               </div>
             </div>
           ) : viewingId && !viewingAnalysis ? (
-            <div className="h-72 grid place-items-center text-muted-foreground">
-              <RefreshCw className="h-8 w-8 animate-spin" />
+            <div className="space-y-6 animate-pulse">
+              <div className="flex gap-6 items-start">
+                <div className="h-24 w-24 rounded-full bg-white/5 border border-white/10 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-32 bg-white/5 border border-white/10 rounded" />
+                  <div className="h-6 w-full bg-white/5 border border-white/10 rounded" />
+                  <div className="h-6 w-3/4 bg-white/5 border border-white/10 rounded" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-full bg-white/5 border border-white/10 rounded" />
+                <div className="h-4 w-5/6 bg-white/5 border border-white/10 rounded" />
+                <div className="h-4 w-4/6 bg-white/5 border border-white/10 rounded" />
+              </div>
             </div>
           ) : (
             <div className="h-72 grid place-items-center text-muted-foreground">

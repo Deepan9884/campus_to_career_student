@@ -30,3 +30,12 @@ async function authFetch<T>(url: string): Promise<T> {
 export async function getAnalyticsOverview(): Promise<AnalyticsResponse> {
   return authFetch<AnalyticsResponse>(`${API_BASE}/analytics/overview`);
 }
+
+export interface WeeklyReportResponse {
+  summary: string;
+  recommendations: string[];
+}
+
+export async function getWeeklyReport(): Promise<WeeklyReportResponse> {
+  return authFetch<WeeklyReportResponse>(`${API_BASE}/analytics/weekly-report`);
+}

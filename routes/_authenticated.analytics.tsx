@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedCounter } from "@/components/Score";
 import { Trophy, Flame, FileText, Mic, Github, Sparkles, Loader2, BookOpen } from "lucide-react";
@@ -22,8 +23,82 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { getAnalyticsOverview } from "@/lib/analytics-api";
+import { getAnalyticsOverview, getWeeklyReport, type WeeklyReportResponse } from "@/lib/analytics-api";
+import { toast } from "sonner";
 import type { AnalyticsResponse } from "@/types/analytics";
+
+function WeeklyReportCard() {
+  const [report, setReport] = useState<WeeklyReportResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleGenerate() {
+    setLoading(true);
+    try {
+      const res = await getWeeklyReport();
+      setReport(res);
+      toast.success("AI Weekly Report generated!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate weekly report.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!report) {
+    return (
+      <GlassCard className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border-[color:var(--color-primary)]/20 bg-gradient-to-r from-[color:var(--color-primary)]/5 to-transparent">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-xl bg-[color:var(--color-primary)]/20 grid place-items-center shrink-0">
+            <Sparkles className="h-5 w-5 text-[color:var(--color-primary)]" />
+          </div>
+          <div>
+            <h3 className="font-bold text-white">Generate AI Weekly Report</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">Get a personalized summary of your progress and actionable tips for next week.</p>
+          </div>
+        </div>
+        <button
+          onClick={handleGenerate}
+          disabled={loading}
+          className="btn-gradient px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap disabled:opacity-50 flex items-center gap-2"
+        >
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          Generate Report ✨
+        </button>
+      </GlassCard>
+    );
+  }
+
+  return (
+    <GlassCard variant="strong" className="mb-6 border-[color:var(--color-primary)]/30 shadow-lg shadow-[color:var(--color-primary)]/10">
+      <div className="flex items-start gap-4">
+        <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 p-[1px] shrink-0">
+          <div className="w-full h-full bg-slate-950 rounded-[15px] grid place-items-center">
+            <Sparkles className="h-6 w-6 text-indigo-400" />
+          </div>
+        </div>
+        <div className="space-y-4 flex-1">
+          <div>
+            <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Your AI Weekly Report</h3>
+            <p className="text-slate-300 mt-1 leading-relaxed text-sm">{report.summary}</p>
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Action Items for Next Week</h4>
+            <ul className="space-y-2">
+              {report.recommendations.map((rec, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-slate-200">
+                  <div className="h-5 w-5 rounded-full bg-[color:var(--color-primary)]/10 text-[color:var(--color-primary)] grid place-items-center text-xs font-bold shrink-0 mt-0.5">
+                    {i + 1}
+                  </div>
+                  {rec}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({ meta: [{ title: "Progress & Analytics — CareerForge AI" }] }),
@@ -33,20 +108,27 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 const COLORS = ["#3B82F6", "#8B5CF6", "#10B981", "#F59E0B", "#EF4444"];
 
 function AnalyticsPage() {
-  const [data, setData] = useState<AnalyticsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getAnalyticsOverview()
-      .then(setData)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["analyticsOverview"],
+    queryFn: getAnalyticsOverview,
+  });
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="space-y-6">
+        <div>
+          <div className="h-8 w-64 bg-white/5 border border-white/10 rounded-lg animate-pulse mb-2" />
+          <div className="h-4 w-48 bg-white/5 border border-white/10 rounded-lg animate-pulse" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 bg-white/5 border border-white/10 rounded-xl animate-pulse" />
+          ))}
+        </div>
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div className="h-72 bg-white/5 border border-white/10 rounded-xl animate-pulse" />
+          <div className="h-72 bg-white/5 border border-white/10 rounded-xl animate-pulse" />
+        </div>
       </div>
     );
   }
@@ -65,6 +147,8 @@ function AnalyticsPage() {
         <h1 className="text-2xl md:text-3xl font-bold">Progress & Analytics</h1>
         <p className="text-muted-foreground text-sm mt-1">Track every step of your prep journey.</p>
       </div>
+
+      <WeeklyReportCard />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <OverviewCard
@@ -261,7 +345,7 @@ function AnalyticsPage() {
 
         <GlassCard>
           <h3 className="font-semibold mb-3">AI Insights</h3>
-          <InsightsList data={data} />
+          <InsightsList data={data ?? null} />
         </GlassCard>
       </div>
 
