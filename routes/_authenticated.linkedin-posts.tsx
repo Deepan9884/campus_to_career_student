@@ -134,12 +134,12 @@ function LinkedInPostsPage() {
                           {analysis.repoFullName}
                         </a>
                         <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium ${
                             analysis.status === "completed"
-                              ? "bg-green-500/20 text-green-300"
+                              ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-500/30"
                               : analysis.status === "processing"
-                              ? "bg-yellow-500/20 text-yellow-300"
-                              : "bg-red-500/20 text-red-300"
+                              ? "bg-amber-500/15 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-500/30"
+                              : "bg-rose-500/15 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-500/30"
                           }`}
                         >
                           {analysis.status}
@@ -171,8 +171,8 @@ function LinkedInPostsPage() {
                           onClick={() => handleCopy(draft, analysis._id)}
                           className={`rounded-xl px-4 py-2 text-sm font-semibold transition flex items-center gap-2 ${
                             showCopySuccess
-                              ? "bg-green-500/20 text-green-300"
-                              : "glass hover:bg-white/10"
+                              ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                              : "glass hover:bg-foreground/5"
                           }`}
                         >
                           <Copy className="h-4 w-4" />
@@ -180,7 +180,7 @@ function LinkedInPostsPage() {
                         </button>
                         <button
                           onClick={() => handleShare(`https://github.com/${analysis.repoFullName}`, draft)}
-                          className="bg-blue-500/20 text-blue-300 rounded-xl px-4 py-2 text-sm font-semibold hover:bg-blue-500/30 transition flex items-center gap-2"
+                          className="bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 rounded-xl px-4 py-2 text-sm font-semibold hover:bg-blue-500/25 transition flex items-center gap-2"
                         >
                           <Share2 className="h-4 w-4" />
                           Share
@@ -190,7 +190,7 @@ function LinkedInPostsPage() {
                   </div>
 
                   {draft && (
-                    <div className="mt-4 pt-4 border-t border-white/10">
+                    <div className="mt-4 pt-4 border-t border-foreground/10">
                       <textarea
                         value={draft}
                         onChange={(e) => setDrafts((prev) => ({ ...prev, [analysis._id]: e.target.value }))}

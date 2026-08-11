@@ -297,7 +297,7 @@ function Dashboard() {
             </div>
             <div className="space-y-4">
               {todayMission.map((mission, i) => (
-                <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-2 relative overflow-hidden group">
+                <div key={i} className="p-3 rounded-xl bg-foreground/5 border border-foreground/10 flex flex-col gap-2 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <mission.icon className="h-16 w-16 -mr-4 -mt-4 transform rotate-12" />
                   </div>
@@ -317,7 +317,7 @@ function Dashboard() {
               <span className="text-muted-foreground">Progress</span>
               <span className="font-medium text-[color:var(--color-primary)]">{profileProgress}%</span>
             </div>
-            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden mb-4">
+            <div className="h-2 w-full bg-foreground/10 rounded-full overflow-hidden mb-4">
               <div 
                 className="h-full btn-gradient transition-all duration-1000" 
                 style={{ width: `${profileProgress}%` }}
@@ -329,7 +329,7 @@ function Dashboard() {
                   {check.done ? (
                     <BadgeCheck className="h-4 w-4 text-[color:var(--color-success)] shrink-0" />
                   ) : (
-                    <div className="h-4 w-4 rounded-full border border-white/20 shrink-0" />
+                    <div className="h-4 w-4 rounded-full border border-foreground/20 shrink-0" />
                   )}
                   <span className={check.done ? "text-muted-foreground line-through opacity-70" : "text-foreground"}>
                     {check.label}
@@ -378,16 +378,16 @@ function Dashboard() {
               return (
                 <div
                   key={id}
-                  className={`rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 flex items-center gap-3 ${unlocked ? "shadow-[0_0_40px_rgba(124,58,237,0.25)] border-white/20" : "opacity-70"
+                  className={`rounded-xl border border-foreground/10 bg-foreground/5 px-3 py-2.5 flex items-center gap-3 ${unlocked ? "shadow-[0_0_20px_rgba(124,58,237,0.15)] border-indigo-500/30" : "opacity-70"
                     }`}
                 >
                   <div className="h-9 w-9 rounded-lg grid place-items-center shrink-0" style={{ background: unlocked ? "linear-gradient(135deg, rgba(99,102,241,0.35), rgba(168,85,247,0.25))" : undefined }}>
-                    {unlocked ? <BadgeCheck className="h-4 w-4 text-white" /> : <BadgeInfo className="h-4 w-4 text-muted-foreground" />}
+                    {unlocked ? <BadgeCheck className="h-4 w-4 text-[color:var(--color-primary)]" /> : <BadgeInfo className="h-4 w-4 text-muted-foreground" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <Icon className={`h-3.5 w-3.5 ${unlocked ? "text-white" : "text-muted-foreground"}`} />
-                      <p className={`text-sm font-medium truncate ${unlocked ? "text-white" : "text-muted-foreground"}`}>
+                      <Icon className={`h-3.5 w-3.5 ${unlocked ? "text-[color:var(--color-primary)]" : "text-muted-foreground"}`} />
+                      <p className={`text-sm font-medium truncate ${unlocked ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
                         {id}
                       </p>
                     </div>

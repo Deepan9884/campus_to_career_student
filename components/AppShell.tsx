@@ -213,7 +213,7 @@ export function AppShell() {
             onClick={() => setShowProductTour(true)}
             title={sidebarCollapsed ? "App Tour" : undefined}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl text-xs font-semibold text-indigo-300 hover:bg-white/10 hover:text-white transition",
+              "flex w-full items-center gap-3 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:bg-foreground/5 transition",
               sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2"
             )}
           >

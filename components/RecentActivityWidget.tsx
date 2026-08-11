@@ -97,23 +97,23 @@ export function RecentActivityWidget() {
 
   return (
     <GlassCard className="p-0 overflow-hidden">
-      <div className="px-4 py-3 border-b border-white/10">
+      <div className="px-4 py-3 border-b border-foreground/10">
         <h3 className="font-semibold text-sm">Recent Activity</h3>
       </div>
-      <ul className="divide-y divide-white/5">
+      <ul className="divide-y divide-foreground/5">
         {activities.map((activity) => {
           const Icon = MODULE_ICONS[activity.module] || Target;
           const color = getModuleColor(activity.module);
           return (
-            <li key={activity._id} className="px-4 py-3 hover:bg-white/5 transition-colors">
+            <li key={activity._id} className="px-4 py-3 hover:bg-foreground/5 transition-colors">
               <div className="flex items-start gap-3">
                 <div
-                  className={`h-8 w-8 rounded-lg bg-white/5 grid place-items-center shrink-0 ${color}`}
+                  className={`h-8 w-8 rounded-lg bg-foreground/5 grid place-items-center shrink-0 ${color}`}
                 >
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-100 truncate">{activity.summary}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{activity.summary}</p>
                   <p className="text-xs text-muted-foreground mt-0.5 capitalize">
                     {activity.module.replace("_", " ")} ·{" "}
                     {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}

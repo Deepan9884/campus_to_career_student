@@ -377,15 +377,15 @@ function CodingPlatformsPage() {
                                             {r.difficulty && (
                                                 <span className={cn(
                                                     "px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none",
-                                                    r.difficulty === "Easy" && "bg-emerald-500/20 text-emerald-400",
-                                                    r.difficulty === "Medium" && "bg-amber-500/20 text-amber-400",
-                                                    r.difficulty === "Hard" && "bg-red-500/20 text-red-400",
+                                                    r.difficulty === "Easy" && "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400",
+                                                    r.difficulty === "Medium" && "bg-amber-500/15 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400",
+                                                    r.difficulty === "Hard" && "bg-rose-500/15 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400",
                                                 )}>
                                                     {r.difficulty}
                                                 </span>
                                             )}
                                             {r.platform && (
-                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium leading-none bg-indigo-500/15 text-indigo-300 capitalize">
+                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium leading-none bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 capitalize">
                                                     {r.platform === "gfg" ? "GFG" : r.platform === "hackerrank" ? "HackerRank" : r.platform === "codechef" ? "CodeChef" : r.platform === "codeforces" ? "Codeforces" : "LeetCode"}
                                                 </span>
                                             )}
@@ -394,7 +394,7 @@ function CodingPlatformsPage() {
                                             href={r.url}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="text-sm font-semibold text-slate-100 hover:underline break-words"
+                                            className="text-sm font-semibold text-foreground hover:underline break-words"
                                         >
                                             {r.title}
                                         </a>
@@ -403,7 +403,7 @@ function CodingPlatformsPage() {
                                         href={r.url}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="shrink-0 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-[color:var(--color-primary)]"
+                                        className="shrink-0 p-2 rounded-lg bg-foreground/5 hover:bg-foreground/10 text-[color:var(--color-primary)]"
                                         aria-label="Open problem"
                                     >
                                         <LinkIcon className="h-4 w-4" />

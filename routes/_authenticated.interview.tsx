@@ -212,11 +212,11 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
           const Icon = meta.icon;
           return (
             <div key={key} className="glass rounded-xl p-3 text-xs">
-              <div className="flex items-center gap-1.5 font-medium text-white mb-1">
+              <div className="flex items-center gap-1.5 font-medium text-foreground mb-1">
                 <Icon className="h-3.5 w-3.5 text-[color:var(--color-primary)]" />
                 Round {i + 1}
               </div>
-              <p className="font-semibold text-slate-200">{meta.label}</p>
+              <p className="font-semibold text-foreground/90">{meta.label}</p>
               <p className="text-[10px] text-muted-foreground mt-1">{meta.desc}</p>
             </div>
           );
@@ -734,8 +734,8 @@ function ResultsView({ session: initialSession, onRetry }: { session: InterviewS
                   </div>
 
                   {/* Detailed Per-Question Feedback & Answer Key */}
-                  <div className="space-y-3 mt-4 border-t border-white/10 pt-3">
-                    <h5 className="font-semibold text-xs text-slate-300 uppercase tracking-wider">
+                  <div className="space-y-3 mt-4 border-t border-foreground/10 pt-3">
+                    <h5 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">
                       Questions & Detailed Review ({r.items.length})
                     </h5>
                     {r.items.map((it, qIdx) => {
@@ -751,22 +751,22 @@ function ResultsView({ session: initialSession, onRetry }: { session: InterviewS
                           className={`glass rounded-xl p-3.5 text-xs space-y-2 border ${
                             isMcq
                               ? isCorrect
-                                ? "border-green-500/30 bg-green-500/5"
-                                : "border-red-500/30 bg-red-500/5"
-                              : "border-white/10"
+                                ? "border-emerald-500/30 bg-emerald-500/5"
+                                : "border-rose-500/30 bg-rose-500/5"
+                              : "border-foreground/10"
                           }`}
                         >
                           {/* Question Header & Score Badge */}
                           <div className="flex justify-between items-start gap-2">
-                            <p className="font-semibold text-slate-100 text-sm">
+                            <p className="font-semibold text-foreground text-sm">
                               Q{qIdx + 1}: {it.questionText}
                             </p>
                             {isMcq ? (
                               <span
                                 className={`shrink-0 px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
                                   isCorrect
-                                    ? "bg-green-500/20 text-green-300 border border-green-500/40"
-                                    : "bg-red-500/20 text-red-300 border border-red-500/40"
+                                    ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-500/40"
+                                    : "bg-rose-500/15 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-500/40"
                                 }`}
                               >
                                 {isCorrect ? "Correct (+100%)" : "Incorrect (0%)"}
@@ -775,10 +775,10 @@ function ResultsView({ session: initialSession, onRetry }: { session: InterviewS
                               <span
                                 className={`shrink-0 px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
                                   it.score >= 70
-                                    ? "bg-green-500/20 text-green-300"
+                                    ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
                                     : it.score >= 40
-                                      ? "bg-yellow-500/20 text-yellow-300"
-                                      : "bg-red-500/20 text-red-300"
+                                      ? "bg-amber-500/15 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+                                      : "bg-rose-500/15 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300"
                                 }`}
                               >
                                 Score: {it.score}%
@@ -845,11 +845,11 @@ function ResultsView({ session: initialSession, onRetry }: { session: InterviewS
                           {/* Open-Ended Candidate Answer & Feedback */}
                           {!isMcq && (
                             <div className="mt-2 space-y-2">
-                              <div className="glass p-2.5 rounded-lg bg-black/20">
+                              <div className="glass p-2.5 rounded-lg bg-foreground/5">
                                 <span className="text-[10px] text-muted-foreground uppercase font-semibold block mb-0.5">
                                   Your Answer:
                                 </span>
-                                <p className="text-xs text-slate-200 whitespace-pre-wrap">
+                                <p className="text-xs text-foreground whitespace-pre-wrap">
                                   {it.answer?.trim() || (
                                     <span className="italic text-muted-foreground">No answer provided</span>
                                   )}
@@ -862,7 +862,7 @@ function ResultsView({ session: initialSession, onRetry }: { session: InterviewS
                                   <span className="text-[10px] text-[color:var(--color-primary)] uppercase font-bold flex items-center gap-1 mb-0.5">
                                     <Sparkles className="h-3 w-3" /> AI Feedback:
                                   </span>
-                                  <p className="text-xs text-slate-200">{it.feedback}</p>
+                                  <p className="text-xs text-foreground">{it.feedback}</p>
                                 </div>
                               )}
 
@@ -872,7 +872,7 @@ function ResultsView({ session: initialSession, onRetry }: { session: InterviewS
                                   <span className="text-[10px] text-blue-400 uppercase font-bold block mb-1">
                                     Key Answer Points:
                                   </span>
-                                  <ul className="space-y-1 text-xs text-slate-300">
+                                  <ul className="space-y-1 text-xs text-foreground/90">
                                     {it.idealAnswerPoints.map((pt, pIdx) => (
                                       <li key={pIdx} className="flex items-start gap-1.5">
                                         <span className="text-blue-400">•</span>

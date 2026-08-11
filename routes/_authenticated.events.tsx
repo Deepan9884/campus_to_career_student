@@ -664,7 +664,7 @@ function EventsPage() {
                     className="w-full glass-input rounded-xl px-3 py-2 text-sm outline-none bg-slate-900"
                   >
                     {EVENT_TYPE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
+                      <option key={opt.value} value={opt.value} className="bg-slate-900 text-slate-100">
                         {opt.label}
                       </option>
                     ))}
@@ -696,7 +696,7 @@ function EventsPage() {
                     className="w-full glass-input rounded-xl px-3 py-2 text-sm outline-none bg-slate-900"
                   >
                     {MODE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
+                      <option key={opt.value} value={opt.value} className="bg-slate-900 text-slate-100">
                         {opt.label}
                       </option>
                     ))}
@@ -712,7 +712,7 @@ function EventsPage() {
                     className="w-full glass-input rounded-xl px-3 py-2 text-sm outline-none bg-slate-900"
                   >
                     {LEVEL_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
+                      <option key={opt.value} value={opt.value} className="bg-slate-900 text-slate-100">
                         {opt.label}
                       </option>
                     ))}
@@ -756,7 +756,7 @@ function EventsPage() {
                     className="w-full glass-input rounded-xl px-3 py-2 text-sm outline-none bg-slate-900"
                   >
                     {RESULT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
+                      <option key={opt.value} value={opt.value} className="bg-slate-900 text-slate-100">
                         {opt.label}
                       </option>
                     ))}
