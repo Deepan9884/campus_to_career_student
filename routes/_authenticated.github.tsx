@@ -35,7 +35,7 @@ import type {
 } from "@/types/github";
 
 export const Route = createFileRoute("/_authenticated/github")({
-  head: () => ({ meta: [{ title: "GitHub Projects — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "GitHub Projects — Campus to Career AI" }] }),
   component: GithubPage,
 });
 

@@ -12,18 +12,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CareerForge AI — Become Internship-Ready" },
+      { title: "Campus to Career AI — Become Internship-Ready" },
       {
         name: "description",
         content:
           "AI-powered career prep: ATS resume scoring, mock interviews, GitHub project review, skill-gap analysis and personalized learning roadmaps.",
       },
-      { property: "og:title", content: "CareerForge AI" },
+      { property: "og:title", content: "Campus to Career AI" },
       { property: "og:description", content: "Your AI co-pilot for landing the internship." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
+      { rel: "icon", type: "image/png", href: "/logo.png" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -58,9 +59,14 @@ function RootComponent() {
   useEffect(() => {
     checkAuth();
   }, []);
+
+  const googleClientId =
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    "1000000000000-demo1234567890abcdef.apps.googleusercontent.com";
+
   return (
     <QueryClientProvider client={queryClient}>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+      <GoogleOAuthProvider clientId={googleClientId}>
         <Outlet />
         <Toaster
           position="top-right"

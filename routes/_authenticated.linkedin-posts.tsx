@@ -8,7 +8,7 @@ import { useAuth } from "@/stores";
 import type { AnalysisHistoryItem } from "@/types/github";
 
 export const Route = createFileRoute("/_authenticated/linkedin-posts")({
-  head: () => ({ meta: [{ title: "LinkedIn Post Ideas — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "LinkedIn Post Ideas — Campus to Career AI" }] }),
   component: LinkedInPostsPage,
 });
 

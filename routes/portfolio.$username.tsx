@@ -44,7 +44,7 @@ function PortfolioPage() {
             href="/"
             className="inline-block mt-4 text-[color:var(--color-primary)] hover:underline text-sm"
           >
-            Create your own portfolio on CareerForge AI
+            Create your own portfolio on Campus to Career AI
           </a>
         </div>
       </div>
@@ -206,7 +206,7 @@ function PortfolioPage() {
       
       {/* Footer */}
       <footer className="text-center py-12 border-t border-white/5 text-sm text-muted-foreground">
-        Powered by <a href="/" className="text-[color:var(--color-primary)] font-semibold hover:underline">CareerForge AI</a>
+        Powered by <a href="/" className="text-[color:var(--color-primary)] font-semibold hover:underline">Campus to Career AI</a>
       </footer>
     </div>
   );

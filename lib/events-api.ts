@@ -201,10 +201,10 @@ export function downloadICS(event: Event) {
   const icsData = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//CareerForge AI//Events Calendar//EN",
+    "PRODID:-//Campus to Career AI//Events Calendar//EN",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
-    `UID:${event._id || Date.now()}@careerforge.ai`,
+    `UID:${event._id || Date.now()}@campustocareer.ai`,
     `DTSTAMP:${formatDate(new Date())}`,
     `DTSTART;VALUE=DATE:${start.toISOString().split("T")[0].replace(/-/g, "")}`,
     `DTEND;VALUE=DATE:${new Date(end.getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0].replace(/-/g, "")}`, // All-day events need +1 day end

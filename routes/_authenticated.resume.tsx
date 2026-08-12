@@ -74,7 +74,7 @@ function ImprovementItem({ imp, role }: { imp: string; role?: string }) {
 }
 
 export const Route = createFileRoute("/_authenticated/resume")({
-  head: () => ({ meta: [{ title: "Resume Analyzer — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Resume Analyzer — Campus to Career AI" }] }),
   component: ResumePage,
 });
 
@@ -248,7 +248,7 @@ function ResumePage() {
 
       <div className="grid lg:grid-cols-[1fr_2fr] gap-6">
         {/* Left: Upload + History */}
-        <GlassCard>
+        <GlassCard data-tour="resume-upload-zone">
           <h3 className="font-semibold mb-3">Upload Resume</h3>
 
           {mode === "uploading" ? (

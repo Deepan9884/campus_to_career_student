@@ -7,7 +7,7 @@ import { verifyResetToken, resetPassword, type VerifyResetTokenResponse } from "
 import { useAuth } from "@/stores";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Set new password — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Set new password — Campus to Career AI" }] }),
   component: ResetPasswordPage,
 });
 

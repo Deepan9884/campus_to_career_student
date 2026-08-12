@@ -33,6 +33,12 @@ export async function googleLogin(credential: string): Promise<AuthResponse> {
   return data;
 }
 
+export async function githubLogin(payload?: { code?: string; accessToken?: string; username?: string }): Promise<AuthResponse> {
+  const data = await api.post<AuthResponse>("/auth/github", payload || {});
+  setAccessToken(data.accessToken);
+  return data;
+}
+
 export async function logoutAllSessions(): Promise<void> {
   await api.post("/auth/logout-all");
 }

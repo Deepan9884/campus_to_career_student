@@ -46,7 +46,7 @@ import { CodingPlatformAnalyticsCharts } from "@/components/CodingPlatformAnalyt
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/skills")({
-  head: () => ({ meta: [{ title: "Skill Gap — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Skill Gap — Campus to Career AI" }] }),
   component: SkillsPage,
 });
 
@@ -444,7 +444,7 @@ function SkillsPage() {
 
       <div className="grid lg:grid-cols-[1fr_2fr] gap-6">
         <div className="space-y-6 relative z-10">
-          <GlassCard className="relative z-30">
+          <GlassCard className="relative z-30" data-tour="skill-growth-card">
             <h3 className="font-semibold mb-3">Your Current Skills</h3>
             {loadingSkills ? (
               <div className="flex justify-center py-6">

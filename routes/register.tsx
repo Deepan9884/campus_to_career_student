@@ -3,11 +3,11 @@ import { useState, useMemo } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/stores";
-import { GoogleLogin } from "@react-oauth/google";
+import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { AuthShell, Field } from "./login";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Create account — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Create account — Campus to Career AI" }] }),
   component: RegisterPage,
 });
 
@@ -27,7 +27,7 @@ function strength(pw: string): { score: 0 | 1 | 2 | 3; label: string; color: str
 }
 
 function RegisterPage() {
-  const { register, googleLogin, isLoading } = useAuth();
+  const { register, googleLogin, githubLogin, isLoading } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -197,28 +197,19 @@ function RegisterPage() {
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              if (credentialResponse.credential) {
-                try {
-                  await googleLogin(credentialResponse.credential);
-                  toast.success("Account linked/created!");
-                  navigate({ to: "/dashboard" });
-                } catch (err: unknown) {
-                  toast.error(err instanceof Error ? err.message : "Google signup failed");
-                }
-              }
-            }}
-            onError={() => {
-              toast.error("Google signup failed");
-            }}
-            theme="filled_black"
-            shape="pill"
-            width="100%"
-            text="signup_with"
-          />
-        </div>
+        <SocialAuthButtons
+          isLoading={isLoading}
+          onGoogleSuccess={async (cred) => {
+            await googleLogin(cred);
+            toast.success("Account created/linked!");
+            navigate({ to: "/dashboard" });
+          }}
+          onGithubSuccess={async (payload) => {
+            await githubLogin(payload);
+            toast.success("Account created/linked via GitHub!");
+            navigate({ to: "/dashboard" });
+          }}
+        />
       </form>
     </AuthShell>
   );

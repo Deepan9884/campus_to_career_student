@@ -43,7 +43,7 @@ import type {
 } from "@/types/interview";
 
 export const Route = createFileRoute("/_authenticated/interview")({
-  head: () => ({ meta: [{ title: "Mock Interview — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Mock Interview — Campus to Career AI" }] }),
   component: InterviewPage,
 });
 
@@ -226,6 +226,7 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
       <button
         onClick={handleStart}
         disabled={loading}
+        data-tour="interview-setup-card"
         className="mt-6 btn-gradient btn-gradient-hover rounded-xl px-6 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"
       >
         {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}

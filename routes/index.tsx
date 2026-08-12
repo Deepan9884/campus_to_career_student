@@ -1,11 +1,12 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useAuth } from "@/stores";
+import { createFileRoute } from "@tanstack/react-router";
+import { LandingPage } from "@/components/landing/LandingPage";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  const auth = useAuth();
-  return <Navigate to={auth.isAuthenticated ? "/dashboard" : "/login"} />;
+  return <LandingPage />;
 }
+
+

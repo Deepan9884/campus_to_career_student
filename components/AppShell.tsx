@@ -78,6 +78,8 @@ export function AppShell() {
     return false;
   });
 
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
+
   const toggleSidebar = () => {
     setSidebarCollapsed((prev) => {
       const next = !prev;
@@ -177,7 +179,14 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen flex">
-      <OnboardingWizard />
+      <OnboardingWizard
+        open={showOnboardingWizard ? true : undefined}
+        onClose={() => setShowOnboardingWizard(false)}
+        onComplete={() => {
+          setShowOnboardingWizard(false);
+          setShowProductTour(true);
+        }}
+      />
       <StudentProductTour open={showProductTour} onClose={() => setShowProductTour(false)} />
       {/* Sidebar — desktop */}
       <aside
@@ -211,14 +220,15 @@ export function AppShell() {
         <div className="pt-4 border-t border-white/10 w-full space-y-1">
           <button
             onClick={() => setShowProductTour(true)}
+            data-tour="app-tour-btn"
             title={sidebarCollapsed ? "App Tour" : undefined}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:bg-foreground/5 transition",
-              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2"
+              "flex w-full items-center gap-3 rounded-xl text-sm text-foreground hover:bg-white/10 hover:text-foreground transition",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5"
             )}
           >
-            <HelpCircle className="h-4 w-4 shrink-0 text-indigo-400" />
-            {!sidebarCollapsed && <span>App Tour 💡</span>}
+            <HelpCircle className="h-4 w-4 shrink-0" />
+            {!sidebarCollapsed && <span>App Tour</span>}
           </button>
 
           <button
@@ -336,16 +346,23 @@ export function AppShell() {
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
-    <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
-      <div className="h-9 w-9 rounded-xl btn-gradient grid place-items-center shrink-0">
-        <Sparkles className="h-5 w-5 text-white" />
-      </div>
-      {!collapsed && (
-        <div className="truncate">
-          <p className="font-display font-bold leading-none text-foreground">CareerForge</p>
-          <p className="text-[10px] text-muted-foreground tracking-widest mt-0.5">AI</p>
-        </div>
-      )}
+    <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden py-1">
+      <img
+        src="/logo-dark.png"
+        alt="Campus to Career AI"
+        className={cn(
+          "object-contain transition-all hidden dark:block",
+          collapsed ? "h-9 w-9 object-left" : "h-14 md:h-16 max-w-[210px]"
+        )}
+      />
+      <img
+        src="/logo.png"
+        alt="Campus to Career AI"
+        className={cn(
+          "object-contain transition-all block dark:hidden",
+          collapsed ? "h-9 w-9 object-left" : "h-14 md:h-16 max-w-[210px]"
+        )}
+      />
     </Link>
   );
 }
@@ -366,6 +383,7 @@ function NavItem({
     <Link
       to={item.to}
       onClick={onClick}
+      data-tour={`nav-${item.to.replace("/", "")}`}
       title={collapsed ? item.label : undefined}
       className={cn(
         "flex items-center gap-3 rounded-xl text-sm transition-all",

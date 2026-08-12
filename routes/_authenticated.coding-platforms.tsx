@@ -54,7 +54,7 @@ type CodingProfileStats = {
 type Recommendation = { title: string; url: string; topic: string; difficulty?: string; platform?: string };
 
 export const Route = createFileRoute("/_authenticated/coding-platforms")({
-    head: () => ({ meta: [{ title: "Coding Platforms — CareerForge AI" }] }),
+    head: () => ({ meta: [{ title: "Coding Platforms — Campus to Career AI" }] }),
     component: CodingPlatformsPage,
 });
 
@@ -235,7 +235,7 @@ function CodingPlatformsPage() {
             )}
 
             {/* Tabs */}
-            <GlassCard>
+            <GlassCard data-tour="coding-platforms-card">
                 <div className="flex flex-wrap gap-2">
                     {PLATFORMS.map((p) => (
                         <button

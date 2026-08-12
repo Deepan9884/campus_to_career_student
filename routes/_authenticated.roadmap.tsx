@@ -22,6 +22,7 @@ import {
   getRoadmapHistory,
   getRoadmapById,
   deleteRoadmap,
+  getLatestRoadmap,
 } from "@/lib/roadmap-api";
 import { getGapHistory } from "@/lib/skills-api";
 import type { LearningRoadmap, RoadmapHistoryItem, RoadmapMilestone } from "@/types/roadmap";
@@ -29,14 +30,14 @@ import type { AnalysisHistoryItem } from "@/types/skills";
 import { QuizDialog } from "@/components/QuizDialog";
 
 export const Route = createFileRoute("/_authenticated/roadmap")({
-  head: () => ({ meta: [{ title: "Learning Roadmap — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Learning Roadmap — Campus to Career AI" }] }),
   component: RoadmapPage,
 });
 
 type View = "generate" | "history" | "detail";
 
 function RoadmapPage() {
-  const [view, setView] = useState<View>("generate");
+  const [view, setView] = useState<View>("detail");
   const [roadmaps, setRoadmaps] = useState<RoadmapHistoryItem[]>([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
   const [selectedRoadmap, setSelectedRoadmap] = useState<LearningRoadmap | null>(null);
@@ -44,7 +45,29 @@ function RoadmapPage() {
   const [selectedGapId, setSelectedGapId] = useState("");
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingLatest, setLoadingLatest] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const loadLatest = useCallback(async () => {
+    setLoadingLatest(true);
+    try {
+      const latest = await getLatestRoadmap();
+      if (latest) {
+        setSelectedRoadmap(latest);
+        setView("detail");
+      } else {
+        setView("generate");
+      }
+    } catch {
+      setView("generate");
+    } finally {
+      setLoadingLatest(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadLatest();
+  }, [loadLatest]);
 
   const loadHistory = useCallback(async (page = 1) => {
     setLoading(true);
@@ -123,6 +146,10 @@ function RoadmapPage() {
       await deleteRoadmap(id);
       setRoadmaps((prev) => prev.filter((r) => r._id !== id));
       setConfirmDeleteId(null);
+      if (selectedRoadmap?._id === id) {
+        setSelectedRoadmap(null);
+        loadLatest();
+      }
       toast.success("Roadmap deleted");
     } catch {
       toast.error("Failed to delete roadmap");
@@ -140,20 +167,48 @@ function RoadmapPage() {
 
       {/* Tab bar */}
       <div className="flex gap-2">
-        {(["generate", "history"] as const).map((tab) => (
+        {selectedRoadmap && (
           <button
-            key={tab}
-            onClick={() => setView(tab)}
+            onClick={() => setView("detail")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              view === tab || (view === "detail" && tab === "history")
+              view === "detail"
                 ? "btn-gradient text-white"
                 : "glass hover:bg-white/10"
             }`}
           >
-            {tab === "generate" ? "Generate New" : "History"}
+            Active Roadmap
           </button>
-        ))}
+        )}
+        <button
+          onClick={() => setView("generate")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            view === "generate"
+              ? "btn-gradient text-white"
+              : "glass hover:bg-white/10"
+          }`}
+        >
+          Generate New
+        </button>
+        <button
+          onClick={() => setView("history")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            view === "history"
+              ? "btn-gradient text-white"
+              : "glass hover:bg-white/10"
+          }`}
+        >
+          History
+        </button>
       </div>
+
+      {loadingLatest ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : null}
+
+      {!loadingLatest && (
+        <>
 
       {/* Generate View */}
       {view === "generate" && (
@@ -318,6 +373,8 @@ function RoadmapPage() {
             </div>
           </GlassCard>
         </div>
+      )}
+        </>
       )}
     </div>
   );

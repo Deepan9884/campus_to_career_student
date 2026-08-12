@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { ScoreRing, MiniRing, AnimatedCounter } from "@/components/Score";
@@ -18,16 +18,14 @@ import {
   Clock,
   Loader2,
   BookOpen,
-} from "lucide-react";
-import { getDashboardStats } from "@/lib/dashboard-api";
-import { useAuth } from "@/stores";
-import type { DashboardResponse } from "@/types/dashboard";
-import { getBadges } from "@/lib/badges-api";
-import type { BadgeId } from "@/types/badges";
-import {
+  LayoutDashboard,
+  BarChart3,
   Award,
   BadgeCheck,
   BadgeInfo,
+  CheckCircle2,
+  Activity,
+  Layers,
   FileText as FileTextIcon,
   Mic as MicIcon,
   Github as GithubIcon,
@@ -36,14 +34,32 @@ import {
   Sparkles as SparklesIcon,
   BookOpen as BookOpenIcon,
 } from "lucide-react";
+import { getDashboardStats } from "@/lib/dashboard-api";
+import { useAuth } from "@/stores";
+import type { DashboardResponse } from "@/types/dashboard";
+import { getBadges } from "@/lib/badges-api";
+import type { BadgeId } from "@/types/badges";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Campus to Career AI" }] }),
   component: Dashboard,
 });
 
+const DASHBOARD_SECTIONS = [
+  { id: "section-overview", label: "Overview", icon: Sparkles },
+  { id: "section-stats", label: "Readiness Stats", icon: TrendingUp },
+  { id: "section-progress", label: "Progress", icon: BarChart3 },
+  { id: "section-activity", label: "Activity Feed", icon: Activity },
+  { id: "section-recommendations", label: "Recommended", icon: Layers },
+  { id: "section-mission", label: "Daily Mission", icon: Target },
+  { id: "section-badges", label: "Badges", icon: Award },
+];
+
 function Dashboard() {
   const { user } = useAuth();
+  const [activeSection, setActiveSection] = useState<string>("section-overview");
+  const [filterMode, setFilterMode] = useState<string>("all");
+
   const { data, isLoading: loadingData } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: getDashboardStats,
@@ -53,6 +69,42 @@ function Dashboard() {
     queryKey: ["userBadges"],
     queryFn: getBadges,
   });
+
+  // Track active section on scroll
+  useEffect(() => {
+    const sectionElements = DASHBOARD_SECTIONS.map((sec) =>
+      document.getElementById(sec.id)
+    ).filter(Boolean) as HTMLElement[];
+
+    if (sectionElements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "-20% 0px -60% 0px",
+        threshold: 0.1,
+      }
+    );
+
+    sectionElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [loadingData, loadingBadges]);
+
+  const scrollToSection = (id: string) => {
+    setActiveSection(id);
+    const el = document.getElementById(id);
+    if (el) {
+      const yOffset = -90;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
 
   const loading = loadingData || loadingBadges;
   const earnedBadgeIds = new Set((badgesRes?.data?.badges || []).map((b: any) => b.badgeId));
@@ -141,15 +193,13 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="space-y-6">
-        {/* Hero Skeleton */}
+        <div className="h-14 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
         <div className="h-40 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
-        {/* Stats Skeleton */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-32 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
           ))}
         </div>
-        {/* Content Skeleton */}
         <div className="h-64 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
       </div>
     );
@@ -178,172 +228,218 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Hero */}
-      <GlassCard variant="strong" className="overflow-hidden relative">
-        <div className="grid md:grid-cols-[auto_1fr] gap-6 items-center">
-          <ScoreRing score={readiness?.overall || 0} label="Placement Readiness" />
-          <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Hello {user?.name?.split(" ")[0]} 👋</p>
-            <h1 className="text-2xl md:text-3xl font-bold mt-1">
-              You're <span className="text-gradient">{readiness?.overall || 0}%</span> ready
-            </h1>
-            <p className="text-muted-foreground text-sm mt-2 max-w-lg">
-              {(readiness?.overall || 0) >= 80
-                ? "Excellent progress! You're well-prepared for placements."
-                : (readiness?.overall || 0) >= 50
-                  ? "Good progress. Keep building your skills to reach the next level."
-                  : "Just getting started. Upload your resume and take assessments to track your growth."}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-              {readiness?.lastUpdated && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> Updated{" "}
-                  {new Date(readiness.lastUpdated).toLocaleDateString()}
-                </span>
-              )}
+      {/* Dashboard Horizontal Navigation Bar */}
+      <div className="sticky top-[4.25rem] z-20 glass-strong p-2 rounded-2xl border border-white/15 shadow-xl backdrop-blur-2xl">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth">
+          {DASHBOARD_SECTIONS.map((sec) => {
+            const Icon = sec.icon;
+            const isActive = activeSection === sec.id;
+            return (
+              <button
+                key={sec.id}
+                onClick={() => scrollToSection(sec.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+                  isActive
+                    ? "btn-gradient text-white shadow-lg shadow-indigo-500/20 border border-white/20"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/10"
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 ${isActive ? "text-white" : "text-indigo-400"}`} />
+                <span>{sec.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Hero / Overview Section */}
+      <div id="section-overview" className="scroll-mt-28">
+        <GlassCard variant="strong" className="overflow-hidden relative">
+          <div className="grid md:grid-cols-[auto_1fr] gap-6 items-center">
+            <div data-tour="readiness-card">
+              <ScoreRing score={readiness?.overall || 0} label="Placement Readiness" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm text-muted-foreground">Hello {user?.name?.split(" ")[0]} 👋</p>
+              <h1 className="text-2xl md:text-3xl font-bold mt-1">
+                You're <span className="text-gradient">{readiness?.overall || 0}%</span> ready
+              </h1>
+              <p className="text-muted-foreground text-sm mt-2 max-w-lg">
+                {(readiness?.overall || 0) >= 80
+                  ? "Excellent progress! You're well-prepared for placements."
+                  : (readiness?.overall || 0) >= 50
+                    ? "Good progress. Keep building your skills to reach the next level."
+                    : "Just getting started. Upload your resume and take assessments to track your growth."}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                {readiness?.lastUpdated && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> Updated{" "}
+                    {new Date(readiness.lastUpdated).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </GlassCard>
-
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((s) => (
-          <GlassCard key={s.label} hover className="p-5">
-            <div className="flex items-start justify-between">
-              <div className="h-10 w-10 rounded-xl btn-gradient grid place-items-center">
-                <s.icon className="h-5 w-5" />
-              </div>
-              {s.trend !== 0 && (
-                <span
-                  className={`flex items-center text-xs ${s.trend >= 0 ? "text-[color:var(--color-success)]" : "text-[color:var(--color-destructive)]"}`}
-                >
-                  {s.trend >= 0 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" />
-                  )}
-                  {Math.abs(s.trend)}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">{s.label}</p>
-            <p className="text-2xl font-bold mt-1">
-              <AnimatedCounter value={s.value} />
-            </p>
-            <Link
-              to={s.link}
-              className="text-xs text-[color:var(--color-primary)] hover:underline mt-2 inline-flex items-center gap-1"
-            >
-              {s.sub} <ChevronRight className="h-3 w-3" />
-            </Link>
-          </GlassCard>
-        ))}
+        </GlassCard>
       </div>
 
-      {/* Progress mini rings */}
-      <GlassCard>
-        <h3 className="font-semibold mb-4">Section Progress</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <MiniRing value={readiness?.resume || 0} label="Resume" />
-          <MiniRing value={readiness?.interview || 0} label="Interview" color="#8B5CF6" />
-          <MiniRing value={readiness?.skills || 0} label="Skills" color="#10B981" />
+      {/* Quick stats Section */}
+      <div id="section-stats" className="scroll-mt-28">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-[color:var(--color-primary)]" /> Readiness Stats
+          </h3>
         </div>
-      </GlassCard>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {statCards.map((s) => (
+            <GlassCard key={s.label} hover className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="h-10 w-10 rounded-xl btn-gradient grid place-items-center">
+                  <s.icon className="h-5 w-5" />
+                </div>
+                {s.trend !== 0 && (
+                  <span
+                    className={`flex items-center text-xs ${s.trend >= 0 ? "text-[color:var(--color-success)]" : "text-[color:var(--color-destructive)]"}`}
+                  >
+                    {s.trend >= 0 ? (
+                      <TrendingUp className="h-3 w-3" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3" />
+                    )}
+                    {Math.abs(s.trend)}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">{s.label}</p>
+              <p className="text-2xl font-bold mt-1">
+                <AnimatedCounter value={s.value} />
+              </p>
+              <Link
+                to={s.link}
+                className="text-xs text-[color:var(--color-primary)] hover:underline mt-2 inline-flex items-center gap-1"
+              >
+                {s.sub} <ChevronRight className="h-3 w-3" />
+              </Link>
+            </GlassCard>
+          ))}
+        </div>
+      </div>
 
-      {/* Recent Activity Widget */}
-      <RecentActivityWidget />
+      {/* Progress mini rings Section */}
+      <div id="section-progress" className="scroll-mt-28">
+        <GlassCard>
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-[color:var(--color-primary)]" /> Section Progress
+          </h3>
+          <div className="grid grid-cols-3 gap-4">
+            <MiniRing value={readiness?.resume || 0} label="Resume" />
+            <MiniRing value={readiness?.interview || 0} label="Interview" color="#8B5CF6" />
+            <MiniRing value={readiness?.skills || 0} label="Skills" color="#10B981" />
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Recent Activity Widget Section */}
+      <div id="section-activity" className="scroll-mt-28">
+        <RecentActivityWidget />
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Recommendations */}
-        <GlassCard className="lg:col-span-3">
-          <h3 className="font-semibold mb-4">Recommended</h3>
-          {recommendations.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">
-              You've explored all features! Check analytics for insights.
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {recommendations.map((r) => (
-                <li
-                  key={r.title}
-                  className="flex items-start gap-3 p-3 rounded-xl glass hover:-translate-y-0.5 transition"
-                >
-                  <div className="h-9 w-9 rounded-lg btn-gradient grid place-items-center shrink-0">
-                    <r.icon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{r.title}</p>
-                    <p className="text-xs text-muted-foreground">{r.desc}</p>
-                  </div>
-                  <Link
-                    to={r.link}
-                    className="text-xs font-semibold text-[color:var(--color-primary)] hover:underline shrink-0"
+        {/* Recommendations Section */}
+        <div id="section-recommendations" className="lg:col-span-3 scroll-mt-28">
+          <GlassCard className="w-full">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Layers className="h-4 w-4 text-[color:var(--color-primary)]" /> Recommended Actions
+            </h3>
+            {recommendations.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8 text-sm">
+                You've explored all features! Check analytics for insights.
+              </p>
+            ) : (
+              <ul className="space-y-3">
+                {recommendations.map((r) => (
+                  <li
+                    key={r.title}
+                    className="flex items-start gap-3 p-3 rounded-xl glass hover:-translate-y-0.5 transition"
                   >
-                    {r.cta}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </GlassCard>
-        
-        {/* Today's Mission & Profile Completion */}
-        <div className="lg:col-span-1 space-y-6">
-          <GlassCard variant="strong" className="bg-gradient-to-br from-[var(--color-primary)]/10 to-transparent">
-            <div className="flex items-center gap-2 mb-4">
-              <Target className="h-5 w-5 text-[color:var(--color-primary)]" />
-              <h3 className="font-semibold">Today's Mission</h3>
-            </div>
-            <div className="space-y-4">
-              {todayMission.map((mission, i) => (
-                <div key={i} className="p-3 rounded-xl bg-foreground/5 border border-foreground/10 flex flex-col gap-2 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <mission.icon className="h-16 w-16 -mr-4 -mt-4 transform rotate-12" />
-                  </div>
-                  <p className="text-sm font-medium relative z-10">{mission.title}</p>
-                  <p className="text-xs text-muted-foreground relative z-10">{mission.desc}</p>
-                  <Link to={mission.link as any} className="btn-gradient rounded-lg py-1.5 px-3 text-xs text-center font-medium mt-1 relative z-10">
-                    Start Mission
-                  </Link>
-                </div>
-              ))}
-            </div>
+                    <div className="h-9 w-9 rounded-lg btn-gradient grid place-items-center shrink-0">
+                      <r.icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">{r.title}</p>
+                      <p className="text-xs text-muted-foreground">{r.desc}</p>
+                    </div>
+                    <Link
+                      to={r.link}
+                      className="text-xs font-semibold text-[color:var(--color-primary)] hover:underline shrink-0"
+                    >
+                      {r.cta}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </GlassCard>
+        </div>
 
-          <GlassCard>
-            <h3 className="font-semibold mb-2">Profile Completion</h3>
-            <div className="flex items-center justify-between text-xs mb-2">
-              <span className="text-muted-foreground">Progress</span>
-              <span className="font-medium text-[color:var(--color-primary)]">{profileProgress}%</span>
-            </div>
-            <div className="h-2 w-full bg-foreground/10 rounded-full overflow-hidden mb-4">
-              <div 
-                className="h-full btn-gradient transition-all duration-1000" 
-                style={{ width: `${profileProgress}%` }}
-              />
-            </div>
-            <ul className="space-y-2 text-sm">
-              {profileChecks.map((check, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  {check.done ? (
-                    <BadgeCheck className="h-4 w-4 text-[color:var(--color-success)] shrink-0" />
-                  ) : (
-                    <div className="h-4 w-4 rounded-full border border-foreground/20 shrink-0" />
-                  )}
-                  <span className={check.done ? "text-muted-foreground line-through opacity-70" : "text-foreground"}>
-                    {check.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </GlassCard>
+        {/* Today's Mission & Profile Completion Section */}
+        <div id="section-mission" className="lg:col-span-3 scroll-mt-28 space-y-6">
+          <div className="grid lg:grid-cols-2 gap-6">
+            <GlassCard variant="strong" className="bg-gradient-to-br from-[var(--color-primary)]/10 to-transparent">
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="h-5 w-5 text-[color:var(--color-primary)]" />
+                <h3 className="font-semibold">Today's Mission</h3>
+              </div>
+              <div className="space-y-4">
+                {todayMission.map((mission, i) => (
+                  <div key={i} className="p-3 rounded-xl bg-foreground/5 border border-foreground/10 flex flex-col gap-2 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <mission.icon className="h-16 w-16 -mr-4 -mt-4 transform rotate-12" />
+                    </div>
+                    <p className="text-sm font-medium relative z-10">{mission.title}</p>
+                    <p className="text-xs text-muted-foreground relative z-10">{mission.desc}</p>
+                    <Link to={mission.link as any} className="btn-gradient rounded-lg py-1.5 px-3 text-xs text-center font-medium mt-1 relative z-10">
+                      Start Mission
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+
+            <GlassCard>
+              <h3 className="font-semibold mb-2">Profile Completion</h3>
+              <div className="flex items-center justify-between text-xs mb-2">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-medium text-[color:var(--color-primary)]">{profileProgress}%</span>
+              </div>
+              <div className="h-2 w-full bg-foreground/10 rounded-full overflow-hidden mb-4">
+                <div 
+                  className="h-full btn-gradient transition-all duration-1000" 
+                  style={{ width: `${profileProgress}%` }}
+                />
+              </div>
+              <ul className="space-y-2 text-sm">
+                {profileChecks.map((check, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    {check.done ? (
+                      <BadgeCheck className="h-4 w-4 text-[color:var(--color-success)] shrink-0" />
+                    ) : (
+                      <div className="h-4 w-4 rounded-full border border-foreground/20 shrink-0" />
+                    )}
+                    <span className={check.done ? "text-muted-foreground line-through opacity-70" : "text-foreground"}>
+                      {check.label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
+          </div>
         </div>
       </div>
 
-      {/* Bottom CTAs */}
-      {/* Badges */}
-      <div className="mt-6">
+      {/* Badges Section */}
+      <div id="section-badges" className="mt-6 scroll-mt-28">
         <GlassCard variant="strong" hover className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -351,11 +447,11 @@ function Dashboard() {
                 <Award className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-semibold">Your Badges</p>
+                <p className="font-semibold">Your Badges & Achievements</p>
                 <p className="text-xs text-muted-foreground">Unlocked by completing key milestones.</p>
               </div>
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
               {earnedBadgeIds.size}/9 unlocked
             </div>
           </div>
@@ -401,12 +497,7 @@ function Dashboard() {
           </div>
         </GlassCard>
       </div>
-
-      {/* Bottom CTAs - Hidden in favor of Profile Completion Sidebar 
-      <div className="grid md:grid-cols-2 gap-4">
-        ...
-      </div>
-      */}
     </div>
   );
 }
+

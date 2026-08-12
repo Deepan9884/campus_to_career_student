@@ -101,7 +101,7 @@ function WeeklyReportCard() {
 }
 
 export const Route = createFileRoute("/_authenticated/analytics")({
-  head: () => ({ meta: [{ title: "Progress & Analytics — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Progress & Analytics — Campus to Career AI" }] }),
   component: AnalyticsPage,
 });
 

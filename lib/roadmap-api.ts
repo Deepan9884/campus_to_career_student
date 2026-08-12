@@ -71,3 +71,7 @@ export async function getRoadmapByGapAnalysis(
     `${API_BASE}/roadmap/by-gap/${gapAnalysisId}`,
   );
 }
+
+export async function getLatestRoadmap(): Promise<LearningRoadmap | null> {
+  return authFetch<LearningRoadmap | null>(`${API_BASE}/roadmap/latest`);
+}

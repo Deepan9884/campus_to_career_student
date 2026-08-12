@@ -6,7 +6,7 @@ import { forgotPassword } from "@/lib/auth-api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset password — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Reset password — Campus to Career AI" }] }),
   component: ForgotPage,
 });
 

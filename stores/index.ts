@@ -45,6 +45,7 @@ interface AuthState {
   isCheckingAuth: boolean;
   login: (email: string, password: string) => Promise<void>;
   googleLogin: (credential: string) => Promise<void>;
+  githubLogin: (payload?: { code?: string; accessToken?: string; username?: string }) => Promise<void>;
   register: (data: { name: string; email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (patch: Partial<User>) => Promise<void>;
@@ -80,6 +81,18 @@ export const useAuth = create<AuthState>()(
           const data = await api.post<{ user: User; accessToken: string }>("/auth/google", {
             credential,
           });
+          setAccessToken(data.accessToken);
+          set({ user: data.user, isAuthenticated: true, isLoading: false });
+        } catch (err) {
+          set({ isLoading: false });
+          throw err;
+        }
+      },
+
+      githubLogin: async (payload = {}) => {
+        set({ isLoading: true });
+        try {
+          const data = await api.post<{ user: User; accessToken: string }>("/auth/github", payload);
           setAccessToken(data.accessToken);
           set({ user: data.user, isAuthenticated: true, isLoading: false });
         } catch (err) {

@@ -3,15 +3,15 @@ import { useState } from "react";
 import { Sparkles, Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/stores";
-import { GoogleLogin } from "@react-oauth/google";
+import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — CareerForge AI" }] }),
+  head: () => ({ meta: [{ title: "Sign in — Campus to Career AI" }] }),
   component: LoginPage,
 });
 
 function LoginPage() {
-  const { login, googleLogin, isLoading } = useAuth();
+  const { login, googleLogin, githubLogin, isLoading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -114,27 +114,19 @@ function LoginPage() {
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              if (credentialResponse.credential) {
-                try {
-                  await googleLogin(credentialResponse.credential);
-                  toast.success("Welcome back!");
-                  navigate({ to: "/dashboard" });
-                } catch (err: unknown) {
-                  toast.error(err instanceof Error ? err.message : "Google login failed");
-                }
-              }
-            }}
-            onError={() => {
-              toast.error("Google login failed");
-            }}
-            theme="filled_black"
-            shape="pill"
-            width="100%"
-          />
-        </div>
+        <SocialAuthButtons
+          isLoading={isLoading}
+          onGoogleSuccess={async (cred) => {
+            await googleLogin(cred);
+            toast.success("Welcome back!");
+            navigate({ to: "/dashboard" });
+          }}
+          onGithubSuccess={async (payload) => {
+            await githubLogin(payload);
+            toast.success("Welcome back via GitHub!");
+            navigate({ to: "/dashboard" });
+          }}
+        />
       </form>
     </AuthShell>
   );
@@ -144,11 +136,9 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden">
-        <div className="flex items-center gap-2">
-          <div className="h-10 w-10 rounded-xl btn-gradient grid place-items-center">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <span className="font-display font-bold text-xl">CareerForge AI</span>
+        <div className="flex items-center gap-3">
+          <img src="/logo-dark.png" alt="Campus to Career AI" className="h-20 md:h-24 w-auto max-w-[340px] object-contain hidden dark:block" />
+          <img src="/logo.png" alt="Campus to Career AI" className="h-20 md:h-24 w-auto max-w-[340px] object-contain block dark:hidden" />
         </div>
         <div className="relative z-10">
           <h2 className="text-4xl font-bold leading-tight">
@@ -167,7 +157,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             ))}
           </div>
         </div>
-        <div className="text-xs text-muted-foreground">© 2024 CareerForge AI</div>
+        <div className="text-xs text-muted-foreground">© 2026 Campus to Career AI</div>
       </div>
       <div className="flex items-center justify-center p-6">
         <div className="glass-strong rounded-2xl p-8 w-full max-w-md">{children}</div>
