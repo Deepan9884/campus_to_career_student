@@ -6,25 +6,9 @@ interface Node {
   vx: number;
   vy: number;
   radius: number;
-  label?: string;
   color: string;
   glowColor: string;
 }
-
-const SKILL_LABELS = [
-  "React",
-  "System Design",
-  "DSA Streak",
-  "ATS 94%",
-  "Mock Voice AI",
-  "LeetCode 450+",
-  "STAR Method",
-  "GitHub Audit",
-  "Roadmap SDE",
-  "Next.js",
-  "TypeScript",
-  "Clean Code",
-];
 
 export const StudyConstellation: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,22 +31,20 @@ export const StudyConstellation: React.FC = () => {
 
     window.addEventListener("resize", handleResize);
 
-    // Initialize Nodes
-    const nodeCount = Math.min(32, Math.floor((width * height) / 38000));
+    // Initialize clean glowing nodes
+    const nodeCount = Math.min(28, Math.floor((width * height) / 45000));
     const nodes: Node[] = [];
 
     for (let i = 0; i < nodeCount; i++) {
-      const isLabeled = i < SKILL_LABELS.length;
-      const isEmber = i % 3 === 0 || isLabeled;
+      const isEmber = i % 2 === 0;
       nodes.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: (Math.random() - 0.5) * 0.45,
-        radius: isLabeled ? 3.5 : Math.random() * 2 + 1.5,
-        label: isLabeled ? SKILL_LABELS[i] : undefined,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        radius: Math.random() * 2 + 1.2,
         color: isEmber ? "#E08A3C" : "#4A6E94",
-        glowColor: isEmber ? "rgba(224, 138, 60, 0.45)" : "rgba(74, 110, 148, 0.35)",
+        glowColor: isEmber ? "rgba(224, 138, 60, 0.4)" : "rgba(74, 110, 148, 0.3)",
       });
     }
 
@@ -87,8 +69,8 @@ export const StudyConstellation: React.FC = () => {
           const dy = nodes[i].y - nodes[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 140) {
-            const alpha = (1 - dist / 140) * 0.22;
+          if (dist < 150) {
+            const alpha = (1 - dist / 150) * 0.18;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -103,7 +85,7 @@ export const StudyConstellation: React.FC = () => {
         const mdy = nodes[i].y - mouseY;
         const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
         if (mDist < 160) {
-          const alpha = (1 - mDist / 160) * 0.35;
+          const alpha = (1 - mDist / 160) * 0.3;
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
           ctx.lineTo(mouseX, mouseY);
@@ -127,16 +109,9 @@ export const StudyConstellation: React.FC = () => {
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
         ctx.fillStyle = node.color;
         ctx.shadowColor = node.glowColor;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 8;
         ctx.fill();
         ctx.shadowBlur = 0;
-
-        // Draw label if present
-        if (node.label) {
-          ctx.font = "500 10px 'IBM Plex Mono', monospace";
-          ctx.fillStyle = "rgba(242, 244, 247, 0.75)";
-          ctx.fillText(node.label, node.x + 8, node.y + 3);
-        }
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -154,7 +129,7 @@ export const StudyConstellation: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 opacity-70"
+      className="fixed inset-0 pointer-events-none z-0 opacity-60"
       style={{ mixBlendMode: "screen" }}
     />
   );

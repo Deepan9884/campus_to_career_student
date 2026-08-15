@@ -224,20 +224,22 @@ export const LandingPage: React.FC = () => {
       <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
 
       {/* ── NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full bg-[#080D18]/85 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-4 md:px-8 py-2 md:py-2.5 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => scrollToSection("hero")}>
+      <header className="sticky top-0 z-50 w-full bg-[#080D18]/90 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-4 md:px-8 py-2.5 transition-all">
+        <div className="max-w-7xl mx-auto relative flex items-center justify-between">
+          {/* Left Brand */}
+          <div className="flex items-center space-x-3 cursor-pointer z-10" onClick={() => scrollToSection("hero")}>
             <img
               src="/logo-dark.png"
               alt="Campus to Career AI"
-              className="h-7 sm:h-8 w-auto max-w-[180px] object-contain transition-transform hover:scale-[1.02]"
+              className="h-8 md:h-9 w-auto max-w-[200px] object-contain transition-transform hover:scale-[1.02]"
             />
           </div>
 
-          <nav className="hidden lg:flex items-center space-x-1 bg-[#131B2E]/70 p-1 rounded-2xl border border-[#2F4B6B]/50 text-xs font-medium backdrop-blur-sm">
+          {/* Center Nav — Mathematically Dead Center */}
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center space-x-1 bg-[#131B2E]/90 p-1 rounded-2xl border border-[#2F4B6B]/60 text-xs font-medium backdrop-blur-md shadow-lg shadow-black/50">
             <button
               onClick={() => scrollToSection("hero")}
-              className="px-2.5 py-1 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
+              className="px-3 py-1.5 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
             >
               Overview
             </button>
@@ -245,31 +247,32 @@ export const LandingPage: React.FC = () => {
               <button
                 key={sec.id}
                 onClick={() => scrollToSection(sec.id)}
-                className="px-2.5 py-1 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
+                className="px-3 py-1.5 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
               >
                 {sec.navTitle}
               </button>
             ))}
           </nav>
 
-          <div className="flex items-center space-x-2 md:space-x-3">
+          {/* Right Action */}
+          <div className="flex items-center space-x-2 md:space-x-3 z-10">
             {isCheckingAuth ? (
               <div className="h-8 w-20 bg-[#131B2E] animate-pulse rounded-xl" />
             ) : isAuthenticated ? (
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handleDashboardClick}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#E08A3C] hover:bg-[#B96E2C] text-[#080D18] text-xs font-bold flex items-center space-x-1.5 ember-glow transition-all hover:-translate-y-0.5"
+                  className="px-4 py-2 rounded-xl bg-[#E08A3C] hover:bg-[#B96E2C] text-[#080D18] text-xs md:text-sm font-bold flex items-center space-x-1.5 ember-glow transition-all hover:-translate-y-0.5"
                 >
-                  <UserCheck className="w-3.5 h-3.5" />
+                  <UserCheck className="w-4 h-4" />
                   <span>Dashboard</span>
                 </button>
                 <button
                   onClick={handleSignOutClick}
                   title="Sign Out"
-                  className="p-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] text-[#93A0B5] hover:text-white transition-all flex items-center gap-1 text-xs"
+                  className="p-2 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] text-[#93A0B5] hover:text-white transition-all flex items-center gap-1 text-xs"
                 >
-                  <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                  <LogOut className="w-4 h-4 text-rose-400" />
                   <span className="hidden sm:inline">Exit</span>
                 </button>
               </div>
@@ -277,16 +280,16 @@ export const LandingPage: React.FC = () => {
               <>
                 <button
                   onClick={handleLoginClick}
-                  className="px-3 py-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#F2F4F7] text-xs font-medium transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#F2F4F7] text-xs md:text-sm font-medium transition-all"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={handleRegisterClick}
-                  className="px-3.5 py-1.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs font-bold flex items-center space-x-1"
+                  className="px-4 py-2 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs md:text-sm font-bold flex items-center space-x-1.5"
                 >
                   <span>Get Started</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </>
             )}
@@ -294,7 +297,7 @@ export const LandingPage: React.FC = () => {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-[#93A0B5] hover:text-white hover:border-[#E08A3C]/40 transition-all"
+              className="lg:hidden p-2 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-[#93A0B5] hover:text-white hover:border-[#E08A3C]/40 transition-all"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -332,16 +335,16 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section id="hero" className="relative z-10 pt-2 md:pt-3 pb-2 px-3 md:px-6 max-w-7xl mx-auto overflow-hidden">
+      <section id="hero" className="relative z-10 pt-4 md:pt-6 pb-2 px-3 md:px-6 max-w-7xl mx-auto overflow-hidden">
         <HeroParticles />
 
-        <div className="text-center max-w-3xl mx-auto space-y-1.5">
+        <div className="text-center max-w-3xl mx-auto space-y-2">
           {/* Animated badge */}
           <motion.div
-            initial={{ opacity: 0, y: -6 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-[#E08A3C]/10 border border-[#E08A3C]/25 text-[#E08A3C] text-[10px] font-bold"
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center space-x-2 px-3 py-0.5 rounded-full bg-[#E08A3C]/10 border border-[#E08A3C]/25 text-[#E08A3C] text-[11px] font-bold"
           >
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E08A3C] opacity-60" />
@@ -352,95 +355,70 @@ export const LandingPage: React.FC = () => {
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.05 }}
-            className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight tracking-tight"
+            transition={{ duration: 0.45, delay: 0.05 }}
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight"
           >
             Become <span className="text-ember-gradient">Internship-Ready</span> in Weeks, Not Months.
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="text-xs text-[#93A0B5] font-normal leading-relaxed max-w-lg mx-auto line-clamp-1"
+            className="text-xs sm:text-sm text-[#93A0B5] font-normal leading-relaxed max-w-xl mx-auto"
           >
-            ATS-scored resumes, AI mock interviews, GitHub code reviews & milestone roadmaps.
+            ATS-scored resumes, AI mock interviews, GitHub code reviews, and milestone roadmaps.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-            className="flex items-center justify-center gap-2 pt-0.5"
+            transition={{ duration: 0.35, delay: 0.15 }}
+            className="flex items-center justify-center gap-3 pt-1"
           >
             <button
               onClick={handleRegisterClick}
-              className="px-4 py-1.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs font-bold flex items-center space-x-1 shadow-md shadow-[#E08A3C]/20"
+              className="px-6 py-2 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-[#E08A3C]/25"
             >
               <span>{isAuthenticated ? "Go to Workspace" : "Start Free"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => scrollToSection("resume")}
-              className="px-3.5 py-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/30 text-[#F2F4F7] text-xs font-semibold flex items-center space-x-1 transition-all"
+              className="px-5 py-2 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/30 text-[#F2F4F7] text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition-all"
             >
-              <span>Explore</span>
-              <ArrowRight className="w-3 h-3 rotate-90 text-[#E08A3C]" />
+              <span>Explore Features</span>
+              <ArrowRight className="w-3.5 h-3.5 rotate-90 text-[#E08A3C]" />
             </button>
           </motion.div>
         </div>
 
-        {/* ── FEATURED SPOTLIGHT MOVING PANELS SHOWCASE (WOW FACTOR) ── */}
+        {/* ── FEATURED SPOTLIGHT MOVING PANELS SHOWCASE ── */}
         <div
-          className="mt-2.5 relative w-full overflow-hidden"
+          className="mt-4 relative w-full overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          {/* Interactive Feature Category Switcher */}
-          <div className="flex items-center justify-between max-w-4xl mx-auto mb-2 px-2">
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
-              {SECTIONS.map((sec, idx) => {
-                const Icon = sec.icon;
-                const isActive = idx === activeDeckIndex;
-                return (
-                  <button
-                    key={sec.id}
-                    onClick={() => setActiveDeckIndex(idx)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all shrink-0 ${
-                      isActive
-                        ? "btn-gradient text-[#080D18] font-bold shadow-sm shadow-[#E08A3C]/20 border border-white/20"
-                        : "bg-[#131B2E]/80 text-[#93A0B5] hover:text-white hover:bg-[#1B2740] border border-[#2F4B6B]/50"
-                    }`}
-                  >
-                    <Icon className="w-3 h-3" />
-                    <span>{sec.navTitle}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Left / Right Floating Navigation Arrows */}
+          <button
+            onClick={prevDeck}
+            className="hidden md:flex absolute left-4 lg:left-12 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-2xl bg-[#111827]/90 hover:bg-[#1A2438] border border-[#2F4B6B]/70 hover:border-[#E08A3C]/50 text-[#93A0B5] hover:text-[#E08A3C] transition-all shadow-xl backdrop-blur-md"
+            title="Previous feature"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={nextDeck}
+            className="hidden md:flex absolute right-4 lg:right-12 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-2xl bg-[#111827]/90 hover:bg-[#1A2438] border border-[#2F4B6B]/70 hover:border-[#E08A3C]/50 text-[#93A0B5] hover:text-[#E08A3C] transition-all shadow-xl backdrop-blur-md"
+            title="Next feature"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
 
-            <div className="hidden sm:flex items-center space-x-1 shrink-0 pl-2">
-              <button
-                onClick={prevDeck}
-                className="p-1 rounded-lg bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
-                title="Previous feature"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={nextDeck}
-                className="p-1 rounded-lg bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
-                title="Next feature"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Cards Track (Center Stage - 100% Above the Fold) */}
-          <div className="relative flex items-center justify-center min-h-[300px] sm:min-h-[320px] md:min-h-[340px] px-2">
+          {/* Cards Track (Center Stage) */}
+          <div className="relative flex items-center justify-center min-h-[310px] sm:min-h-[330px] md:min-h-[350px] px-2">
             {SECTIONS.map((panel, idx) => {
               const Icon = panel.icon;
               const isCenter = idx === activeDeckIndex;
