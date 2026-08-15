@@ -364,7 +364,12 @@ function Brand({ collapsed }: { collapsed?: boolean }) {
         <img
           src="/logo-dark.png"
           alt="Campus to Career"
-          className="h-8 w-auto object-contain"
+          className="hidden dark:block h-8 w-auto object-contain"
+        />
+        <img
+          src="/logo.png"
+          alt="Campus to Career"
+          className="block dark:hidden h-8 w-auto object-contain"
         />
       </Link>
     );
@@ -375,7 +380,12 @@ function Brand({ collapsed }: { collapsed?: boolean }) {
       <img
         src="/logo-dark.png"
         alt="Campus to Career"
-        className="h-9 md:h-10 w-auto max-w-[180px] object-contain transition-all"
+        className="hidden dark:block h-9 md:h-10 w-auto max-w-[180px] object-contain transition-all"
+      />
+      <img
+        src="/logo.png"
+        alt="Campus to Career"
+        className="block dark:hidden h-9 md:h-10 w-auto max-w-[180px] object-contain transition-all"
       />
     </Link>
   );

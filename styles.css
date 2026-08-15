@@ -293,8 +293,22 @@
   color: transparent;
 }
 
+.light .text-gradient, html.light .text-gradient {
+  background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 50%, #0284C7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 @utility text-ember-gradient {
   background: linear-gradient(120deg, #A5B4FC 0%, #818CF8 45%, #38BDF8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.light .text-ember-gradient, html.light .text-ember-gradient {
+  background: linear-gradient(120deg, #3730A3 0%, #4F46E5 45%, #0284C7 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

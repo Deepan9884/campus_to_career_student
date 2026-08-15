@@ -529,15 +529,7 @@ const [analyzing, setAnalyzing] = useState(false);
           )}
 
           {!selectedRepo && !showHistory && !analyzing && (
-            <div
-              className="rounded-3xl p-6 sm:p-8 border border-[#2F4B6B]/60 shadow-2xl relative overflow-hidden space-y-6"
-              style={{
-                background:
-                  "radial-gradient(ellipse at top left, rgba(27,39,64,0.9) 0%, rgba(17,24,39,0.96) 60%, rgba(8,13,24,1) 100%)",
-                boxShadow:
-                  "0 20px 60px rgba(0,0,0,0.7), 0 0 35px rgba(99,102,241,0.12), inset 0 1px 0 0 rgba(99,102,241,0.25)",
-              }}
-            >
+            <div className="rounded-3xl p-6 sm:p-8 border border-border dark:border-[#2F4B6B]/60 shadow-xl relative overflow-hidden space-y-6 bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(27,39,64,0.9)_0%,rgba(17,24,39,0.96)_60%,rgba(8,13,24,1)_100%)]">
               {/* Subtle background grid */}
               <div
                 className="absolute inset-0 pointer-events-none opacity-15"
@@ -550,14 +542,14 @@ const [analyzing, setAnalyzing] = useState(false);
 
               <div className="relative z-10 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-[#1B2740] to-[#111827] border border-[#2F4B6B] text-indigo-400 shadow-lg">
+                  <div className="p-3 rounded-2xl bg-indigo-500/10 dark:bg-gradient-to-br dark:from-[#1B2740] dark:to-[#111827] border border-border dark:border-[#2F4B6B] text-indigo-600 dark:text-indigo-400 shadow-sm">
                     <Github className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white leading-tight">
+                    <h3 className="text-lg font-bold text-foreground leading-tight">
                       {connected ? "Ready to Audit Your Repositories" : "Recruiter GitHub Project Intelligence"}
                     </h3>
-                    <p className="text-xs text-[#93A0B5] mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {connected
                         ? "Select any repository from the list on the left to start full code & README analysis."
                         : "Enter your GitHub username on the left to benchmark your code quality against placement standards."}
@@ -567,44 +559,44 @@ const [analyzing, setAnalyzing] = useState(false);
 
                 {/* 3 Core Value Pillars */}
                 <div className="grid sm:grid-cols-3 gap-3.5 pt-2">
-                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
-                    <div className="p-2 rounded-xl bg-[#1B2740] text-indigo-400 w-fit border border-[#2F4B6B]/60">
+                  <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/80 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
+                    <div className="p-2 rounded-xl bg-card dark:bg-[#1B2740] text-indigo-600 dark:text-indigo-400 w-fit border border-border dark:border-[#2F4B6B]/60 shadow-sm">
                       <Code2 className="w-4 h-4" />
                     </div>
-                    <h4 className="text-xs font-bold text-white">Code & Architecture Audit</h4>
-                    <p className="text-[11px] text-[#93A0B5] leading-relaxed">
+                    <h4 className="text-xs font-bold text-foreground">Code & Architecture Audit</h4>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
                       Evaluates modularity, framework usage, cleanliness, and test coverage for hiring engineers.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
-                    <div className="p-2 rounded-xl bg-[#1B2740] text-emerald-400 w-fit border border-[#2F4B6B]/60">
+                  <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/80 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
+                    <div className="p-2 rounded-xl bg-card dark:bg-[#1B2740] text-emerald-600 dark:text-emerald-400 w-fit border border-border dark:border-[#2F4B6B]/60 shadow-sm">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
-                    <h4 className="text-xs font-bold text-white">Security & API Health</h4>
-                    <p className="text-[11px] text-[#93A0B5] leading-relaxed">
+                    <h4 className="text-xs font-bold text-foreground">Security & API Health</h4>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
                       Checks for exposed secrets, unsafe dependencies, and proper environment variable setup.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
-                    <div className="p-2 rounded-xl bg-[#1B2740] text-blue-400 w-fit border border-[#2F4B6B]/60">
+                  <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/80 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
+                    <div className="p-2 rounded-xl bg-card dark:bg-[#1B2740] text-sky-600 dark:text-blue-400 w-fit border border-border dark:border-[#2F4B6B]/60 shadow-sm">
                       <Briefcase className="w-4 h-4" />
                     </div>
-                    <h4 className="text-xs font-bold text-white">Resume Impact & Posts</h4>
-                    <p className="text-[11px] text-[#93A0B5] leading-relaxed">
+                    <h4 className="text-xs font-bold text-foreground">Resume Impact & Posts</h4>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
                       Generates bullet points tailored for your resume and ready-to-share LinkedIn project drafts.
                     </p>
                   </div>
                 </div>
 
                 {/* Recruiter Trust Footnote */}
-                <div className="p-3.5 rounded-2xl bg-[#131B2E]/60 border border-[#2F4B6B]/40 flex items-center justify-between text-xs text-[#93A0B5]">
+                <div className="p-3.5 rounded-2xl bg-muted/50 dark:bg-[#131B2E]/60 border border-border dark:border-[#2F4B6B]/40 flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                     <span>⚡ 10,000+ student repositories audited for campus placement drives</span>
                   </span>
-                  <span className="text-indigo-400 font-semibold">100% Free & Open-Source Friendly</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 font-semibold">100% Free & Open-Source Friendly</span>
                 </div>
               </div>
             </div>

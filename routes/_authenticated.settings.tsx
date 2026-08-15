@@ -382,40 +382,40 @@ function SettingsPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-black dark:text-white">Display Name</label>
+                <label className="block text-sm font-medium mb-1 text-foreground">Display Name</label>
                 <input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   placeholder="Your full name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-black dark:text-white">Target Role</label>
+                <label className="block text-sm font-medium mb-1 text-foreground">Target Role</label>
                 <input
                   value={form.targetRole}
                   onChange={(e) => setForm({ ...form, targetRole: e.target.value })}
-                  className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   placeholder="e.g. Frontend Developer"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-black dark:text-white">Bio</label>
+                <label className="block text-sm font-medium mb-1 text-foreground">Bio</label>
                 <textarea
                   value={form.bio}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                  className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 min-h-[80px]"
+                  className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 min-h-[80px]"
                   placeholder="A short bio about yourself..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 flex items-center gap-2 text-black dark:text-white">
+                <label className="block text-sm font-medium mb-1 flex items-center gap-2 text-foreground">
                   <Github className="h-4 w-4" /> GitHub Username
                 </label>
                 <input
                   value={form.githubUsername}
                   onChange={(e) => setForm({ ...form, githubUsername: e.target.value })}
-                  className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   placeholder="username"
                 />
               </div>
@@ -425,12 +425,12 @@ function SettingsPage() {
           {/* Connected Coding Profiles */}
           <GlassCard>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold flex items-center gap-2 text-lg text-black dark:text-white">
-                <LinkIcon className="h-5 w-5 text-indigo-400" /> Linked Accounts
+              <h3 className="font-semibold flex items-center gap-2 text-lg text-foreground">
+                <LinkIcon className="h-5 w-5 text-indigo-500 dark:text-indigo-400" /> Linked Accounts
               </h3>
               <Link
                 to="/coding-platforms"
-                className="text-xs text-indigo-500 hover:text-indigo-400 font-medium flex items-center gap-1"
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium flex items-center gap-1"
               >
                 Manage Profiles →
               </Link>
@@ -439,16 +439,16 @@ function SettingsPage() {
             {linkedProfiles.length > 0 ? (
               <div className="space-y-3">
                 {linkedProfiles.map((p, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/20">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border dark:border-white/10 bg-muted/40 dark:bg-black/20">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                      <div className="p-2 bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 rounded-lg">
                         <BarChart3 className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm capitalize text-black dark:text-white flex items-center gap-2">
+                        <p className="font-semibold text-sm capitalize text-foreground flex items-center gap-2">
                           {p.platform}
                           {p.cachedStats?.solved !== undefined && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-medium">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-medium">
                               {p.cachedStats.solved} solved
                             </span>
                           )}
@@ -458,7 +458,7 @@ function SettingsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                      <span className="text-xs text-emerald-500 font-medium">Connected</span>
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Connected</span>
                     </div>
                   </div>
                 ))}
@@ -478,18 +478,18 @@ function SettingsPage() {
 
           {/* Goals */}
           <GlassCard>
-            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-black dark:text-white">
-              <Target className="h-5 w-5 text-emerald-400" /> Daily Goals
+            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-foreground">
+              <Target className="h-5 w-5 text-emerald-500 dark:text-emerald-400" /> Daily Goals
             </h3>
             <div>
-              <label className="block text-sm font-medium mb-1 text-black dark:text-white">Target Problems per Day</label>
+              <label className="block text-sm font-medium mb-1 text-foreground">Target Problems per Day</label>
               <input
                 type="number"
                 min="1"
                 max="50"
                 value={preferences.dailyGoalProblems}
                 onChange={(e) => setPreferences({ ...preferences, dailyGoalProblems: Number(e.target.value) })}
-                className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               />
               <p className="text-xs text-muted-foreground mt-2">Set a daily goal for problems solved across all platforms.</p>
             </div>
@@ -499,22 +499,22 @@ function SettingsPage() {
         <div className="space-y-6">
           {/* AI Preferences */}
           <GlassCard>
-            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-black dark:text-white">
-              <SlidersHorizontal className="h-5 w-5 text-fuchsia-400" /> AI Preferences
+            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-foreground">
+              <SlidersHorizontal className="h-5 w-5 text-indigo-500 dark:text-fuchsia-400" /> AI Preferences
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-black dark:text-white">AI Recommendation Difficulty</label>
+                <label className="block text-sm font-medium mb-1 text-foreground">AI Recommendation Difficulty</label>
                 <div className="grid grid-cols-3 gap-2">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <button
                       key={level}
                       onClick={() => setPreferences({ ...preferences, aiDifficulty: level as any })}
                       className={cn(
-                        "py-2 rounded-lg text-sm transition-all border",
+                        "py-2 rounded-lg text-sm transition-all border font-semibold",
                         preferences.aiDifficulty === level
-                          ? "bg-fuchsia-100 dark:bg-fuchsia-500/20 border-fuchsia-500/50 text-fuchsia-700 dark:text-fuchsia-200 font-medium"
-                          : "bg-black/5 dark:bg-black/20 border-black/10 dark:border-white/5 hover:bg-black/10 dark:hover:bg-white/5 text-muted-foreground"
+                          ? "bg-indigo-50 dark:bg-indigo-500/20 border-indigo-500 text-indigo-600 dark:text-indigo-300"
+                          : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/5 hover:bg-muted dark:hover:bg-white/5 text-muted-foreground"
                       )}
                     >
                       {level}
@@ -524,19 +524,19 @@ function SettingsPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1 text-black dark:text-white">Preferred Language (Interviews & Tips)</label>
+                <label className="block text-sm font-medium mb-1 text-foreground">Preferred Language (Interviews & Tips)</label>
                 <input
                   value={preferences.preferredLanguage}
                   onChange={(e) => setPreferences({ ...preferences, preferredLanguage: e.target.value })}
-                  className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   placeholder="e.g. Python, Java, C++"
                 />
               </div>
 
               <div className="pt-2">
-                <label className="flex items-start gap-3 p-3 rounded-xl border border-black/10 dark:border-white/5 bg-black/5 dark:bg-black/20 cursor-pointer">
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-border dark:border-white/5 bg-muted/40 dark:bg-black/20 cursor-pointer">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm flex items-center gap-2 text-black dark:text-white"><Lock className="w-3 h-3"/> Resume Privacy Mode</p>
+                    <p className="font-medium text-sm flex items-center gap-2 text-foreground"><Lock className="w-3 h-3 text-indigo-500"/> Resume Privacy Mode</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Don't use my resume context for global AI suggestions.
                     </p>
@@ -548,7 +548,7 @@ function SettingsPage() {
                       checked={preferences.resumePrivacy}
                       onChange={(e) => setPreferences({ ...preferences, resumePrivacy: e.target.checked })}
                     />
-                    <div className={cn("h-5 w-9 rounded-full transition-colors", preferences.resumePrivacy ? "bg-brand-500" : "bg-black/20 dark:bg-white/10")}></div>
+                    <div className={cn("h-5 w-9 rounded-full transition-colors", preferences.resumePrivacy ? "bg-indigo-600" : "bg-black/20 dark:bg-white/10")}></div>
                     <div className={cn("absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white transition-transform", preferences.resumePrivacy ? "translate-x-4" : "")}></div>
                   </div>
                 </label>
@@ -558,8 +558,8 @@ function SettingsPage() {
 
           {/* Theme & Appearance */}
           <GlassCard>
-            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-black dark:text-white">
-              <Sun className="h-5 w-5 text-amber-400" /> Appearance
+            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-foreground">
+              <Sun className="h-5 w-5 text-amber-500" /> Appearance
             </h3>
             <div className="grid grid-cols-3 gap-3">
               {[
@@ -573,8 +573,8 @@ function SettingsPage() {
                   className={cn(
                     "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all",
                     preferences.theme === id
-                      ? "bg-brand-100 dark:bg-brand-500/20 border-brand-500/50 text-brand-600 dark:text-brand-400 font-medium"
-                      : "bg-black/5 dark:bg-black/20 border-black/10 dark:border-white/5 hover:bg-black/10 dark:hover:bg-white/5 text-muted-foreground",
+                      ? "bg-indigo-50 dark:bg-indigo-500/20 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold"
+                      : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/5 hover:bg-muted dark:hover:bg-white/5 text-muted-foreground",
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -586,7 +586,7 @@ function SettingsPage() {
 
           {/* Sidebar Modules */}
           <GlassCard>
-            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-black dark:text-white">
+            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-foreground">
               <EyeOff className="h-5 w-5 text-cyan-500 dark:text-cyan-400" /> Sidebar Visibility
             </h3>
             <p className="text-sm text-muted-foreground mb-4">Toggle which modules appear in your sidebar navigation.</p>
@@ -594,10 +594,10 @@ function SettingsPage() {
               {MODULES.map((mod) => {
                 const isVisible = !preferences.hiddenModules.includes(mod.key);
                 return (
-                  <label key={mod.key} className="flex items-center justify-between p-3 rounded-lg border border-black/10 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition">
+                  <label key={mod.key} className="flex items-center justify-between p-3 rounded-lg border border-border dark:border-white/5 hover:bg-muted/50 dark:hover:bg-white/5 cursor-pointer transition">
                     <div className="flex items-center gap-3">
                       <mod.icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium text-black dark:text-white">{mod.label}</span>
+                      <span className="text-sm font-medium text-foreground">{mod.label}</span>
                     </div>
                     <div className="relative inline-flex h-5 w-9 items-center justify-center rounded-full">
                       <input

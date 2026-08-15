@@ -123,7 +123,10 @@ function Dashboard() {
       subtext: `${stats?.resumeCount || 0} resumes uploaded`,
       action: "Optimize Resume",
       tag: (readiness?.resume || 0) >= 75 ? "Placement Ready" : "Needs Polish",
-      tagColor: (readiness?.resume || 0) >= 75 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+      tagColor:
+        (readiness?.resume || 0) >= 75
+          ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+          : "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
     },
     {
       icon: Mic,
@@ -134,7 +137,10 @@ function Dashboard() {
       subtext: `${stats?.completedInterviewCount || 0} practice sessions`,
       action: "Practice Answers",
       tag: (readiness?.interview || 0) >= 70 ? "Confident" : "Practice Daily",
-      tagColor: (readiness?.interview || 0) >= 70 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+      tagColor:
+        (readiness?.interview || 0) >= 70
+          ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+          : "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
     },
     {
       icon: Github,
@@ -145,7 +151,10 @@ function Dashboard() {
       subtext: "Portfolio verified",
       action: "Review Code",
       tag: (stats?.repoCount || 0) > 0 ? "Portfolio Live" : "Sync GitHub",
-      tagColor: (stats?.repoCount || 0) > 0 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-[#93A0B5] bg-white/5 border-[#2F4B6B]/40",
+      tagColor:
+        (stats?.repoCount || 0) > 0
+          ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+          : "text-muted-foreground bg-muted border-border",
     },
     {
       icon: Target,
@@ -156,7 +165,7 @@ function Dashboard() {
       subtext: `${stats?.gapCount || 0} topics to review`,
       action: "Close Skill Gaps",
       tag: "Target Track",
-      tagColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+      tagColor: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
     },
   ];
 
@@ -260,11 +269,11 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-12 rounded-full bg-[#111827] border border-[#2F4B6B]/40 animate-pulse" />
-        <div className="h-44 rounded-3xl bg-[#111827] border border-[#2F4B6B]/40 animate-pulse" />
+        <div className="h-12 rounded-full bg-card border border-border animate-pulse" />
+        <div className="h-44 rounded-3xl bg-card border border-border animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-36 rounded-2xl bg-[#111827] border border-[#2F4B6B]/40 animate-pulse" />
+            <div key={i} className="h-36 rounded-2xl bg-card border border-border animate-pulse" />
           ))}
         </div>
       </div>
@@ -275,7 +284,7 @@ function Dashboard() {
     <div className="space-y-6 max-w-[1360px] mx-auto pb-12">
       {/* ── STICKY SLIM SUB-NAV CAPSULE ── */}
       <div className="sticky top-2 z-30 flex justify-center w-full pointer-events-none">
-        <div className="pointer-events-auto bg-[#080D18]/90 p-1 rounded-full border border-[#2F4B6B]/50 shadow-2xl backdrop-blur-xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
+        <div className="pointer-events-auto bg-card/90 dark:bg-[#080D18]/90 p-1 rounded-full border border-border dark:border-[#2F4B6B]/50 shadow-xl backdrop-blur-xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
           {DASHBOARD_SECTIONS.map((sec) => {
             const Icon = sec.icon;
             const isActive = activeSection === sec.id;
@@ -286,10 +295,10 @@ function Dashboard() {
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap ${
                   isActive
                     ? "btn-gradient text-white font-bold shadow-md shadow-indigo-500/20 border border-white/20"
-                    : "text-[#93A0B5] hover:text-indigo-400 hover:bg-white/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                 }`}
               >
-                <Icon className={`w-3 h-3 ${isActive ? "text-white" : "text-indigo-400"}`} />
+                <Icon className={`w-3 h-3 ${isActive ? "text-white" : "text-indigo-500 dark:text-indigo-400"}`} />
                 <span>{sec.label}</span>
               </button>
             );
@@ -299,34 +308,26 @@ function Dashboard() {
 
       {/* ── STUDENT WELCOME & READINESS OVERVIEW ── */}
       <div id="section-overview" className="scroll-mt-24">
-        <div
-          className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-[#2F4B6B]/60 shadow-2xl"
-          style={{
-            background:
-              "radial-gradient(ellipse at top left, rgba(27,39,64,0.92) 0%, rgba(17,24,39,0.98) 60%, rgba(8,13,24,1) 100%)",
-            boxShadow:
-              "0 20px 60px rgba(0,0,0,0.7), 0 0 35px rgba(99,102,241,0.12), inset 0 1px 0 0 rgba(99,102,241,0.3)",
-          }}
-        >
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-border dark:border-[#2F4B6B]/60 shadow-xl bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(27,39,64,0.92)_0%,rgba(17,24,39,0.98)_60%,rgba(8,13,24,1)_100%)]">
           <div className="relative z-10 grid lg:grid-cols-12 gap-6 items-center">
             {/* Left: Readiness Ring & Score */}
-            <div className="lg:col-span-4 flex flex-col sm:flex-row items-center gap-5 border-b lg:border-b-0 lg:border-r border-[#2F4B6B]/40 pb-6 lg:pb-0 lg:pr-6">
+            <div className="lg:col-span-4 flex flex-col sm:flex-row items-center gap-5 border-b lg:border-b-0 lg:border-r border-border dark:border-[#2F4B6B]/40 pb-6 lg:pb-0 lg:pr-6">
               <div className="relative shrink-0">
                 <ScoreRing score={overallScore} label="Readiness" size={145} stroke={12} />
               </div>
               <div className="text-center sm:text-left space-y-1">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                   Active Study Plan
                 </span>
-                <h3 className="text-lg font-bold text-white leading-tight">
+                <h3 className="text-lg font-bold text-foreground leading-tight">
                   Placement Readiness
                 </h3>
-                <p className="text-xs text-[#93A0B5]">
-                  Target: <span className="text-indigo-400 font-bold">85%+ Ready</span>
+                <p className="text-xs text-muted-foreground">
+                  Target: <span className="text-indigo-600 dark:text-indigo-400 font-bold">85%+ Ready</span>
                 </p>
                 {readiness?.lastUpdated && (
-                  <p className="text-[10px] text-[#93A0B5]/70 flex items-center gap-1">
+                  <p className="text-[10px] text-muted-foreground/80 flex items-center gap-1">
                     <Clock className="w-3 h-3" /> Last updated {new Date(readiness.lastUpdated).toLocaleDateString()}
                   </p>
                 )}
@@ -336,19 +337,19 @@ function Dashboard() {
             {/* Center: Warm Encouragement & Student Track */}
             <div className="lg:col-span-5 space-y-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-[#93A0B5] uppercase tracking-wider">Student Dashboard</span>
-                <span className="text-slate-600">•</span>
-                <span className="text-xs text-indigo-400 font-semibold flex items-center gap-1">
-                  <Flame className="w-3.5 h-3.5 text-indigo-400" /> 3-Day Study Streak
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Student Dashboard</span>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1">
+                  <Flame className="w-3.5 h-3.5 text-indigo-500" /> 3-Day Study Streak
                 </span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight">
                 Hey {user?.name?.split(" ")[0] || "Student"}! 🎓 You're{" "}
                 <span className="text-ember-gradient">{overallScore}% ready</span> for campus placements.
               </h2>
 
-              <p className="text-xs sm:text-sm text-[#93A0B5] leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {overallScore >= 80
                   ? "🎉 Amazing work! You are in great shape for upcoming campus drives and technical interviews."
                   : overallScore >= 50
@@ -357,52 +358,52 @@ function Dashboard() {
               </p>
 
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-[11px] font-medium text-slate-200 bg-[#131B2E] px-3 py-1 rounded-xl border border-[#2F4B6B]">
-                  🎯 Target Track: <strong className="text-white">{user?.profile?.targetRole || user?.targetRole || "Software Engineer"}</strong>
+                <span className="text-[11px] font-medium text-foreground bg-muted dark:bg-[#131B2E] px-3 py-1 rounded-xl border border-border dark:border-[#2F4B6B]">
+                  🎯 Target Track: <strong className="text-foreground">{user?.profile?.targetRole || user?.targetRole || "Software Engineer"}</strong>
                 </span>
               </div>
             </div>
 
             {/* Right: Quick Action Buttons */}
             <div className="lg:col-span-3 flex flex-col gap-2">
-              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Quick Study Tools
+              <span className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Quick Study Tools
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   to="/resume"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <FileText className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-white">Resume</span>
-                  <span className="text-[10px] text-[#93A0B5]">ATS Review</span>
+                  <FileText className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-semibold text-foreground">Resume</span>
+                  <span className="text-[10px] text-muted-foreground">ATS Review</span>
                 </Link>
 
                 <Link
                   to="/interview"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Mic className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-white">Interview</span>
-                  <span className="text-[10px] text-[#93A0B5]">Voice Mock</span>
+                  <Mic className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-semibold text-foreground">Interview</span>
+                  <span className="text-[10px] text-muted-foreground">Voice Mock</span>
                 </Link>
 
                 <Link
                   to="/github"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Github className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-white">GitHub</span>
-                  <span className="text-[10px] text-[#93A0B5]">Code Review</span>
+                  <Github className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-semibold text-foreground">GitHub</span>
+                  <span className="text-[10px] text-muted-foreground">Code Review</span>
                 </Link>
 
                 <Link
                   to="/roadmap"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Map className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-white">Roadmap</span>
-                  <span className="text-[10px] text-[#93A0B5]">Study Plan</span>
+                  <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-semibold text-foreground">Roadmap</span>
+                  <span className="text-[10px] text-muted-foreground">Study Plan</span>
                 </Link>
               </div>
             </div>
@@ -413,10 +414,10 @@ function Dashboard() {
       {/* ── 4 KEY STUDY PILLARS ── */}
       <div id="section-stats" className="scroll-mt-24 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <BarChart3 className="w-3.5 h-3.5 text-indigo-400" /> Core Preparation Pillars
+          <h3 className="text-xs font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5">
+            <BarChart3 className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Core Preparation Pillars
           </h3>
-          <span className="text-xs text-[#93A0B5]">Click any card to continue practicing</span>
+          <span className="text-xs text-muted-foreground">Click any card to continue practicing</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
@@ -426,14 +427,10 @@ function Dashboard() {
               <Link
                 key={card.title}
                 to={card.link}
-                className="group relative rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 block border border-[#2F4B6B]/60 hover:border-indigo-500/60 bg-[#0F172A]/90 backdrop-blur-xl shadow-xl hover:shadow-2xl"
-                style={{
-                  boxShadow:
-                    "0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 0 rgba(99,102,241,0.18)",
-                }}
+                className="group relative rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 block border border-border dark:border-[#2F4B6B]/60 hover:border-indigo-500/60 bg-card dark:bg-[#0F172A]/90 backdrop-blur-xl shadow-md hover:shadow-xl dark:shadow-xl dark:hover:shadow-2xl"
               >
                 <div className="flex items-start justify-between">
-                  <div className="p-2.5 rounded-xl bg-[#1B2740] border border-[#2F4B6B]/60 text-indigo-400 shadow-md group-hover:border-indigo-500/40 transition-colors">
+                  <div className="p-2.5 rounded-xl bg-muted dark:bg-[#1B2740] border border-border dark:border-[#2F4B6B]/60 text-indigo-600 dark:text-indigo-400 shadow-sm group-hover:border-indigo-500/40 transition-colors">
                     <Icon className="w-4 h-4" />
                   </div>
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${card.tagColor}`}>
@@ -442,17 +439,17 @@ function Dashboard() {
                 </div>
 
                 <div className="mt-3">
-                  <p className="text-xs text-[#93A0B5] font-medium">{card.title}</p>
+                  <p className="text-xs text-muted-foreground font-medium">{card.title}</p>
                   <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-2xl font-extrabold text-white tracking-tight">
+                    <span className="text-2xl font-extrabold text-foreground tracking-tight">
                       <AnimatedCounter value={card.value} />
                     </span>
-                    <span className="text-xs text-[#93A0B5]">{card.unit}</span>
+                    <span className="text-xs text-muted-foreground">{card.unit}</span>
                   </div>
-                  <p className="text-[11px] text-[#93A0B5] mt-1">{card.subtext}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">{card.subtext}</p>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-[#2F4B6B]/40 flex items-center justify-between text-[11px] text-indigo-400 font-semibold">
+                <div className="mt-3 pt-2.5 border-t border-border dark:border-[#2F4B6B]/40 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
                   <span>{card.action}</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -468,95 +465,95 @@ function Dashboard() {
         <div className="lg:col-span-7 space-y-6">
           {/* Section Progress — Sleek Benchmark Cards */}
           <div id="section-progress" className="scroll-mt-24">
-            <GlassCard variant="strong" className="p-5 border border-[#2F4B6B]/60">
+            <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-indigo-400" />
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                     <span>Skill Progress Breakdown</span>
                   </h3>
-                  <p className="text-xs text-[#93A0B5] mt-0.5">Your scores across the 3 key hiring benchmarks</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Your scores across the 3 key hiring benchmarks</p>
                 </div>
-                <span className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/25">
+                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/25">
                   Updated Live
                 </span>
               </div>
 
               <div className="space-y-3">
                 {/* 1. Resume ATS Score */}
-                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/75 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
+                      <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
                         <FileText className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-white">ATS Resume Formatting & Keywords</h4>
-                        <p className="text-[11px] text-[#93A0B5]">Action verbs, impact phrasing & section structure</p>
+                        <h4 className="text-xs font-bold text-foreground">ATS Resume Formatting & Keywords</h4>
+                        <p className="text-[11px] text-muted-foreground">Action verbs, impact phrasing & section structure</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-base font-extrabold text-white">{readiness?.resume || 0}%</span>
-                      <span className="text-[10px] block text-emerald-400 font-semibold">
+                      <span className="text-base font-extrabold text-foreground">{readiness?.resume || 0}%</span>
+                      <span className="text-[10px] block text-emerald-600 dark:text-emerald-400 font-semibold">
                         {(readiness?.resume || 0) >= 70 ? "Placement Ready" : "Needs Review"}
                       </span>
                     </div>
                   </div>
-                  <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
+                  <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden border border-border dark:border-[#2F4B6B]/40">
                     <div
-                      className="h-full bg-gradient-to-r from-[#2F4B6B] to-indigo-500 rounded-full transition-all duration-1000"
+                      className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.resume || 0)}%` }}
                     />
                   </div>
                 </div>
 
                 {/* 2. Mock Interview Articulation */}
-                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/75 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-[#2F4B6B]/30 border border-[#2F4B6B]/60 text-[#93A0B5]">
-                        <Mic className="w-4 h-4 text-indigo-400" />
+                      <div className="p-2 rounded-xl bg-indigo-500/10 dark:bg-[#2F4B6B]/30 border border-indigo-500/20 dark:border-[#2F4B6B]/60 text-indigo-600 dark:text-indigo-400">
+                        <Mic className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-white">Technical & Behavioral Vocal Articulation</h4>
-                        <p className="text-[11px] text-[#93A0B5]">STAR response structure, clarity & feedback score</p>
+                        <h4 className="text-xs font-bold text-foreground">Technical & Behavioral Vocal Articulation</h4>
+                        <p className="text-[11px] text-muted-foreground">STAR response structure, clarity & feedback score</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-base font-extrabold text-white">{readiness?.interview || 0}%</span>
-                      <span className="text-[10px] block text-indigo-400 font-semibold">
+                      <span className="text-base font-extrabold text-foreground">{readiness?.interview || 0}%</span>
+                      <span className="text-[10px] block text-indigo-600 dark:text-indigo-400 font-semibold">
                         {(readiness?.interview || 0) >= 70 ? "Confident" : "Practice Needed"}
                       </span>
                     </div>
                   </div>
-                  <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
+                  <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden border border-border dark:border-[#2F4B6B]/40">
                     <div
-                      className="h-full bg-gradient-to-r from-[#2F4B6B] via-[#4A6E94] to-indigo-500 rounded-full transition-all duration-1000"
+                      className="h-full bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-400 rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.interview || 0)}%` }}
                     />
                   </div>
                 </div>
 
                 {/* 3. Target Role Skill Coverage */}
-                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/75 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-[#2F4B6B]/30 border border-[#2F4B6B]/60 text-[#93A0B5]">
-                        <Target className="w-4 h-4 text-emerald-400" />
+                      <div className="p-2 rounded-xl bg-emerald-500/10 dark:bg-[#2F4B6B]/30 border border-emerald-500/20 dark:border-[#2F4B6B]/60 text-emerald-600 dark:text-emerald-400">
+                        <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-white">Role Skills & Concept Coverage</h4>
-                        <p className="text-[11px] text-[#93A0B5]">Data Structures, Algorithms & System Architecture</p>
+                        <h4 className="text-xs font-bold text-foreground">Role Skills & Concept Coverage</h4>
+                        <p className="text-[11px] text-muted-foreground">Data Structures, Algorithms & System Architecture</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-base font-extrabold text-white">{readiness?.skills || 0}%</span>
-                      <span className="text-[10px] block text-slate-400 font-semibold">Target: 80%+</span>
+                      <span className="text-base font-extrabold text-foreground">{readiness?.skills || 0}%</span>
+                      <span className="text-[10px] block text-muted-foreground font-semibold">Target: 80%+</span>
                     </div>
                   </div>
-                  <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
+                  <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden border border-border dark:border-[#2F4B6B]/40">
                     <div
-                      className="h-full bg-gradient-to-r from-[#2F4B6B] to-emerald-400 rounded-full transition-all duration-1000"
+                      className="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.skills || 0)}%` }}
                     />
                   </div>
@@ -567,22 +564,22 @@ function Dashboard() {
 
           {/* Recommended Next Steps */}
           <div id="section-recommendations" className="scroll-mt-24">
-            <GlassCard variant="strong" className="p-5 border border-[#2F4B6B]/60">
+            <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-indigo-400" />
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                     <span>Recommended Next Steps</span>
                   </h3>
-                  <p className="text-xs text-[#93A0B5] mt-0.5">Tasks tailored to help you pass campus screening</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Tasks tailored to help you pass campus screening</p>
                 </div>
               </div>
 
               {recommendations.length === 0 ? (
-                <div className="p-6 text-center rounded-2xl bg-[#080D18]/60 border border-[#2F4B6B]/40">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">All essential onboarding tasks completed!</p>
-                  <p className="text-xs text-[#93A0B5] mt-1">Keep practicing mock questions and updating your projects to stay sharp.</p>
+                <div className="p-6 text-center rounded-2xl bg-muted/40 dark:bg-[#080D18]/60 border border-border dark:border-[#2F4B6B]/40">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-foreground">All essential onboarding tasks completed!</p>
+                  <p className="text-xs text-muted-foreground mt-1">Keep practicing mock questions and updating your projects to stay sharp.</p>
                 </div>
               ) : (
                 <div className="space-y-2.5">
@@ -591,20 +588,20 @@ function Dashboard() {
                     return (
                       <div
                         key={rec.title}
-                        className="p-3.5 rounded-2xl bg-[#080D18]/70 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                        className="p-3.5 rounded-2xl bg-muted/40 dark:bg-[#080D18]/70 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-xl bg-[#1B2740] text-indigo-400 shrink-0 border border-[#2F4B6B]/60">
+                          <div className="p-2 rounded-xl bg-card dark:bg-[#1B2740] text-indigo-600 dark:text-indigo-400 shrink-0 border border-border dark:border-[#2F4B6B]/60 shadow-sm">
                             <Icon className="w-4 h-4" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-bold text-white">{rec.title}</h4>
-                              <span className="text-[9px] font-semibold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/20">
+                              <h4 className="text-xs font-bold text-foreground">{rec.title}</h4>
+                              <span className="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/20">
                                 {rec.badge}
                               </span>
                             </div>
-                            <p className="text-[11px] text-[#93A0B5] mt-0.5 line-clamp-1">{rec.desc}</p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{rec.desc}</p>
                           </div>
                         </div>
 
@@ -633,36 +630,28 @@ function Dashboard() {
         <div className="lg:col-span-5 space-y-6">
           {/* Today's Study Goal Card */}
           <div id="section-mission" className="scroll-mt-24">
-            <div
-              className="rounded-3xl p-5 border border-indigo-500/40 shadow-2xl relative overflow-hidden"
-              style={{
-                background:
-                  "radial-gradient(ellipse at top right, rgba(99,102,241,0.18) 0%, rgba(17,24,39,0.95) 60%, rgba(8,13,24,1) 100%)",
-                boxShadow:
-                  "0 15px 50px rgba(0,0,0,0.7), 0 0 30px rgba(99,102,241,0.15), inset 0 1px 0 0 rgba(99,102,241,0.35)",
-              }}
-            >
+            <div className="rounded-3xl p-5 border border-indigo-500/40 shadow-xl relative overflow-hidden bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.18)_0%,rgba(17,24,39,0.95)_60%,rgba(8,13,24,1)_100%)]">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
                     <Target className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold text-white">Today's Study Goal</h3>
+                  <h3 className="text-sm font-bold text-foreground">Today's Study Goal</h3>
                 </div>
-                <span className="px-2 py-0.5 rounded-md bg-indigo-500 text-white text-[10px] font-extrabold flex items-center gap-1 shadow">
+                <span className="px-2 py-0.5 rounded-md bg-indigo-600 dark:bg-indigo-500 text-white text-[10px] font-extrabold flex items-center gap-1 shadow">
                   <Flame className="w-3 h-3" /> Streak Active
                 </span>
               </div>
 
               <div className="space-y-3">
-                <div className="p-3.5 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/60 space-y-1.5">
+                <div className="p-3.5 rounded-2xl bg-muted/40 dark:bg-[#080D18]/80 border border-border dark:border-[#2F4B6B]/60 space-y-1.5">
                   <div className="flex items-start justify-between">
-                    <h4 className="text-xs font-bold text-white">{todayMission.title}</h4>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                    <h4 className="text-xs font-bold text-foreground">{todayMission.title}</h4>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/30">
                       {todayMission.reward}
                     </span>
                   </div>
-                  <p className="text-[11px] text-[#93A0B5] leading-relaxed">{todayMission.desc}</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">{todayMission.desc}</p>
                 </div>
 
                 <Link
@@ -677,18 +666,18 @@ function Dashboard() {
           </div>
 
           {/* Student Placement Checklist */}
-          <GlassCard variant="strong" className="p-5 border border-[#2F4B6B]/60">
+          <GlassCard variant="strong" className="p-5">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 className="text-sm font-bold text-white">Placement Readiness Checklist</h3>
-                <p className="text-[11px] text-[#93A0B5]">Core profile milestones for recruiters</p>
+                <h3 className="text-sm font-bold text-foreground">Placement Readiness Checklist</h3>
+                <p className="text-[11px] text-muted-foreground">Core profile milestones for recruiters</p>
               </div>
-              <span className="text-xs font-bold text-indigo-400">{profileProgress}% Complete</span>
+              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{profileProgress}% Complete</span>
             </div>
 
-            <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden my-3 border border-[#2F4B6B]/40">
+            <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden my-3 border border-border dark:border-[#2F4B6B]/40">
               <div
-                className="h-full bg-gradient-to-r from-[#2F4B6B] to-indigo-500 transition-all duration-700"
+                className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 transition-all duration-700"
                 style={{ width: `${profileProgress}%` }}
               />
             </div>
@@ -698,21 +687,21 @@ function Dashboard() {
                 <Link
                   key={i}
                   to={check.link as any}
-                  className="flex items-center justify-between p-2 rounded-xl bg-[#080D18]/60 hover:bg-[#131B2E] border border-[#2F4B6B]/40 transition-colors text-xs"
+                  className="flex items-center justify-between p-2 rounded-xl bg-muted/40 dark:bg-[#080D18]/60 hover:bg-muted dark:hover:bg-[#131B2E] border border-border dark:border-[#2F4B6B]/40 transition-colors text-xs"
                 >
                   <div className="flex items-center gap-2.5">
                     {check.done ? (
-                      <div className="h-4 w-4 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 grid place-items-center">
+                      <div className="h-4 w-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 grid place-items-center">
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </div>
                     ) : (
-                      <div className="h-4 w-4 rounded-full border border-[#93A0B5]/40" />
+                      <div className="h-4 w-4 rounded-full border border-muted-foreground/40" />
                     )}
-                    <span className={check.done ? "text-slate-300 font-medium line-through opacity-70" : "text-foreground font-medium"}>
+                    <span className={check.done ? "text-muted-foreground font-medium line-through opacity-70" : "text-foreground font-medium"}>
                       {check.label}
                     </span>
                   </div>
-                  <ChevronRight className="w-3 h-3 text-[#93A0B5]" />
+                  <ChevronRight className="w-3 h-3 text-muted-foreground" />
                 </Link>
               ))}
             </div>
@@ -720,25 +709,25 @@ function Dashboard() {
 
           {/* Gamified Achievements & Badges */}
           <div id="section-badges" className="scroll-mt-24">
-            <GlassCard variant="strong" className="p-5 border border-[#2F4B6B]/60">
+            <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-indigo-400" />
-                  <h3 className="text-sm font-bold text-white">Earned Badges & Trophies</h3>
+                  <Trophy className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                  <h3 className="text-sm font-bold text-foreground">Earned Badges & Trophies</h3>
                 </div>
-                <span className="text-xs text-indigo-400 font-semibold">
+                <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
                   {earnedBadgeIds.size} / 9 Earned
                 </span>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: "First Steps", label: "First Steps", icon: GraduationCap, color: "text-emerald-400" },
-                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-indigo-400" },
-                  { id: "Interview Warmup", label: "Voice Coach", icon: Mic, color: "text-sky-400" },
-                  { id: "Code Explorer", label: "GitHub Scout", icon: Github, color: "text-purple-400" },
-                  { id: "Gap Closer", label: "Skill Closer", icon: Target, color: "text-rose-400" },
-                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-indigo-400" },
+                  { id: "First Steps", label: "First Steps", icon: GraduationCap, color: "text-emerald-500 dark:text-emerald-400" },
+                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-indigo-500 dark:text-indigo-400" },
+                  { id: "Interview Warmup", label: "Voice Coach", icon: Mic, color: "text-sky-500 dark:text-sky-400" },
+                  { id: "Code Explorer", label: "GitHub Scout", icon: Github, color: "text-purple-500 dark:text-purple-400" },
+                  { id: "Gap Closer", label: "Skill Closer", icon: Target, color: "text-rose-500 dark:text-rose-400" },
+                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-indigo-500 dark:text-indigo-400" },
                 ].map((badge) => {
                   const Icon = badge.icon;
                   const isEarned = earnedBadgeIds.has(badge.id);
@@ -747,15 +736,15 @@ function Dashboard() {
                       key={badge.id}
                       className={`p-2.5 rounded-xl flex flex-col items-center text-center transition-all border ${
                         isEarned
-                          ? "bg-gradient-to-br from-[#1B2740] to-[#111827] border-indigo-500/50 shadow-md shadow-indigo-500/10"
-                          : "bg-[#080D18]/50 border-[#2F4B6B]/30 opacity-40 grayscale"
+                          ? "bg-gradient-to-br from-indigo-50 to-white dark:from-[#1B2740] dark:to-[#111827] border-indigo-500/50 shadow-sm"
+                          : "bg-muted/40 dark:bg-[#080D18]/50 border-border dark:border-[#2F4B6B]/30 opacity-40 grayscale"
                       }`}
                     >
-                      <div className={`p-1.5 rounded-lg ${isEarned ? "bg-white/5" : "bg-transparent"}`}>
+                      <div className={`p-1.5 rounded-lg ${isEarned ? "bg-indigo-500/10 dark:bg-white/5" : "bg-transparent"}`}>
                         <Icon className={`w-5 h-5 ${badge.color}`} />
                       </div>
-                      <span className="text-[10px] font-bold text-white mt-1 line-clamp-1">{badge.label}</span>
-                      <span className="text-[8px] text-[#93A0B5]">{isEarned ? "Unlocked" : "Locked"}</span>
+                      <span className="text-[10px] font-bold text-foreground mt-1 line-clamp-1">{badge.label}</span>
+                      <span className="text-[8px] text-muted-foreground">{isEarned ? "Unlocked" : "Locked"}</span>
                     </div>
                   );
                 })}

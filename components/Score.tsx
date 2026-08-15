@@ -70,7 +70,7 @@ export function ScoreRing({
         />
       </svg>
       <div className="absolute text-center">
-        <div className="text-4xl font-bold font-mono">
+        <div className="text-4xl font-bold font-mono text-foreground">
           <AnimatedCounter value={score} />
           <span className="text-base text-muted-foreground font-mono">%</span>
         </div>
