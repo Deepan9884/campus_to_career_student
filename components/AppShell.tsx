@@ -179,11 +179,37 @@ export function AppShell() {
   };
 
   return (
-    <div className="min-h-screen flex relative overflow-x-hidden">
-      {/* Dynamic Ambient Background Nebula Glows */}
-      <div className="fixed top-0 right-1/4 w-[650px] h-[650px] bg-[#E08A3C]/08 rounded-full blur-[160px] pointer-events-none -z-10" />
-      <div className="fixed top-1/3 left-0 w-[550px] h-[550px] bg-[#2F4B6B]/20 rounded-full blur-[180px] pointer-events-none -z-10" />
-      <div className="fixed -bottom-20 right-10 w-[500px] h-[500px] bg-[#E08A3C]/07 rounded-full blur-[170px] pointer-events-none -z-10" />
+    <div className="min-h-screen flex relative overflow-x-hidden bg-[#080D18]">
+      {/* ── RICH AMBIENT ATMOSPHERIC BACKGROUND SYSTEM (APPLIES ACROSS ALL SECTIONS) ── */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Warm Ember Nebula Flare Top-Right */}
+        <div className="absolute -top-20 right-0 w-[750px] h-[750px] bg-[#E08A3C]/20 rounded-full blur-[180px]" />
+        
+        {/* Deep Steel Blue Nebula Mid-Left */}
+        <div className="absolute top-1/4 -left-20 w-[650px] h-[650px] bg-[#2F4B6B]/40 rounded-full blur-[200px]" />
+        
+        {/* Soft Amber Glow Bottom-Right */}
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#E08A3C]/16 rounded-full blur-[180px]" />
+        
+        {/* Cyber Blueprint Grid Pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.22]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(47,75,107,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(47,75,107,0.35) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+
+        {/* Subtle Radial Light Vignette */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 30%, transparent 20%, rgba(8,13,24,0.6) 80%, rgba(8,13,24,0.95) 100%)",
+          }}
+        />
+      </div>
 
       <OnboardingWizard
         open={showOnboardingWizard ? true : undefined}
