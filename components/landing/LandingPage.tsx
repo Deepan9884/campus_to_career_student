@@ -339,21 +339,6 @@ export const LandingPage: React.FC = () => {
         <HeroParticles />
 
         <div className="text-center max-w-3xl mx-auto space-y-2">
-          {/* Animated badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="inline-flex items-center space-x-2 px-3 py-0.5 rounded-full bg-[#E08A3C]/10 border border-[#E08A3C]/25 text-[#E08A3C] text-[11px] font-bold"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E08A3C] opacity-60" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#E08A3C]" />
-            </span>
-            <Sparkles className="w-3 h-3" />
-            <span>AI-Powered Career Preparation Studio</span>
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
