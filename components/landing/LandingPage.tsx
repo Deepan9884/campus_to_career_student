@@ -370,61 +370,59 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section id="hero" className="relative z-10 pt-12 md:pt-16 pb-4 px-4 md:px-8 max-w-7xl mx-auto overflow-hidden">
+      <section id="hero" className="relative z-10 pt-4 md:pt-6 pb-2 px-4 md:px-8 max-w-7xl mx-auto overflow-hidden">
         <HeroParticles />
 
-        <div className="text-center max-w-3xl mx-auto space-y-5">
+        <div className="text-center max-w-3xl mx-auto space-y-3">
           {/* Animated badge */}
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#E08A3C]/10 border border-[#E08A3C]/25 text-[#E08A3C] text-xs font-bold"
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-[#E08A3C]/10 border border-[#E08A3C]/25 text-[#E08A3C] text-[11px] font-bold"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E08A3C] opacity-60" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E08A3C]" />
             </span>
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3 h-3" />
             <span>AI-Powered Career Preparation Studio</span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight"
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight"
           >
-            Become{" "}
-            <span className="text-ember-gradient">Internship-Ready</span>
-            {" "}in Weeks, Not Months.
+            Become <span className="text-ember-gradient">Internship-Ready</span> in Weeks, Not Months.
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-base md:text-lg text-[#93A0B5] font-normal leading-relaxed max-w-2xl mx-auto"
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="text-xs sm:text-sm text-[#93A0B5] font-normal leading-relaxed max-w-xl mx-auto"
           >
-            ATS-scored resumes, AI mock interviews, GitHub project reviews, and personalized learning roadmaps — all in one serene study studio.
+            ATS-scored resumes, AI mock interviews, GitHub code reviews, and milestone roadmaps — all in one serene study studio.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="flex items-center justify-center gap-3 pt-1"
           >
             <button
               onClick={handleRegisterClick}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl btn-gradient btn-gradient-hover text-[#0A0F1A] text-sm font-bold flex items-center justify-center space-x-2"
+              className="px-6 py-2.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-[#E08A3C]/25"
             >
               <span>{isAuthenticated ? "Go to Workspace" : "Start Practice Free"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => scrollToSection("resume")}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/30 text-[#F2F4F7] text-sm font-semibold flex items-center justify-center space-x-2 transition-all"
+              className="px-5 py-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/30 text-[#F2F4F7] text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition-all"
             >
               <span>Explore Features</span>
               <ArrowRight className="w-4 h-4 rotate-90 text-[#E08A3C]" />
@@ -432,28 +430,46 @@ export const LandingPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* FEATURED SPOTLIGHT MOVING PANELS CAROUSEL */}
+        {/* ── FEATURED SPOTLIGHT MOVING PANELS SHOWCASE (WOW FACTOR) ── */}
         <div
-          className="mt-8 md:mt-10 relative w-full overflow-hidden py-6"
+          className="mt-6 relative w-full overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div className="flex items-center justify-between max-w-6xl mx-auto mb-4 px-4">
-            <span className="text-xs font-semibold text-[#93A0B5] flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#E08A3C]" />
-              Featured Prep Modules
-            </span>
-            <div className="flex items-center space-x-2">
+          {/* Interactive Feature Category Switcher */}
+          <div className="flex items-center justify-between max-w-4xl mx-auto mb-3 px-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+              {SECTIONS.map((sec, idx) => {
+                const Icon = sec.icon;
+                const isActive = idx === activeDeckIndex;
+                return (
+                  <button
+                    key={sec.id}
+                    onClick={() => setActiveDeckIndex(idx)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all shrink-0 ${
+                      isActive
+                        ? "btn-gradient text-[#080D18] font-bold shadow-md shadow-[#E08A3C]/20 border border-white/20"
+                        : "bg-[#131B2E]/80 text-[#93A0B5] hover:text-white hover:bg-[#1B2740] border border-[#2F4B6B]/50"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{sec.navTitle}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="hidden sm:flex items-center space-x-1.5 shrink-0 pl-2">
               <button
                 onClick={prevDeck}
-                className="p-2.5 rounded-full bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
+                className="p-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
                 title="Previous feature"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={nextDeck}
-                className="p-2.5 rounded-full bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
+                className="p-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
                 title="Next feature"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -461,13 +477,13 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Cards Track */}
-          <div className="relative flex items-center justify-center min-h-[460px] px-4">
+          {/* Cards Track (Center Stage) */}
+          <div className="relative flex items-center justify-center min-h-[380px] md:min-h-[420px] px-2">
             {SECTIONS.map((panel, idx) => {
               const Icon = panel.icon;
               const isCenter = idx === activeDeckIndex;
-              const isLeft = (idx === (activeDeckIndex - 1 + SECTIONS.length) % SECTIONS.length);
-              const isRight = (idx === (activeDeckIndex + 1) % SECTIONS.length);
+              const isLeft = idx === (activeDeckIndex - 1 + SECTIONS.length) % SECTIONS.length;
+              const isRight = idx === (activeDeckIndex + 1) % SECTIONS.length;
 
               if (!isCenter && !isLeft && !isRight) return null;
 
@@ -475,52 +491,103 @@ export const LandingPage: React.FC = () => {
                 <motion.div
                   key={panel.id}
                   onClick={() => {
-                    setActiveDeckIndex(idx);
-                    scrollToSection(panel.id);
+                    if (!isCenter) {
+                      setActiveDeckIndex(idx);
+                    } else {
+                      scrollToSection(panel.id);
+                    }
                   }}
                   animate={{
-                    scale: isCenter ? 1.05 : 0.85,
-                    opacity: isCenter ? 1 : 0.3,
-                    filter: isCenter ? "brightness(1) drop-shadow(0 25px 40px rgba(0,0,0,0.5))" : "brightness(0.35) blur(1px)",
-                    x: isCenter ? 0 : isLeft ? -360 : 360,
+                    scale: isCenter ? 1.02 : 0.82,
+                    opacity: isCenter ? 1 : 0.28,
+                    filter: isCenter
+                      ? "brightness(1) drop-shadow(0 20px 40px rgba(0,0,0,0.6))"
+                      : "brightness(0.35) blur(1px)",
+                    x: isCenter ? 0 : isLeft ? -380 : 380,
                     zIndex: isCenter ? 30 : 10,
                   }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`absolute w-[90vw] max-w-[700px] p-6 rounded-3xl cursor-pointer transition-all border ${
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  className={`absolute w-[92vw] max-w-[740px] p-5 rounded-3xl cursor-pointer transition-all border ${
                     isCenter
-                      ? "bg-[#131B2E]/98 border-[#E08A3C]/50 shadow-2xl"
-                      : "bg-[#0A0F1A]/80 border-[#2F4B6B]/30"
+                      ? "bg-[#111827]/98 border-[#E08A3C]/60 shadow-2xl"
+                      : "bg-[#080D18]/80 border-[#2F4B6B]/30 pointer-events-auto"
                   }`}
-                  style={isCenter ? { boxShadow: "0 25px 80px rgba(0,0,0,0.6), 0 0 40px rgba(224,138,60,0.08)" } : {}}
+                  style={
+                    isCenter
+                      ? {
+                          boxShadow:
+                            "0 20px 70px rgba(0,0,0,0.7), 0 0 35px rgba(224,138,60,0.18), inset 0 1px 0 0 rgba(224,138,60,0.25)",
+                        }
+                      : {}
+                  }
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <span className={`p-2.5 rounded-xl ${isCenter ? "bg-[#E08A3C]/15 text-[#E08A3C] border border-[#E08A3C]/25" : "bg-[#1B2740] text-[#93A0B5]"}`}>
-                        <Icon className="w-5 h-5" />
+                  {/* Card Header */}
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center space-x-2.5">
+                      <span
+                        className={`p-2 rounded-xl ${
+                          isCenter
+                            ? "bg-[#E08A3C]/15 text-[#E08A3C] border border-[#E08A3C]/30"
+                            : "bg-[#1A2438] text-[#93A0B5]"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
                       </span>
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#E08A3C]">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#E08A3C]">
                           {panel.badge}
                         </span>
-                        <h3 className="text-lg font-bold text-white leading-tight">{panel.title}</h3>
+                        <h3 className="text-base md:text-lg font-bold text-white leading-tight">
+                          {panel.title}
+                        </h3>
                       </div>
                     </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewModalPanel(panel);
+                      }}
+                      className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#1A2438] hover:bg-[#24334f] border border-[#2F4B6B] text-[11px] font-semibold text-slate-200 transition-all shrink-0"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-[#E08A3C]" />
+                      <span>Sandbox</span>
+                    </button>
                   </div>
 
-                  <p className="text-xs text-[#93A0B5] line-clamp-2 mt-1">{panel.subtitle}</p>
+                  <p className="text-xs text-[#93A0B5] line-clamp-1 mb-3">{panel.subtitle}</p>
 
-                  {/* WIDE PICTURE DISPLAY */}
-                  <div className="mt-4 overflow-hidden rounded-2xl border border-[#2F4B6B]/60 h-64 md:h-72 relative group">
+                  {/* Wide Picture Display */}
+                  <div className="overflow-hidden rounded-2xl border border-[#2F4B6B]/60 h-48 md:h-56 relative group">
                     <img
                       src={panel.imagePath}
                       alt={panel.title}
                       className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#080D18]/80 via-transparent to-transparent flex items-end p-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        {panel.highlights.slice(0, 2).map((h, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded-lg bg-[#111827]/90 border border-[#2F4B6B]/70 text-[10px] font-medium text-slate-200 backdrop-blur-md"
+                          >
+                            ✓ {h}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#2F4B6B]/40 text-xs text-[#E08A3C] font-semibold">
-                    <span>Inspect Section</span>
-                    <ArrowRight className="w-4 h-4" />
+                  {/* Card Footer */}
+                  <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[#2F4B6B]/40 text-xs text-[#E08A3C] font-semibold">
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#93A0B5]">
+                      <Flame className="w-3.5 h-3.5 text-[#E08A3C]" />
+                      <span>Live interactive module</span>
+                    </div>
+                    <div className="flex items-center gap-1 hover:underline">
+                      <span>Explore Section</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -528,17 +595,15 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Indicator dots */}
-          <div className="flex items-center justify-center space-x-2 mt-6">
+          <div className="flex items-center justify-center space-x-2 mt-3 pb-2">
             {SECTIONS.map((p, idx) => (
               <button
                 key={p.id}
                 onClick={() => setActiveDeckIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  idx === activeDeckIndex
-                    ? "w-8 bg-[#E08A3C] shadow-md"
-                    : "w-2 bg-[#2F4B6B]"
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === activeDeckIndex ? "w-7 bg-[#E08A3C] shadow-md" : "w-2 bg-[#2F4B6B]"
                 }`}
-                style={idx === activeDeckIndex ? { boxShadow: "0 0 10px rgba(224,138,60,0.5)" } : {}}
+                style={idx === activeDeckIndex ? { boxShadow: "0 0 10px rgba(224,138,60,0.6)" } : {}}
               />
             ))}
           </div>
