@@ -244,23 +244,23 @@ export const LandingPage: React.FC = () => {
       <div className="fixed bottom-0 right-1/4 w-[750px] h-[750px] bg-[#38BDF8]/08 rounded-full blur-[220px] pointer-events-none -z-10" />
       <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
 
-      {/* ── NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full bg-[#080D18]/90 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-4 md:px-8 py-2.5 transition-all">
-        <div className="max-w-7xl mx-auto relative flex items-center justify-between">
+      {/* ── SPACIOUS MODERN NAVBAR ── */}
+      <header className="sticky top-0 z-50 w-full bg-[#080D18]/90 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-6 md:px-10 py-3.5 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left Brand */}
-          <div className="flex items-center space-x-3 cursor-pointer z-10" onClick={() => scrollToSection("hero")}>
+          <div className="flex items-center space-x-3 cursor-pointer shrink-0" onClick={() => scrollToSection("hero")}>
             <img
               src="/logo-dark.png"
               alt="Campus to Career"
-              className="h-8 md:h-9 w-auto object-contain transition-transform hover:scale-[1.02]"
+              className="h-9 md:h-10 w-auto object-contain transition-transform hover:scale-[1.02]"
             />
           </div>
 
-          {/* Center Nav — Mathematically Dead Center, Slim & Elegant Capsule */}
-          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center space-x-0.5 bg-[#111827]/80 px-1.5 py-0.5 rounded-full border border-[#2F4B6B]/50 text-[11px] font-medium backdrop-blur-xl shadow-lg shadow-black/40">
+          {/* Center Nav — Spacious, Readable, Beautifully Padded Glass Capsule */}
+          <nav className="hidden lg:flex items-center gap-1.5 bg-[#111827]/75 px-3 py-1.5 rounded-full border border-[#2F4B6B]/60 text-xs sm:text-sm font-medium backdrop-blur-xl shadow-xl shadow-black/40">
             <button
               onClick={() => scrollToSection("hero")}
-              className="px-2.5 py-1 rounded-full text-[#93A0B5] hover:text-indigo-400 hover:bg-white/5 transition-all whitespace-nowrap"
+              className="px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
             >
               Overview
             </button>
@@ -268,7 +268,7 @@ export const LandingPage: React.FC = () => {
               <button
                 key={sec.id}
                 onClick={() => scrollToSection(sec.id)}
-                className="px-2.5 py-1 rounded-full text-[#93A0B5] hover:text-indigo-400 hover:bg-white/5 transition-all whitespace-nowrap"
+                className="px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
               >
                 {sec.navTitle}
               </button>
@@ -276,14 +276,14 @@ export const LandingPage: React.FC = () => {
           </nav>
 
           {/* Right Action */}
-          <div className="flex items-center space-x-2 md:space-x-3 z-10">
+          <div className="flex items-center space-x-3 shrink-0">
             {isCheckingAuth ? (
-              <div className="h-8 w-20 bg-[#131B2E] animate-pulse rounded-xl" />
+              <div className="h-9 w-24 bg-[#131B2E] animate-pulse rounded-xl" />
             ) : isAuthenticated ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2.5">
                 <button
                   onClick={handleDashboardClick}
-                  className="px-4 py-2 rounded-xl btn-gradient btn-gradient-hover text-white text-xs md:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5"
+                  className="px-5 py-2 rounded-xl btn-gradient btn-gradient-hover text-white text-xs md:text-sm font-bold flex items-center space-x-2 shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5"
                 >
                   <UserCheck className="w-4 h-4" />
                   <span>Dashboard</span>
@@ -291,7 +291,7 @@ export const LandingPage: React.FC = () => {
                 <button
                   onClick={handleSignOutClick}
                   title="Sign Out"
-                  className="p-2 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] text-[#93A0B5] hover:text-white transition-all flex items-center gap-1 text-xs"
+                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] text-[#93A0B5] hover:text-white transition-all flex items-center gap-1.5 text-xs font-semibold"
                 >
                   <LogOut className="w-4 h-4 text-rose-400" />
                   <span className="hidden sm:inline">Exit</span>
@@ -301,13 +301,13 @@ export const LandingPage: React.FC = () => {
               <>
                 <button
                   onClick={handleLoginClick}
-                  className="px-3.5 py-2 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 text-[#F2F4F7] text-xs md:text-sm font-medium transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 text-slate-200 hover:text-white text-xs md:text-sm font-semibold transition-all"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={handleRegisterClick}
-                  className="px-4 py-2 rounded-xl btn-gradient btn-gradient-hover text-white text-xs md:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-500/25"
+                  className="px-5 py-2 rounded-xl btn-gradient btn-gradient-hover text-white text-xs md:text-sm font-bold flex items-center space-x-2 shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5"
                 >
                   <span>Get Started</span>
                   <ArrowRight className="w-4 h-4" />
@@ -318,10 +318,10 @@ export const LandingPage: React.FC = () => {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-[#93A0B5] hover:text-white hover:border-indigo-500/40 transition-all"
+              className="lg:hidden p-2.5 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-slate-300 hover:text-white hover:border-indigo-500/40 transition-all"
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -333,11 +333,11 @@ export const LandingPage: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden mt-2 border-t border-[#2F4B6B]/40 pt-2 pb-1 flex flex-col space-y-1.5 max-w-7xl mx-auto"
+              className="lg:hidden mt-3 border-t border-[#2F4B6B]/40 pt-3 pb-2 flex flex-col space-y-2 max-w-7xl mx-auto"
             >
               <button
                 onClick={() => scrollToSection("hero")}
-                className="text-left px-3 py-1.5 rounded-lg text-xs text-[#F2F4F7] hover:bg-[#1B2740] hover:text-indigo-400 transition-all"
+                className="text-left px-4 py-2 rounded-xl text-sm font-medium text-[#F2F4F7] hover:bg-[#1B2740] hover:text-indigo-400 transition-all"
               >
                 Overview
               </button>
@@ -345,7 +345,7 @@ export const LandingPage: React.FC = () => {
                 <button
                   key={sec.id}
                   onClick={() => scrollToSection(sec.id)}
-                  className="text-left px-3 py-1.5 rounded-lg text-xs text-[#F2F4F7] hover:bg-[#1B2740] hover:text-indigo-400 transition-all"
+                  className="text-left px-4 py-2 rounded-xl text-sm font-medium text-[#F2F4F7] hover:bg-[#1B2740] hover:text-indigo-400 transition-all"
                 >
                   {sec.navTitle}
                 </button>
