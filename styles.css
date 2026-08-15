@@ -12,15 +12,17 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
 
-  /* Campus to Career - Design System v1 ("Steel and Ember") Tokens */
+  /* Campus to Career - Design System ("Electric Indigo & Cyber Azure") Tokens */
   --color-bg: #080D18;
   --color-surface: #111827;
   --color-surface-raised: #1A2438;
   --color-steel: #2F4B6B;
   --color-steel-light: #4A6E94;
-  --color-ember: #E08A3C;
-  --color-ember-light: #F5B87A;
-  --color-ember-dim: #B96E2C;
+  --color-ember: #6366F1;
+  --color-ember-light: #A5B4FC;
+  --color-ember-dim: #4F46E5;
+  --color-primary-indigo: #6366F1;
+  --color-cyan-glow: #38BDF8;
   --color-text-primary: #F2F4F7;
   --color-text-muted: #93A0B5;
   --color-success: #4CAF7D;
@@ -45,11 +47,11 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  --color-chart-1: #6366F1;
+  --color-chart-2: #38BDF8;
+  --color-chart-3: #4CAF7D;
+  --color-chart-4: #818CF8;
+  --color-chart-5: #93A0B5;
 
   --font-display: "Outfit", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
@@ -59,20 +61,20 @@
 :root {
   --radius: 0.875rem;
 
-  /* "Steel and Ember" Theme Mapping */
+  /* "Electric Indigo & Cyber Azure" Theme Mapping */
   --background: #080D18;
   --foreground: #F2F4F7;
   --card: #111827;
   --card-foreground: #F2F4F7;
   --popover: #111827;
   --popover-foreground: #F2F4F7;
-  --primary: #E08A3C;
-  --primary-foreground: #080D18;
+  --primary: #6366F1;
+  --primary-foreground: #FFFFFF;
   --secondary: #2F4B6B;
   --secondary-foreground: #F2F4F7;
   --muted: #1A2438;
   --muted-foreground: #93A0B5;
-  --accent: #E08A3C;
+  --accent: #38BDF8;
   --accent-foreground: #080D18;
   --destructive: #E5484D;
   --destructive-foreground: #FFFFFF;
@@ -80,12 +82,12 @@
   --warning: #F5A623;
   --border: #2F4B6B;
   --input: #2F4B6B;
-  --ring: #E08A3C;
+  --ring: #6366F1;
 
-  --chart-1: #E08A3C;
-  --chart-2: #2F4B6B;
+  --chart-1: #6366F1;
+  --chart-2: #38BDF8;
   --chart-3: #4CAF7D;
-  --chart-4: #B96E2C;
+  --chart-4: #818CF8;
   --chart-5: #93A0B5;
 
   --glass-bg: rgba(17, 24, 39, 0.78);
@@ -99,22 +101,21 @@
 }
 
 .light {
-  /* Enforce Steel and Ember dark disciplined layout */
   --background: #080D18;
   --foreground: #F2F4F7;
   --card: #111827;
   --card-foreground: #F2F4F7;
   --popover: #111827;
   --popover-foreground: #F2F4F7;
-  --primary: #E08A3C;
-  --primary-foreground: #080D18;
+  --primary: #6366F1;
+  --primary-foreground: #FFFFFF;
   --secondary: #2F4B6B;
   --secondary-foreground: #F2F4F7;
   --muted: #1A2438;
   --muted-foreground: #93A0B5;
   --border: #2F4B6B;
   --input: #2F4B6B;
-  --ring: #E08A3C;
+  --ring: #6366F1;
 }
 
 @layer base {
@@ -244,24 +245,24 @@
 }
 
 @utility text-gradient {
-  background: linear-gradient(135deg, #F5B87A 0%, #E08A3C 50%, #B96E2C 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #A5B4FC 50%, #38BDF8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 @utility text-ember-gradient {
-  background: linear-gradient(120deg, #F5B87A 0%, #E08A3C 45%, #B96E2C 100%);
+  background: linear-gradient(120deg, #A5B4FC 0%, #818CF8 45%, #38BDF8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 @utility btn-gradient {
-  background: linear-gradient(135deg, #E08A3C 0%, #C97B30 100%);
-  color: #080D18;
+  background: linear-gradient(135deg, #6366F1 0%, #3B82F6 100%);
+  color: #FFFFFF;
   font-weight: 700;
-  box-shadow: 0 4px 20px rgba(224, 138, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
@@ -269,8 +270,8 @@
 
 @utility btn-gradient-hover {
   &:hover {
-    background: linear-gradient(135deg, #F09B4C 0%, #E08A3C 100%);
-    box-shadow: 0 6px 28px rgba(224, 138, 60, 0.5), 0 0 0 3px rgba(224, 138, 60, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    background: linear-gradient(135deg, #818CF8 0%, #60A5FA 100%);
+    box-shadow: 0 6px 28px rgba(99, 102, 241, 0.5), 0 0 0 3px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     transform: translateY(-1px);
   }
   &:active {
@@ -279,24 +280,24 @@
 }
 
 @utility ember-glow {
-  box-shadow: 0 0 24px rgba(224, 138, 60, 0.35), 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.35), 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 @utility ember-glow-lg {
-  box-shadow: 0 0 40px rgba(224, 138, 60, 0.45), 0 8px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.45), 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
 @utility ember-border-glow {
-  border-color: rgba(224, 138, 60, 0.5);
-  box-shadow: 0 0 24px rgba(224, 138, 60, 0.2), inset 0 0 20px rgba(224, 138, 60, 0.05);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.2), inset 0 0 20px rgba(99, 102, 241, 0.05);
 }
 
 @utility card-hover-lift {
   transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   &:hover {
     transform: translateY(-4px);
-    border-color: rgba(224, 138, 60, 0.45);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(224, 138, 60, 0.15);
+    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.15);
   }
 }
 

@@ -33,7 +33,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen relative bg-[#080D18] text-[#F2F4F7] overflow-hidden flex flex-col justify-between">
       {/* ── AMBIENT NEBULA LIGHTING ── */}
-      <div className="fixed top-1/4 right-1/4 w-[600px] h-[600px] bg-[#E08A3C]/18 rounded-full blur-[180px] pointer-events-none z-0" />
+      <div className="fixed top-1/4 right-1/4 w-[600px] h-[600px] bg-[#6366F1]/15 rounded-full blur-[180px] pointer-events-none z-0" />
       <div className="fixed bottom-10 left-10 w-[600px] h-[600px] bg-[#2F4B6B]/30 rounded-full blur-[200px] pointer-events-none z-0" />
 
       {/* ── FULL-SCREEN MOVING PANELS BACKGROUND ANIMATION ── */}
@@ -128,10 +128,10 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
 
           {/* Hero Content */}
           <div className="my-auto py-10 max-w-xl space-y-6">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-[#E08A3C]/15 border border-[#E08A3C]/35 text-[#E08A3C] text-xs font-bold shadow-lg">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/35 text-indigo-400 text-xs font-bold shadow-lg">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E08A3C] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E08A3C]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
               </span>
               <Sparkles className="w-3.5 h-3.5" />
               <span>AI-Powered Career Preparation Studio</span>
@@ -149,15 +149,15 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             {/* Feature Checklist */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center space-x-3 text-sm text-slate-200">
-                <CheckCircle2 className="w-4 h-4 text-[#E08A3C] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>Instant ATS resume diagnosis and bullet point rewriter</span>
               </div>
               <div className="flex items-center space-x-3 text-sm text-slate-200">
-                <CheckCircle2 className="w-4 h-4 text-[#E08A3C] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>Live voice AI mock coach with STAR feedback scorecards</span>
               </div>
               <div className="flex items-center space-x-3 text-sm text-slate-200">
-                <CheckCircle2 className="w-4 h-4 text-[#E08A3C] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>Automated GitHub repository audit and student leaderboard</span>
               </div>
             </div>
@@ -179,7 +179,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             className="rounded-3xl p-7 sm:p-9 w-full max-w-md border border-[#2F4B6B]/70 shadow-2xl backdrop-blur-2xl bg-[#0F172A]/90 relative"
             style={{
               boxShadow:
-                "0 25px 70px rgba(0,0,0,0.85), 0 0 40px rgba(224,138,60,0.18), inset 0 1px 0 0 rgba(224,138,60,0.35)",
+                "0 25px 70px rgba(0,0,0,0.85), 0 0 40px rgba(99,102,241,0.18), inset 0 1px 0 0 rgba(99,102,241,0.35)",
             }}
           >
             {/* Mobile Brand Logo */}

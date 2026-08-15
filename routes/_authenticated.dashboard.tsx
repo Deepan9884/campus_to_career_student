@@ -123,7 +123,7 @@ function Dashboard() {
       subtext: `${stats?.resumeCount || 0} resumes uploaded`,
       action: "Optimize Resume",
       tag: (readiness?.resume || 0) >= 75 ? "Placement Ready" : "Needs Polish",
-      tagColor: (readiness?.resume || 0) >= 75 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-[#E08A3C] bg-[#E08A3C]/10 border-[#E08A3C]/30",
+      tagColor: (readiness?.resume || 0) >= 75 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
     },
     {
       icon: Mic,
@@ -134,7 +134,7 @@ function Dashboard() {
       subtext: `${stats?.completedInterviewCount || 0} practice sessions`,
       action: "Practice Answers",
       tag: (readiness?.interview || 0) >= 70 ? "Confident" : "Practice Daily",
-      tagColor: (readiness?.interview || 0) >= 70 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-[#E08A3C] bg-[#E08A3C]/10 border-[#E08A3C]/30",
+      tagColor: (readiness?.interview || 0) >= 70 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
     },
     {
       icon: Github,
@@ -155,8 +155,8 @@ function Dashboard() {
       link: "/skills" as const,
       subtext: `${stats?.gapCount || 0} topics to review`,
       action: "Close Skill Gaps",
-      tag: "Target Role",
-      tagColor: "text-[#E08A3C] bg-[#E08A3C]/10 border-[#E08A3C]/30",
+      tag: "Target Track",
+      tagColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
     },
   ];
 
@@ -285,11 +285,11 @@ function Dashboard() {
                 onClick={() => scrollToSection(sec.id)}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap ${
                   isActive
-                    ? "btn-gradient text-[#080D18] font-bold shadow-md shadow-[#E08A3C]/20 border border-white/20"
-                    : "text-[#93A0B5] hover:text-[#E08A3C] hover:bg-white/5"
+                    ? "btn-gradient text-white font-bold shadow-md shadow-indigo-500/20 border border-white/20"
+                    : "text-[#93A0B5] hover:text-indigo-400 hover:bg-white/5"
                 }`}
               >
-                <Icon className={`w-3 h-3 ${isActive ? "text-[#080D18]" : "text-[#E08A3C]"}`} />
+                <Icon className={`w-3 h-3 ${isActive ? "text-white" : "text-indigo-400"}`} />
                 <span>{sec.label}</span>
               </button>
             );
@@ -305,7 +305,7 @@ function Dashboard() {
             background:
               "radial-gradient(ellipse at top left, rgba(27,39,64,0.92) 0%, rgba(17,24,39,0.98) 60%, rgba(8,13,24,1) 100%)",
             boxShadow:
-              "0 20px 60px rgba(0,0,0,0.7), 0 0 35px rgba(224,138,60,0.12), inset 0 1px 0 0 rgba(224,138,60,0.3)",
+              "0 20px 60px rgba(0,0,0,0.7), 0 0 35px rgba(99,102,241,0.12), inset 0 1px 0 0 rgba(99,102,241,0.3)",
           }}
         >
           <div className="relative z-10 grid lg:grid-cols-12 gap-6 items-center">
@@ -323,7 +323,7 @@ function Dashboard() {
                   Placement Readiness
                 </h3>
                 <p className="text-xs text-[#93A0B5]">
-                  Target: <span className="text-[#E08A3C] font-bold">85%+ Ready</span>
+                  Target: <span className="text-indigo-400 font-bold">85%+ Ready</span>
                 </p>
                 {readiness?.lastUpdated && (
                   <p className="text-[10px] text-[#93A0B5]/70 flex items-center gap-1">
@@ -338,8 +338,8 @@ function Dashboard() {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-[#93A0B5] uppercase tracking-wider">Student Dashboard</span>
                 <span className="text-slate-600">•</span>
-                <span className="text-xs text-[#E08A3C] font-semibold flex items-center gap-1">
-                  <Flame className="w-3.5 h-3.5" /> 3-Day Study Streak
+                <span className="text-xs text-indigo-400 font-semibold flex items-center gap-1">
+                  <Flame className="w-3.5 h-3.5 text-indigo-400" /> 3-Day Study Streak
                 </span>
               </div>
 
@@ -366,41 +366,41 @@ function Dashboard() {
             {/* Right: Quick Action Buttons */}
             <div className="lg:col-span-3 flex flex-col gap-2">
               <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                <Sparkles className="w-3.5 h-3.5 text-[#E08A3C]" /> Quick Study Tools
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Quick Study Tools
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   to="/resume"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <FileText className="w-4 h-4 text-[#E08A3C] group-hover:scale-110 transition-transform" />
+                  <FileText className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-white">Resume</span>
                   <span className="text-[10px] text-[#93A0B5]">ATS Review</span>
                 </Link>
 
                 <Link
                   to="/interview"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Mic className="w-4 h-4 text-[#E08A3C] group-hover:scale-110 transition-transform" />
+                  <Mic className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-white">Interview</span>
                   <span className="text-[10px] text-[#93A0B5]">Voice Mock</span>
                 </Link>
 
                 <Link
                   to="/github"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Github className="w-4 h-4 text-[#E08A3C] group-hover:scale-110 transition-transform" />
+                  <Github className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-white">GitHub</span>
                   <span className="text-[10px] text-[#93A0B5]">Code Review</span>
                 </Link>
 
                 <Link
                   to="/roadmap"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Map className="w-4 h-4 text-[#E08A3C] group-hover:scale-110 transition-transform" />
+                  <Map className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-white">Roadmap</span>
                   <span className="text-[10px] text-[#93A0B5]">Study Plan</span>
                 </Link>
@@ -414,7 +414,7 @@ function Dashboard() {
       <div id="section-stats" className="scroll-mt-24 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <BarChart3 className="w-3.5 h-3.5 text-[#E08A3C]" /> Core Preparation Pillars
+            <BarChart3 className="w-3.5 h-3.5 text-indigo-400" /> Core Preparation Pillars
           </h3>
           <span className="text-xs text-[#93A0B5]">Click any card to continue practicing</span>
         </div>
@@ -426,14 +426,14 @@ function Dashboard() {
               <Link
                 key={card.title}
                 to={card.link}
-                className="group relative rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 block border border-[#2F4B6B]/60 hover:border-[#E08A3C]/60 bg-[#0F172A]/90 backdrop-blur-xl shadow-xl hover:shadow-2xl"
+                className="group relative rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 block border border-[#2F4B6B]/60 hover:border-indigo-500/60 bg-[#0F172A]/90 backdrop-blur-xl shadow-xl hover:shadow-2xl"
                 style={{
                   boxShadow:
-                    "0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 0 rgba(224,138,60,0.18)",
+                    "0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 0 rgba(99,102,241,0.18)",
                 }}
               >
                 <div className="flex items-start justify-between">
-                  <div className="p-2.5 rounded-xl bg-[#1B2740] border border-[#2F4B6B]/60 text-[#E08A3C] shadow-md group-hover:border-[#E08A3C]/40 transition-colors">
+                  <div className="p-2.5 rounded-xl bg-[#1B2740] border border-[#2F4B6B]/60 text-indigo-400 shadow-md group-hover:border-indigo-500/40 transition-colors">
                     <Icon className="w-4 h-4" />
                   </div>
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${card.tagColor}`}>
@@ -452,7 +452,7 @@ function Dashboard() {
                   <p className="text-[11px] text-[#93A0B5] mt-1">{card.subtext}</p>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-[#2F4B6B]/40 flex items-center justify-between text-[11px] text-[#E08A3C] font-semibold">
+                <div className="mt-3 pt-2.5 border-t border-[#2F4B6B]/40 flex items-center justify-between text-[11px] text-indigo-400 font-semibold">
                   <span>{card.action}</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -472,22 +472,22 @@ function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-[#E08A3C]" />
+                    <TrendingUp className="w-4 h-4 text-indigo-400" />
                     <span>Skill Progress Breakdown</span>
                   </h3>
                   <p className="text-xs text-[#93A0B5] mt-0.5">Your scores across the 3 key hiring benchmarks</p>
                 </div>
-                <span className="text-xs font-semibold text-[#E08A3C] bg-[#E08A3C]/10 px-2.5 py-1 rounded-lg border border-[#E08A3C]/25">
+                <span className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/25">
                   Updated Live
                 </span>
               </div>
 
               <div className="space-y-3">
                 {/* 1. Resume ATS Score */}
-                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-[#E08A3C]/15 border border-[#E08A3C]/30 text-[#E08A3C]">
+                      <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
                         <FileText className="w-4 h-4" />
                       </div>
                       <div>
@@ -504,18 +504,18 @@ function Dashboard() {
                   </div>
                   <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
                     <div
-                      className="h-full bg-gradient-to-r from-[#2F4B6B] to-[#E08A3C] rounded-full transition-all duration-1000"
+                      className="h-full bg-gradient-to-r from-[#2F4B6B] to-indigo-500 rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.resume || 0)}%` }}
                     />
                   </div>
                 </div>
 
                 {/* 2. Mock Interview Articulation */}
-                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-[#2F4B6B]/30 border border-[#2F4B6B]/60 text-[#93A0B5]">
-                        <Mic className="w-4 h-4 text-[#E08A3C]" />
+                        <Mic className="w-4 h-4 text-indigo-400" />
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-white">Technical & Behavioral Vocal Articulation</h4>
@@ -524,21 +524,21 @@ function Dashboard() {
                     </div>
                     <div className="text-right">
                       <span className="text-base font-extrabold text-white">{readiness?.interview || 0}%</span>
-                      <span className="text-[10px] block text-[#E08A3C] font-semibold">
+                      <span className="text-[10px] block text-indigo-400 font-semibold">
                         {(readiness?.interview || 0) >= 70 ? "Confident" : "Practice Needed"}
                       </span>
                     </div>
                   </div>
                   <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
                     <div
-                      className="h-full bg-gradient-to-r from-[#2F4B6B] via-[#4A6E94] to-[#E08A3C] rounded-full transition-all duration-1000"
+                      className="h-full bg-gradient-to-r from-[#2F4B6B] via-[#4A6E94] to-indigo-500 rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.interview || 0)}%` }}
                     />
                   </div>
                 </div>
 
                 {/* 3. Target Role Skill Coverage */}
-                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-[#2F4B6B]/30 border border-[#2F4B6B]/60 text-[#93A0B5]">
@@ -571,7 +571,7 @@ function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-[#E08A3C]" />
+                    <Layers className="w-4 h-4 text-indigo-400" />
                     <span>Recommended Next Steps</span>
                   </h3>
                   <p className="text-xs text-[#93A0B5] mt-0.5">Tasks tailored to help you pass campus screening</p>
@@ -591,16 +591,16 @@ function Dashboard() {
                     return (
                       <div
                         key={rec.title}
-                        className="p-3.5 rounded-2xl bg-[#080D18]/70 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                        className="p-3.5 rounded-2xl bg-[#080D18]/70 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-xl bg-[#1B2740] text-[#E08A3C] shrink-0 border border-[#2F4B6B]/60">
+                          <div className="p-2 rounded-xl bg-[#1B2740] text-indigo-400 shrink-0 border border-[#2F4B6B]/60">
                             <Icon className="w-4 h-4" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="text-xs font-bold text-white">{rec.title}</h4>
-                              <span className="text-[9px] font-semibold text-[#E08A3C] bg-[#E08A3C]/10 px-1.5 py-0.2 rounded border border-[#E08A3C]/20">
+                              <span className="text-[9px] font-semibold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/20">
                                 {rec.badge}
                               </span>
                             </div>
@@ -610,7 +610,7 @@ function Dashboard() {
 
                         <Link
                           to={rec.link}
-                          className="px-3.5 py-1.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs font-bold shrink-0 flex items-center justify-center gap-1 shadow-md"
+                          className="px-3.5 py-1.5 rounded-xl btn-gradient btn-gradient-hover text-white text-xs font-bold shrink-0 flex items-center justify-center gap-1 shadow-md"
                         >
                           <span>{rec.cta}</span>
                           <ArrowRight className="w-3 h-3" />
@@ -634,22 +634,22 @@ function Dashboard() {
           {/* Today's Study Goal Card */}
           <div id="section-mission" className="scroll-mt-24">
             <div
-              className="rounded-3xl p-5 border border-[#E08A3C]/40 shadow-2xl relative overflow-hidden"
+              className="rounded-3xl p-5 border border-indigo-500/40 shadow-2xl relative overflow-hidden"
               style={{
                 background:
-                  "radial-gradient(ellipse at top right, rgba(224,138,60,0.18) 0%, rgba(17,24,39,0.95) 60%, rgba(8,13,24,1) 100%)",
+                  "radial-gradient(ellipse at top right, rgba(99,102,241,0.18) 0%, rgba(17,24,39,0.95) 60%, rgba(8,13,24,1) 100%)",
                 boxShadow:
-                  "0 15px 50px rgba(0,0,0,0.7), 0 0 30px rgba(224,138,60,0.15), inset 0 1px 0 0 rgba(224,138,60,0.35)",
+                  "0 15px 50px rgba(0,0,0,0.7), 0 0 30px rgba(99,102,241,0.15), inset 0 1px 0 0 rgba(99,102,241,0.35)",
               }}
             >
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-[#E08A3C]/20 text-[#E08A3C]">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400">
                     <Target className="w-4 h-4" />
                   </div>
                   <h3 className="text-sm font-bold text-white">Today's Study Goal</h3>
                 </div>
-                <span className="px-2 py-0.5 rounded-md bg-[#E08A3C] text-[#080D18] text-[10px] font-extrabold flex items-center gap-1 shadow">
+                <span className="px-2 py-0.5 rounded-md bg-indigo-500 text-white text-[10px] font-extrabold flex items-center gap-1 shadow">
                   <Flame className="w-3 h-3" /> Streak Active
                 </span>
               </div>
@@ -667,7 +667,7 @@ function Dashboard() {
 
                 <Link
                   to={todayMission.link as any}
-                  className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-[#E08A3C]/25"
+                  className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-500/25"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>{todayMission.btnText}</span>
@@ -683,12 +683,12 @@ function Dashboard() {
                 <h3 className="text-sm font-bold text-white">Placement Readiness Checklist</h3>
                 <p className="text-[11px] text-[#93A0B5]">Core profile milestones for recruiters</p>
               </div>
-              <span className="text-xs font-bold text-[#E08A3C]">{profileProgress}% Complete</span>
+              <span className="text-xs font-bold text-indigo-400">{profileProgress}% Complete</span>
             </div>
 
             <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden my-3 border border-[#2F4B6B]/40">
               <div
-                className="h-full bg-gradient-to-r from-[#2F4B6B] to-[#E08A3C] transition-all duration-700"
+                className="h-full bg-gradient-to-r from-[#2F4B6B] to-indigo-500 transition-all duration-700"
                 style={{ width: `${profileProgress}%` }}
               />
             </div>
@@ -723,10 +723,10 @@ function Dashboard() {
             <GlassCard variant="strong" className="p-5 border border-[#2F4B6B]/60">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-[#E08A3C]" />
+                  <Trophy className="w-4 h-4 text-indigo-400" />
                   <h3 className="text-sm font-bold text-white">Earned Badges & Trophies</h3>
                 </div>
-                <span className="text-xs text-[#E08A3C] font-semibold">
+                <span className="text-xs text-indigo-400 font-semibold">
                   {earnedBadgeIds.size} / 9 Earned
                 </span>
               </div>
@@ -734,11 +734,11 @@ function Dashboard() {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: "First Steps", label: "First Steps", icon: GraduationCap, color: "text-emerald-400" },
-                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-[#E08A3C]" },
-                  { id: "Interview Warmup", label: "Voice Coach", icon: Mic, color: "text-[#4A6E94]" },
+                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-indigo-400" },
+                  { id: "Interview Warmup", label: "Voice Coach", icon: Mic, color: "text-sky-400" },
                   { id: "Code Explorer", label: "GitHub Scout", icon: Github, color: "text-purple-400" },
                   { id: "Gap Closer", label: "Skill Closer", icon: Target, color: "text-rose-400" },
-                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-amber-400" },
+                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-indigo-400" },
                 ].map((badge) => {
                   const Icon = badge.icon;
                   const isEarned = earnedBadgeIds.has(badge.id);
@@ -747,7 +747,7 @@ function Dashboard() {
                       key={badge.id}
                       className={`p-2.5 rounded-xl flex flex-col items-center text-center transition-all border ${
                         isEarned
-                          ? "bg-gradient-to-br from-[#1B2740] to-[#111827] border-[#E08A3C]/50 shadow-md shadow-[#E08A3C]/10"
+                          ? "bg-gradient-to-br from-[#1B2740] to-[#111827] border-indigo-500/50 shadow-md shadow-indigo-500/10"
                           : "bg-[#080D18]/50 border-[#2F4B6B]/30 opacity-40 grayscale"
                       }`}
                     >

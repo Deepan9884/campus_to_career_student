@@ -13,7 +13,7 @@ export function AnimatedCounter({ value, duration = 900 }: { value: number; dura
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [value, duration]);
-  return <>{n}</>;
+  return <span className="font-mono font-medium">{n}</span>;
 }
 
 export function ScoreRing({
@@ -29,19 +29,20 @@ export function ScoreRing({
 }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const color =
+  const strokeColor =
     score >= 70
-      ? "var(--color-success)"
+      ? "#4CAF7D"
       : score >= 40
-        ? "var(--color-warning)"
-        : "var(--color-destructive)";
+        ? "#6366F1"
+        : "#E5484D";
+
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <defs>
-          <linearGradient id={`g-${size}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#8B5CF6" />
+          <linearGradient id={`g-ember-${size}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#6366F1" />
+            <stop offset="100%" stopColor="#38BDF8" />
           </linearGradient>
         </defs>
         <circle
@@ -57,7 +58,7 @@ export function ScoreRing({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={score >= 40 && score < 70 ? color : `url(#g-${size})`}
+          stroke={score >= 70 ? "#4CAF7D" : score < 40 ? "#E5484D" : `url(#g-ember-${size})`}
           strokeWidth={stroke}
           fill="none"
           strokeLinecap="round"
@@ -69,9 +70,9 @@ export function ScoreRing({
         />
       </svg>
       <div className="absolute text-center">
-        <div className="text-4xl font-bold">
+        <div className="text-4xl font-bold font-mono">
           <AnimatedCounter value={score} />
-          <span className="text-base text-muted-foreground">%</span>
+          <span className="text-base text-muted-foreground font-mono">%</span>
         </div>
         {label && <div className="text-xs text-muted-foreground mt-1">{label}</div>}
       </div>
@@ -82,7 +83,7 @@ export function ScoreRing({
 export function MiniRing({
   value,
   label,
-  color = "#3B82F6",
+  color = "#E08A3C",
 }: {
   value: number;
   label: string;
@@ -101,7 +102,7 @@ export function MiniRing({
             cy={size / 2}
             r={r}
             stroke="currentColor"
-          className="text-foreground/10"
+            className="text-foreground/10"
             strokeWidth={stroke}
             fill="none"
           />
@@ -120,7 +121,7 @@ export function MiniRing({
             }}
           />
         </svg>
-        <div className="absolute inset-0 grid place-items-center text-sm font-semibold">
+        <div className="absolute inset-0 grid place-items-center text-sm font-semibold font-mono">
           <AnimatedCounter value={value} />%
         </div>
       </div>

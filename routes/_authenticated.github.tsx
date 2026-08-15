@@ -550,7 +550,7 @@ const [analyzing, setAnalyzing] = useState(false);
 
               <div className="relative z-10 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-[#1B2740] to-[#111827] border border-[#2F4B6B] text-[#E08A3C] shadow-lg">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-[#1B2740] to-[#111827] border border-[#2F4B6B] text-indigo-400 shadow-lg">
                     <Github className="h-6 w-6" />
                   </div>
                   <div>
@@ -567,8 +567,8 @@ const [analyzing, setAnalyzing] = useState(false);
 
                 {/* 3 Core Value Pillars */}
                 <div className="grid sm:grid-cols-3 gap-3.5 pt-2">
-                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2">
-                    <div className="p-2 rounded-xl bg-[#1B2740] text-[#E08A3C] w-fit border border-[#2F4B6B]/60">
+                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
+                    <div className="p-2 rounded-xl bg-[#1B2740] text-indigo-400 w-fit border border-[#2F4B6B]/60">
                       <Code2 className="w-4 h-4" />
                     </div>
                     <h4 className="text-xs font-bold text-white">Code & Architecture Audit</h4>
@@ -577,7 +577,7 @@ const [analyzing, setAnalyzing] = useState(false);
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2">
+                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
                     <div className="p-2 rounded-xl bg-[#1B2740] text-emerald-400 w-fit border border-[#2F4B6B]/60">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
@@ -587,7 +587,7 @@ const [analyzing, setAnalyzing] = useState(false);
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2">
+                  <div className="p-4 rounded-2xl bg-[#080D18]/80 border border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2">
                     <div className="p-2 rounded-xl bg-[#1B2740] text-blue-400 w-fit border border-[#2F4B6B]/60">
                       <Briefcase className="w-4 h-4" />
                     </div>
@@ -604,7 +604,7 @@ const [analyzing, setAnalyzing] = useState(false);
                     <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                     <span>⚡ 10,000+ student repositories audited for campus placement drives</span>
                   </span>
-                  <span className="text-[#E08A3C] font-semibold">100% Free & Open-Source Friendly</span>
+                  <span className="text-indigo-400 font-semibold">100% Free & Open-Source Friendly</span>
                 </div>
               </div>
             </div>
