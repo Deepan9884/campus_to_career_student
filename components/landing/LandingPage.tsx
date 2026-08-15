@@ -224,20 +224,20 @@ export const LandingPage: React.FC = () => {
       <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
 
       {/* ── NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full bg-[#080D18]/85 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-4 md:px-8 py-3.5 transition-all">
+      <header className="sticky top-0 z-50 w-full bg-[#080D18]/85 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-4 md:px-8 py-2 md:py-2.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => scrollToSection("hero")}>
             <img
               src="/logo-dark.png"
               alt="Campus to Career AI"
-              className="h-8 sm:h-9 md:h-10 w-auto max-w-[200px] sm:max-w-[240px] object-contain transition-transform hover:scale-[1.02]"
+              className="h-7 sm:h-8 w-auto max-w-[180px] object-contain transition-transform hover:scale-[1.02]"
             />
           </div>
 
-          <nav className="hidden lg:flex items-center space-x-1 bg-[#131B2E]/70 p-1.5 rounded-2xl border border-[#2F4B6B]/50 text-xs font-medium backdrop-blur-sm">
+          <nav className="hidden lg:flex items-center space-x-1 bg-[#131B2E]/70 p-1 rounded-2xl border border-[#2F4B6B]/50 text-xs font-medium backdrop-blur-sm">
             <button
               onClick={() => scrollToSection("hero")}
-              className="px-3 py-1.5 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
+              className="px-2.5 py-1 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
             >
               Overview
             </button>
@@ -245,7 +245,7 @@ export const LandingPage: React.FC = () => {
               <button
                 key={sec.id}
                 onClick={() => scrollToSection(sec.id)}
-                className="px-3 py-1.5 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
+                className="px-2.5 py-1 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
               >
                 {sec.navTitle}
               </button>
@@ -254,39 +254,39 @@ export const LandingPage: React.FC = () => {
 
           <div className="flex items-center space-x-2 md:space-x-3">
             {isCheckingAuth ? (
-              <div className="h-9 w-24 bg-[#131B2E] animate-pulse rounded-xl" />
+              <div className="h-8 w-20 bg-[#131B2E] animate-pulse rounded-xl" />
             ) : isAuthenticated ? (
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handleDashboardClick}
-                  className="px-3.5 md:px-5 py-2.5 rounded-xl bg-[#E08A3C] hover:bg-[#B96E2C] text-[#0A0F1A] text-xs md:text-sm font-bold flex items-center space-x-2 ember-glow transition-all hover:-translate-y-0.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#E08A3C] hover:bg-[#B96E2C] text-[#080D18] text-xs font-bold flex items-center space-x-1.5 ember-glow transition-all hover:-translate-y-0.5"
                 >
-                  <UserCheck className="w-4 h-4" />
-                  <span>Go to Dashboard</span>
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Dashboard</span>
                 </button>
                 <button
                   onClick={handleSignOutClick}
                   title="Sign Out"
-                  className="p-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] text-[#93A0B5] hover:text-white transition-all flex items-center gap-1.5 text-xs font-medium"
+                  className="p-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] text-[#93A0B5] hover:text-white transition-all flex items-center gap-1 text-xs"
                 >
-                  <LogOut className="w-4 h-4 text-rose-400" />
-                  <span className="hidden sm:inline">Sign Out</span>
+                  <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                  <span className="hidden sm:inline">Exit</span>
                 </button>
               </div>
             ) : (
               <>
                 <button
                   onClick={handleLoginClick}
-                  className="px-3.5 md:px-4 py-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#F2F4F7] text-xs md:text-sm font-medium transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#F2F4F7] text-xs font-medium transition-all"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={handleRegisterClick}
-                  className="px-4 md:px-5 py-2.5 rounded-xl btn-gradient btn-gradient-hover text-[#0A0F1A] text-xs md:text-sm font-bold flex items-center space-x-1.5"
+                  className="px-3.5 py-1.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs font-bold flex items-center space-x-1"
                 >
                   <span>Get Started</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </>
             )}
@@ -294,10 +294,10 @@ export const LandingPage: React.FC = () => {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-[#93A0B5] hover:text-white hover:border-[#E08A3C]/40 transition-all"
+              className="lg:hidden p-1.5 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-[#93A0B5] hover:text-white hover:border-[#E08A3C]/40 transition-all"
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -309,11 +309,11 @@ export const LandingPage: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden mt-3 border-t border-[#2F4B6B]/40 pt-3 pb-2 flex flex-col space-y-2 max-w-7xl mx-auto"
+              className="lg:hidden mt-2 border-t border-[#2F4B6B]/40 pt-2 pb-1 flex flex-col space-y-1.5 max-w-7xl mx-auto"
             >
               <button
                 onClick={() => scrollToSection("hero")}
-                className="text-left px-3 py-2 rounded-lg text-sm text-[#F2F4F7] hover:bg-[#1B2740] hover:text-[#E08A3C] transition-all"
+                className="text-left px-3 py-1.5 rounded-lg text-xs text-[#F2F4F7] hover:bg-[#1B2740] hover:text-[#E08A3C] transition-all"
               >
                 Overview
               </button>
@@ -321,124 +321,86 @@ export const LandingPage: React.FC = () => {
                 <button
                   key={sec.id}
                   onClick={() => scrollToSection(sec.id)}
-                  className="text-left px-3 py-2 rounded-lg text-sm text-[#F2F4F7] hover:bg-[#1B2740] hover:text-[#E08A3C] transition-all"
+                  className="text-left px-3 py-1.5 rounded-lg text-xs text-[#F2F4F7] hover:bg-[#1B2740] hover:text-[#E08A3C] transition-all"
                 >
                   {sec.navTitle}
                 </button>
               ))}
-
-              <div className="pt-2 border-t border-[#2F4B6B]/40 flex flex-col space-y-2">
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      onClick={() => { setMobileMenuOpen(false); handleDashboardClick(); }}
-                      className="w-full py-2.5 rounded-xl bg-[#E08A3C] text-[#0A0F1A] text-sm font-bold flex items-center justify-center space-x-2"
-                    >
-                      <UserCheck className="w-4 h-4" />
-                      <span>Go to Dashboard</span>
-                    </button>
-                    <button
-                      onClick={() => { setMobileMenuOpen(false); handleSignOutClick(); }}
-                      className="w-full py-2.5 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-[#F2F4F7] text-sm font-medium flex items-center justify-center space-x-2"
-                    >
-                      <LogOut className="w-4 h-4 text-rose-400" />
-                      <span>Sign Out</span>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => { setMobileMenuOpen(false); handleLoginClick(); }}
-                      className="w-full py-2.5 rounded-xl bg-[#131B2E] border border-[#2F4B6B] text-[#F2F4F7] text-sm font-medium flex items-center justify-center space-x-2"
-                    >
-                      <LogIn className="w-4 h-4" />
-                      <span>Sign In</span>
-                    </button>
-                    <button
-                      onClick={() => { setMobileMenuOpen(false); handleRegisterClick(); }}
-                      className="w-full py-2.5 rounded-xl bg-[#E08A3C] text-[#0A0F1A] text-sm font-bold flex items-center justify-center space-x-2"
-                    >
-                      <span>Get Started Free</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </>
-                )}
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section id="hero" className="relative z-10 pt-4 md:pt-6 pb-2 px-4 md:px-8 max-w-7xl mx-auto overflow-hidden">
+      <section id="hero" className="relative z-10 pt-2 md:pt-3 pb-2 px-3 md:px-6 max-w-7xl mx-auto overflow-hidden">
         <HeroParticles />
 
-        <div className="text-center max-w-3xl mx-auto space-y-3">
+        <div className="text-center max-w-3xl mx-auto space-y-1.5">
           {/* Animated badge */}
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-[#E08A3C]/10 border border-[#E08A3C]/25 text-[#E08A3C] text-[11px] font-bold"
+            transition={{ duration: 0.3 }}
+            className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-[#E08A3C]/10 border border-[#E08A3C]/25 text-[#E08A3C] text-[10px] font-bold"
           >
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E08A3C] opacity-60" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E08A3C]" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#E08A3C]" />
             </span>
             <Sparkles className="w-3 h-3" />
             <span>AI-Powered Career Preparation Studio</span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight"
+            transition={{ duration: 0.4, delay: 0.05 }}
+            className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight tracking-tight"
           >
             Become <span className="text-ember-gradient">Internship-Ready</span> in Weeks, Not Months.
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="text-xs sm:text-sm text-[#93A0B5] font-normal leading-relaxed max-w-xl mx-auto"
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="text-xs text-[#93A0B5] font-normal leading-relaxed max-w-lg mx-auto line-clamp-1"
           >
-            ATS-scored resumes, AI mock interviews, GitHub code reviews, and milestone roadmaps — all in one serene study studio.
+            ATS-scored resumes, AI mock interviews, GitHub code reviews & milestone roadmaps.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="flex items-center justify-center gap-3 pt-1"
+            transition={{ duration: 0.3, delay: 0.15 }}
+            className="flex items-center justify-center gap-2 pt-0.5"
           >
             <button
               onClick={handleRegisterClick}
-              className="px-6 py-2.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-[#E08A3C]/25"
+              className="px-4 py-1.5 rounded-xl btn-gradient btn-gradient-hover text-[#080D18] text-xs font-bold flex items-center space-x-1 shadow-md shadow-[#E08A3C]/20"
             >
-              <span>{isAuthenticated ? "Go to Workspace" : "Start Practice Free"}</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>{isAuthenticated ? "Go to Workspace" : "Start Free"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => scrollToSection("resume")}
-              className="px-5 py-2.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/30 text-[#F2F4F7] text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition-all"
+              className="px-3.5 py-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/30 text-[#F2F4F7] text-xs font-semibold flex items-center space-x-1 transition-all"
             >
-              <span>Explore Features</span>
-              <ArrowRight className="w-4 h-4 rotate-90 text-[#E08A3C]" />
+              <span>Explore</span>
+              <ArrowRight className="w-3 h-3 rotate-90 text-[#E08A3C]" />
             </button>
           </motion.div>
         </div>
 
         {/* ── FEATURED SPOTLIGHT MOVING PANELS SHOWCASE (WOW FACTOR) ── */}
         <div
-          className="mt-6 relative w-full overflow-hidden"
+          className="mt-2.5 relative w-full overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           {/* Interactive Feature Category Switcher */}
-          <div className="flex items-center justify-between max-w-4xl mx-auto mb-3 px-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+          <div className="flex items-center justify-between max-w-4xl mx-auto mb-2 px-2">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
               {SECTIONS.map((sec, idx) => {
                 const Icon = sec.icon;
                 const isActive = idx === activeDeckIndex;
@@ -446,39 +408,39 @@ export const LandingPage: React.FC = () => {
                   <button
                     key={sec.id}
                     onClick={() => setActiveDeckIndex(idx)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all shrink-0 ${
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all shrink-0 ${
                       isActive
-                        ? "btn-gradient text-[#080D18] font-bold shadow-md shadow-[#E08A3C]/20 border border-white/20"
+                        ? "btn-gradient text-[#080D18] font-bold shadow-sm shadow-[#E08A3C]/20 border border-white/20"
                         : "bg-[#131B2E]/80 text-[#93A0B5] hover:text-white hover:bg-[#1B2740] border border-[#2F4B6B]/50"
                     }`}
                   >
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon className="w-3 h-3" />
                     <span>{sec.navTitle}</span>
                   </button>
                 );
               })}
             </div>
 
-            <div className="hidden sm:flex items-center space-x-1.5 shrink-0 pl-2">
+            <div className="hidden sm:flex items-center space-x-1 shrink-0 pl-2">
               <button
                 onClick={prevDeck}
-                className="p-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
+                className="p-1 rounded-lg bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
                 title="Previous feature"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={nextDeck}
-                className="p-1.5 rounded-xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
+                className="p-1 rounded-lg bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#93A0B5] hover:text-[#E08A3C] transition-all"
                 title="Next feature"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Cards Track (Center Stage) */}
-          <div className="relative flex items-center justify-center min-h-[380px] md:min-h-[420px] px-2">
+          {/* Cards Track (Center Stage - 100% Above the Fold) */}
+          <div className="relative flex items-center justify-center min-h-[300px] sm:min-h-[320px] md:min-h-[340px] px-2">
             {SECTIONS.map((panel, idx) => {
               const Icon = panel.icon;
               const isCenter = idx === activeDeckIndex;
@@ -498,46 +460,46 @@ export const LandingPage: React.FC = () => {
                     }
                   }}
                   animate={{
-                    scale: isCenter ? 1.02 : 0.82,
-                    opacity: isCenter ? 1 : 0.28,
+                    scale: isCenter ? 1 : 0.82,
+                    opacity: isCenter ? 1 : 0.25,
                     filter: isCenter
-                      ? "brightness(1) drop-shadow(0 20px 40px rgba(0,0,0,0.6))"
+                      ? "brightness(1) drop-shadow(0 15px 30px rgba(0,0,0,0.6))"
                       : "brightness(0.35) blur(1px)",
-                    x: isCenter ? 0 : isLeft ? -380 : 380,
+                    x: isCenter ? 0 : isLeft ? -360 : 360,
                     zIndex: isCenter ? 30 : 10,
                   }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                  className={`absolute w-[92vw] max-w-[740px] p-5 rounded-3xl cursor-pointer transition-all border ${
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className={`absolute w-[92vw] max-w-[680px] p-3.5 rounded-2xl cursor-pointer transition-all border ${
                     isCenter
-                      ? "bg-[#111827]/98 border-[#E08A3C]/60 shadow-2xl"
+                      ? "bg-[#111827]/98 border-[#E08A3C]/60 shadow-xl"
                       : "bg-[#080D18]/80 border-[#2F4B6B]/30 pointer-events-auto"
                   }`}
                   style={
                     isCenter
                       ? {
                           boxShadow:
-                            "0 20px 70px rgba(0,0,0,0.7), 0 0 35px rgba(224,138,60,0.18), inset 0 1px 0 0 rgba(224,138,60,0.25)",
+                            "0 15px 50px rgba(0,0,0,0.7), 0 0 30px rgba(224,138,60,0.18), inset 0 1px 0 0 rgba(224,138,60,0.25)",
                         }
                       : {}
                   }
                 >
                   {/* Card Header */}
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="flex items-center space-x-2.5">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center space-x-2">
                       <span
-                        className={`p-2 rounded-xl ${
+                        className={`p-1.5 rounded-lg ${
                           isCenter
                             ? "bg-[#E08A3C]/15 text-[#E08A3C] border border-[#E08A3C]/30"
                             : "bg-[#1A2438] text-[#93A0B5]"
                         }`}
                       >
-                        <Icon className="w-4 h-4" />
+                        <Icon className="w-3.5 h-3.5" />
                       </span>
                       <div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#E08A3C]">
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-[#E08A3C]">
                           {panel.badge}
                         </span>
-                        <h3 className="text-base md:text-lg font-bold text-white leading-tight">
+                        <h3 className="text-sm md:text-base font-bold text-white leading-tight">
                           {panel.title}
                         </h3>
                       </div>
@@ -548,28 +510,28 @@ export const LandingPage: React.FC = () => {
                         e.stopPropagation();
                         setPreviewModalPanel(panel);
                       }}
-                      className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#1A2438] hover:bg-[#24334f] border border-[#2F4B6B] text-[11px] font-semibold text-slate-200 transition-all shrink-0"
+                      className="hidden sm:flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#1A2438] hover:bg-[#24334f] border border-[#2F4B6B] text-[10px] font-semibold text-slate-200 transition-all shrink-0"
                     >
-                      <Eye className="w-3.5 h-3.5 text-[#E08A3C]" />
+                      <Eye className="w-3 h-3 text-[#E08A3C]" />
                       <span>Sandbox</span>
                     </button>
                   </div>
 
-                  <p className="text-xs text-[#93A0B5] line-clamp-1 mb-3">{panel.subtitle}</p>
+                  <p className="text-[11px] text-[#93A0B5] line-clamp-1 mb-2">{panel.subtitle}</p>
 
                   {/* Wide Picture Display */}
-                  <div className="overflow-hidden rounded-2xl border border-[#2F4B6B]/60 h-48 md:h-56 relative group">
+                  <div className="overflow-hidden rounded-xl border border-[#2F4B6B]/60 h-36 sm:h-40 md:h-44 relative group">
                     <img
                       src={panel.imagePath}
                       alt={panel.title}
                       className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#080D18]/80 via-transparent to-transparent flex items-end p-3">
-                      <div className="flex flex-wrap gap-1.5">
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#080D18]/80 via-transparent to-transparent flex items-end p-2.5">
+                      <div className="flex flex-wrap gap-1">
                         {panel.highlights.slice(0, 2).map((h, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded-lg bg-[#111827]/90 border border-[#2F4B6B]/70 text-[10px] font-medium text-slate-200 backdrop-blur-md"
+                            className="px-1.5 py-0.5 rounded-md bg-[#111827]/90 border border-[#2F4B6B]/70 text-[9px] font-medium text-slate-200 backdrop-blur-md"
                           >
                             ✓ {h}
                           </span>
@@ -579,14 +541,14 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   {/* Card Footer */}
-                  <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[#2F4B6B]/40 text-xs text-[#E08A3C] font-semibold">
-                    <div className="flex items-center gap-1.5 text-[11px] text-[#93A0B5]">
-                      <Flame className="w-3.5 h-3.5 text-[#E08A3C]" />
-                      <span>Live interactive module</span>
+                  <div className="flex items-center justify-between pt-1.5 mt-1.5 border-t border-[#2F4B6B]/40 text-[11px] text-[#E08A3C] font-semibold">
+                    <div className="flex items-center gap-1 text-[10px] text-[#93A0B5]">
+                      <Flame className="w-3 h-3 text-[#E08A3C]" />
+                      <span>Live module</span>
                     </div>
                     <div className="flex items-center gap-1 hover:underline">
-                      <span>Explore Section</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>Explore Feature</span>
+                      <ArrowRight className="w-3 h-3" />
                     </div>
                   </div>
                 </motion.div>
@@ -595,15 +557,15 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Indicator dots */}
-          <div className="flex items-center justify-center space-x-2 mt-3 pb-2">
+          <div className="flex items-center justify-center space-x-1.5 mt-1 pb-1">
             {SECTIONS.map((p, idx) => (
               <button
                 key={p.id}
                 onClick={() => setActiveDeckIndex(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  idx === activeDeckIndex ? "w-7 bg-[#E08A3C] shadow-md" : "w-2 bg-[#2F4B6B]"
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  idx === activeDeckIndex ? "w-6 bg-[#E08A3C] shadow-md" : "w-1.5 bg-[#2F4B6B]"
                 }`}
-                style={idx === activeDeckIndex ? { boxShadow: "0 0 10px rgba(224,138,60,0.6)" } : {}}
+                style={idx === activeDeckIndex ? { boxShadow: "0 0 8px rgba(224,138,60,0.6)" } : {}}
               />
             ))}
           </div>
