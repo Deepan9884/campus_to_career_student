@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/stores";
 import { FeaturePreviewModal } from "./FeaturePreviewModal";
+import { StudyConstellation } from "./StudyConstellation";
+import { CampusStudioDeck } from "./CampusStudioDeck";
 import {
   Sparkles,
   ArrowRight,
@@ -147,140 +149,6 @@ const SECTIONS: FeatureSectionData[] = [
   },
 ];
 
-/* ── Floating Hero Widget ── */
-const HeroWidget: React.FC = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 30, scale: 0.95 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ duration: 0.8, delay: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
-    className="relative mt-10 mx-auto max-w-lg animate-float-slow"
-  >
-    {/* Outer glow ring */}
-    <div className="absolute -inset-px rounded-2xl animate-glow-pulse pointer-events-none" />
-
-    <div className="relative rounded-2xl bg-[#131B2E]/95 border border-[#E08A3C]/30 backdrop-blur-2xl overflow-hidden shadow-2xl p-5">
-      {/* Top bar */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#E08A3C]" />
-          <span className="text-[10px] font-bold text-[#E08A3C] tracking-widest uppercase">Career Readiness</span>
-        </div>
-        <div className="flex items-center space-x-1.5">
-          <TrendingUp className="w-3.5 h-3.5 text-[#4CAF7D]" />
-          <span className="text-[10px] font-semibold text-[#4CAF7D]">+14% this week</span>
-        </div>
-      </div>
-
-      {/* Main content row */}
-      <div className="flex items-center gap-5">
-        {/* ATS Score Ring */}
-        <div className="relative flex-shrink-0">
-          <svg width="90" height="90" viewBox="0 0 90 90">
-            {/* Track */}
-            <circle cx="45" cy="45" r="36" fill="none" stroke="#1B2740" strokeWidth="7" />
-            {/* Ember progress arc */}
-            <circle
-              cx="45" cy="45" r="36"
-              fill="none"
-              stroke="url(#emberArc)"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeDasharray="226"
-              strokeDashoffset="51"
-              transform="rotate(-90 45 45)"
-              className="animate-score-ring"
-            />
-            <defs>
-              <linearGradient id="emberArc" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#F5B87A" />
-                <stop offset="100%" stopColor="#E08A3C" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl font-bold font-mono text-white leading-none">87</span>
-            <span className="text-[9px] text-[#93A0B5] font-medium">ATS Score</span>
-          </div>
-        </div>
-
-        {/* Right column */}
-        <div className="flex-1 space-y-3">
-          {/* Skill pills */}
-          <div className="flex flex-wrap gap-1.5">
-            {["React", "Node.js", "System Design"].map((skill, i) => (
-              <span
-                key={skill}
-                className="px-2 py-0.5 rounded-full text-[9px] font-semibold border"
-                style={{
-                  background: i === 0 ? "rgba(224,138,60,0.12)" : "rgba(47,75,107,0.3)",
-                  borderColor: i === 0 ? "rgba(224,138,60,0.4)" : "rgba(47,75,107,0.6)",
-                  color: i === 0 ? "#E08A3C" : "#93A0B5",
-                }}
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-
-          {/* Progress bars */}
-          <div className="space-y-1.5">
-            {[
-              { label: "Interview Prep", pct: 74 },
-              { label: "Resume Score", pct: 87 },
-            ].map((item) => (
-              <div key={item.label}>
-                <div className="flex justify-between mb-0.5">
-                  <span className="text-[9px] text-[#93A0B5]">{item.label}</span>
-                  <span className="text-[9px] font-semibold text-[#E08A3C]">{item.pct}%</span>
-                </div>
-                <div className="h-1 rounded-full bg-[#1B2740] overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${item.pct}%` }}
-                    transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-                    className="h-full rounded-full"
-                    style={{ background: "linear-gradient(90deg, #E08A3C, #F5B87A)" }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Waveform mic indicator */}
-          <div className="flex items-center gap-1.5">
-            <Mic className="w-3 h-3 text-[#E08A3C]" />
-            <span className="text-[9px] text-[#93A0B5]">AI Listening</span>
-            <div className="flex items-end gap-0.5 h-3 ml-1">
-              {[8, 12, 7, 14, 9, 11, 6].map((h, i) => (
-                <div
-                  key={i}
-                  className="waveform-bar"
-                  style={{ height: `${h}px`, animationDelay: `${i * 0.1}s` }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom status row */}
-      <div className="mt-4 pt-3 border-t border-[#2F4B6B]/40 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <div className="relative">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#4CAF7D]" />
-            <div className="absolute inset-0 rounded-full bg-[#4CAF7D] animate-ping opacity-50" />
-          </div>
-          <span className="text-[9px] text-[#93A0B5]">3 modules active</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <ShieldCheck className="w-3 h-3 text-[#E08A3C]" />
-          <span className="text-[9px] text-[#E08A3C] font-semibold">Academic Prep Studio</span>
-        </div>
-      </div>
-    </div>
-  </motion.div>
-);
-
 /* ── Particle Stars ── */
 const HeroParticles: React.FC = () => {
   const stars = Array.from({ length: 18 }, (_, i) => ({
@@ -346,14 +214,18 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0A0F1A] text-[#F2F4F7] relative font-sans selection:bg-[#E08A3C] selection:text-[#0A0F1A]">
+    <div className="min-h-screen w-full relative font-sans selection:bg-[#E08A3C] selection:text-[#080D18]">
+      {/* Interactive Developer Study Constellation Canvas */}
+      <StudyConstellation />
+
       {/* Ambient Background Orbs */}
-      <div className="fixed top-0 left-1/4 w-[800px] h-[800px] bg-[#2F4B6B]/20 rounded-full blur-[200px] pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-[700px] h-[700px] bg-[#E08A3C]/07 rounded-full blur-[200px] pointer-events-none" />
-      <div className="fixed top-1/2 left-0 w-[400px] h-[400px] bg-[#2F4B6B]/08 rounded-full blur-[160px] pointer-events-none" />
+      <div className="fixed top-0 left-1/4 w-[850px] h-[850px] bg-[#2F4B6B]/25 rounded-full blur-[220px] pointer-events-none -z-10" />
+      <div className="fixed top-20 right-10 w-[750px] h-[750px] bg-[#E08A3C]/12 rounded-full blur-[200px] pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-1/4 w-[750px] h-[750px] bg-[#E08A3C]/09 rounded-full blur-[220px] pointer-events-none -z-10" />
+      <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
 
       {/* ── NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full bg-[#0A0F1A]/90 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-4 md:px-8 py-3.5 transition-all">
+      <header className="sticky top-0 z-50 w-full bg-[#080D18]/85 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-4 md:px-8 py-3.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => scrollToSection("hero")}>
             <img
@@ -561,8 +433,11 @@ export const LandingPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Floating Hero Widget */}
-        <HeroWidget />
+        {/* Interactive Campus Studio Console */}
+        <CampusStudioDeck
+          onOpenRegister={handleRegisterClick}
+          onExploreFeatures={() => scrollToSection("resume")}
+        />
 
         {/* FEATURED CAROUSEL */}
         <div

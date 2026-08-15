@@ -178,7 +178,12 @@ export function AppShell() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative overflow-x-hidden">
+      {/* Dynamic Ambient Background Nebula Glows */}
+      <div className="fixed top-0 right-1/4 w-[650px] h-[650px] bg-[#E08A3C]/08 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="fixed top-1/3 left-0 w-[550px] h-[550px] bg-[#2F4B6B]/20 rounded-full blur-[180px] pointer-events-none -z-10" />
+      <div className="fixed -bottom-20 right-10 w-[500px] h-[500px] bg-[#E08A3C]/07 rounded-full blur-[170px] pointer-events-none -z-10" />
+
       <OnboardingWizard
         open={showOnboardingWizard ? true : undefined}
         onClose={() => setShowOnboardingWizard(false)}
@@ -326,7 +331,7 @@ export function AppShell() {
                 <div className="h-9 w-9 rounded-full bg-slate-700/50 animate-pulse" />
               ) : (
                 <>
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 grid place-items-center text-xs font-bold text-white">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#E08A3C] to-[#B96E2C] grid place-items-center text-xs font-bold text-[#0A0F1A]">
                     {(user?.name ?? "G").charAt(0).toUpperCase()}
                   </div>
                   {user?.avatar && (
@@ -356,8 +361,8 @@ function Brand({ collapsed }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
       <Link to="/dashboard" className="flex items-center justify-center py-1 w-full" title="Campus to Career AI">
-        <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0 shadow-sm">
-          <GraduationCap className="w-5 h-5 text-indigo-400" />
+        <div className="w-9 h-9 rounded-xl bg-[#E08A3C]/20 border border-[#E08A3C]/40 flex items-center justify-center shrink-0 shadow-sm">
+          <GraduationCap className="w-5 h-5 text-[#E08A3C]" />
         </div>
       </Link>
     );
@@ -401,8 +406,8 @@ function NavItem({
         "flex items-center gap-3 rounded-xl text-sm transition-all",
         collapsed ? "justify-center p-2.5" : "px-3 py-2.5",
         active
-          ? "btn-gradient text-white shadow-lg font-medium"
-          : "text-foreground hover:bg-white/10 hover:text-foreground",
+          ? "btn-gradient text-[#080D18] font-bold shadow-lg shadow-[#E08A3C]/25 border border-white/20"
+          : "text-foreground/80 hover:bg-white/5 hover:text-foreground",
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />

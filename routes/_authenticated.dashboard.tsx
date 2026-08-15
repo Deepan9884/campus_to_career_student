@@ -240,11 +240,11 @@ function Dashboard() {
                 onClick={() => scrollToSection(sec.id)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
                   isActive
-                    ? "btn-gradient text-white shadow-lg shadow-indigo-500/20 border border-white/20"
+                    ? "btn-gradient text-[#080D18] font-bold shadow-lg shadow-[#E08A3C]/25 border border-white/20"
                     : "text-muted-foreground hover:text-foreground hover:bg-white/10"
                 }`}
               >
-                <Icon className={`h-3.5 w-3.5 ${isActive ? "text-white" : "text-indigo-400"}`} />
+                <Icon className={`h-3.5 w-3.5 ${isActive ? "text-[#080D18]" : "text-[#E08A3C]"}`} />
                 <span>{sec.label}</span>
               </button>
             );
@@ -254,8 +254,11 @@ function Dashboard() {
 
       {/* Hero / Overview Section */}
       <div id="section-overview" className="scroll-mt-28">
-        <GlassCard variant="strong" className="overflow-hidden relative">
-          <div className="grid md:grid-cols-[auto_1fr] gap-6 items-center">
+        <GlassCard variant="strong" className="overflow-hidden relative border border-[#2F4B6B]/60 shadow-2xl">
+          {/* Ambient ember & steel aura inside card */}
+          <div className="absolute -top-16 -right-16 w-60 h-60 bg-[#E08A3C]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-[#2F4B6B]/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="grid md:grid-cols-[auto_1fr] gap-6 items-center relative z-10">
             <div data-tour="readiness-card">
               <ScoreRing score={readiness?.overall || 0} label="Placement Readiness" />
             </div>
