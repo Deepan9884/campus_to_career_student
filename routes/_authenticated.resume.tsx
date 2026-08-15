@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { ScoreRing } from "@/components/Score";
+import { TargetRoleSelect } from "@/components/TargetRoleSelect";
 import {
   Upload,
   FileText,
@@ -286,12 +287,10 @@ function ResumePage() {
               </div>
 
               <div className="mt-3">
-                <input
-                  type="text"
-                  placeholder="Target role (optional)"
+                <TargetRoleSelect
                   value={targetRole}
-                  onChange={(e) => setTargetRole(e.target.value)}
-                  className="w-full glass-input rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+                  onChange={setTargetRole}
+                  placeholder="Target role (optional)"
                 />
               </div>
             </>

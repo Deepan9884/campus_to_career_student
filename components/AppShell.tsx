@@ -312,6 +312,14 @@ export function AppShell() {
           <Link to="/settings" className="p-2 rounded-lg hover:bg-white/10" aria-label="Settings">
             <Settings className="h-5 w-5" />
           </Link>
+          <button
+            onClick={handleLogout}
+            title="Sign out"
+            aria-label="Sign out"
+            className="p-2 rounded-lg hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
           <Link to="/settings" className="flex items-center gap-2">
             <div className="relative h-9 w-9 rounded-full ring-2 ring-white/20">
               {isCheckingAuth ? (
@@ -345,23 +353,27 @@ export function AppShell() {
 }
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
+  if (collapsed) {
+    return (
+      <Link to="/dashboard" className="flex items-center justify-center py-1 w-full" title="Campus to Career AI">
+        <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0 shadow-sm">
+          <GraduationCap className="w-5 h-5 text-indigo-400" />
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden py-1">
       <img
         src="/logo-dark.png"
         alt="Campus to Career AI"
-        className={cn(
-          "object-contain transition-all hidden dark:block",
-          collapsed ? "h-9 w-9 object-left" : "h-14 md:h-16 max-w-[210px]"
-        )}
+        className="h-10 md:h-12 w-auto max-w-[190px] object-contain hidden dark:block transition-all"
       />
       <img
-        src="/logo.png"
+        src="/logo-dark.png"
         alt="Campus to Career AI"
-        className={cn(
-          "object-contain transition-all block dark:hidden",
-          collapsed ? "h-9 w-9 object-left" : "h-14 md:h-16 max-w-[210px]"
-        )}
+        className="h-10 md:h-12 w-auto max-w-[190px] object-contain block dark:hidden transition-all"
       />
     </Link>
   );

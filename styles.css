@@ -222,6 +222,11 @@
   100% { transform: translateX(-50%); }
 }
 
+@keyframes panelsLeft {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-33.333333%); }
+}
+
 .animate-marquee-stream {
   display: flex;
   width: max-content;
@@ -230,5 +235,23 @@
 
 .animate-marquee-stream:hover {
   animation-play-state: paused;
+}
+
+.animate-panels-left {
+  display: flex;
+  width: max-content;
+  animation: panelsLeft 25s linear infinite;
+}
+
+.animate-panels-left-slow {
+  display: flex;
+  width: max-content;
+  animation: panelsLeft 35s linear infinite;
+}
+
+.animate-panels-left-fast {
+  display: flex;
+  width: max-content;
+  animation: panelsLeft 20s linear infinite;
 }
 

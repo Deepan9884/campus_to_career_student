@@ -132,39 +132,8 @@ function LoginPage() {
   );
 }
 
-export function AuthShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden">
-        <div className="flex items-center gap-3">
-          <img src="/logo-dark.png" alt="Campus to Career AI" className="h-20 md:h-24 w-auto max-w-[340px] object-contain hidden dark:block" />
-          <img src="/logo.png" alt="Campus to Career AI" className="h-20 md:h-24 w-auto max-w-[340px] object-contain block dark:hidden" />
-        </div>
-        <div className="relative z-10">
-          <h2 className="text-4xl font-bold leading-tight">
-            Become <span className="text-gradient">internship-ready</span>
-            <br /> in weeks, not months.
-          </h2>
-          <p className="text-muted-foreground mt-4 max-w-md">
-            ATS-scored resumes, AI mock interviews, GitHub project reviews, and a personalized
-            roadmap — all in one place.
-          </p>
-          <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
-            {["10k+ resumes", "50k+ interviews", "200+ roles"].map((s) => (
-              <div key={s} className="glass rounded-xl p-3 text-center text-xs text-slate-200">
-                {s}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="text-xs text-muted-foreground">© 2026 Campus to Career AI</div>
-      </div>
-      <div className="flex items-center justify-center p-6">
-        <div className="glass-strong rounded-2xl p-8 w-full max-w-md">{children}</div>
-      </div>
-    </div>
-  );
-}
+import { AuthShell } from "@/components/AuthShell";
+export { AuthShell };
 
 export function Field({
   label,
