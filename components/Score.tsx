@@ -83,7 +83,7 @@ export function ScoreRing({
 export function MiniRing({
   value,
   label,
-  color = "#E08A3C",
+  color = "#6366F1",
 }: {
   value: number;
   label: string;

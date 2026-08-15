@@ -29,7 +29,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <div
         className={`relative ${iconSizes[size]} shrink-0 rounded-xl bg-gradient-to-br from-[#1B2740] via-[#111827] to-[#0A0F1A] p-1.5 border border-[#2F4B6B]/60 shadow-lg shadow-black/40 flex items-center justify-center group`}
         style={{
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(224, 138, 60, 0.25)",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(99, 102, 241, 0.25)",
         }}
       >
         <svg
@@ -54,7 +54,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           />
           <path
             d="M31 14V21.5"
-            stroke="#E08A3C"
+            stroke="#6366F1"
             strokeWidth="1.2"
             strokeLinecap="round"
           />
@@ -68,7 +68,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           />
           <path
             d="M24 11H29V16"
-            stroke="#E08A3C"
+            stroke="#6366F1"
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -81,8 +81,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
             </linearGradient>
             <linearGradient id="arrow-grad" x1="11" y1="25" x2="29" y2="11" gradientUnits="userSpaceOnUse">
               <stop stopColor="#F2F4F7" />
-              <stop offset="0.5" stopColor="#E08A3C" />
-              <stop offset="1" stopColor="#F3A75B" />
+              <stop offset="0.5" stopColor="#6366F1" />
+              <stop offset="1" stopColor="#38BDF8" />
             </linearGradient>
           </defs>
         </svg>
@@ -92,8 +92,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       {!collapsed && (
         <div className="flex flex-col leading-none">
           <div className={`font-extrabold tracking-tight text-white flex items-center gap-1.5 ${textSizes[size]}`}>
-            <span className="font-['Space_Grotesk',sans-serif]">CampusToCareer</span>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#E08A3C]/20 border border-[#E08A3C]/40 text-[#E08A3C] tracking-wide uppercase">
+            <span className="font-['Outfit',sans-serif]">CampusToCareer</span>
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 tracking-wide uppercase">
               AI
             </span>
           </div>

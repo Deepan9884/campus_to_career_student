@@ -331,7 +331,7 @@ export function AppShell() {
                 <div className="h-9 w-9 rounded-full bg-slate-700/50 animate-pulse" />
               ) : (
                 <>
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#E08A3C] to-[#B96E2C] grid place-items-center text-xs font-bold text-[#0A0F1A]">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#6366F1] to-[#38BDF8] grid place-items-center text-xs font-bold text-white shadow-md shadow-indigo-500/20">
                     {(user?.name ?? "G").charAt(0).toUpperCase()}
                   </div>
                   {user?.avatar && (
@@ -403,7 +403,7 @@ function NavItem({
         "flex items-center gap-3 rounded-xl text-sm transition-all",
         collapsed ? "justify-center p-2.5" : "px-3 py-2.5",
         active
-          ? "btn-gradient text-[#080D18] font-bold shadow-lg shadow-[#E08A3C]/25 border border-white/20"
+          ? "btn-gradient text-white font-bold shadow-lg shadow-indigo-500/25 border border-white/20"
           : "text-foreground/80 hover:bg-white/5 hover:text-foreground",
       )}
     >

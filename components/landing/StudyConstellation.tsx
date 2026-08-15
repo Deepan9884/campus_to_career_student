@@ -43,8 +43,8 @@ export const StudyConstellation: React.FC = () => {
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
         radius: Math.random() * 2 + 1.2,
-        color: isEmber ? "#E08A3C" : "#4A6E94",
-        glowColor: isEmber ? "rgba(224, 138, 60, 0.4)" : "rgba(74, 110, 148, 0.3)",
+        color: isEmber ? "#6366F1" : "#38BDF8",
+        glowColor: isEmber ? "rgba(99, 102, 241, 0.45)" : "rgba(56, 189, 248, 0.35)",
       });
     }
 
@@ -74,7 +74,7 @@ export const StudyConstellation: React.FC = () => {
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(47, 75, 107, ${alpha})`;
+            ctx.strokeStyle = `rgba(74, 110, 148, ${alpha})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
@@ -89,7 +89,7 @@ export const StudyConstellation: React.FC = () => {
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
           ctx.lineTo(mouseX, mouseY);
-          ctx.strokeStyle = `rgba(224, 138, 60, ${alpha})`;
+          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
           ctx.lineWidth = 1;
           ctx.stroke();
         }

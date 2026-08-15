@@ -535,7 +535,7 @@ const [analyzing, setAnalyzing] = useState(false);
                 background:
                   "radial-gradient(ellipse at top left, rgba(27,39,64,0.9) 0%, rgba(17,24,39,0.96) 60%, rgba(8,13,24,1) 100%)",
                 boxShadow:
-                  "0 20px 60px rgba(0,0,0,0.7), 0 0 35px rgba(224,138,60,0.12), inset 0 1px 0 0 rgba(224,138,60,0.25)",
+                  "0 20px 60px rgba(0,0,0,0.7), 0 0 35px rgba(99,102,241,0.12), inset 0 1px 0 0 rgba(99,102,241,0.25)",
               }}
             >
               {/* Subtle background grid */}
