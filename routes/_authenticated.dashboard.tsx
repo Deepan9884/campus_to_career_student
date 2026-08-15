@@ -466,7 +466,7 @@ function Dashboard() {
       <div className="grid lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN (7 / 12) — Section Progress, Recommendations & Activity */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Section Progress Mini Rings */}
+          {/* Section Progress — Sleek Benchmark Cards */}
           <div id="section-progress" className="scroll-mt-24">
             <GlassCard variant="strong" className="p-5 border border-[#2F4B6B]/60">
               <div className="flex items-center justify-between mb-4">
@@ -477,21 +477,89 @@ function Dashboard() {
                   </h3>
                   <p className="text-xs text-[#93A0B5] mt-0.5">Your scores across the 3 key hiring benchmarks</p>
                 </div>
-                <span className="text-xs font-semibold text-[#E08A3C]">Updated Live</span>
+                <span className="text-xs font-semibold text-[#E08A3C] bg-[#E08A3C]/10 px-2.5 py-1 rounded-lg border border-[#E08A3C]/25">
+                  Updated Live
+                </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-2xl bg-[#080D18]/70 border border-[#2F4B6B]/50 flex flex-col items-center text-center">
-                  <MiniRing value={readiness?.resume || 0} label="Resume ATS" color="#E08A3C" />
-                  <span className="text-[10px] text-[#93A0B5] mt-2">Keywords & Impact</span>
+              <div className="space-y-3">
+                {/* 1. Resume ATS Score */}
+                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-[#E08A3C]/15 border border-[#E08A3C]/30 text-[#E08A3C]">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-white">ATS Resume Formatting & Keywords</h4>
+                        <p className="text-[11px] text-[#93A0B5]">Action verbs, impact phrasing & section structure</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-base font-extrabold text-white">{readiness?.resume || 0}%</span>
+                      <span className="text-[10px] block text-emerald-400 font-semibold">
+                        {(readiness?.resume || 0) >= 70 ? "Placement Ready" : "Needs Review"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#2F4B6B] to-[#E08A3C] rounded-full transition-all duration-1000"
+                      style={{ width: `${Math.max(5, readiness?.resume || 0)}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-[#080D18]/70 border border-[#2F4B6B]/50 flex flex-col items-center text-center">
-                  <MiniRing value={readiness?.interview || 0} label="Mock Interview" color="#4A6E94" />
-                  <span className="text-[10px] text-[#93A0B5] mt-2">Voice & Articulation</span>
+
+                {/* 2. Mock Interview Articulation */}
+                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-[#2F4B6B]/30 border border-[#2F4B6B]/60 text-[#93A0B5]">
+                        <Mic className="w-4 h-4 text-[#E08A3C]" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-white">Technical & Behavioral Vocal Articulation</h4>
+                        <p className="text-[11px] text-[#93A0B5]">STAR response structure, clarity & feedback score</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-base font-extrabold text-white">{readiness?.interview || 0}%</span>
+                      <span className="text-[10px] block text-[#E08A3C] font-semibold">
+                        {(readiness?.interview || 0) >= 70 ? "Confident" : "Practice Needed"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#2F4B6B] via-[#4A6E94] to-[#E08A3C] rounded-full transition-all duration-1000"
+                      style={{ width: `${Math.max(5, readiness?.interview || 0)}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-[#080D18]/70 border border-[#2F4B6B]/50 flex flex-col items-center text-center">
-                  <MiniRing value={readiness?.skills || 0} label="Skills Match" color="#4CAF7D" />
-                  <span className="text-[10px] text-[#93A0B5] mt-2">Role Requirements</span>
+
+                {/* 3. Target Role Skill Coverage */}
+                <div className="p-4 rounded-2xl bg-[#080D18]/75 border border-[#2F4B6B]/50 hover:border-[#E08A3C]/40 transition-all space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-[#2F4B6B]/30 border border-[#2F4B6B]/60 text-[#93A0B5]">
+                        <Target className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-white">Role Skills & Concept Coverage</h4>
+                        <p className="text-[11px] text-[#93A0B5]">Data Structures, Algorithms & System Architecture</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-base font-extrabold text-white">{readiness?.skills || 0}%</span>
+                      <span className="text-[10px] block text-slate-400 font-semibold">Target: 80%+</span>
+                    </div>
+                  </div>
+                  <div className="h-2 w-full bg-[#1A2438] rounded-full overflow-hidden border border-[#2F4B6B]/40">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#2F4B6B] to-emerald-400 rounded-full transition-all duration-1000"
+                      style={{ width: `${Math.max(5, readiness?.skills || 0)}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             </GlassCard>
