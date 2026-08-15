@@ -4,7 +4,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/stores";
 import { FeaturePreviewModal } from "./FeaturePreviewModal";
 import { StudyConstellation } from "./StudyConstellation";
-import { CampusStudioDeck } from "./CampusStudioDeck";
 import {
   Sparkles,
   ArrowRight,
@@ -433,15 +432,9 @@ export const LandingPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Interactive Campus Studio Console */}
-        <CampusStudioDeck
-          onOpenRegister={handleRegisterClick}
-          onExploreFeatures={() => scrollToSection("resume")}
-        />
-
-        {/* FEATURED CAROUSEL */}
+        {/* FEATURED SPOTLIGHT MOVING PANELS CAROUSEL */}
         <div
-          className="mt-14 relative w-full overflow-hidden py-8"
+          className="mt-8 md:mt-10 relative w-full overflow-hidden py-6"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
