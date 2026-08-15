@@ -229,7 +229,11 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto relative flex items-center justify-between">
           {/* Left Brand */}
           <div className="flex items-center space-x-3 cursor-pointer z-10" onClick={() => scrollToSection("hero")}>
-            <BrandLogo size="md" />
+            <img
+              src="/logo-dark.png"
+              alt="Campus to Career"
+              className="h-8 md:h-9 w-auto object-contain transition-transform hover:scale-[1.02]"
+            />
           </div>
 
           {/* Center Nav — Mathematically Dead Center, Slim & Elegant Capsule */}

@@ -359,9 +359,25 @@ export function AppShell() {
 }
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
+  if (collapsed) {
+    return (
+      <Link to="/dashboard" className="flex items-center justify-center py-1 w-full" title="Campus to Career">
+        <img
+          src="/logo-dark.png"
+          alt="Campus to Career"
+          className="h-8 w-auto object-contain"
+        />
+      </Link>
+    );
+  }
+
   return (
     <Link to="/dashboard" className="flex items-center py-1">
-      <BrandLogo size={collapsed ? "sm" : "md"} collapsed={collapsed} />
+      <img
+        src="/logo-dark.png"
+        alt="Campus to Career"
+        className="h-9 md:h-10 w-auto max-w-[180px] object-contain transition-all"
+      />
     </Link>
   );
 }

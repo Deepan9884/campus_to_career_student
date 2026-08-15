@@ -110,7 +110,11 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           {/* Logo */}
           <div>
             <Link to="/" className="inline-block group">
-              <BrandLogo size="lg" />
+              <img
+                src="/logo-dark.png"
+                alt="Campus to Career"
+                className="h-16 md:h-20 w-auto max-w-[280px] object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+              />
             </Link>
           </div>
 
