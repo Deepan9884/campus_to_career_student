@@ -733,13 +733,14 @@ function Dashboard() {
 
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: "First Steps", label: "First Steps", icon: "🌱" },
-                  { id: "Resume Ready", label: "ATS Pro", icon: "📄" },
-                  { id: "Interview Warmup", label: "Voice Coach", icon: "🎙️" },
-                  { id: "Code Explorer", label: "GitHub Scout", icon: "🐙" },
-                  { id: "Gap Closer", label: "Skill Closer", icon: "🎯" },
-                  { id: "Roadmap Builder", label: "Strategist", icon: "🗺️" },
+                  { id: "First Steps", label: "First Steps", icon: GraduationCap, color: "text-emerald-400" },
+                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-[#E08A3C]" },
+                  { id: "Interview Warmup", label: "Voice Coach", icon: Mic, color: "text-[#4A6E94]" },
+                  { id: "Code Explorer", label: "GitHub Scout", icon: Github, color: "text-purple-400" },
+                  { id: "Gap Closer", label: "Skill Closer", icon: Target, color: "text-rose-400" },
+                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-amber-400" },
                 ].map((badge) => {
+                  const Icon = badge.icon;
                   const isEarned = earnedBadgeIds.has(badge.id);
                   return (
                     <div
@@ -750,7 +751,9 @@ function Dashboard() {
                           : "bg-[#080D18]/50 border-[#2F4B6B]/30 opacity-40 grayscale"
                       }`}
                     >
-                      <span className="text-lg">{badge.icon}</span>
+                      <div className={`p-1.5 rounded-lg ${isEarned ? "bg-white/5" : "bg-transparent"}`}>
+                        <Icon className={`w-5 h-5 ${badge.color}`} />
+                      </div>
                       <span className="text-[10px] font-bold text-white mt-1 line-clamp-1">{badge.label}</span>
                       <span className="text-[8px] text-[#93A0B5]">{isEarned ? "Unlocked" : "Locked"}</span>
                     </div>
