@@ -34,6 +34,7 @@ import confetti from "canvas-confetti";
 import { getBadges } from "@/lib/badges-api";
 import type { BadgeId, EarnedBadge } from "@/types/badges";
 import { BrandLogo } from "@/components/BrandLogo";
+import { InteractiveAppBackground } from "@/components/InteractiveAppBackground";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -180,36 +181,8 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen flex relative overflow-x-hidden bg-[#080D18]">
-      {/* ── RICH AMBIENT ATMOSPHERIC BACKGROUND SYSTEM (APPLIES ACROSS ALL SECTIONS) ── */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {/* Warm Ember Nebula Flare Top-Right */}
-        <div className="absolute -top-20 right-0 w-[750px] h-[750px] bg-[#E08A3C]/20 rounded-full blur-[180px]" />
-        
-        {/* Deep Steel Blue Nebula Mid-Left */}
-        <div className="absolute top-1/4 -left-20 w-[650px] h-[650px] bg-[#2F4B6B]/40 rounded-full blur-[200px]" />
-        
-        {/* Soft Amber Glow Bottom-Right */}
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#E08A3C]/16 rounded-full blur-[180px]" />
-        
-        {/* Cyber Blueprint Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.22]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(47,75,107,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(47,75,107,0.35) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-
-        {/* Subtle Radial Light Vignette */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at 50% 30%, transparent 20%, rgba(8,13,24,0.6) 80%, rgba(8,13,24,0.95) 100%)",
-          }}
-        />
-      </div>
+      {/* Interactive Constellation & Cyber Mesh Background Feature */}
+      <InteractiveAppBackground />
 
       <OnboardingWizard
         open={showOnboardingWizard ? true : undefined}

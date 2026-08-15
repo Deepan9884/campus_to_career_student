@@ -131,15 +131,14 @@
     background-color: #080D18;
     background-image:
       /* 1. Fine Tech Dot Matrix Grid */
-      radial-gradient(circle at 1px 1px, rgba(224, 138, 60, 0.14) 1.5px, transparent 0),
+      radial-gradient(circle at 1px 1px, rgba(74, 110, 148, 0.16) 1.2px, transparent 0),
       /* 2. Cyber Blueprint Grid Lines */
-      linear-gradient(to right, rgba(47, 75, 107, 0.16) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(47, 75, 107, 0.16) 1px, transparent 1px),
-      /* 3. Atmospheric Radiant Glows (Ember & Steel) */
-      radial-gradient(1200px 700px at 10% -5%, rgba(47, 75, 107, 0.55), transparent 70%),
-      radial-gradient(1000px 650px at 90% 10%, rgba(224, 138, 60, 0.24), transparent 65%),
-      radial-gradient(1000px 700px at 92% 92%, rgba(224, 138, 60, 0.18), transparent 60%),
-      radial-gradient(900px 600px at 8% 85%, rgba(47, 75, 107, 0.35), transparent 70%);
+      linear-gradient(to right, rgba(47, 75, 107, 0.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(47, 75, 107, 0.12) 1px, transparent 1px),
+      /* 3. Deep Midnight & Steel Radiant Depth */
+      radial-gradient(1200px 700px at 15% -5%, rgba(47, 75, 107, 0.45), transparent 70%),
+      radial-gradient(1000px 650px at 85% 15%, rgba(30, 58, 95, 0.35), transparent 65%),
+      radial-gradient(900px 600px at 10% 85%, rgba(47, 75, 107, 0.30), transparent 70%);
     background-size: 36px 36px, 36px 36px, 36px 36px, auto, auto, auto, auto;
     background-attachment: fixed;
     font-family: var(--font-sans);
