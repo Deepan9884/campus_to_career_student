@@ -180,7 +180,7 @@ export function AppShell() {
   };
 
   return (
-    <div className="min-h-screen flex relative overflow-x-hidden bg-[#080D18]">
+    <div className="min-h-screen flex relative overflow-x-hidden bg-background text-foreground">
       {/* Interactive Constellation & Cyber Mesh Background Feature */}
       <InteractiveAppBackground />
 

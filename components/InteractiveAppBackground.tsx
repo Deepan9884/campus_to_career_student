@@ -72,6 +72,7 @@ export const InteractiveAppBackground: React.FC = () => {
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
+      const isLight = document.documentElement.classList.contains("light");
 
       // 1. Draw Connection Lines between particles
       for (let i = 0; i < particles.length; i++) {
@@ -81,11 +82,13 @@ export const InteractiveAppBackground: React.FC = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < 140) {
-            const lineAlpha = (1 - dist / 140) * 0.16;
+            const lineAlpha = (1 - dist / 140) * (isLight ? 0.22 : 0.16);
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(47, 75, 107, ${lineAlpha})`;
+            ctx.strokeStyle = isLight
+              ? `rgba(148, 163, 184, ${lineAlpha})`
+              : `rgba(47, 75, 107, ${lineAlpha})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
@@ -97,29 +100,40 @@ export const InteractiveAppBackground: React.FC = () => {
         const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
 
         if (mDist < 160) {
-          const mouseLineAlpha = (1 - mDist / 160) * 0.28;
+          const mouseLineAlpha = (1 - mDist / 160) * 0.32;
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(mouseX, mouseY);
-          ctx.strokeStyle = `rgba(99, 102, 241, ${mouseLineAlpha})`;
+          ctx.strokeStyle = isLight
+            ? `rgba(79, 70, 229, ${mouseLineAlpha})`
+            : `rgba(99, 102, 241, ${mouseLineAlpha})`;
           ctx.lineWidth = 1;
           ctx.stroke();
+
+          // Gentle magnetic attraction towards cursor
+          particles[i].vx += (mouseX - particles[i].x) * 0.00008;
+          particles[i].vy += (mouseY - particles[i].y) * 0.00008;
         }
 
-        // 3. Update position
+        // 3. Move Particles with Smooth Boundaries
         particles[i].x += particles[i].vx;
         particles[i].y += particles[i].vy;
 
+        // Dampen velocity to prevent runaways
+        particles[i].vx *= 0.992;
+        particles[i].vy *= 0.992;
+
+        // Wrap or bounce gently
         if (particles[i].x < 0) particles[i].x = width;
         if (particles[i].x > width) particles[i].x = 0;
         if (particles[i].y < 0) particles[i].y = height;
         if (particles[i].y > height) particles[i].y = 0;
 
-        // 4. Draw Particle Node
+        // 4. Render Glowing Particle Nodes
         ctx.beginPath();
         ctx.arc(particles[i].x, particles[i].y, particles[i].radius, 0, Math.PI * 2);
-        ctx.fillStyle = particles[i].color;
-        ctx.shadowColor = particles[i].color;
+        ctx.fillStyle = isLight ? "rgba(99, 102, 241, 0.65)" : particles[i].color;
+        ctx.shadowColor = isLight ? "rgba(99, 102, 241, 0.4)" : particles[i].color;
         ctx.shadowBlur = 6;
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -145,7 +159,7 @@ export const InteractiveAppBackground: React.FC = () => {
 
       {/* Cyber Grid with Soft Perspective */}
       <div
-        className="absolute inset-0 opacity-[0.14]"
+        className="absolute inset-0 opacity-[0.14] dark:block hidden"
         style={{
           backgroundImage:
             "linear-gradient(rgba(74,110,148,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(74,110,148,0.25) 1px, transparent 1px)",
@@ -153,9 +167,9 @@ export const InteractiveAppBackground: React.FC = () => {
         }}
       />
 
-      {/* Soft Vignette Mask */}
+      {/* Dark Vignette Mask */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 dark:block hidden"
         style={{
           background:
             "radial-gradient(ellipse at 50% 40%, transparent 40%, rgba(8,13,24,0.65) 80%, rgba(8,13,24,0.95) 100%)",

@@ -55,10 +55,27 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const { checkAuth } = useAuth();
+  const { user, checkAuth } = useAuth();
   useEffect(() => {
     checkAuth();
   }, []);
+
+  // Synchronize theme with user preferences or localStorage
+  useEffect(() => {
+    const savedTheme =
+      user?.preferences?.theme ||
+      (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_theme") : null) ||
+      "dark";
+    const root = document.documentElement;
+    if (savedTheme === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.classList.toggle("dark", prefersDark);
+      root.classList.toggle("light", !prefersDark);
+    } else {
+      root.classList.toggle("dark", savedTheme === "dark");
+      root.classList.toggle("light", savedTheme === "light");
+    }
+  }, [user?.preferences?.theme]);
 
   const googleClientId =
     import.meta.env.VITE_GOOGLE_CLIENT_ID ||

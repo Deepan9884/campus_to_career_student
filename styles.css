@@ -101,35 +101,64 @@
 }
 
 .light {
-  --background: #080D18;
-  --foreground: #F2F4F7;
-  --card: #111827;
-  --card-foreground: #F2F4F7;
-  --popover: #111827;
-  --popover-foreground: #F2F4F7;
-  --primary: #6366F1;
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #4F46E5;
   --primary-foreground: #FFFFFF;
-  --secondary: #2F4B6B;
-  --secondary-foreground: #F2F4F7;
-  --muted: #1A2438;
-  --muted-foreground: #93A0B5;
-  --border: #2F4B6B;
-  --input: #2F4B6B;
-  --ring: #6366F1;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #1E293B;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #0284C7;
+  --accent-foreground: #FFFFFF;
+  --destructive: #E11D48;
+  --destructive-foreground: #FFFFFF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #4F46E5;
+
+  --chart-1: #4F46E5;
+  --chart-2: #0284C7;
+  --chart-3: #10B981;
+  --chart-4: #8B5CF6;
+  --chart-5: #64748B;
+
+  --color-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #F1F5F9;
+  --color-steel: #E2E8F0;
+  --color-steel-light: #CBD5E1;
+  --color-text-primary: #0F172A;
+  --color-text-muted: #64748B;
+
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(226, 232, 240, 0.95);
+  --glass-shadow: rgba(15, 23, 42, 0.06);
+  --glass-strong-bg: rgba(255, 255, 255, 0.97);
+  --glass-strong-border: rgba(203, 213, 225, 0.95);
+  --glass-strong-shadow: rgba(15, 23, 42, 0.09);
+  --glass-input-bg: rgba(248, 250, 252, 0.98);
+  --glass-input-border: rgba(203, 213, 225, 0.95);
 }
 
 @layer base {
   * {
-    border-color: var(--color-steel);
+    border-color: var(--border);
   }
   html, body, #root {
     min-height: 100%;
-    background-color: #080D18;
-    color: #F2F4F7;
+    background-color: var(--background);
+    color: var(--foreground);
   }
   body {
-    color: #F2F4F7;
-    background-color: #080D18;
+    color: var(--foreground);
+    background-color: var(--background);
     background-image:
       /* 1. Fine Tech Dot Matrix Grid */
       radial-gradient(circle at 1px 1px, rgba(74, 110, 148, 0.16) 1.2px, transparent 0),
@@ -147,15 +176,28 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
+  .light body, html.light body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.35) 1.2px, transparent 0),
+      linear-gradient(to right, rgba(226, 232, 240, 0.8) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(226, 232, 240, 0.8) 1px, transparent 1px),
+      radial-gradient(1200px 700px at 15% -5%, rgba(99, 102, 241, 0.08), transparent 70%),
+      radial-gradient(1000px 650px at 85% 15%, rgba(56, 189, 248, 0.08), transparent 65%);
+  }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.025em;
     font-weight: 700;
-    color: #F2F4F7;
+    color: inherit;
+  }
+  .light h1, .light h2, .light h3, .light h4, html.light h1, html.light h2, html.light h3, html.light h4 {
+    color: #0F172A;
   }
   select option, option {
-    background-color: #111827;
-    color: #F2F4F7;
+    background-color: var(--card);
+    color: var(--card-foreground);
   }
 }
 
