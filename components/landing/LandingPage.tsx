@@ -48,7 +48,7 @@ export interface FeatureSectionData {
 const SECTIONS: FeatureSectionData[] = [
   {
     id: "resume",
-    navTitle: "ATS Resume",
+    navTitle: "Resume",
     badge: "RESUME & ATS ANALYZER",
     title: "Craft ATS-Scored Resumes That Land Recruiter Interviews",
     subtitle:
@@ -65,7 +65,7 @@ const SECTIONS: FeatureSectionData[] = [
   },
   {
     id: "interview",
-    navTitle: "Mock Interview",
+    navTitle: "Interviews",
     badge: "AI VOICE COACH",
     title: "Master Technical & Behavioral Interviews with Live Voice Feedback",
     subtitle:
@@ -82,7 +82,7 @@ const SECTIONS: FeatureSectionData[] = [
   },
   {
     id: "coding",
-    navTitle: "Coding Hub",
+    navTitle: "Coding",
     badge: "CODING PLATFORMS HUB",
     title: "Unify LeetCode, Codeforces & HackerRank into One Analytics Hub",
     subtitle:
@@ -99,7 +99,7 @@ const SECTIONS: FeatureSectionData[] = [
   },
   {
     id: "github",
-    navTitle: "GitHub Audit",
+    navTitle: "GitHub",
     badge: "CODE & PORTFOLIO REVIEW",
     title: "Turn Raw GitHub Repositories into Stunning Developer Portfolios",
     subtitle:
@@ -116,7 +116,7 @@ const SECTIONS: FeatureSectionData[] = [
   },
   {
     id: "roadmap",
-    navTitle: "Career Roadmap",
+    navTitle: "Roadmaps",
     badge: "SKILL-GAP NAVIGATOR",
     title: "Clear, Step-by-Step Learning Paths Tailored to Your Target Role",
     subtitle:
@@ -132,7 +132,7 @@ const SECTIONS: FeatureSectionData[] = [
   },
   {
     id: "events",
-    navTitle: "Placement Radar",
+    navTitle: "Placements",
     badge: "Hiring Drives & Hackathons",
     title: "Never Miss Off-Campus Hiring Drives, Internships & Hackathons",
     subtitle:
@@ -235,11 +235,11 @@ export const LandingPage: React.FC = () => {
             />
           </div>
 
-          {/* Center Nav — Mathematically Dead Center */}
-          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center space-x-1 bg-[#131B2E]/90 p-1 rounded-2xl border border-[#2F4B6B]/60 text-xs font-medium backdrop-blur-md shadow-lg shadow-black/50">
+          {/* Center Nav — Mathematically Dead Center, Slim & Elegant Capsule */}
+          <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center space-x-0.5 bg-[#111827]/80 px-1.5 py-0.5 rounded-full border border-[#2F4B6B]/50 text-[11px] font-medium backdrop-blur-xl shadow-lg shadow-black/40">
             <button
               onClick={() => scrollToSection("hero")}
-              className="px-3 py-1.5 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
+              className="px-2.5 py-1 rounded-full text-[#93A0B5] hover:text-[#E08A3C] hover:bg-white/5 transition-all whitespace-nowrap"
             >
               Overview
             </button>
@@ -247,7 +247,7 @@ export const LandingPage: React.FC = () => {
               <button
                 key={sec.id}
                 onClick={() => scrollToSection(sec.id)}
-                className="px-3 py-1.5 rounded-xl text-[#93A0B5] hover:text-[#E08A3C] hover:bg-[#1B2740] transition-all"
+                className="px-2.5 py-1 rounded-full text-[#93A0B5] hover:text-[#E08A3C] hover:bg-white/5 transition-all whitespace-nowrap"
               >
                 {sec.navTitle}
               </button>
