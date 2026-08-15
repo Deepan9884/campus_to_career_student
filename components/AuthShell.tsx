@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const PICTURE_PANELS_ROW1 = [
   { src: "/landing/panel_interview.jpg", alt: "AI Mock Interview" },
@@ -30,7 +31,7 @@ const PICTURE_PANELS_ROW3 = [
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen relative bg-slate-950 text-slate-100 overflow-hidden">
+    <div className="min-h-screen relative bg-[#0A0F1A] text-[#F2F4F7] overflow-hidden">
       {/* Full-Screen Background Animation (Right-to-Left Motion across entire screen) */}
       <div className="absolute inset-0 z-0 flex flex-col justify-center gap-6 overflow-hidden pointer-events-none opacity-45">
         {/* Row 1 */}
@@ -38,7 +39,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           {[...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1].map((panel, idx) => (
             <div
               key={`r1-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-slate-900/60"
+              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-[#2F4B6B]/40 shadow-2xl bg-[#131B2E]/60"
             >
               <img
                 src={panel.src}
@@ -54,7 +55,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           {[...PICTURE_PANELS_ROW2, ...PICTURE_PANELS_ROW2, ...PICTURE_PANELS_ROW2].map((panel, idx) => (
             <div
               key={`r2-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-slate-900/60"
+              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-[#2F4B6B]/40 shadow-2xl bg-[#131B2E]/60"
             >
               <img
                 src={panel.src}
@@ -70,7 +71,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           {[...PICTURE_PANELS_ROW3, ...PICTURE_PANELS_ROW3, ...PICTURE_PANELS_ROW3].map((panel, idx) => (
             <div
               key={`r3-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-slate-900/60"
+              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-[#2F4B6B]/40 shadow-2xl bg-[#131B2E]/60"
             >
               <img
                 src={panel.src}
@@ -86,7 +87,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           {[...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1].map((panel, idx) => (
             <div
               key={`r4-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-slate-900/60"
+              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-[#2F4B6B]/40 shadow-2xl bg-[#131B2E]/60"
             >
               <img
                 src={panel.src}
@@ -99,8 +100,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Full-Screen Ambient Overlay (ensures maximum legibility & vibrant bg motion) */}
-      <div className="absolute inset-0 z-0 bg-slate-950/65 backdrop-blur-[1px] pointer-events-none" />
-      <div className="absolute inset-0 z-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/80 pointer-events-none" />
+      <div className="absolute inset-0 z-0 bg-[#0A0F1A]/75 backdrop-blur-[1px] pointer-events-none" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#0A0F1A]/95 via-[#0A0F1A]/80 to-[#0A0F1A]/90 pointer-events-none" />
 
       {/* Foreground Grid Content */}
       <div className="relative z-10 min-h-screen grid lg:grid-cols-2">
@@ -109,34 +110,30 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           {/* Logo */}
           <div>
             <Link to="/" className="inline-block group">
-              <img
-                src="/logo-dark.png"
-                alt="Campus to Career AI"
-                className="h-16 md:h-20 w-auto max-w-[300px] object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-              />
+              <BrandLogo size="lg" />
             </Link>
           </div>
 
           {/* Hero Headline */}
           <div className="my-auto py-12 max-w-lg">
-            <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.15] text-white drop-shadow-lg">
+            <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.15] text-[#F2F4F7] drop-shadow-lg">
               Become <span className="text-gradient">internship-ready</span>
               <br /> in weeks, not months.
             </h1>
-            <p className="text-slate-200 text-base mt-4 font-medium leading-relaxed drop-shadow">
+            <p className="text-[#93A0B5] text-base mt-4 font-medium leading-relaxed drop-shadow">
               AI-driven prep platform for resumes, mock interviews, and career growth.
             </p>
           </div>
 
           {/* Footer */}
-          <div className="text-xs text-slate-300 font-medium drop-shadow">
+          <div className="text-xs text-[#93A0B5] font-medium drop-shadow">
             © 2026 Campus to Career AI
           </div>
         </div>
 
         {/* Right Side: Form Card */}
         <div className="flex items-center justify-center p-6 lg:p-12">
-          <div className="glass-strong rounded-2xl p-6 sm:p-8 w-full max-w-md border border-white/20 shadow-2xl backdrop-blur-xl bg-slate-900/85">
+          <div className="glass-strong rounded-2xl p-6 sm:p-8 w-full max-w-md border border-[#2F4B6B]/80 shadow-2xl backdrop-blur-xl bg-[#131B2E]/90">
             {children}
           </div>
         </div>

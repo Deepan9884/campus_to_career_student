@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { getBadges } from "@/lib/badges-api";
 import type { BadgeId, EarnedBadge } from "@/types/badges";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -358,28 +359,9 @@ export function AppShell() {
 }
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
-  if (collapsed) {
-    return (
-      <Link to="/dashboard" className="flex items-center justify-center py-1 w-full" title="Campus to Career AI">
-        <div className="w-9 h-9 rounded-xl bg-[#E08A3C]/20 border border-[#E08A3C]/40 flex items-center justify-center shrink-0 shadow-sm">
-          <GraduationCap className="w-5 h-5 text-[#E08A3C]" />
-        </div>
-      </Link>
-    );
-  }
-
   return (
-    <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden py-1">
-      <img
-        src="/logo-dark.png"
-        alt="Campus to Career AI"
-        className="h-10 md:h-12 w-auto max-w-[190px] object-contain hidden dark:block transition-all"
-      />
-      <img
-        src="/logo-dark.png"
-        alt="Campus to Career AI"
-        className="h-10 md:h-12 w-auto max-w-[190px] object-contain block dark:hidden transition-all"
-      />
+    <Link to="/dashboard" className="flex items-center py-1">
+      <BrandLogo size={collapsed ? "sm" : "md"} collapsed={collapsed} />
     </Link>
   );
 }

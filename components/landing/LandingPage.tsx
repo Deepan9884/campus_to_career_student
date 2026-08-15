@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/stores";
 import { FeaturePreviewModal } from "./FeaturePreviewModal";
 import { StudyConstellation } from "./StudyConstellation";
+import { BrandLogo } from "@/components/BrandLogo";
 import {
   Sparkles,
   ArrowRight,
@@ -228,11 +229,7 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto relative flex items-center justify-between">
           {/* Left Brand */}
           <div className="flex items-center space-x-3 cursor-pointer z-10" onClick={() => scrollToSection("hero")}>
-            <img
-              src="/logo-dark.png"
-              alt="Campus to Career AI"
-              className="h-8 md:h-9 w-auto max-w-[200px] object-contain transition-transform hover:scale-[1.02]"
-            />
+            <BrandLogo size="md" />
           </div>
 
           {/* Center Nav — Mathematically Dead Center, Slim & Elegant Capsule */}
