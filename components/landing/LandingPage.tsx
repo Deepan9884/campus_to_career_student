@@ -642,42 +642,94 @@ export const LandingPage: React.FC = () => {
         })}
       </section>
 
-      {/* ── FINAL CTA ── */}
-      <section className="relative z-10 py-20 px-4 md:px-8 max-w-5xl mx-auto text-center">
+      {/* ── FINAL CTA BANNER (HIGH IMPACT WOW FACTOR) ── */}
+      <section className="relative z-10 py-20 px-4 md:px-8 max-w-5xl mx-auto">
+        {/* Ambient Glowing Nebula Behind the Card */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-[#E08A3C]/20 via-[#2F4B6B]/25 to-[#E08A3C]/15 rounded-full blur-[120px] pointer-events-none -z-10" />
+
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.7 }}
-          className="p-8 md:p-12 rounded-3xl border space-y-6"
+          className="relative overflow-hidden rounded-3xl p-8 sm:p-12 md:p-14 border text-center"
           style={{
-            background: "linear-gradient(135deg, rgba(19,27,46,0.95) 0%, rgba(10,15,26,0.98) 100%)",
-            borderColor: "rgba(224,138,60,0.3)",
-            boxShadow: "0 0 80px rgba(224,138,60,0.08), 0 40px 80px rgba(0,0,0,0.4)",
+            background: "radial-gradient(ellipse at top, rgba(27,39,64,0.95) 0%, rgba(17,24,39,0.98) 60%, rgba(8,13,24,1) 100%)",
+            borderColor: "rgba(224,138,60,0.45)",
+            boxShadow:
+              "0 25px 80px rgba(0,0,0,0.85), 0 0 50px rgba(224,138,60,0.2), inset 0 1px 0 0 rgba(224,138,60,0.45), inset 0 0 30px rgba(224,138,60,0.06)",
           }}
         >
-          <div className="inline-flex p-3.5 rounded-2xl bg-[#E08A3C]/15 border border-[#E08A3C]/25 text-[#E08A3C]">
-            <Sparkles className="w-8 h-8" />
+          {/* Cyber matrix background lines within the card */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(47,75,107,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(47,75,107,0.3) 1px, transparent 1px)",
+              backgroundSize: "28px 28px",
+            }}
+          />
+
+          {/* Top trust badge */}
+          <div className="relative inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-[#E08A3C]/15 border border-[#E08A3C]/35 text-[#E08A3C] text-xs font-bold mb-3 shadow-lg">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E08A3C] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E08A3C]" />
+            </span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Join 10,000+ Students Fast-Tracking Their Tech Careers</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="relative text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-2xl mx-auto">
             Ready to Land Your{" "}
             <span className="text-ember-gradient">Dream Tech Internship?</span>
           </h2>
 
-          <p className="text-[#93A0B5] text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-            Join thousands of students honing their ATS resumes, mock interview confidence, and coding portfolio readiness in a serene, distraction-free environment.
+          <p className="relative text-[#93A0B5] text-sm sm:text-base max-w-xl mx-auto leading-relaxed mt-3">
+            AI-scored resumes, real-time voice mock interviews, automated GitHub audits, and personalized role roadmaps — completely free to start.
           </p>
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* Feature Badges Grid */}
+          <div className="relative flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 my-5">
+            <span className="px-3 py-1 rounded-xl bg-[#131B2E]/90 border border-[#2F4B6B]/60 text-xs font-medium text-slate-200 flex items-center gap-1.5 shadow-md">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#E08A3C]" />
+              <span>ATS Resume Analyzer</span>
+            </span>
+            <span className="px-3 py-1 rounded-xl bg-[#131B2E]/90 border border-[#2F4B6B]/60 text-xs font-medium text-slate-200 flex items-center gap-1.5 shadow-md">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#E08A3C]" />
+              <span>Voice AI Mock Coach</span>
+            </span>
+            <span className="px-3 py-1 rounded-xl bg-[#131B2E]/90 border border-[#2F4B6B]/60 text-xs font-medium text-slate-200 flex items-center gap-1.5 shadow-md">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#E08A3C]" />
+              <span>GitHub Portfolio Audit</span>
+            </span>
+            <span className="px-3 py-1 rounded-xl bg-[#131B2E]/90 border border-[#2F4B6B]/60 text-xs font-medium text-slate-200 flex items-center gap-1.5 shadow-md">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#E08A3C]" />
+              <span>Career Roadmap</span>
+            </span>
+          </div>
+
+          {/* Action CTAs */}
+          <div className="relative pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={handleRegisterClick}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl btn-gradient btn-gradient-hover text-[#0A0F1A] text-sm font-bold flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl btn-gradient btn-gradient-hover text-[#080D18] text-sm font-bold flex items-center justify-center space-x-2 shadow-xl shadow-[#E08A3C]/30 hover:scale-102 transition-all"
             >
               <span>{isAuthenticated ? "Open Dashboard Workspace" : "Get Started For Free"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+            <button
+              onClick={() => scrollToSection("hero")}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#131B2E] hover:bg-[#1B2740] border border-[#2F4B6B] hover:border-[#E08A3C]/40 text-[#F2F4F7] text-sm font-semibold flex items-center justify-center space-x-2 transition-all"
+            >
+              <Compass className="w-4 h-4 text-[#E08A3C]" />
+              <span>Back to Top</span>
+            </button>
           </div>
+
+          <p className="relative text-[11px] text-[#93A0B5]/80 mt-4">
+            ⚡ No credit card required · Instant access to all AI tools · Free student tier
+          </p>
         </motion.div>
       </section>
 
