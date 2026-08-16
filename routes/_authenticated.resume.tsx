@@ -10,7 +10,6 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle2,
-  Sparkles,
   Trash2,
   X,
   Target,
@@ -54,7 +53,7 @@ function ImprovementItem({ imp, role }: { imp: string; role?: string }) {
       )}
 
       <div className="flex items-start gap-3 relative z-10">
-        <Sparkles
+        <Zap
           className={`h-4 w-4 mt-0.5 shrink-0 ${improved ? "text-[color:var(--color-primary)]" : "text-yellow-400"}`}
         />
         <div className="flex-1 space-y-3">
@@ -389,7 +388,7 @@ function ResumePage() {
             className="space-y-6"
           >
             {/* Top: Upload Resume Hero Card */}
-            <GlassCard data-tour="resume-upload-zone" className="relative overflow-hidden">
+            <GlassCard data-tour="resume-upload-zone" className="relative overflow-visible">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-lg font-bold flex items-center gap-2">
@@ -401,7 +400,7 @@ function ResumePage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs flex items-center gap-1.5 font-medium">
-                    <Sparkles className="h-3 w-3 text-indigo-400" /> Instant ATS Score
+                    <FileText className="h-3 w-3 text-indigo-400" /> Instant ATS Score
                   </span>
                   <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs flex items-center gap-1.5 font-medium">
                     <Target className="h-3 w-3 text-blue-400" /> Keyword Gap Detection
@@ -451,7 +450,7 @@ function ResumePage() {
               </div>
 
               {/* Optional Target Role */}
-              <div className="mt-5 max-w-md">
+              <div className="mt-5 max-w-md relative z-30">
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">
                   Target Role (Optional — helps tailor ATS keywords to your dream position)
                 </label>
@@ -597,7 +596,7 @@ function ResumePage() {
                       <div className="relative z-10 space-y-3.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-indigo-400" />
+                            <Target className="h-4 w-4 text-indigo-400" />
                             <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Latest Resume Spotlight</h4>
                           </div>
                           {latest.inferredTargetRole && (
@@ -750,7 +749,7 @@ function ResumePage() {
                       />
                     </div>
 
-                    <div>
+                    <div className="relative z-30">
                       <TargetRoleSelect
                         value={targetRole}
                         onChange={setTargetRole}
@@ -799,7 +798,7 @@ function ResumePage() {
                   <div className="flex items-center justify-between pb-4 mb-5 border-b border-white/10">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-                        <Sparkles className="h-4 w-4" />
+                        <FileText className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-bold text-base leading-tight">ATS Analysis & Feedback</h3>
@@ -977,7 +976,7 @@ function ResumePage() {
                       {display.improvements && display.improvements.length > 0 && (
                         <div>
                           <h4 className="text-sm font-semibold mb-2.5 flex items-center gap-1.5">
-                            <Sparkles className="h-4 w-4 text-yellow-400" /> Actionable Improvements
+                            <Target className="h-4 w-4 text-yellow-400" /> Actionable Improvements
                           </h4>
                           <ul className="space-y-2.5">
                             {display.improvements.map((imp, i) => (

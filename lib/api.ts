@@ -13,6 +13,9 @@ export function setAccessToken(token: string | null) {
 }
 
 export function getAccessToken(): string | null {
+  if (!accessToken && typeof window !== "undefined") {
+    accessToken = localStorage.getItem("cf-token");
+  }
   return accessToken;
 }
 
@@ -49,7 +52,8 @@ async function tryRefresh(): Promise<void> {
 }
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE}${endpoint}`;
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = endpoint.startsWith("http") ? endpoint : `${API_BASE}${cleanEndpoint}`;
   const headers: Record<string, string> = {
     ...((options.headers as Record<string, string>) || {}),
   };
@@ -58,19 +62,23 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers["Content-Type"] = "application/json";
   }
 
-  if (accessToken) {
-    headers["Authorization"] = `Bearer ${accessToken}`;
+  const token = getAccessToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   let res = await fetch(url, { ...options, headers, credentials: "include" });
 
-  if (res.status === 401 && endpoint !== "/auth/refresh" && endpoint !== "/auth/login") {
+  if (res.status === 401 && !url.includes("/auth/refresh") && !url.includes("/auth/login")) {
     try {
       await tryRefresh();
-      headers["Authorization"] = `Bearer ${accessToken}`;
+      const freshToken = getAccessToken();
+      if (freshToken) {
+        headers["Authorization"] = `Bearer ${freshToken}`;
+      }
       res = await fetch(url, { ...options, headers, credentials: "include" });
     } catch {
-      if (endpoint !== "/auth/me") {
+      if (!url.includes("/auth/me")) {
         const { useAuth } = await import("@/stores");
         useAuth.getState().logout();
       }
@@ -101,16 +109,19 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
-  get: <T>(endpoint: string) => request<T>(endpoint),
-  post: <T>(endpoint: string, body?: unknown) =>
+  get: <T>(endpoint: string, options?: RequestInit) => request<T>(endpoint, { ...options, method: "GET" }),
+  post: <T>(endpoint: string, body?: unknown, options?: RequestInit) =>
     request<T>(endpoint, {
+      ...options,
       method: "POST",
-      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     }),
-  patch: <T>(endpoint: string, body?: unknown) =>
+  patch: <T>(endpoint: string, body?: unknown, options?: RequestInit) =>
     request<T>(endpoint, {
+      ...options,
       method: "PATCH",
-      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     }),
-  delete: <T>(endpoint: string) => request<T>(endpoint, { method: "DELETE" }),
+  delete: <T>(endpoint: string, options?: RequestInit) =>
+    request<T>(endpoint, { ...options, method: "DELETE" }),
 };

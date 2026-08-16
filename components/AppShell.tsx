@@ -12,7 +12,6 @@ import {
   LogOut,
   Menu,
   X,
-  Sparkles,
   Settings,
   CheckCheck,
   BellOff,
@@ -94,10 +93,8 @@ export function AppShell() {
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationStream();
 
-  const filteredNav = nav.filter((item) => {
-    if (!user?.preferences?.hiddenModules) return true;
-    return !user.preferences.hiddenModules.includes(item.to);
-  });
+  // Navigation stays constant throughout the application across all pages
+  const filteredNav = nav;
 
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const earnedBadgeIdsRef = useRef<Set<string>>(new Set());
@@ -180,7 +177,7 @@ export function AppShell() {
   };
 
   return (
-    <div className="min-h-screen flex relative overflow-x-hidden bg-background text-foreground">
+    <div className="min-h-screen flex relative bg-background text-foreground">
       {/* Interactive Constellation & Cyber Mesh Background Feature */}
       <InteractiveAppBackground />
 
@@ -193,10 +190,10 @@ export function AppShell() {
         }}
       />
       <StudentProductTour open={showProductTour} onClose={() => setShowProductTour(false)} />
-      {/* Sidebar — desktop */}
+      {/* Sidebar — Persistent & Constant on desktop/tablet */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col glass-strong m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] transition-all duration-300 shrink-0",
+          "hidden md:flex flex-col glass-strong m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] transition-all duration-300 shrink-0 z-40",
           sidebarCollapsed ? "w-20 items-center px-3" : "w-64"
         )}
       >
@@ -211,7 +208,7 @@ export function AppShell() {
           </button>
         </div>
 
-        <nav className="mt-6 flex-1 space-y-1 w-full">
+        <nav className="mt-6 flex-1 space-y-1 w-full overflow-y-auto">
           {filteredNav.map((item) => (
             <NavItem
               key={item.to}
@@ -252,7 +249,7 @@ export function AppShell() {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50 md:hidden">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
@@ -267,7 +264,7 @@ export function AppShell() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="mt-6 flex-1 space-y-1">
+            <nav className="mt-6 flex-1 space-y-1 overflow-y-auto">
               {filteredNav.map((item) => (
                 <NavItem
                   key={item.to}
@@ -289,10 +286,10 @@ export function AppShell() {
 
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-30 glass-strong m-3 ml-3 lg:ml-3 rounded-2xl px-4 py-3 flex items-center gap-3">
+        <header className="sticky top-0 z-30 glass-strong m-3 ml-3 rounded-2xl px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => {
-              if (typeof window !== "undefined" && window.innerWidth < 1024) {
+              if (typeof window !== "undefined" && window.innerWidth < 768) {
                 setMobileOpen(!mobileOpen);
               } else {
                 toggleSidebar();

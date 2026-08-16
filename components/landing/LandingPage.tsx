@@ -10,7 +10,6 @@ import {
   Calendar,
   CheckCircle2,
   ArrowRight,
-  Sparkles,
   Zap,
   Target,
   MessageCircle,
@@ -25,10 +24,12 @@ import {
   LogOut,
   Flame,
   Eye,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/stores";
 import { StudyConstellation } from "./StudyConstellation";
 import { FeaturePreviewModal } from "./FeaturePreviewModal";
+import { LandingIntroAnimation } from "./LandingIntroAnimation";
 
 /* ── Interactive Feature Decks & Detailed Sections ── */
 export interface SectionData {
@@ -126,7 +127,7 @@ export const SECTIONS: SectionData[] = [
       "Daily practice recommendations & milestone tracking",
       "Skill gap matrix with priority recommendations",
     ],
-    imagePath: "/landing/panel_roadmap.jpg",
+    imagePath: "/landing/study_roadmap.jpg",
   },
   {
     id: "events",
@@ -142,7 +143,7 @@ export const SECTIONS: SectionData[] = [
       "Application deadline reminders & tracking status",
       "Peer discussion & mock preparation groups",
     ],
-    imagePath: "/landing/panel_events.jpg",
+    imagePath: "/landing/study_events.jpg",
   },
 ];
 
@@ -181,6 +182,7 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isCheckingAuth, logout } = useAuth();
 
+  const [showIntro, setShowIntro] = useState(true);
   const [activeDeckIndex, setActiveDeckIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -235,6 +237,11 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full relative font-sans selection:bg-indigo-500 selection:text-white">
+      {/* ── CINEMATIC OPENING INTRO ANIMATION ── */}
+      {showIntro && (
+        <LandingIntroAnimation onComplete={() => setShowIntro(false)} />
+      )}
+
       {/* Interactive Developer Study Constellation Canvas */}
       <StudyConstellation />
 
@@ -244,8 +251,8 @@ export const LandingPage: React.FC = () => {
       <div className="fixed bottom-0 right-1/4 w-[750px] h-[750px] bg-[#38BDF8]/08 rounded-full blur-[220px] pointer-events-none -z-10" />
       <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
 
-      {/* ── SPACIOUS MODERN NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full bg-[#080D18]/90 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-6 md:px-10 py-3.5 transition-all">
+      {/* ── SPACIOUS MODERN NAVBAR (STAYS CONSTANT THROUGHOUT) ── */}
+      <header className="sticky top-0 z-[10001] w-full bg-[#080D18]/90 border-b border-[#2F4B6B]/40 backdrop-blur-2xl px-6 md:px-10 py-3.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left Brand */}
           <div className="flex items-center space-x-3 cursor-pointer shrink-0" onClick={() => scrollToSection("hero")}>
@@ -273,6 +280,15 @@ export const LandingPage: React.FC = () => {
                 {sec.navTitle}
               </button>
             ))}
+            {/* Replay Intro Trigger */}
+            <button
+              onClick={() => setShowIntro(true)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-indigo-300 hover:text-white hover:bg-indigo-500/20 border border-indigo-500/30 transition-all whitespace-nowrap text-xs font-semibold"
+              title="Watch Opening Animation"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+              <span>Intro</span>
+            </button>
           </nav>
 
           {/* Right Action */}
@@ -350,6 +366,16 @@ export const LandingPage: React.FC = () => {
                   {sec.navTitle}
                 </button>
               ))}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setShowIntro(true);
+                }}
+                className="text-left px-4 py-2 rounded-xl text-sm font-medium text-indigo-300 hover:bg-[#1B2740] flex items-center gap-2 transition-all"
+              >
+                <Sparkles className="w-4 h-4 text-sky-400" />
+                <span>Replay Opening Animation</span>
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -699,7 +725,7 @@ export const LandingPage: React.FC = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
             </span>
-            <Sparkles className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5" />
             <span>Join 10,000+ Students Fast-Tracking Their Tech Careers</span>
           </div>
 

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "@tanstack/react-router";
 import {
   X,
-  Sparkles,
   ArrowRight,
   Terminal,
   Activity,
@@ -92,7 +91,7 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
             {/* Modal Header */}
             <div className="flex items-center space-x-3 mb-6">
               <span className="p-2.5 rounded-xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/25">
-                <Sparkles className="w-6 h-6" />
+                <Layers className="w-6 h-6" />
               </span>
               <div>
                 <div className="flex items-center space-x-2">
@@ -198,7 +197,7 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-4 h-4" />
+                            <Play className="w-4 h-4" />
                             <span>Simulate Instant ATS Optimization</span>
                           </>
                         )}

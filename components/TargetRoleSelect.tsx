@@ -108,7 +108,7 @@ export function TargetRoleSelect({
   }
 
   return (
-    <div ref={containerRef} className={cn("relative", className, open && "z-50")}>
+    <div ref={containerRef} className={cn("relative", className, open ? "z-50" : "z-10")}>
       <button
         type="button"
         onClick={() => {
@@ -124,7 +124,7 @@ export function TargetRoleSelect({
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1 w-full bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+        <div className="absolute z-50 top-full mt-1.5 w-full bg-slate-900/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl overflow-hidden">
           <div className="p-2 border-b border-white/10">
             <div className="flex items-center gap-2 glass rounded-lg px-2 py-1.5">
               <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -134,7 +134,7 @@ export function TargetRoleSelect({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search roles..."
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground text-white"
               />
             </div>
           </div>

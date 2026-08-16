@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, CheckCircle2, Award, BookOpen, Target, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Award, BookOpen, Target, ShieldCheck } from "lucide-react";
 
 export const StreamLineTicker: React.FC = () => {
   const highlights = [

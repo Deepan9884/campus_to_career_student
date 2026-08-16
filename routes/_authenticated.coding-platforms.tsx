@@ -13,7 +13,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { upsertCodingProfile, refreshCodingProfile, getProblemRecommendations, getAllCodingProfiles } from "@/lib/coding-profiles-api";
-import { Target, Trophy, Sparkles } from "lucide-react";
+import { Target, Trophy, Flame } from "lucide-react";
 import { CodingPlatformAnalyticsCharts } from "@/components/CodingPlatformAnalyticsCharts";
 
 type Platform = "leetcode" | "codechef" | "hackerrank" | "gfg";
@@ -372,7 +372,7 @@ function CodingPlatformsPage() {
                                 >
                                     <div className="min-w-0">
                                         <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 flex-wrap">
-                                            {idx === 0 && <Sparkles className="h-3 w-3 text-amber-400" />}
+                                            {idx === 0 && <Flame className="h-3 w-3 text-amber-400" />}
                                             {idx === 0 ? <span className="text-amber-400 font-medium">Daily Challenge • {r.topic}</span> : <span>{r.topic}</span>}
                                             {r.difficulty && (
                                                 <span className={cn(

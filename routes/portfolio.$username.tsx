@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getPortfolio } from "@/lib/github-api";
-import { Github, Code, ExternalLink, Briefcase, Share2, Copy, Check, Sparkles, CheckCircle2, ChevronRight, FileCode } from "lucide-react";
+import { Github, Code, ExternalLink, Briefcase, Share2, Copy, Check, CheckCircle2, ChevronRight, FileCode } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/portfolio/$username")({

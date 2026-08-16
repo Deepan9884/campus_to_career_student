@@ -97,7 +97,7 @@ export const ELEGANT_FEATURE_PANELS: FeaturePanelData[] = [
       "Curated project & learning step progression",
       "Interactive milestone badges & progress tracking",
     ],
-    imagePath: "/landing/hero_study.jpg",
+    imagePath: "/landing/study_roadmap.jpg",
   },
   {
     id: "events",
@@ -112,7 +112,7 @@ export const ELEGANT_FEATURE_PANELS: FeaturePanelData[] = [
       "Hackathon timeline tracker & team building",
       "Referral request guidelines & application tracking",
     ],
-    imagePath: "/landing/study_coding.jpg",
+    imagePath: "/landing/study_events.jpg",
   },
 ];
 

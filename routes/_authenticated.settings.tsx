@@ -309,6 +309,19 @@ function SettingsPage() {
     }
   };
 
+  const showAllModules = async () => {
+    const updatedPrefs = { ...preferences, hiddenModules: [] };
+    setPreferences(updatedPrefs);
+
+    try {
+      await updateUser({ preferences: updatedPrefs });
+      toast.success("All sidebar navigation modules restored");
+    } catch (err: any) {
+      console.error("Failed to update sidebar preference:", err);
+      toast.error(err?.message || "Failed to restore sidebar modules");
+    }
+  };
+
   if (loading || isCheckingAuth) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -586,9 +599,20 @@ function SettingsPage() {
 
           {/* Sidebar Modules */}
           <GlassCard>
-            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-foreground">
-              <EyeOff className="h-5 w-5 text-cyan-500 dark:text-cyan-400" /> Sidebar Visibility
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold flex items-center gap-2 text-lg text-foreground">
+                <EyeOff className="h-5 w-5 text-cyan-500 dark:text-cyan-400" /> Sidebar Visibility
+              </h3>
+              {preferences.hiddenModules.length > 0 && (
+                <button
+                  type="button"
+                  onClick={showAllModules}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 transition"
+                >
+                  Show All
+                </button>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground mb-4">Toggle which modules appear in your sidebar navigation.</p>
             <div className="space-y-2">
               {MODULES.map((mod) => {
@@ -606,7 +630,7 @@ function SettingsPage() {
                         checked={isVisible}
                         onChange={() => toggleVisibility(mod.key)}
                       />
-                      <div className={cn("h-5 w-9 rounded-full transition-colors", isVisible ? "bg-brand-500" : "bg-black/20 dark:bg-white/10")}></div>
+                      <div className={cn("h-5 w-9 rounded-full transition-colors", isVisible ? "bg-indigo-600" : "bg-black/20 dark:bg-white/10")}></div>
                       <div className={cn("absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white transition-transform", isVisible ? "translate-x-4" : "")}></div>
                     </div>
                   </label>

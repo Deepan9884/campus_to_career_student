@@ -8,7 +8,6 @@ import {
   Plus,
   Loader2,
   Search,
-  Sparkles,
   Award,
   Calendar,
   X,
@@ -854,7 +853,7 @@ function EventsPage() {
                     {generatingAI ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
                     ) : (
-                      <Sparkles className="h-3 w-3" />
+                      <Zap className="h-3 w-3" />
                     )}
                     Generate with AI
                   </button>

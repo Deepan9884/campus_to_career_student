@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/stores";
 import { toast } from "sonner";
 import {
-  Sparkles,
+  Trophy,
   Target,
   Briefcase,
   ChevronRight,
@@ -65,7 +65,7 @@ const DAILY_GOALS = [
   { count: 1, label: "Casual", icon: Target, desc: "1 problem / day" },
   { count: 3, label: "Recommended", icon: Flame, desc: "3 problems / day" },
   { count: 5, label: "Intensive", icon: Zap, desc: "5 problems / day" },
-  { count: 10, label: "Hardcore", icon: Sparkles, desc: "10 problems / day" },
+  { count: 10, label: "Hardcore", icon: Trophy, desc: "10 problems / day" },
 ];
 
 const DEFAULT_TECH_SKILLS = [
@@ -181,7 +181,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
           </div>
 
           <h2 className="text-2xl font-black text-white flex items-center gap-2">
-            Welcome to Campus to Career AI <Sparkles className="h-5 w-5 text-indigo-400 animate-pulse" />
+            Welcome to Campus to Career AI
           </h2>
           <p className="text-xs text-indigo-200 mt-1 max-w-md">
             Let's personalize your AI interview practice, skill gap roadmaps, and career readiness telemetry.

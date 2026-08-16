@@ -17,7 +17,6 @@ import {
   Target,
   Award,
   Code2,
-  Sparkles,
   CheckCircle2,
   ChevronRight,
   Activity,
@@ -272,7 +271,7 @@ function SkillsPage() {
               <ScoreRing score={growthMetrics.overallReadinessPct} size={90} stroke={8} label="Readiness" />
               <div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-indigo-400" />
+                  <Zap className="h-4 w-4 text-indigo-400" />
                   <h2 className="text-xl font-bold text-foreground">Live Growth & Career Readiness</h2>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 max-w-lg">

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { AnimatedCounter } from "@/components/Score";
-import { Trophy, Flame, FileText, Mic, Github, Sparkles, Loader2, BookOpen } from "lucide-react";
+import { Trophy, Flame, FileText, Mic, Github, Loader2, BookOpen, Target, Zap, CheckCircle2 } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -49,7 +49,7 @@ function WeeklyReportCard() {
       <GlassCard className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border-[color:var(--color-primary)]/20 bg-gradient-to-r from-[color:var(--color-primary)]/5 to-transparent">
         <div className="flex items-start gap-3">
           <div className="h-10 w-10 rounded-xl bg-[color:var(--color-primary)]/20 grid place-items-center shrink-0">
-            <Sparkles className="h-5 w-5 text-[color:var(--color-primary)]" />
+            <Zap className="h-5 w-5 text-[color:var(--color-primary)]" />
           </div>
           <div>
             <h3 className="font-bold text-white">Generate AI Weekly Report</h3>
@@ -73,7 +73,7 @@ function WeeklyReportCard() {
       <div className="flex items-start gap-4">
         <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 p-[1px] shrink-0">
           <div className="w-full h-full bg-slate-950 rounded-[15px] grid place-items-center">
-            <Sparkles className="h-6 w-6 text-indigo-400" />
+            <Zap className="h-6 w-6 text-indigo-400" />
           </div>
         </div>
         <div className="space-y-4 flex-1">
@@ -155,7 +155,7 @@ function AnalyticsPage() {
           label="Readiness"
           value={overview?.readiness || 0}
           suffix="%"
-          icon={Sparkles}
+          icon={Target}
         />
         <OverviewCard label="Days on Platform" value={overview?.daysOnPlatform || 0} icon={Flame} />
         <OverviewCard
@@ -329,7 +329,7 @@ function AnalyticsPage() {
                     ) : a.type === "roadmap" ? (
                       <BookOpen className="h-4 w-4" />
                     ) : (
-                      <Sparkles className="h-4 w-4" />
+                      <CheckCircle2 className="h-4 w-4" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -458,7 +458,7 @@ function OverviewCard({
 function Insight({ text }: { text: string }) {
   return (
     <li className="flex items-start gap-2 p-3 glass rounded-xl">
-      <Sparkles className="h-4 w-4 text-[color:var(--color-accent)] shrink-0 mt-0.5" />
+      <CheckCircle2 className="h-4 w-4 text-[color:var(--color-accent)] shrink-0 mt-0.5" />
       <span className="text-muted-foreground">{text}</span>
     </li>
   );

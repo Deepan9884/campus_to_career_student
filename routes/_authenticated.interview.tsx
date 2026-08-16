@@ -14,7 +14,8 @@ import {
   AlertTriangle,
   RefreshCw,
   RotateCcw,
-  Sparkles,
+  Terminal,
+  Bot,
   BookOpen,
   Brain,
   Code2,
@@ -56,7 +57,7 @@ const ROUND_META: Record<
   quiz: { label: "CS Fundamentals Quiz", desc: "MCQ — DS, DBMS, OS, Networking", icon: Brain },
   aptitude: { label: "Aptitude & Reasoning", desc: "MCQ — Quant, Logical, Verbal", icon: BookOpen },
   core: { label: "Core CS Concepts", desc: "Short Answer — OOP, OS, DBMS", icon: Code2 },
-  technical: { label: "Technical Problem Solving", desc: "Explanation — DSA & System Design", icon: Sparkles },
+  technical: { label: "Technical Problem Solving", desc: "Explanation — DSA & System Design", icon: Terminal },
   hr: { label: "HR & Behavioral", desc: "STAR Prompt — Teamwork & Leadership", icon: Users },
 };
 
@@ -74,9 +75,11 @@ function InterviewPage() {
   return (
     <div className="space-y-6 relative z-10">
       <div className="relative z-30">
-        <h1 className="text-2xl md:text-3xl font-bold">5-Round Mock Interview Engine</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {session ? `${session.rounds.length}-Round` : "Custom"} Mock Interview Engine
+        </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Practice 5 comprehensive rounds with AI adaptive evaluation & instant scoring.
+          Practice comprehensive rounds with AI adaptive evaluation & instant scoring.
         </p>
       </div>
 
@@ -139,6 +142,31 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
   const [questionCount, setQuestionCount] = useState(5);
   const [loading, setLoading] = useState(false);
 
+  const allRoundKeys = Object.keys(ROUND_META) as Array<keyof typeof ROUND_META>;
+  const [selectedRounds, setSelectedRounds] = useState<Set<string>>(new Set(allRoundKeys));
+
+  function toggleRound(key: string) {
+    setSelectedRounds((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        if (next.size <= 1) return prev; // must keep at least 1
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }
+
+  function selectAll() {
+    setSelectedRounds(new Set(allRoundKeys));
+  }
+
+  function deselectAll() {
+    // keep first round selected as minimum
+    setSelectedRounds(new Set([allRoundKeys[0]]));
+  }
+
   async function handleStart() {
     setLoading(true);
     try {
@@ -146,6 +174,9 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
         targetRole: targetRole || undefined,
         difficulty,
         questionCount,
+        selectedRounds: selectedRounds.size === allRoundKeys.length
+          ? undefined // all selected = don't send (backward compatible)
+          : allRoundKeys.filter((k) => selectedRounds.has(k)) as Array<"quiz" | "aptitude" | "core" | "technical" | "hr">,
       });
       onStart(res);
     } catch (err: unknown) {
@@ -159,6 +190,8 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
       setLoading(false);
     }
   }
+
+  const roundCount = selectedRounds.size;
 
   return (
     <GlassCard variant="strong">
@@ -207,20 +240,73 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-white/10 grid grid-cols-2 md:grid-cols-5 gap-3">
-        {Object.entries(ROUND_META).map(([key, meta], i) => {
-          const Icon = meta.icon;
-          return (
-            <div key={key} className="glass rounded-xl p-3 text-xs">
-              <div className="flex items-center gap-1.5 font-medium text-foreground mb-1">
-                <Icon className="h-3.5 w-3.5 text-[color:var(--color-primary)]" />
-                Round {i + 1}
-              </div>
-              <p className="font-semibold text-foreground/90">{meta.label}</p>
-              <p className="text-[10px] text-muted-foreground mt-1">{meta.desc}</p>
-            </div>
-          );
-        })}
+      {/* Round Selection */}
+      <div className="mt-6 pt-4 border-t border-white/10">
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-xs text-muted-foreground font-medium">
+            Select Rounds ({roundCount} of {allRoundKeys.length} selected)
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={selectAll}
+              disabled={selectedRounds.size === allRoundKeys.length}
+              className="text-[11px] text-[color:var(--color-primary)] hover:underline disabled:opacity-40 disabled:no-underline"
+            >
+              Select All
+            </button>
+            <span className="text-white/20">|</span>
+            <button
+              type="button"
+              onClick={deselectAll}
+              disabled={selectedRounds.size === 1}
+              className="text-[11px] text-[color:var(--color-primary)] hover:underline disabled:opacity-40 disabled:no-underline"
+            >
+              Deselect All
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {allRoundKeys.map((key, i) => {
+            const meta = ROUND_META[key];
+            const Icon = meta.icon;
+            const isSelected = selectedRounds.has(key);
+            const isLastSelected = isSelected && selectedRounds.size === 1;
+
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleRound(key)}
+                disabled={isLastSelected}
+                className={`glass rounded-xl p-3 text-xs text-left transition-all cursor-pointer border-2 ${
+                  isSelected
+                    ? "border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/10 shadow-[0_0_12px_rgba(var(--color-primary-rgb,99,102,241),0.15)]"
+                    : "border-transparent opacity-40 hover:opacity-60"
+                } ${isLastSelected ? "cursor-not-allowed" : ""}`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1.5 font-medium text-foreground">
+                    <Icon className={`h-3.5 w-3.5 ${isSelected ? "text-[color:var(--color-primary)]" : "text-muted-foreground"}`} />
+                    Round {i + 1}
+                  </div>
+                  <div
+                    className={`w-4 h-4 rounded-md border-2 flex items-center justify-center transition-all ${
+                      isSelected
+                        ? "bg-[color:var(--color-primary)] border-[color:var(--color-primary)]"
+                        : "border-white/30"
+                    }`}
+                  >
+                    {isSelected && <Check className="h-3 w-3 text-white" />}
+                  </div>
+                </div>
+                <p className="font-semibold text-foreground/90">{meta.label}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">{meta.desc}</p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <button
@@ -230,7 +316,9 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
         className="mt-6 btn-gradient btn-gradient-hover rounded-xl px-6 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"
       >
         {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-        {loading ? "Initializing 5-Round Session..." : "Start 5-Round Mock Interview"}
+        {loading
+          ? `Initializing ${roundCount}-Round Session...`
+          : `Start ${roundCount}-Round Mock Interview`}
       </button>
     </GlassCard>
   );
@@ -861,7 +949,7 @@ function ResultsView({ session: initialSession, onRetry }: { session: InterviewS
                               {it.feedback && (
                                 <div className="glass p-2.5 rounded-lg border border-[color:var(--color-primary)]/30 bg-[color:var(--color-primary)]/5">
                                   <span className="text-[10px] text-[color:var(--color-primary)] uppercase font-bold flex items-center gap-1 mb-0.5">
-                                    <Sparkles className="h-3 w-3" /> AI Feedback:
+                                    <Bot className="h-3 w-3" /> AI Feedback:
                                   </span>
                                   <p className="text-xs text-foreground">{it.feedback}</p>
                                 </div>

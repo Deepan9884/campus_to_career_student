@@ -12,7 +12,7 @@ import {
   TrendingUp,
   TrendingDown,
   Upload,
-  Sparkles,
+  Zap,
   Map,
   ChevronRight,
   Clock,
@@ -33,7 +33,6 @@ import {
   Calendar,
   Compass,
   ArrowRight,
-  Zap,
 } from "lucide-react";
 import { getDashboardStats } from "@/lib/dashboard-api";
 import { useAuth } from "@/stores";
@@ -60,7 +59,7 @@ function Dashboard() {
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<string>("section-overview");
 
-  const { data, isLoading: loadingData } = useQuery({
+  const { data, isLoading: loadingData, isError: errorData, refetch: refetchStats } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: getDashboardStats,
   });
@@ -282,6 +281,20 @@ function Dashboard() {
 
   return (
     <div className="space-y-6 max-w-[1360px] mx-auto pb-12">
+      {errorData && !data && (
+        <div className="flex items-center justify-between p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-sm">
+          <div className="flex items-center gap-3">
+            <Zap className="w-5 h-5 shrink-0 animate-bounce" />
+            <span>Could not load latest placement statistics. Your session or database connection might be refreshing.</span>
+          </div>
+          <button
+            onClick={() => refetchStats()}
+            className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-xs font-semibold transition"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       {/* ── STICKY SLIM SUB-NAV CAPSULE ── */}
       <div className="sticky top-2 z-30 flex justify-center w-full pointer-events-none">
         <div className="pointer-events-auto bg-card/90 dark:bg-[#080D18]/90 p-1 rounded-full border border-border dark:border-[#2F4B6B]/50 shadow-xl backdrop-blur-xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
@@ -367,7 +380,7 @@ function Dashboard() {
             {/* Right: Quick Action Buttons */}
             <div className="lg:col-span-3 flex flex-col gap-2">
               <span className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Quick Study Tools
+                <Zap className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Quick Study Tools
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <Link
@@ -658,7 +671,7 @@ function Dashboard() {
                   to={todayMission.link as any}
                   className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-500/25"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                   <span>{todayMission.btnText}</span>
                 </Link>
               </div>

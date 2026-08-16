@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { GlassCard } from "@/components/GlassCard";
 import { cn } from "@/lib/utils";
 import {
-  Sparkles,
   Trophy,
   FileText,
   Mic,
   Target,
-  ChevronRight,
   ChevronLeft,
   X,
   CheckCircle2,
@@ -17,6 +14,9 @@ import {
   Compass,
   ArrowRight,
   Loader2,
+  Lightbulb,
+  Linkedin,
+  Share2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -42,48 +42,58 @@ interface TourStep {
 const TOUR_STEPS: TourStep[] = [
   {
     step: 1,
-    title: "360° Placement Readiness Index 📊",
-    subtitle: "Your live career benchmark calculated from 5 telemetry streams",
-    icon: Sparkles,
+    title: "360° Placement Readiness",
+    subtitle: "Real-time benchmark across 5 telemetry streams",
+    icon: Target,
     iconColor: "text-indigo-400",
-    badge: "DASHBOARD",
-    routeName: "Dashboard Page",
+    badge: "Readiness Index",
+    routeName: "Dashboard",
     route: "/dashboard",
     targetSelector: '[data-tour="readiness-card"]',
     preferredPlacement: "right",
     content: (
-      <div className="space-y-2.5 text-xs text-slate-300">
-        <p>
-          Campus to Career AI calculates a live <strong className="text-white">Career Readiness Score</strong> from 5 telemetry streams: ATS Resume score, AI Mock Interviews, Live Coding, Event Proofs, and Skill Gaps.
+      <div className="space-y-3">
+        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+          Campus to Career AI calculates a dynamic <strong className="text-white font-semibold">Career Readiness Score</strong> from five telemetry feeds: ATS resume parsing, AI mock interviews, live coding telemetry, event proofs, and skill gaps.
         </p>
-        <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] font-medium flex items-center gap-2">
-          <span>💡</span>
-          <div><strong className="text-white">Pro Tip:</strong> Reach 75%+ readiness to unlock Tier-1 placement recommendations!</div>
+        <div className="p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-indigo-500/5 border border-indigo-500/20 text-indigo-200 text-xs flex items-start gap-2.5 shadow-sm">
+          <Lightbulb className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-semibold text-white">Pro Tip:</span> Reach 75%+ readiness to unlock Tier-1 placement recommendations!
+          </div>
         </div>
       </div>
     ),
   },
   {
     step: 2,
-    title: "ATS Resume Analyzer & Bullet Improver 📄",
-    subtitle: "Upload your resume & optimize bullet points with AI",
+    title: "ATS Resume Studio",
+    subtitle: "Instant ATS scoring & AI bullet optimization",
     icon: FileText,
     iconColor: "text-blue-400",
-    badge: "RESUME STUDIO",
-    routeName: "Resume Page",
+    badge: "Resume Studio",
+    routeName: "Resume Studio",
     route: "/resume",
     targetSelector: '[data-tour="resume-upload-zone"]',
     preferredPlacement: "right",
     content: (
-      <div className="space-y-2.5 text-xs text-slate-300">
-        <ul className="space-y-1.5">
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
-            <span><strong className="text-white">Drag & Drop Upload:</strong> Upload PDF or DOCX resumes to receive instant ATS score feedback.</span>
+      <div className="space-y-2.5 text-xs sm:text-[13px] text-slate-300">
+        <ul className="space-y-2">
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-blue-500/15 text-blue-400 mt-0.5 shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">Smart Parser:</strong> Upload PDF or DOCX resumes for deep section-by-section ATS evaluation.
+            </span>
           </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
-            <span><strong className="text-white">AI Bullet Optimizer:</strong> Rewrite bullets into impact-driven STAR format achievements.</span>
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-purple-500/15 text-purple-400 mt-0.5 shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">STAR Rewriter:</strong> Rewrite bullets into impact-driven achievements with quantifiable results.
+            </span>
           </li>
         </ul>
       </div>
@@ -91,47 +101,58 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     step: 3,
-    title: "5-Round AI Mock Interview Engine 🎙️",
-    subtitle: "Practice multi-round technical & HR voice interviews",
+    title: "AI Voice Interview Engine",
+    subtitle: "Multi-round technical & HR voice simulations",
     icon: Mic,
     iconColor: "text-purple-400",
-    badge: "INTERVIEW ENGINE",
-    routeName: "Interview Page",
+    badge: "Mock Interviews",
+    routeName: "Interview Engine",
     route: "/interview",
     targetSelector: '[data-tour="interview-setup-card"]',
     preferredPlacement: "right",
     content: (
-      <div className="space-y-2.5 text-xs text-slate-300">
-        <p>
-          Simulate real technical interviews across <strong className="text-white">5 structured rounds</strong>: CS Fundamentals, Aptitude, Core CS, Technical DSA, and HR STAR prompts.
+      <div className="space-y-3">
+        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+          Simulate real recruiter interviews across <strong className="text-white font-semibold">5 structured rounds</strong>: CS Fundamentals, Aptitude, Core CS, Technical DSA, and HR STAR questions.
         </p>
-        <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-medium">
-          🎙️ Practice with real-time Speech-to-Text voice transcription & instant AI grading!
+        <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/5 border border-purple-500/20 text-purple-200 text-xs flex items-start gap-2.5 shadow-sm">
+          <Lightbulb className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            Practice with real-time Speech-to-Text transcription and receive instant AI performance scoring.
+          </div>
         </div>
       </div>
     ),
   },
   {
     step: 4,
-    title: "Live Competitive Coding Telemetry 💻",
-    subtitle: "Connect LeetCode, CodeChef, HackerRank & GeeksforGeeks",
+    title: "Competitive Coding Telemetry",
+    subtitle: "Auto-sync LeetCode, CodeChef, HackerRank & GFG",
     icon: BarChart3,
     iconColor: "text-emerald-400",
-    badge: "CODING PLATFORMS",
-    routeName: "Coding Page",
+    badge: "Coding Telemetry",
+    routeName: "Coding Platforms",
     route: "/coding-platforms",
     targetSelector: '[data-tour="coding-platforms-card"]',
     preferredPlacement: "bottom",
     content: (
-      <div className="space-y-2.5 text-xs text-slate-300">
-        <ul className="space-y-1.5">
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-            <span><strong className="text-white">Live Profile Sync:</strong> Link your platform handles for automatic problem-solving telemetry.</span>
+      <div className="space-y-2.5 text-xs sm:text-[13px] text-slate-300">
+        <ul className="space-y-2">
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-emerald-500/15 text-emerald-400 mt-0.5 shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">Live Profile Sync:</strong> Link your coding handles for automatic problem-solving telemetry.
+            </span>
           </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-            <span><strong className="text-white">Topic Recommendations:</strong> AI suggests exact coding problems based on your weak areas.</span>
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-amber-500/15 text-amber-400 mt-0.5 shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">Smart Practice:</strong> AI recommends targeted problems based on your identified weak areas.
+            </span>
           </li>
         </ul>
       </div>
@@ -139,60 +160,88 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     step: 5,
-    title: "Skill Gap Matrix & Milestone Quizzes 🎯",
-    subtitle: "Identify missing skills & level up your readiness rating",
+    title: "Skill Gap Matrix & Quizzes",
+    subtitle: "Identify missing skills & level up your rating",
     icon: Target,
     iconColor: "text-amber-400",
-    badge: "SKILL GAP MATRIX",
-    routeName: "Skills Page",
+    badge: "Skill Matrix",
+    routeName: "Skills Matrix",
     route: "/skills",
     targetSelector: '[data-tour="skill-growth-card"]',
     preferredPlacement: "right",
     content: (
-      <div className="space-y-2.5 text-xs text-slate-300">
-        <p>
-          Select your target career role (e.g. <em>Full Stack Engineer</em>, <em>Data Scientist</em>). Our AI maps your skill gaps and generates custom quizzes.
+      <div className="space-y-3">
+        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+          Select your target role (e.g. <em className="text-indigo-300 not-italic font-medium">Full Stack Engineer</em>, <em className="text-indigo-300 not-italic font-medium">Data Scientist</em>) to visualize gaps and unlock custom benchmark quizzes.
         </p>
-        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-medium">
-          🏆 Pass milestone quizzes with &ge; 80% to upgrade your verified skill levels!
+        <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2.5 shadow-sm">
+          <Trophy className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            Pass milestone quizzes with &ge; 80% to upgrade your verified skill badge levels.
+          </div>
         </div>
       </div>
     ),
   },
   {
     step: 6,
-    title: "Verified Hackathons & Event Proofs 🏆",
-    subtitle: "Upload certificates and build recruiter-verified proof of work",
+    title: "Verified Hackathons & Proofs",
+    subtitle: "Build recruiter-verified proof of work",
     icon: Trophy,
     iconColor: "text-rose-400",
-    badge: "EVENT PROOFS",
+    badge: "Event Proofs",
     routeName: "Events Page",
     route: "/events",
     targetSelector: '[data-tour="events-upload-card"]',
     preferredPlacement: "left",
     content: (
-      <div className="space-y-2.5 text-xs text-slate-300">
-        <p>
-          Log your hackathon wins, ideathons, and open source contributions with official certificates to generate verified skill credentials.
+      <div className="space-y-3">
+        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+          Log your hackathon wins, ideathons, and open source contributions with official certificates to generate verified skill credentials that recruiters trust.
         </p>
       </div>
     ),
   },
   {
     step: 7,
-    title: "Relaunch Tour Anytime 💡",
-    subtitle: "Access the interactive tour whenever you need guidance",
+    title: "AI LinkedIn Post Creator",
+    subtitle: "Turn hackathons & GitHub projects into viral posts",
+    icon: Linkedin,
+    iconColor: "text-blue-400",
+    badge: "LinkedIn Studio",
+    routeName: "LinkedIn Studio",
+    route: "/linkedin-posts",
+    targetSelector: '[data-tour="linkedin-generator-card"]',
+    preferredPlacement: "bottom",
+    content: (
+      <div className="space-y-3">
+        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+          Transform your logged hackathon wins and GitHub repo analyses directly into recruiter-tailored, high-engagement LinkedIn posts with 1-click generation.
+        </p>
+        <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-500/5 border border-blue-500/20 text-blue-200 text-xs flex items-start gap-2.5 shadow-sm">
+          <Share2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-semibold text-white">Pro Tip:</span> Generates custom achievement social banners, bold Unicode styling, and optimized hashtags!
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    step: 8,
+    title: "You're All Set!",
+    subtitle: "Relaunch this interactive guide anytime",
     icon: GraduationCap,
     iconColor: "text-indigo-400",
-    badge: "TOUR COMPLETE",
-    routeName: "Dashboard Page",
+    badge: "Tour Complete",
+    routeName: "Dashboard",
     route: "/dashboard",
     targetSelector: '[data-tour="app-tour-btn"]',
     preferredPlacement: "right",
     content: (
-      <div className="space-y-2.5 text-xs text-slate-300">
-        <p>
-          You are all set! Click <strong className="text-white">App Tour</strong> in the left sidebar anytime to restart this interactive guide.
+      <div className="space-y-3">
+        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+          You are ready to accelerate your career! Click <strong className="text-white font-semibold">App Tour</strong> in the sidebar anytime to restart this interactive walkthrough.
         </p>
       </div>
     ),
@@ -318,8 +367,8 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     if (!targetRect) return;
 
     const cardEl = cardRef.current;
-    const cardWidth = cardEl ? cardEl.offsetWidth : Math.min(380, window.innerWidth - 32);
-    const cardHeight = cardEl ? cardEl.offsetHeight : 380;
+    const cardWidth = cardEl ? cardEl.offsetWidth : Math.min(420, window.innerWidth - 32);
+    const cardHeight = cardEl ? cardEl.offsetHeight : 420;
     const margin = 16;
     const padding = 16;
 
@@ -436,19 +485,19 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     if (chosenPlacement === "right") {
       arrowPlacement = "left";
       const targetCenterY = targetRect.top + targetRect.height / 2;
-      arrowOffset = Math.max(24, Math.min(cardHeight - 24, targetCenterY - chosenTop));
+      arrowOffset = Math.max(28, Math.min(cardHeight - 28, targetCenterY - chosenTop));
     } else if (chosenPlacement === "left") {
       arrowPlacement = "right";
       const targetCenterY = targetRect.top + targetRect.height / 2;
-      arrowOffset = Math.max(24, Math.min(cardHeight - 24, targetCenterY - chosenTop));
+      arrowOffset = Math.max(28, Math.min(cardHeight - 28, targetCenterY - chosenTop));
     } else if (chosenPlacement === "bottom") {
       arrowPlacement = "top";
       const targetCenterX = targetRect.left + targetRect.width / 2;
-      arrowOffset = Math.max(24, Math.min(cardWidth - 24, targetCenterX - chosenLeft));
+      arrowOffset = Math.max(28, Math.min(cardWidth - 28, targetCenterX - chosenLeft));
     } else if (chosenPlacement === "top") {
       arrowPlacement = "bottom";
       const targetCenterX = targetRect.left + targetRect.width / 2;
-      arrowOffset = Math.max(24, Math.min(cardWidth - 24, targetCenterX - chosenLeft));
+      arrowOffset = Math.max(28, Math.min(cardWidth - 28, targetCenterX - chosenLeft));
     }
 
     setCardPosition({
@@ -538,17 +587,17 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
             y="0"
             width="100%"
             height="100%"
-            fill="rgba(2, 6, 23, 0.72)"
+            fill="rgba(2, 6, 23, 0.76)"
             mask="url(#spotlight-cutout)"
           />
         </svg>
       ) : (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-40 animate-in fade-in duration-300 flex flex-col items-center justify-center">
           {isNavigating && (
-            <div className="flex flex-col items-center gap-3 p-6 rounded-2xl glass-strong border border-indigo-500/30 text-center shadow-2xl animate-in zoom-in-95">
+            <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-slate-900/90 border border-indigo-500/30 text-center shadow-2xl backdrop-blur-xl animate-in zoom-in-95">
               <Loader2 className="h-8 w-8 text-indigo-400 animate-spin" />
               <div>
-                <p className="text-sm font-bold text-white">Navigating to {current.routeName}...</p>
+                <p className="text-sm font-semibold text-white">Navigating to {current.routeName}...</p>
                 <p className="text-xs text-slate-400 mt-0.5">Locating {current.badge} feature area</p>
               </div>
             </div>
@@ -565,7 +614,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
             width: `${targetRect.width + padding * 2}px`,
             height: `${targetRect.height + padding * 2}px`,
           }}
-          className="fixed z-40 pointer-events-none rounded-2xl border-2 border-indigo-400 ring-4 ring-indigo-500/40 shadow-[0_0_40px_rgba(99,102,241,0.7)] transition-all duration-500 ease-in-out animate-pulse"
+          className="fixed z-40 pointer-events-none rounded-2xl border-2 border-indigo-400 ring-4 ring-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.5)] transition-all duration-500 ease-in-out animate-pulse"
         />
       )}
 
@@ -587,11 +636,10 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
                   transform: "translate(-50%, -50%)",
                 }
           }
-          className="z-50 w-full max-w-[380px] max-h-[calc(100vh-32px)] transition-all duration-300 ease-out animate-in zoom-in-95"
+          className="z-50 w-[calc(100vw-32px)] sm:w-[420px] max-w-[420px] max-h-[calc(100vh-32px)] transition-all duration-300 ease-out animate-in zoom-in-95"
         >
-          <GlassCard
-            variant="strong"
-            className="p-4 space-y-3.5 border-indigo-500/40 bg-slate-900/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(99,102,241,0.3)] relative overflow-hidden rounded-2xl flex flex-col max-h-[calc(100vh-32px)]"
+          <div
+            className="p-5 sm:p-6 space-y-4 border border-white/[0.12] bg-slate-900/95 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_35px_rgba(99,102,241,0.18)] relative overflow-hidden rounded-3xl flex flex-col max-h-[calc(100vh-32px)]"
           >
             {/* Pointer Arrow Element */}
             <div
@@ -609,109 +657,122 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
               )}
             />
 
-            {/* Background Glow Accents */}
-            <div className="absolute -top-12 -right-12 w-28 h-28 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-12 -left-12 w-28 h-28 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+            {/* Ambient Background Glow Accents */}
+            <div className="absolute -top-16 -right-16 w-36 h-36 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-36 h-36 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                localStorage.setItem("cf-student-tour-done", "true");
-                onClose();
-              }}
-              className="absolute top-3.5 right-3.5 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition z-10"
-              title="Close Tour"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            {/* Current Navigation Map Banner */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/10 text-xs">
-              <div className="flex items-center gap-1.5 text-indigo-300 font-bold uppercase tracking-wider text-[10px]">
-                <Compass className="h-3.5 w-3.5 text-indigo-400 animate-spin" style={{ animationDuration: "12s" }} />
+            {/* Top Bar: Section Badge + Step Counter + Close Button */}
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/[0.08] relative z-10">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold tracking-wide">
+                <Compass className="h-3.5 w-3.5 text-indigo-400 animate-spin" style={{ animationDuration: "16s" }} />
                 <span>{current.routeName}</span>
               </div>
-              <div className="flex items-center gap-1 text-[11px] font-bold text-slate-400">
-                Step <span className="text-white">{currentStep + 1}</span> of {TOUR_STEPS.length}
-              </div>
-            </div>
 
-            {/* Step Header */}
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 p-[2px] shadow-lg shrink-0">
-                <div className="w-full h-full bg-slate-950 rounded-[10px] grid place-items-center">
-                  <Icon className={`h-4.5 w-4.5 ${current.iconColor}`} />
+              <div className="flex items-center gap-2">
+                <div className="px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-[11px] font-medium text-slate-300">
+                  Step <span className="text-white font-bold">{currentStep + 1}</span> of {TOUR_STEPS.length}
                 </div>
-              </div>
 
-              <div className="min-w-0 flex-1 pr-5">
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase tracking-wider">
-                  {current.badge}
-                </span>
-                <h3 className="text-xs font-extrabold text-white mt-0.5 leading-snug">{current.title}</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">{current.subtitle}</p>
+                <button
+                  onClick={() => {
+                    localStorage.setItem("cf-student-tour-done", "true");
+                    onClose();
+                  }}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  title="Close Tour (Esc)"
+                  aria-label="Close tour"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             </div>
 
-            {/* Step Body */}
-            <div className="py-0.5">{current.content}</div>
+            {/* Step Header: Icon + Badge + Title + Subtitle */}
+            <div className="flex items-start gap-3.5 relative z-10 pt-0.5">
+              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-purple-500/15 to-pink-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 shadow-lg shadow-indigo-500/10">
+                <Icon className={`h-5 w-5 ${current.iconColor}`} />
+              </div>
 
-            {/* Step Map Timeline Pills */}
-            <div className="flex items-center justify-between gap-1 pt-1 overflow-x-auto no-scrollbar">
+              <div className="min-w-0 flex-1">
+                <div className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 uppercase tracking-wider mb-1">
+                  {current.badge}
+                </div>
+                <h3 className="text-base font-bold text-white tracking-tight leading-snug">
+                  {current.title}
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5 leading-normal">
+                  {current.subtitle}
+                </p>
+              </div>
+            </div>
+
+            {/* Step Body Content */}
+            <div className="relative z-10 py-1">
+              {current.content}
+            </div>
+
+            {/* Step Progress Segments */}
+            <div className="flex items-center gap-1.5 pt-1 relative z-10">
               {TOUR_STEPS.map((s, idx) => (
                 <button
                   key={s.step}
                   onClick={() => handleSelectStep(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-300 relative focus:outline-none",
                     idx === currentStep
-                      ? "w-7 bg-gradient-to-r from-indigo-500 to-purple-500"
+                      ? "flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"
                       : idx < currentStep
-                      ? "w-2 bg-indigo-400/60"
-                      : "w-2 bg-white/20 hover:bg-white/40"
-                  }`}
-                  title={`Jump to Step ${s.step}: ${s.badge}`}
-                />
+                      ? "w-4 bg-indigo-400/50 hover:bg-indigo-400"
+                      : "w-4 bg-white/15 hover:bg-white/30"
+                  )}
+                  title={`Step ${s.step}: ${s.badge}`}
+                >
+                  <span className="sr-only">Step {s.step}</span>
+                </button>
               ))}
             </div>
 
             {/* Footer & Navigation Controls */}
-            <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+            <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3 relative z-10">
               <button
                 onClick={() => {
                   localStorage.setItem("cf-student-tour-done", "true");
                   onClose();
                 }}
-                className="text-[11px] text-slate-400 hover:text-white transition font-medium underline-offset-4 hover:underline"
+                className="text-xs text-slate-400 hover:text-slate-200 transition-colors font-medium px-2 py-1.5 rounded-lg hover:bg-white/5"
               >
                 Exit Tour
               </button>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 {currentStep > 0 && (
                   <button
                     onClick={handlePrev}
-                    className="px-2.5 py-1 rounded-xl glass hover:bg-white/10 text-[11px] font-semibold text-slate-300 flex items-center gap-1 transition"
+                    className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition-colors"
                   >
-                    <ChevronLeft className="h-3 w-3" /> Back
+                    <ChevronLeft className="h-3.5 w-3.5" /> Back
                   </button>
                 )}
 
                 <button
                   onClick={handleNext}
-                  className="btn-gradient px-3.5 py-1 rounded-xl text-[11px] font-bold text-white flex items-center gap-1 shadow-lg shadow-indigo-500/20 hover:scale-105 transition"
+                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 transition-all duration-200 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0"
                 >
                   {isLast ? (
-                    <>Finish 🚀</>
+                    <>
+                      <span>Get Started</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </>
                   ) : (
                     <>
-                      Next: {nextStep?.badge || "Feature"}{" "}
-                      <ArrowRight className="h-3 w-3" />
+                      <span>Next: {nextStep?.badge ? (nextStep.badge.charAt(0) + nextStep.badge.slice(1).toLowerCase()) : "Feature"}</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
                     </>
                   )}
                 </button>
               </div>
             </div>
-          </GlassCard>
+          </div>
         </div>
       )}
     </div>

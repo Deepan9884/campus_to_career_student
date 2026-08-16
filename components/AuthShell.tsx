@@ -1,32 +1,32 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
+import { CheckCircle2, ShieldCheck } from "lucide-react";
 
 const PICTURE_PANELS_ROW1 = [
-  { src: "/landing/panel_interview.jpg", alt: "AI Mock Interview" },
-  { src: "/landing/panel_resume.jpg", alt: "ATS Resume Audit" },
-  { src: "/landing/panel_github.jpg", alt: "GitHub Code Review" },
-  { src: "/landing/panel_roadmap.jpg", alt: "Skill Roadmap" },
-  { src: "/landing/panel_coding.jpg", alt: "Coding Practice" },
-  { src: "/landing/panel_events.jpg", alt: "Tech Events" },
+  { src: "/landing/study_interview.jpg", alt: "AI Mock Interview" },
+  { src: "/landing/study_resume.jpg", alt: "ATS Resume Audit" },
+  { src: "/landing/study_github.jpg", alt: "GitHub Code Review" },
+  { src: "/landing/study_roadmap.jpg", alt: "Skill Roadmap" },
+  { src: "/landing/study_coding.jpg", alt: "Coding Practice" },
+  { src: "/landing/study_events.jpg", alt: "Tech Events" },
 ];
 
 const PICTURE_PANELS_ROW2 = [
   { src: "/landing/study_interview.jpg", alt: "Interview Preparation" },
   { src: "/landing/study_resume.jpg", alt: "Resume Builder" },
   { src: "/landing/study_github.jpg", alt: "Project Showcase" },
-  { src: "/landing/panel_linkedin.jpg", alt: "LinkedIn Optimizer" },
+  { src: "/landing/study_roadmap.jpg", alt: "Career Roadmap" },
   { src: "/landing/study_coding.jpg", alt: "Interactive Coding" },
-  { src: "/landing/hero_study.jpg", alt: "Career Hub" },
+  { src: "/landing/study_events.jpg", alt: "Hiring Drives & Hackathons" },
 ];
 
 const PICTURE_PANELS_ROW3 = [
-  { src: "/landing/panel_roadmap.jpg", alt: "Career Roadmap" },
-  { src: "/landing/panel_interview.jpg", alt: "Mock Interview" },
+  { src: "/landing/study_roadmap.jpg", alt: "Career Roadmap" },
+  { src: "/landing/study_interview.jpg", alt: "Mock Interview" },
   { src: "/landing/study_resume.jpg", alt: "Resume Analysis" },
-  { src: "/landing/panel_github.jpg", alt: "Code Audit" },
-  { src: "/landing/panel_events.jpg", alt: "Events & Workshops" },
-  { src: "/landing/panel_coding.jpg", alt: "Algorithm Prep" },
+  { src: "/landing/study_github.jpg", alt: "Code Audit" },
+  { src: "/landing/study_events.jpg", alt: "Events & Workshops" },
+  { src: "/landing/study_coding.jpg", alt: "Algorithm Prep" },
 ];
 
 export function AuthShell({ children }: { children: React.ReactNode }) {

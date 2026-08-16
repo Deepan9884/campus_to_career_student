@@ -6,7 +6,6 @@ import {
   Brain,
   RotateCcw,
   AlertTriangle,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -254,7 +253,7 @@ export function QuizDialog({
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-5 w-5 text-[color:var(--color-warning)]" />
+                      <AlertTriangle className="h-5 w-5 text-[color:var(--color-warning)]" />
                       <span>Almost!</span>
                     </>
                   )}

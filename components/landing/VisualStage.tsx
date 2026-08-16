@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FeaturePanelData } from "./FeatureDeck";
-import { Sparkles, ArrowRight, Eye, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Eye, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/stores";
 

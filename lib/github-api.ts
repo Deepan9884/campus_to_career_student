@@ -1,4 +1,4 @@
-import { getAccessToken } from "@/lib/api";
+import { api } from "@/lib/api";
 import type {
   GithubConnectResponse,
   RepoListResponse,
@@ -8,89 +8,92 @@ import type {
   AnalyzePayload,
 } from "@/types/github";
 
-const isServer = typeof window === "undefined";
-const API_BASE = isServer ? "http://localhost:5000/api" : import.meta.env.VITE_API_URL || "/api";
-
-class ApiError extends Error {
-  statusCode: number;
-  errors: string[];
-  constructor(statusCode: number, message: string, errors: string[] = []) {
-    super(message);
-    this.statusCode = statusCode;
-    this.errors = errors;
-  }
-}
-
-async function authFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const headers: Record<string, string> = {
-    ...((options.headers as Record<string, string>) || {}),
-  };
-
-  const token = getAccessToken();
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const res = await fetch(url, { ...options, headers, credentials: "include" });
-  const json = await res.json();
-
-  if (!res.ok || json.success === false) {
-    throw new ApiError(
-      json.statusCode || res.status,
-      json.message || "Request failed",
-      json.errors || [],
-    );
-  }
-
-  return json.data as T;
-}
-
 export async function connectGithub(payload: ConnectPayload): Promise<GithubConnectResponse> {
-  return authFetch<GithubConnectResponse>(`${API_BASE}/github/connect`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  return api.post<GithubConnectResponse>("/github/connect", payload);
 }
 
 export async function listRepos(): Promise<RepoListResponse> {
-  return authFetch<RepoListResponse>(`${API_BASE}/github/repos`);
+  return api.get<RepoListResponse>("/github/repos");
 }
 
 export async function analyzeRepo(payload: AnalyzePayload): Promise<RepoAnalysis> {
-  return authFetch<RepoAnalysis>(`${API_BASE}/github/analyze`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  return api.post<RepoAnalysis>("/github/analyze", payload);
 }
 
 export async function getAnalysisHistory(page = 1, limit = 10): Promise<AnalysisHistoryResponse> {
-  return authFetch<AnalysisHistoryResponse>(
-    `${API_BASE}/github/history?page=${page}&limit=${limit}`,
-  );
+  return api.get<AnalysisHistoryResponse>(`/github/history?page=${page}&limit=${limit}`);
 }
 
 export async function getAnalysisById(id: string): Promise<RepoAnalysis> {
-  return authFetch<RepoAnalysis>(`${API_BASE}/github/${id}`);
+  return api.get<RepoAnalysis>(`/github/${id}`);
 }
 
 export async function deleteAnalysis(id: string): Promise<void> {
-  await authFetch<void>(`${API_BASE}/github/${id}`, { method: "DELETE" });
+  await api.delete<void>(`/github/${id}`);
 }
 
-export async function generateLinkedInPost(payload: {
-  repoFullName: string;
-  overview: string;
-  quality: string;
-  resumeImpact: string[];
-  repoUrl: string;
-}): Promise<{ draft: string }> {
-  return authFetch<{ draft: string }>(`${API_BASE}/github/linkedin-post`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+export interface LinkedInPostVariation {
+  style: string;
+  content: string;
+}
+
+export interface LinkedInPostResult {
+  draft: string;
+  headline?: string;
+  achievementParagraph?: string;
+  variations?: LinkedInPostVariation[];
+  suggestedHashtags?: string[];
+  suggestedMentions?: string[];
+  keyTakeaways?: string[];
+  sourceData?: {
+    postType?: string;
+    title?: string;
+  };
+}
+
+export interface GenerateLinkedInPostPayload {
+  postType?: "github" | "event" | "milestone" | "custom" | "idea";
+  eventId?: string;
+  eventName?: string;
+  eventType?: string;
+  organizer?: string;
+  role?: string;
+  teamName?: string;
+  teamSize?: number;
+  teamMembers?: string[];
+  projectTitle?: string;
+  problemStatement?: string;
+  techStack?: string[] | string;
+  description?: string;
+  result?: string;
+  prize?: string;
+  whatDidYouBuild?: string;
+  whatDidYouLearn?: string;
+  challengesFaced?: string;
+  keyTakeaways?: string[] | string;
+  projectLink?: string;
+  repoFullName?: string;
+  overview?: string;
+  quality?: string;
+  resumeImpact?: string[];
+  repoUrl?: string;
+  tone?: string;
+  length?: string;
+  customHighlights?: string;
+  mentions?: string[] | string;
+  includeEmoji?: boolean;
+  includeHashtags?: boolean;
+  title?: string;
+  topic?: string;
+  organization?: string;
+  milestoneType?: string;
+  keyAchievements?: string;
+}
+
+export async function generateLinkedInPost(
+  payload: GenerateLinkedInPostPayload,
+): Promise<LinkedInPostResult> {
+  return api.post<LinkedInPostResult>("/github/linkedin-post", payload);
 }
 
 export interface PortfolioData {
@@ -112,14 +115,5 @@ export interface PortfolioData {
 }
 
 export async function getPortfolio(username: string): Promise<PortfolioData> {
-  const res = await fetch(`${API_BASE}/github/portfolio/${username}`);
-  const json = await res.json();
-  if (!res.ok || json.success === false) {
-    throw new ApiError(
-      json.statusCode || res.status,
-      json.message || "Failed to fetch portfolio",
-      json.errors || [],
-    );
-  }
-  return json.data as PortfolioData;
+  return api.get<PortfolioData>(`/github/portfolio/${username}`);
 }
