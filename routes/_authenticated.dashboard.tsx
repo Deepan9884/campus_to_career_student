@@ -307,7 +307,7 @@ function Dashboard() {
       </div>
 
       {/* ── STUDENT WELCOME & READINESS OVERVIEW ── */}
-      <div id="section-overview" className="scroll-mt-24">
+      <div id="section-overview" className="scroll-mt-24" data-tour="readiness-card">
         <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-border dark:border-[#2F4B6B]/60 shadow-xl bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(27,39,64,0.92)_0%,rgba(17,24,39,0.98)_60%,rgba(8,13,24,1)_100%)]">
           <div className="relative z-10 grid lg:grid-cols-12 gap-6 items-center">
             {/* Left: Readiness Ring & Score */}

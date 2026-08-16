@@ -206,16 +206,24 @@ interface ElementRect {
   height: number;
 }
 
+interface CardPosition {
+  top: number;
+  left: number;
+  arrowPlacement: "top" | "bottom" | "left" | "right";
+  arrowOffset?: number;
+}
+
 export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<ElementRect | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [cardPosition, setCardPosition] = useState<{ top: number; left: number; arrowPlacement: string }>({
+  const [cardPosition, setCardPosition] = useState<CardPosition>({
     top: 100,
     left: 100,
-    arrowPlacement: "top",
+    arrowPlacement: "left",
   });
 
+  const cardRef = React.useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -246,23 +254,23 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     }
   }, [open, currentStep, current, pathname, navigate]);
 
-  // Gentle, spacious target locating without aggressive scrolling
+  // Centered, comfortable target locating with smooth scroll into view
   const updateTargetLocation = useCallback(() => {
     if (!open || !current || isNavigating) return;
 
-    let el = document.querySelector(current.targetSelector) as HTMLElement | null;
+    const el = document.querySelector(current.targetSelector) as HTMLElement | null;
 
     if (el) {
       const elRect = el.getBoundingClientRect();
-      const isVisible =
-        elRect.top >= 60 &&
-        elRect.bottom <= window.innerHeight - 40 &&
-        elRect.left >= 0 &&
-        elRect.right <= window.innerWidth;
+      const isComfortablyVisible =
+        elRect.top >= 90 &&
+        elRect.bottom <= window.innerHeight - 90 &&
+        elRect.left >= 20 &&
+        elRect.right <= window.innerWidth - 20;
 
-      // Only scroll gently if element is actually outside visible range
-      if (!isVisible) {
-        el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      // Scroll smoothly to center the element if outside comfortable range
+      if (!isComfortablyVisible) {
+        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
       }
 
       const timer = setTimeout(() => {
@@ -274,7 +282,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           width: rect.width,
           height: rect.height,
         });
-      }, 200);
+      }, 250);
 
       return () => clearTimeout(timer);
     } else {
@@ -305,13 +313,14 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     };
   }, [open, currentStep, pathname, isNavigating, updateTargetLocation]);
 
-  // Strict Zero-Overlap Placement Solver
-  useEffect(() => {
+  // Dynamic Zero-Overlap Placement Solver with Strict Viewport Clamping
+  const calculateCardPosition = useCallback(() => {
     if (!targetRect) return;
 
-    const cardWidth = Math.min(375, window.innerWidth - 32);
-    const cardHeight = 285;
-    const margin = 20;
+    const cardEl = cardRef.current;
+    const cardWidth = cardEl ? cardEl.offsetWidth : Math.min(380, window.innerWidth - 32);
+    const cardHeight = cardEl ? cardEl.offsetHeight : 380;
+    const margin = 16;
     const padding = 16;
 
     const targetBox = {
@@ -321,41 +330,48 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
       bottom: targetRect.top + targetRect.height + padding,
     };
 
+    const spaceRight = window.innerWidth - (targetBox.right + margin);
+    const spaceLeft = targetBox.left - margin;
+    const spaceBottom = window.innerHeight - (targetBox.bottom + margin);
+    const spaceTop = targetBox.top - margin;
+
     const preferred = current.preferredPlacement || "right";
-    const allPlacements = ["right", "left", "bottom", "top"];
+    const allPlacements: Array<"right" | "left" | "bottom" | "top"> = ["right", "left", "bottom", "top"];
     const orderedPlacements = [preferred, ...allPlacements.filter((p) => p !== preferred)];
 
     let chosenTop = 100;
     let chosenLeft = 100;
-    let chosenArrow = "left";
+    let chosenPlacement: "right" | "left" | "bottom" | "top" = "right";
     let foundNonOverlapping = false;
 
     for (const placement of orderedPlacements) {
       let t = 0;
       let l = 0;
-      let arrow = "left";
+      let hasRoom = false;
 
       if (placement === "right") {
+        hasRoom = spaceRight >= cardWidth;
         l = targetBox.right + margin;
         t = targetRect.top + targetRect.height / 2 - cardHeight / 2;
-        arrow = "left";
       } else if (placement === "left") {
+        hasRoom = spaceLeft >= cardWidth;
         l = targetBox.left - cardWidth - margin;
         t = targetRect.top + targetRect.height / 2 - cardHeight / 2;
-        arrow = "right";
       } else if (placement === "bottom") {
+        hasRoom = spaceBottom >= cardHeight;
         t = targetBox.bottom + margin;
         l = targetRect.left + targetRect.width / 2 - cardWidth / 2;
-        arrow = "top";
       } else if (placement === "top") {
+        hasRoom = spaceTop >= cardHeight;
         t = targetBox.top - cardHeight - margin;
         l = targetRect.left + targetRect.width / 2 - cardWidth / 2;
-        arrow = "bottom";
       }
 
-      // Clamp candidate position to screen viewport
-      l = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, l));
-      t = Math.max(16, Math.min(window.innerHeight - cardHeight - 16, t));
+      // Safe viewport boundary clamping so it never extends off-screen
+      const maxTop = Math.max(16, window.innerHeight - cardHeight - 16);
+      const maxLeft = Math.max(16, window.innerWidth - cardWidth - 16);
+      l = Math.max(16, Math.min(maxLeft, l));
+      t = Math.max(16, Math.min(maxTop, t));
 
       const candidateBox = {
         left: l,
@@ -372,40 +388,91 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
         candidateBox.top >= targetBox.bottom
       );
 
-      if (!overlaps) {
+      if (hasRoom && !overlaps) {
         chosenTop = t;
         chosenLeft = l;
-        chosenArrow = arrow;
+        chosenPlacement = placement;
         foundNonOverlapping = true;
         break;
       }
     }
 
-    // Fallback if all candidates overlap
+    // Fallback: pick side with maximum available space
     if (!foundNonOverlapping) {
-      const targetRight = targetRect.left + targetRect.width;
-      const targetBottom = targetRect.top + targetRect.height;
-      if (window.innerWidth - targetRight > cardWidth + 30) {
-        chosenLeft = targetRight + margin;
-        chosenTop = Math.max(16, Math.min(window.innerHeight - cardHeight - 16, targetRect.top));
-        chosenArrow = "left";
-      } else if (targetRect.left > cardWidth + 30) {
-        chosenLeft = targetRect.left - cardWidth - margin;
-        chosenTop = Math.max(16, Math.min(window.innerHeight - cardHeight - 16, targetRect.top));
-        chosenArrow = "right";
-      } else if (targetRect.top > window.innerHeight / 2) {
-        chosenTop = Math.max(16, targetRect.top - cardHeight - margin);
-        chosenLeft = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, targetRect.left));
-        chosenArrow = "bottom";
+      const candidatesWithSpace = [
+        { side: "right" as const, space: spaceRight },
+        { side: "left" as const, space: spaceLeft },
+        { side: "bottom" as const, space: spaceBottom },
+        { side: "top" as const, space: spaceTop },
+      ];
+      candidatesWithSpace.sort((a, b) => b.space - a.space);
+      const fallbackPlacement = candidatesWithSpace[0].side;
+
+      if (fallbackPlacement === "right") {
+        chosenLeft = targetBox.right + margin;
+        chosenTop = targetRect.top + targetRect.height / 2 - cardHeight / 2;
+      } else if (fallbackPlacement === "left") {
+        chosenLeft = targetBox.left - cardWidth - margin;
+        chosenTop = targetRect.top + targetRect.height / 2 - cardHeight / 2;
+      } else if (fallbackPlacement === "bottom") {
+        chosenTop = targetBox.bottom + margin;
+        chosenLeft = targetRect.left + targetRect.width / 2 - cardWidth / 2;
       } else {
-        chosenTop = Math.min(window.innerHeight - cardHeight - 16, targetBottom + margin);
-        chosenLeft = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, targetRect.left));
-        chosenArrow = "top";
+        chosenTop = targetBox.top - cardHeight - margin;
+        chosenLeft = targetRect.left + targetRect.width / 2 - cardWidth / 2;
       }
+
+      const maxTop = Math.max(16, window.innerHeight - cardHeight - 16);
+      const maxLeft = Math.max(16, window.innerWidth - cardWidth - 16);
+      chosenLeft = Math.max(16, Math.min(maxLeft, chosenLeft));
+      chosenTop = Math.max(16, Math.min(maxTop, chosenTop));
+      chosenPlacement = fallbackPlacement;
     }
 
-    setCardPosition({ top: chosenTop, left: chosenLeft, arrowPlacement: chosenArrow });
+    // Calculate dynamic pointer arrow placement & offset
+    let arrowPlacement: "top" | "bottom" | "left" | "right" = "left";
+    let arrowOffset: number | undefined = undefined;
+
+    if (chosenPlacement === "right") {
+      arrowPlacement = "left";
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+      arrowOffset = Math.max(24, Math.min(cardHeight - 24, targetCenterY - chosenTop));
+    } else if (chosenPlacement === "left") {
+      arrowPlacement = "right";
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+      arrowOffset = Math.max(24, Math.min(cardHeight - 24, targetCenterY - chosenTop));
+    } else if (chosenPlacement === "bottom") {
+      arrowPlacement = "top";
+      const targetCenterX = targetRect.left + targetRect.width / 2;
+      arrowOffset = Math.max(24, Math.min(cardWidth - 24, targetCenterX - chosenLeft));
+    } else if (chosenPlacement === "top") {
+      arrowPlacement = "bottom";
+      const targetCenterX = targetRect.left + targetRect.width / 2;
+      arrowOffset = Math.max(24, Math.min(cardWidth - 24, targetCenterX - chosenLeft));
+    }
+
+    setCardPosition({
+      top: chosenTop,
+      left: chosenLeft,
+      arrowPlacement,
+      arrowOffset,
+    });
   }, [targetRect, current]);
+
+  // Recalculate position on target change or step update
+  useEffect(() => {
+    calculateCardPosition();
+  }, [targetRect, calculateCardPosition]);
+
+  // ResizeObserver on the card to auto-adjust when card layout expands or shrinks
+  useEffect(() => {
+    if (!cardRef.current || !open) return;
+    const observer = new ResizeObserver(() => {
+      calculateCardPosition();
+    });
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [open, currentStep, calculateCardPosition]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -505,6 +572,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
       {/* Dynamic Popover Tooltip Box */}
       {!isNavigating && (
         <div
+          ref={cardRef}
           style={
             targetRect
               ? {
@@ -519,20 +587,25 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
                   transform: "translate(-50%, -50%)",
                 }
           }
-          className="z-50 w-full max-w-[375px] max-h-[calc(100vh-32px)] overflow-y-auto transition-all duration-500 ease-in-out animate-in zoom-in-95"
+          className="z-50 w-full max-w-[380px] max-h-[calc(100vh-32px)] transition-all duration-300 ease-out animate-in zoom-in-95"
         >
           <GlassCard
             variant="strong"
-            className="p-4 space-y-3.5 border-indigo-500/40 bg-slate-900/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(99,102,241,0.3)] relative overflow-hidden rounded-2xl"
+            className="p-4 space-y-3.5 border-indigo-500/40 bg-slate-900/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(99,102,241,0.3)] relative overflow-hidden rounded-2xl flex flex-col max-h-[calc(100vh-32px)]"
           >
             {/* Pointer Arrow Element */}
             <div
+              style={
+                cardPosition.arrowPlacement === "left" || cardPosition.arrowPlacement === "right"
+                  ? { top: cardPosition.arrowOffset !== undefined ? `${cardPosition.arrowOffset}px` : "50%" }
+                  : { left: cardPosition.arrowOffset !== undefined ? `${cardPosition.arrowOffset}px` : "50%" }
+              }
               className={cn(
                 "absolute w-3.5 h-3.5 bg-slate-900 border-indigo-500/40 rotate-45 z-20 pointer-events-none",
-                cardPosition.arrowPlacement === "top" && "-top-2 left-1/2 -translate-x-1/2 border-t border-l",
-                cardPosition.arrowPlacement === "bottom" && "-bottom-2 left-1/2 -translate-x-1/2 border-b border-r",
-                cardPosition.arrowPlacement === "left" && "-left-2 top-1/2 -translate-y-1/2 border-b border-l",
-                cardPosition.arrowPlacement === "right" && "-right-2 top-1/2 -translate-y-1/2 border-t border-r"
+                cardPosition.arrowPlacement === "top" && "-top-2 -translate-x-1/2 border-t border-l",
+                cardPosition.arrowPlacement === "bottom" && "-bottom-2 -translate-x-1/2 border-b border-r",
+                cardPosition.arrowPlacement === "left" && "-left-2 -translate-y-1/2 border-b border-l",
+                cardPosition.arrowPlacement === "right" && "-right-2 -translate-y-1/2 border-t border-r"
               )}
             />
 
