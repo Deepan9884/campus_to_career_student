@@ -73,10 +73,13 @@ export interface InterviewHistoryResponse {
   pagination: Pagination;
 }
 
+export type RoundType = "quiz" | "aptitude" | "core" | "technical" | "hr";
+
 export interface StartInterviewPayload {
   targetRole?: string;
   difficulty?: "easy" | "medium" | "hard";
   questionCount?: number;
+  selectedRounds?: RoundType[];
 }
 
 export interface AnswerPayload {

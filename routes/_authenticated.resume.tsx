@@ -18,6 +18,8 @@ import {
   Zap,
   Mic,
   ChevronRight,
+  ArrowRight,
+  Map,
 } from "lucide-react";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
@@ -473,117 +475,218 @@ function ResumePage() {
               )}
             </GlassCard>
 
-            {/* Bottom 2-Column Grid: Upload History + Score History */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Upload History */}
-              <GlassCard>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-sm flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-indigo-400" /> Upload History
-                    {history.length > 0 && (
-                      <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-white/10 text-muted-foreground">
-                        {pagination ? pagination.total : history.length}
-                      </span>
-                    )}
-                  </h3>
-                  <span className="text-[11px] text-muted-foreground">Click to view past analysis</span>
+            {/* Bottom 2-Column Grid: Upload History + Right Side Insights (Aligned with items-start) */}
+            <div className="grid lg:grid-cols-2 gap-6 items-start">
+              {/* Left Column: Upload History */}
+              <GlassCard className="space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                  <div>
+                    <h3 className="font-bold text-sm flex items-center gap-2 text-white">
+                      <FileText className="h-4 w-4 text-indigo-400" /> Upload History
+                      {history.length > 0 && (
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                          {pagination ? pagination.total : history.length}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Select any resume to inspect detailed AI feedback</p>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 hidden sm:block">
+                    Click to Open
+                  </span>
                 </div>
                 {renderHistoryList(false)}
               </GlassCard>
 
-              {/* Score History / Trend — Enhanced */}
-              <GlassCard variant="strong" className="relative overflow-hidden">
-                {/* Decorative gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-cyan-500/[0.04] pointer-events-none" />
-                <div className="absolute -top-20 -right-20 w-56 h-56 bg-indigo-500/[0.07] rounded-full blur-3xl pointer-events-none" />
+              {/* Right Column: Score History + Latest Resume Spotlight + Quick Tools */}
+              <div className="space-y-6">
+                {/* 1. Score History / Trend */}
+                <GlassCard variant="strong" className="relative overflow-hidden">
+                  {/* Decorative gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-cyan-500/[0.04] pointer-events-none" />
+                  <div className="absolute -top-20 -right-20 w-56 h-56 bg-indigo-500/[0.07] rounded-full blur-3xl pointer-events-none" />
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30">
-                        <TrendingUp className="h-4 w-4 text-indigo-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-white">Score History & Trend</h3>
-                        <p className="text-[11px] text-muted-foreground">Your ATS score progression over time</p>
-                      </div>
-                    </div>
-                    {chartData.length >= 2 && (
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
-                        {chartData[chartData.length - 1].score > chartData[0].score ? "Improving" : "Track Progress"}
-                      </span>
-                    )}
-                  </div>
-
-                  {chartData.length < 2 ? (
-                    <div className="h-48 grid place-items-center text-center">
-                      <div className="space-y-3">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
-                          <TrendingUp className="h-7 w-7 text-indigo-400/60" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30">
+                          <TrendingUp className="h-4 w-4 text-indigo-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-300">Not enough data yet</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Upload more resumes to see your score trend unfold
-                          </p>
+                          <h3 className="font-bold text-sm text-white">Score History & Trend</h3>
+                          <p className="text-[11px] text-muted-foreground">Your ATS score progression over time</p>
                         </div>
                       </div>
+                      {chartData.length >= 2 && (
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold flex items-center gap-1">
+                          <TrendingUp className="h-3 w-3" />
+                          {chartData[chartData.length - 1].score > chartData[0].score ? "Improving" : "Track Progress"}
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <>
-                      {/* Mini stat pills */}
-                      <div className="flex gap-2 mb-4">
-                        <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Highest</p>
-                          <p className="text-lg font-bold text-emerald-400">{Math.max(...chartData.map(d => d.score))}%</p>
-                        </div>
-                        <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Latest</p>
-                          <p className="text-lg font-bold text-indigo-400">{chartData[chartData.length - 1].score}%</p>
-                        </div>
-                        <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Average</p>
-                          <p className="text-lg font-bold text-cyan-400">{Math.round(chartData.reduce((a, d) => a + d.score, 0) / chartData.length)}%</p>
-                        </div>
-                      </div>
 
-                      <div className="h-48 -mx-2">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={chartData}>
-                            <defs>
-                              <linearGradient id="scoreGradientIdle" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#6366F1" stopOpacity={0.35} />
-                                <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                              </linearGradient>
-                            </defs>
-                            <XAxis dataKey="date" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#475569" fontSize={11} domain={[0, 100]} tickLine={false} axisLine={false} />
-                            <Tooltip
-                              contentStyle={{
-                                background: "rgba(15,23,42,0.95)",
-                                border: "1px solid rgba(99,102,241,0.3)",
-                                borderRadius: 12,
-                                boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                              }}
-                              labelStyle={{ color: "#94A3B8", fontSize: 11, fontWeight: 600 }}
-                              itemStyle={{ color: "#A5B4FC", fontWeight: 700, fontSize: 13 }}
-                            />
-                            <Line
-                              type="monotone"
-                              dataKey="score"
-                              stroke="#6366F1"
-                              strokeWidth={3}
-                              dot={{ r: 5, fill: "#818CF8", stroke: "#6366F1", strokeWidth: 2 }}
-                              activeDot={{ r: 7, fill: "#A5B4FC", stroke: "#6366F1", strokeWidth: 2 }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
+                    {chartData.length < 2 ? (
+                      <div className="h-44 grid place-items-center text-center py-2">
+                        <div className="space-y-2">
+                          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
+                            <TrendingUp className="h-6 w-6 text-indigo-400/60" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-slate-300">Not enough data yet</p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                              Upload more resumes to see your score trend unfold
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </>
-                  )}
-                </div>
-              </GlassCard>
+                    ) : (
+                      <>
+                        {/* Mini stat pills */}
+                        <div className="flex gap-2 mb-4">
+                          <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Highest</p>
+                            <p className="text-lg font-bold text-emerald-400">{Math.max(...chartData.map(d => d.score))}%</p>
+                          </div>
+                          <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Latest</p>
+                            <p className="text-lg font-bold text-indigo-400">{chartData[chartData.length - 1].score}%</p>
+                          </div>
+                          <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Average</p>
+                            <p className="text-lg font-bold text-cyan-400">{Math.round(chartData.reduce((a, d) => a + d.score, 0) / chartData.length)}%</p>
+                          </div>
+                        </div>
+
+                        <div className="h-44 -mx-2">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={chartData}>
+                              <XAxis dataKey="date" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
+                              <YAxis stroke="#475569" fontSize={11} domain={[0, 100]} tickLine={false} axisLine={false} />
+                              <Tooltip
+                                contentStyle={{
+                                  background: "rgba(15,23,42,0.95)",
+                                  border: "1px solid rgba(99,102,241,0.3)",
+                                  borderRadius: 12,
+                                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                                }}
+                                labelStyle={{ color: "#94A3B8", fontSize: 11, fontWeight: 600 }}
+                                itemStyle={{ color: "#A5B4FC", fontWeight: 700, fontSize: 13 }}
+                              />
+                              <Line
+                                type="monotone"
+                                dataKey="score"
+                                stroke="#6366F1"
+                                strokeWidth={3}
+                                dot={{ r: 4, fill: "#818CF8", stroke: "#6366F1", strokeWidth: 2 }}
+                                activeDot={{ r: 6, fill: "#A5B4FC", stroke: "#6366F1", strokeWidth: 2 }}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </GlassCard>
+
+                {/* 2. Latest Resume Spotlight (Quick Access) */}
+                {history.length > 0 && (() => {
+                  const latest = history.find(r => r.status === "completed") || history[0];
+                  return (
+                    <GlassCard variant="strong" className="relative overflow-hidden border-indigo-500/25">
+                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.07] via-transparent to-cyan-500/[0.04] pointer-events-none" />
+                      <div className="relative z-10 space-y-3.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-indigo-400" />
+                            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Latest Resume Spotlight</h4>
+                          </div>
+                          {latest.inferredTargetRole && (
+                            <span className="text-[10px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 truncate max-w-[150px]">
+                              {latest.inferredTargetRole}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 shrink-0">
+                              <FileText className="h-5 w-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-white truncate">{latest.filename}</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                Scored on {new Date(latest.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span className="text-lg font-extrabold text-white">
+                              {latest.status === "completed" ? `${latest.atsScore}%` : latest.status}
+                            </span>
+                            <span className="text-[9px] block text-emerald-400 font-bold uppercase tracking-wider">
+                              {(latest.atsScore ?? 0) >= 75 ? "Placement Ready" : "Review Ready"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {latest.summary && (
+                          <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed pl-1">
+                            "{latest.summary}"
+                          </p>
+                        )}
+
+                        <button
+                          onClick={() => viewResume(latest._id)}
+                          className="w-full py-2.5 px-4 rounded-xl btn-gradient btn-gradient-hover text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/20"
+                        >
+                          <span>Open Full AI Breakdown & Polish</span>
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </GlassCard>
+                  );
+                })()}
+
+                {/* 3. Quick Career Prep Tools */}
+                <GlassCard variant="strong" className="relative overflow-hidden">
+                  <div className="relative z-10 space-y-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-purple-400" />
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Next Prep Steps</h4>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">Placement Suite</span>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-2.5">
+                      <Link
+                        to="/interview"
+                        className="p-3 rounded-xl bg-muted/40 hover:bg-muted/70 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] border border-border dark:border-white/[0.08] transition-all group flex flex-col gap-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <Mic className="h-4 w-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                          <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                        <span className="text-xs font-semibold text-white mt-1">Mock Interview</span>
+                        <span className="text-[10px] text-muted-foreground">Practice STAR answers out loud</span>
+                      </Link>
+
+                      <Link
+                        to="/skills"
+                        className="p-3 rounded-xl bg-muted/40 hover:bg-muted/70 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] border border-border dark:border-white/[0.08] transition-all group flex flex-col gap-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <Target className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                          <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                        <span className="text-xs font-semibold text-white mt-1">Skill Benchmarks</span>
+                        <span className="text-[10px] text-muted-foreground">Target missing recruiter keywords</span>
+                      </Link>
+                    </div>
+                  </div>
+                </GlassCard>
+              </div>
             </div>
           </motion.div>
         ) : (
@@ -935,7 +1038,7 @@ function ResumePage() {
             </div>
 
             {/* Bottom Row when active */}
-            <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
+            <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 items-start">
               {/* Score History — Enhanced */}
               <GlassCard variant="strong" className="relative overflow-hidden">
                 {/* Decorative gradient background */}
