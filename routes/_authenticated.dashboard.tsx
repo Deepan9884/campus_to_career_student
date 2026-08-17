@@ -99,7 +99,7 @@ function Dashboard() {
     setActiveSection(id);
     const el = document.getElementById(id);
     if (el) {
-      const yOffset = -135;
+      const yOffset = -85;
       const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
@@ -295,9 +295,9 @@ function Dashboard() {
           </button>
         </div>
       )}
-      {/* ── STICKY SLIM SUB-NAV CAPSULE ── */}
-      <div className="sticky top-[72px] lg:top-[76px] z-20 flex justify-center w-full pointer-events-none mb-3 py-1">
-        <div className="pointer-events-auto bg-card/95 dark:bg-[#080D18]/95 p-1 rounded-full border border-border dark:border-[#2F4B6B]/60 shadow-xl backdrop-blur-xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full px-1.5">
+      {/* ── STATIC SUB-NAV CAPSULE ── */}
+      <div className="flex justify-center w-full mb-2">
+        <div className="bg-card/95 dark:bg-[#080D18]/95 p-1 rounded-full border border-border dark:border-[#2F4B6B]/60 shadow-lg backdrop-blur-xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full px-1.5">
           {DASHBOARD_SECTIONS.map((sec) => {
             const Icon = sec.icon;
             const isActive = activeSection === sec.id;
@@ -320,7 +320,7 @@ function Dashboard() {
       </div>
 
       {/* ── STUDENT WELCOME & READINESS OVERVIEW ── */}
-      <div id="section-overview" className="scroll-mt-36" data-tour="readiness-card">
+      <div id="section-overview" className="scroll-mt-24" data-tour="readiness-card">
         <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-border dark:border-[#2F4B6B]/60 shadow-xl bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(27,39,64,0.92)_0%,rgba(17,24,39,0.98)_60%,rgba(8,13,24,1)_100%)]">
           <div className="relative z-10 grid lg:grid-cols-12 gap-6 items-center">
             {/* Left: Readiness Ring & Score */}
@@ -425,7 +425,7 @@ function Dashboard() {
       </div>
 
       {/* ── 4 KEY STUDY PILLARS ── */}
-      <div id="section-stats" className="scroll-mt-36 space-y-3">
+      <div id="section-stats" className="scroll-mt-24 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5">
             <BarChart3 className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Core Preparation Pillars
@@ -477,7 +477,7 @@ function Dashboard() {
         {/* LEFT COLUMN (7 / 12) — Section Progress, Recommendations & Activity */}
         <div className="lg:col-span-7 space-y-6">
           {/* Section Progress — Sleek Benchmark Cards */}
-          <div id="section-progress" className="scroll-mt-36">
+          <div id="section-progress" className="scroll-mt-24">
             <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -576,7 +576,7 @@ function Dashboard() {
           </div>
 
           {/* Recommended Next Steps */}
-          <div id="section-recommendations" className="scroll-mt-36">
+          <div id="section-recommendations" className="scroll-mt-24">
             <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -634,7 +634,7 @@ function Dashboard() {
           </div>
 
           {/* Practice & Activity Feed */}
-          <div id="section-activity" className="scroll-mt-36">
+          <div id="section-activity" className="scroll-mt-24">
             <RecentActivityWidget />
           </div>
         </div>
@@ -642,7 +642,7 @@ function Dashboard() {
         {/* RIGHT COLUMN (5 / 12) — Daily Goal, Checklist & Trophies */}
         <div className="lg:col-span-5 space-y-6">
           {/* Today's Study Goal Card */}
-          <div id="section-mission" className="scroll-mt-36">
+          <div id="section-mission" className="scroll-mt-24">
             <div className="rounded-3xl p-5 border border-indigo-500/40 shadow-xl relative overflow-hidden bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.18)_0%,rgba(17,24,39,0.95)_60%,rgba(8,13,24,1)_100%)]">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
@@ -721,7 +721,7 @@ function Dashboard() {
           </GlassCard>
 
           {/* Gamified Achievements & Badges */}
-          <div id="section-badges" className="scroll-mt-36">
+          <div id="section-badges" className="scroll-mt-24">
             <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
