@@ -617,7 +617,7 @@ function RoadmapDetail({
         <QuizDialog
           open={quizOpen}
           onOpenChange={setQuizOpen}
-          roadmapItemId={quizMilestone._id || quizMilestone.subTopicId || selectedRoadmap?._id || ""}
+          roadmapItemId={quizMilestone._id || quizMilestone.subTopicId || roadmap?._id || ""}
           subTopicName={quizMilestone.subTopicId || quizMilestone.skillName}
           skillName={quizMilestone.skillName}
           onPassed={handleQuizPass}

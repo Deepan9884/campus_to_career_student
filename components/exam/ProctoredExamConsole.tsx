@@ -224,13 +224,7 @@ export function ProctoredExamConsole({
     if (!document.fullscreenElement) {
       el.requestFullscreen?.().catch(() => {});
     }
-    return () => {
-      if (videoElement) {
-        videoElement.srcObject = null;
-      }
-      stopAllCameraStreams();
-    };
-  }, [videoElement]);
+  }, []);
 
   // Format timer HH:MM:SS
   const formatTimer = (seconds: number) => {
@@ -405,20 +399,28 @@ export function ProctoredExamConsole({
 
           {/* Live AI Proctor HUD (Clear & Visible) */}
           <div className="relative flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800">
-            <div className="relative w-20 h-13 rounded-lg overflow-hidden bg-black border border-slate-300 dark:border-slate-700 shadow-md">
-              <video
-                ref={videoRefCallback}
-                autoPlay
-                muted
-                playsInline
-                width="640"
-                height="480"
-                className="w-full h-full object-cover transform -scale-x-100"
-              />
-              <div className="absolute top-1 right-1 flex items-center gap-1 bg-black/60 backdrop-blur-xs px-1.5 py-0.5 rounded-full text-[9px] text-green-400 font-semibold border border-green-500/30">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                <span>AI</span>
-              </div>
+            <div className="relative w-20 h-13 rounded-lg overflow-hidden bg-black border border-slate-300 dark:border-slate-700 shadow-md flex items-center justify-center">
+              {proctorState.cameraError ? (
+                <div className="text-[8px] text-red-500 text-center px-1 font-bold leading-tight">
+                  CAMERA ERROR
+                </div>
+              ) : (
+                <>
+                  <video
+                    ref={videoRefCallback}
+                    autoPlay
+                    muted
+                    playsInline
+                    width="640"
+                    height="480"
+                    className="w-full h-full object-cover transform -scale-x-100"
+                  />
+                  <div className="absolute top-1 right-1 flex items-center gap-1 bg-black/60 backdrop-blur-xs px-1.5 py-0.5 rounded-full text-[9px] text-green-400 font-semibold border border-green-500/30">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span>AI</span>
+                  </div>
+                </>
+              )}
             </div>
 
             {proctorState.violationCount > 0 && (

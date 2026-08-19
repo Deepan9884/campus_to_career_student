@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useProctoringSession, type ProctoringSessionOptions } from "@/hooks/useProctoringSession";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import type { ViolationType } from "@/lib/proctoring-api";
@@ -26,6 +26,8 @@ const VIOLATION_LABELS: Record<ViolationType, string> = {
   fullscreen_exit: "Exam window exited fullscreen mode",
   tab_switch: "Tab or window switch detected",
   keyboard_shortcut: "Restricted keyboard shortcut was pressed",
+  face_not_detected: "Face not detected in camera frame",
+  multiple_faces_detected: "Multiple faces detected in camera frame",
 };
 
 const STRIKE_MESSAGES: Record<number, string> = {

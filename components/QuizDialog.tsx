@@ -189,6 +189,8 @@ export function QuizDialog({
   }
 
   // 3. Full-Screen Proctored Exam Environment
+  if (!gen) return null;
+
   return (
     <ProctoredExamConsole
       quiz={gen}
