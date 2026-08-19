@@ -73,8 +73,15 @@ export interface CohortAnalyticsResponse {
   topTargetRoles: { role: string; count: number }[];
 }
 
-export async function getStudentsList(page = 1, search = "", filter = "all"): Promise<StudentsListResponse> {
-  return api.get<StudentsListResponse>(`/admin/students?page=${page}&search=${encodeURIComponent(search)}&filter=${filter}`);
+export async function getStudentsList(
+  page = 1,
+  search = "",
+  filter = "all",
+  limit = 20
+): Promise<StudentsListResponse> {
+  return api.get<StudentsListResponse>(
+    `/admin/students?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&filter=${filter}`
+  );
 }
 
 export async function getStudent360Detail(studentId: string): Promise<Student360DetailResponse> {

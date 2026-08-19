@@ -1301,35 +1301,7 @@ function LinkedInPostsPage() {
                 </div>
               )}
 
-              {/* LinkedIn Engagement Bar */}
-              <div className="pt-3 border-t border-white/10">
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground pb-2.5">
-                  <span className="flex items-center gap-1">
-                    <span className="flex -space-x-1">
-                      <span className="h-4 w-4 rounded-full bg-blue-500 flex items-center justify-center text-[8px] text-white">👍</span>
-                      <span className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center text-[8px] text-white">❤️</span>
-                      <span className="h-4 w-4 rounded-full bg-amber-500 flex items-center justify-center text-[8px] text-white">👏</span>
-                    </span>
-                    <span className="ml-1 text-white font-medium">48 likes</span>
-                  </span>
-                  <span>14 comments • 6 reposts</span>
-                </div>
 
-                <div className="grid grid-cols-4 gap-1 pt-2 border-t border-white/5 text-center text-xs font-semibold text-muted-foreground">
-                  <button type="button" className="p-1.5 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center gap-1">
-                    👍 Like
-                  </button>
-                  <button type="button" className="p-1.5 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center gap-1">
-                    💬 Comment
-                  </button>
-                  <button type="button" className="p-1.5 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center gap-1">
-                    🔄 Repost
-                  </button>
-                  <button type="button" className="p-1.5 rounded-lg hover:bg-white/5 hover:text-white transition flex items-center justify-center gap-1">
-                    🚀 Send
-                  </button>
-                </div>
-              </div>
 
               {/* Action Buttons Toolbar */}
               <div className="grid grid-cols-2 gap-2 pt-2">

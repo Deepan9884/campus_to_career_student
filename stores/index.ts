@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { api, setAccessToken, getAccessToken } from "@/lib/api";
+import { api, setAccessToken, getAccessToken, tryRefresh } from "@/lib/api";
 
 export interface User {
   _id: string;
@@ -124,12 +124,15 @@ export const useAuth = create<AuthState>()(
       },
 
       checkAuth: async () => {
-        if (!getAccessToken()) {
-          set({ isCheckingAuth: false });
-          return;
-        }
         set({ isCheckingAuth: true });
         try {
+          if (!getAccessToken()) {
+            await tryRefresh().catch(() => {});
+          }
+          if (!getAccessToken()) {
+            set({ isCheckingAuth: false, isAuthenticated: false, user: null });
+            return;
+          }
           const user = await api.get<User>("/auth/me");
           set({ user, isAuthenticated: true, isCheckingAuth: false });
         } catch {

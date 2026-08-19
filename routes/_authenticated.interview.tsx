@@ -34,6 +34,7 @@ import {
   getInterviewById,
   deleteInterview,
 } from "@/lib/interview-api";
+import { ProctoringWrapper } from "@/components/proctoring/ProctoringWrapper";
 import { useAuth } from "@/stores";
 import type {
   InterviewSession,
@@ -346,6 +347,7 @@ function ActiveView({
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [answerText, setAnswerText] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+  const [isExamBlocked, setIsExamBlocked] = useState(false);
   const [seconds, setSeconds] = useState(120);
   const [isRecording, setIsRecording] = useState(false);
   
@@ -516,183 +518,194 @@ function ActiveView({
   const MetaIcon = meta.icon;
 
   return (
-    <div className="space-y-4">
-      {/* 5-Round Stepper Header */}
-      <GlassCard variant="strong" className="p-4">
-        <div className="grid grid-cols-5 gap-2 text-center">
-          {session.rounds.map((r, i) => {
-            const rMeta = ROUND_META[r.roundType];
-            const isCurrent = i === currentRoundIndex;
-            const isDone = r.status === "completed";
-            const isFailed = r.status === "failed";
+    <ProctoringWrapper
+      moduleType="interview"
+      moduleId={session._id}
+      onBlocked={() => setIsExamBlocked(true)}
+      onExit={onBackToSetup}
+    >
+      <div className="space-y-4">
+        {/* 5-Round Stepper Header */}
+        <GlassCard variant="strong" className="p-4">
+          <div className="grid grid-cols-5 gap-2 text-center">
+            {session.rounds.map((r, i) => {
+              const rMeta = ROUND_META[r.roundType];
+              const isCurrent = i === currentRoundIndex;
+              const isDone = r.status === "completed";
+              const isFailed = r.status === "failed";
 
-            return (
-              <div
-                key={r.roundType}
-                className={`p-2 rounded-xl border text-xs transition ${
-                  isCurrent
-                    ? "border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/10 font-bold"
-                    : isDone
-                      ? "border-green-500/40 bg-green-500/10 text-green-300"
-                      : isFailed
-                        ? "border-red-500/40 bg-red-500/10 text-red-300"
-                        : "border-white/10 opacity-50"
-                }`}
-              >
-                <div className="flex items-center justify-center gap-1">
-                  <span>Round {i + 1}</span>
-                  {isDone && <Check className="h-3 w-3 text-green-400" />}
-                </div>
-                <div className="truncate text-[11px] mt-0.5 font-medium">{rMeta?.label}</div>
-              </div>
-            );
-          })}
-        </div>
-      </GlassCard>
-
-      {/* Main Active Question Area */}
-      <GlassCard variant="strong" className="relative min-h-[420px]">
-        <div className="flex justify-between items-center text-xs text-muted-foreground border-b border-white/10 pb-3 mb-4">
-          <div className="flex items-center gap-2">
-            <MetaIcon className="h-4 w-4 text-[color:var(--color-primary)]" />
-            <span className="font-semibold text-white">{meta.label}</span>
-            <span>·</span>
-            <span>Question {itemIdx + 1} of {items.length}</span>
-          </div>
-          <div className={`inline-flex items-center gap-1.5 glass rounded-full px-3 py-1 text-xs font-mono transition-colors ${seconds <= 30 ? "text-red-400 bg-red-500/10 border border-red-500/30 animate-pulse" : ""}`}>
-            <Clock className="h-3 w-3" />
-            <span>
-              {String(Math.floor(seconds / 60)).padStart(2, "0")}:
-              {String(seconds % 60).padStart(2, "0")}
-            </span>
-          </div>
-        </div>
-
-        <h3 className="text-lg md:text-xl font-semibold max-w-3xl leading-snug">
-          {currentItem.questionText}
-        </h3>
-
-        {/* MCQ Mode */}
-        {currentItem.itemType === "mcq" && currentItem.options && (
-          <div className="mt-6 space-y-2.5">
-            {currentItem.options.map((opt, oIdx) => {
-              const selected = selectedOption === oIdx;
               return (
-                <button
-                  key={oIdx}
-                  onClick={() => setSelectedOption(oIdx)}
-                  className={`w-full text-left p-3.5 rounded-xl text-sm transition border ${
-                    selected
-                      ? "border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/20 font-medium"
-                      : "border-white/10 glass hover:bg-white/10"
+                <div
+                  key={r.roundType}
+                  className={`p-2 rounded-xl border text-xs transition ${
+                    isCurrent
+                      ? "border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/10 font-bold"
+                      : isDone
+                        ? "border-green-500/40 bg-green-500/10 text-green-300"
+                        : isFailed
+                          ? "border-red-500/40 bg-red-500/10 text-red-300"
+                          : "border-white/10 opacity-50"
                   }`}
                 >
-                  <span className="inline-block w-6 font-semibold opacity-70">
-                    {String.fromCharCode(65 + oIdx)}.
-                  </span>
-                  {opt}
-                </button>
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Round {i + 1}</span>
+                    {isDone && <Check className="h-3 w-3 text-green-400" />}
+                  </div>
+                  <div className="truncate text-[11px] mt-0.5 font-medium">{rMeta?.label}</div>
+                </div>
               );
             })}
           </div>
-        )}
+        </GlassCard>
 
-        {/* Open-Ended Mode */}
-        {currentItem.itemType === "open_ended" && (
-          <div className="mt-6">
-            <div className="relative">
-              <textarea
-                value={answerText}
-                onChange={(e) => setAnswerText(e.target.value)}
-                placeholder="Type your explanation or key answer points here..."
-                rows={6}
-                className={`w-full glass-input rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] resize-y ${isRecording ? "border-[color:var(--color-primary)] ring-1 ring-[color:var(--color-primary)] bg-[color:var(--color-primary)]/5" : ""}`}
-              />
+        {/* Main Active Question Area */}
+        <GlassCard variant="strong" className="relative min-h-[420px]">
+          <div className="flex justify-between items-center text-xs text-muted-foreground border-b border-white/10 pb-3 mb-4">
+            <div className="flex items-center gap-2">
+              <MetaIcon className="h-4 w-4 text-[color:var(--color-primary)]" />
+              <span className="font-semibold text-white">{meta.label}</span>
+              <span>·</span>
+              <span>Question {itemIdx + 1} of {items.length}</span>
+            </div>
+            <div className={`inline-flex items-center gap-1.5 glass rounded-full px-3 py-1 text-xs font-mono transition-colors ${seconds <= 30 ? "text-red-400 bg-red-500/10 border border-red-500/30 animate-pulse" : ""}`}>
+              <Clock className="h-3 w-3" />
+              <span>
+                {String(Math.floor(seconds / 60)).padStart(2, "0")}:
+                {String(seconds % 60).padStart(2, "0")}
+              </span>
+            </div>
+          </div>
+
+          <h3 className="text-lg md:text-xl font-semibold max-w-3xl leading-snug">
+            {currentItem.questionText}
+          </h3>
+
+          {/* MCQ Mode */}
+          {currentItem.itemType === "mcq" && currentItem.options && (
+            <div className="mt-6 space-y-2.5">
+              {currentItem.options.map((opt, oIdx) => {
+                const selected = selectedOption === oIdx;
+                return (
+                  <button
+                    key={oIdx}
+                    disabled={isExamBlocked}
+                    onClick={() => setSelectedOption(oIdx)}
+                    className={`w-full text-left p-3.5 rounded-xl text-sm transition border ${
+                      selected
+                        ? "border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/20 font-medium"
+                        : "border-white/10 glass hover:bg-white/10"
+                    } ${isExamBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <span className="inline-block w-6 font-semibold opacity-70">
+                      {String.fromCharCode(65 + oIdx)}.
+                    </span>
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Open-Ended Mode */}
+          {currentItem.itemType === "open_ended" && (
+            <div className="mt-6">
+              <div className="relative">
+                <textarea
+                  value={answerText}
+                  disabled={isExamBlocked}
+                  onChange={(e) => setAnswerText(e.target.value)}
+                  placeholder="Type your explanation or key answer points here..."
+                  rows={6}
+                  className={`w-full glass-input rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] resize-y ${isRecording ? "border-[color:var(--color-primary)] ring-1 ring-[color:var(--color-primary)] bg-[color:var(--color-primary)]/5" : ""} ${isExamBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                />
+                <button
+                  onClick={toggleRecording}
+                  disabled={isExamBlocked}
+                  className={`absolute bottom-4 right-4 p-3 rounded-full transition-all shadow-lg flex items-center justify-center ${isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse" : "btn-gradient btn-gradient-hover"} ${isExamBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                  title={isRecording ? "Stop Recording" : "Use Voice Input"}
+                >
+                  {isRecording ? <div className="h-4 w-4 bg-white rounded-sm" /> : <Mic className="h-5 w-5 text-white" />}
+                </button>
+              </div>
+              {isRecording && (
+                <p className="text-[10px] text-[color:var(--color-primary)] mt-2 font-medium animate-pulse">
+                  Listening... Speak clearly into your microphone.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Question Progress Dots */}
+          <div className="flex gap-2 mt-6 items-center">
+            {items.map((it, i) => {
+              const answered =
+                it.itemType === "mcq" ? it.selectedOptionIndex != null : Boolean(it.answer?.trim());
+              return (
+                <button
+                  key={i}
+                  disabled={isExamBlocked}
+                  onClick={async () => {
+                    if (i === itemIdx || isExamBlocked) return;
+                    setSubmitting(true);
+                    const saved = await saveCurrentAnswer();
+                    setSubmitting(false);
+                    if (!saved) return;
+                    setItemIdx(i);
+                  }}
+                  className={`w-3 h-3 rounded-full transition ${
+                    i === itemIdx
+                      ? "bg-[color:var(--color-primary)] scale-125"
+                      : answered
+                        ? "bg-green-400"
+                        : "bg-white/20 hover:bg-white/30"
+                  }`}
+                  title={`Question ${i + 1}`}
+                />
+              );
+            })}
+          </div>
+
+          {/* Controls */}
+          <div className="mt-6 flex flex-wrap gap-3 items-center justify-between border-t border-white/10 pt-4">
+            <div className="flex gap-2">
               <button
-                onClick={toggleRecording}
-                className={`absolute bottom-4 right-4 p-3 rounded-full transition-all shadow-lg flex items-center justify-center ${isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse" : "btn-gradient btn-gradient-hover"}`}
-                title={isRecording ? "Stop Recording" : "Use Voice Input"}
+                onClick={handlePrevItem}
+                disabled={itemIdx === 0 || submitting || isExamBlocked}
+                className="glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10 flex items-center gap-1.5 disabled:opacity-30"
               >
-                {isRecording ? <div className="h-4 w-4 bg-white rounded-sm" /> : <Mic className="h-5 w-5 text-white" />}
+                <ChevronLeft className="h-4 w-4" /> Prev Question
+              </button>
+              <button
+                onClick={handleNextItem}
+                disabled={itemIdx === items.length - 1 || submitting || isExamBlocked}
+                className="glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10 flex items-center gap-1.5 disabled:opacity-30"
+              >
+                Next Question <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            {isRecording && (
-              <p className="text-[10px] text-[color:var(--color-primary)] mt-2 font-medium animate-pulse">
-                Listening... Speak clearly into your microphone.
-              </p>
-            )}
-          </div>
-        )}
 
-        {/* Question Progress Dots */}
-        <div className="flex gap-2 mt-6 items-center">
-          {items.map((it, i) => {
-            const answered =
-              it.itemType === "mcq" ? it.selectedOptionIndex != null : Boolean(it.answer?.trim());
-            return (
+            <div className="flex gap-2">
               <button
-                key={i}
-                onClick={async () => {
-                  if (i === itemIdx) return;
-                  setSubmitting(true);
-                  const saved = await saveCurrentAnswer();
-                  setSubmitting(false);
-                  if (!saved) return;
-                  setItemIdx(i);
-                }}
-                className={`w-3 h-3 rounded-full transition ${
-                  i === itemIdx
-                    ? "bg-[color:var(--color-primary)] scale-125"
-                    : answered
-                      ? "bg-green-400"
-                      : "bg-white/20 hover:bg-white/30"
-                }`}
-                title={`Question ${i + 1}`}
-              />
-            );
-          })}
-        </div>
-
-        {/* Controls */}
-        <div className="mt-6 flex flex-wrap gap-3 items-center justify-between border-t border-white/10 pt-4">
-          <div className="flex gap-2">
-            <button
-              onClick={handlePrevItem}
-              disabled={itemIdx === 0 || submitting}
-              className="glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10 flex items-center gap-1.5 disabled:opacity-30"
-            >
-              <ChevronLeft className="h-4 w-4" /> Prev Question
-            </button>
-            <button
-              onClick={handleNextItem}
-              disabled={itemIdx === items.length - 1 || submitting}
-              className="glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10 flex items-center gap-1.5 disabled:opacity-30"
-            >
-              Next Question <ChevronRight className="h-4 w-4" />
-            </button>
+                onClick={handleFinishRound}
+                disabled={submitting || isExamBlocked}
+                className="btn-gradient btn-gradient-hover rounded-xl px-6 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+              >
+                {submitting ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                {currentRoundIndex === session.rounds.length - 1
+                  ? "Complete Final Round"
+                  : `Submit Round ${currentRoundIndex + 1}`}
+              </button>
+              <button
+                onClick={onBackToSetup}
+                className="glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10 flex items-center gap-1.5"
+              >
+                <RotateCcw className="h-4 w-4" /> Exit
+              </button>
+            </div>
           </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleFinishRound}
-              disabled={submitting}
-              className="btn-gradient btn-gradient-hover rounded-xl px-6 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
-            >
-              {submitting ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              {currentRoundIndex === session.rounds.length - 1
-                ? "Complete Final Round"
-                : `Submit Round ${currentRoundIndex + 1}`}
-            </button>
-            <button
-              onClick={onBackToSetup}
-              className="glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10 flex items-center gap-1.5"
-            >
-              <RotateCcw className="h-4 w-4" /> Exit
-            </button>
-          </div>
-        </div>
-      </GlassCard>
-    </div>
+        </GlassCard>
+      </div>
+    </ProctoringWrapper>
   );
 }
 

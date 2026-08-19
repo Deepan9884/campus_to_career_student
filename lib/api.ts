@@ -3,20 +3,24 @@
 const isServer = typeof window === "undefined";
 const API_BASE = isServer ? "http://localhost:5000/api" : import.meta.env.VITE_API_URL || "/api";
 
-let accessToken: string | null =
-  typeof window !== "undefined" ? localStorage.getItem("cf-token") : null;
+let inMemoryAccessToken: string | null = null;
 
 export function setAccessToken(token: string | null) {
-  accessToken = token;
-  if (token) localStorage.setItem("cf-token", token);
-  else localStorage.removeItem("cf-token");
+  inMemoryAccessToken = token;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem("cf-token");
+      if (token) {
+        sessionStorage.setItem("cf_session_active", "1");
+      } else {
+        sessionStorage.removeItem("cf_session_active");
+      }
+    } catch {}
+  }
 }
 
 export function getAccessToken(): string | null {
-  if (!accessToken && typeof window !== "undefined") {
-    accessToken = localStorage.getItem("cf-token");
-  }
-  return accessToken;
+  return inMemoryAccessToken;
 }
 
 export class ApiError extends Error {
@@ -31,7 +35,7 @@ export class ApiError extends Error {
 
 let refreshing: Promise<void> | null = null;
 
-async function tryRefresh(): Promise<void> {
+export async function tryRefresh(): Promise<void> {
   if (refreshing) return refreshing;
   refreshing = (async () => {
     const res = await fetch(`${API_BASE}/auth/refresh`, {

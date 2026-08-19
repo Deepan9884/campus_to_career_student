@@ -53,14 +53,30 @@ export function useNotificationSSE({
     onNotificationRef.current(notification);
   }, []);
 
-  const connectSSE = useCallback(() => {
+  const connectSSE = useCallback(async () => {
     const token = getAccessToken();
     if (!token) return;
 
     closeEventSource();
 
+    let streamParam = token;
+    try {
+      const ticketRes = await fetch(`${BASE_URL}/notifications/ticket`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (ticketRes.ok) {
+        const ticketJson = await ticketRes.json();
+        if (ticketJson.data?.ticket) {
+          streamParam = ticketJson.data.ticket;
+        }
+      }
+    } catch {
+      // fallback to token if ticket endpoint is unavailable
+    }
+
     const es = new EventSource(
-      `${BASE_URL}/notifications/stream?token=${encodeURIComponent(token)}`,
+      `${BASE_URL}/notifications/stream?token=${encodeURIComponent(streamParam)}`,
     );
     esInstance = es;
 
