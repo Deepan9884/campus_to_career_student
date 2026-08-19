@@ -1,11 +1,11 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Loader2, AlertTriangle, RotateCcw, Brain, Shield } from "lucide-react";
 import { generateQuiz, submitQuiz } from "@/lib/quiz-api";
 import { ProctoredExamConsole } from "@/components/exam/ProctoredExamConsole";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import type { QuizGenerationResult, QuizSubmissionResult } from "@/types/quiz";
 
-type Phase = "loading" | "taking" | "submitting" | "result" | "error";
+type Phase = "loading" | "ready" | "taking" | "submitting" | "result" | "error";
 
 interface QuizDialogProps {
   open: boolean;
@@ -38,7 +38,7 @@ export function QuizDialog({
     try {
       const data = await generateQuiz({ roadmapItemId });
       setGen(data);
-      setPhase("taking");
+      setPhase("ready");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to generate quiz";
       setError(message);
@@ -118,6 +118,42 @@ export function QuizDialog({
           >
             Cancel
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 1.5 Ready Phase
+  if (phase === "ready" && gen) {
+    return (
+      <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col items-center justify-center p-6 select-none">
+        <div className="max-w-md w-full bg-[#111c34] border border-blue-500/30 rounded-3xl p-8 shadow-2xl text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mx-auto text-blue-400">
+            <Shield className="h-8 w-8" />
+          </div>
+          <h3 className="text-lg font-bold text-white">Environment Ready</h3>
+          <p className="text-xs text-slate-400">
+            Your assessment for <span className="font-semibold text-slate-300">{subTopicName}</span> is ready. This is a strictly proctored exam. 
+            Once you begin, you will enter full-screen mode and your camera will be activated.
+          </p>
+          <div className="pt-4 flex flex-col gap-3">
+            <button
+              onClick={() => {
+                // Must be a user gesture to request fullscreen reliably
+                document.documentElement.requestFullscreen?.().catch(() => {});
+                setPhase("taking");
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition"
+            >
+              Enter Full Screen & Start Exam
+            </button>
+            <button
+              onClick={handleClose}
+              className="text-xs text-slate-500 hover:text-slate-300 transition"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     );

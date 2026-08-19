@@ -411,8 +411,9 @@ export function ProctoredExamConsole({
                 autoPlay
                 muted
                 playsInline
-                className="w-full h-full object-cover"
-                style={{ transform: "scaleX(-1)" }}
+                width="640"
+                height="480"
+                className="w-full h-full object-cover transform -scale-x-100"
               />
               <div className="absolute top-1 right-1 flex items-center gap-1 bg-black/60 backdrop-blur-xs px-1.5 py-0.5 rounded-full text-[9px] text-green-400 font-semibold border border-green-500/30">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
