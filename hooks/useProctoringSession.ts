@@ -352,6 +352,9 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         loopTimerRef.current = null;
       }
       modelRef.current = null;
+      if (videoElementRef.current) {
+        videoElementRef.current.srcObject = null;
+      }
       stopAllCameraStreams();
     };
   }, [enabled, moduleId]);

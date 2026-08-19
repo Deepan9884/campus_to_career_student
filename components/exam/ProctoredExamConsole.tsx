@@ -225,9 +225,12 @@ export function ProctoredExamConsole({
       el.requestFullscreen?.().catch(() => {});
     }
     return () => {
+      if (videoElement) {
+        videoElement.srcObject = null;
+      }
       stopAllCameraStreams();
     };
-  }, []);
+  }, [videoElement]);
 
   // Format timer HH:MM:SS
   const formatTimer = (seconds: number) => {
@@ -261,11 +264,13 @@ export function ProctoredExamConsole({
   const handleFinishExam = async () => {
     setShowConfirmFinish(false);
     setIsTestFinished(true);
+    if (videoElement) videoElement.srcObject = null;
     stopAllCameraStreams();
     await onSubmit(answers);
   };
 
   const handleExitConsole = () => {
+    if (videoElement) videoElement.srcObject = null;
     stopAllCameraStreams();
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {});
