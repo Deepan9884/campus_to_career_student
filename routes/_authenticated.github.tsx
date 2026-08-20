@@ -103,13 +103,15 @@ const [analyzing, setAnalyzing] = useState(false);
     }
   }, [showHistory, fetchHistory]);
 
-  const handleConnect = async () => {
-    if (!username.trim()) return;
+  const handleConnect = async (customHandle?: string) => {
+    const targetHandle = (customHandle || username).trim();
+    if (!targetHandle) return;
     setConnecting(true);
     try {
-      const data = await connectGithub({ githubUsername: username.trim() });
+      const data = await connectGithub({ githubUsername: targetHandle });
       setConnected(true);
       setGithubProfile(data.github);
+      setUsername(data.github.login);
       if (data.user) {
         useAuth.setState((state) => ({
           user: state.user ? { ...state.user, ...data.user, githubUsername: data.user.githubUsername } : data.user,
@@ -124,6 +126,24 @@ const [analyzing, setAnalyzing] = useState(false);
       setConnecting(false);
     }
   };
+
+  useEffect(() => {
+    const handle = user?.profile?.githubUsername || user?.githubUsername;
+    if (handle && !connected && !githubProfile && !connecting) {
+      setUsername(handle);
+      setConnecting(true);
+      connectGithub({ githubUsername: handle })
+        .then((data) => {
+          setConnected(true);
+          setGithubProfile(data.github);
+          fetchRepos();
+        })
+        .catch(() => {})
+        .finally(() => {
+          setConnecting(false);
+        });
+    }
+  }, [user?.githubUsername, user?.profile?.githubUsername]);
 
   const handleAnalyze = async (repoFullName: string) => {
     setSelectedRepo(repoFullName);
@@ -233,44 +253,74 @@ const [analyzing, setAnalyzing] = useState(false);
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Github className="h-4 w-4" /> GitHub Connection
           </h3>
-          <div className="flex gap-2">
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="GitHub username"
-              disabled={connected}
-              className="flex-1 glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
-              onKeyDown={(e) => e.key === "Enter" && !connected && handleConnect()}
-            />
-            <button
-              onClick={handleConnect}
-              disabled={connected || connecting || !username.trim()}
-              className="btn-gradient btn-gradient-hover rounded-xl px-4 text-sm font-semibold disabled:opacity-50"
-            >
-              {connecting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : connected ? (
-                "Connected"
-              ) : (
-                "Connect"
-              )}
-            </button>
-          </div>
-          {connected && githubProfile && (
-            <div className="mt-3 flex items-center gap-3">
-              <img
-                src={githubProfile.avatar_url}
-                alt={githubProfile.login}
-                className="w-8 h-8 rounded-full"
-              />
-              <div className="text-xs">
-                <p className="text-[color:var(--color-success)] flex items-center gap-1">
-                  <Check className="h-3.5 w-3.5 shrink-0" /> Connected as {githubProfile.login}
-                </p>
-                <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
-              </div>
-            </div>
-          )}
+          {(() => {
+            const isCurrentConnected = Boolean(
+              connected &&
+                githubProfile?.login &&
+                username.trim().toLowerCase() === githubProfile.login.toLowerCase(),
+            );
+            return (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="GitHub username"
+                    disabled={connecting}
+                    className="flex-1 glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && !isCurrentConnected && !connecting && username.trim() && handleConnect()
+                    }
+                  />
+                  <button
+                    onClick={() => handleConnect()}
+                    disabled={isCurrentConnected || connecting || !username.trim()}
+                    className="btn-gradient btn-gradient-hover rounded-xl px-4 text-sm font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+                  >
+                    {connecting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isCurrentConnected ? (
+                      <>
+                        <Check className="h-4 w-4" /> Connected
+                      </>
+                    ) : connected ? (
+                      "Switch"
+                    ) : (
+                      "Connect"
+                    )}
+                  </button>
+                </div>
+                {connected && githubProfile && (
+                  <div className="mt-3 flex items-center justify-between gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img
+                        src={githubProfile.avatar_url}
+                        alt={githubProfile.login}
+                        className="w-8 h-8 rounded-full border border-white/20 shrink-0"
+                      />
+                      <div className="text-xs min-w-0">
+                        <p className="text-[color:var(--color-success)] flex items-center gap-1 truncate font-medium">
+                          <Check className="h-3.5 w-3.5 shrink-0" /> Connected as @{githubProfile.login}
+                        </p>
+                        <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
+                      </div>
+                    </div>
+                    {isCurrentConnected && (
+                      <button
+                        onClick={() => {
+                          setUsername("");
+                        }}
+                        className="text-[11px] text-muted-foreground hover:text-white underline px-1.5 py-1 shrink-0"
+                        title="Switch account"
+                      >
+                        Change
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           <h4 className="text-xs uppercase tracking-wider text-muted-foreground mt-6 mb-2">
             Repositories
