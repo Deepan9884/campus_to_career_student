@@ -51,6 +51,7 @@ export const Route = createFileRoute("/_authenticated/github")({
 function GithubPage() {
   const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
+  const autoConnectAttempted = useRef<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [username, setUsername] = useState(user?.githubUsername || "");
   const [githubProfile, setGithubProfile] = useState<GithubProfile | null>(null);
@@ -199,7 +200,8 @@ const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     const handle = user?.profile?.githubUsername || user?.githubUsername;
-    if (handle && !connected && !githubProfile && !connecting) {
+    if (handle && autoConnectAttempted.current !== handle) {
+      autoConnectAttempted.current = handle;
       setUsername(handle);
       setConnecting(true);
       connectGithub({ githubUsername: handle })
@@ -209,14 +211,14 @@ const [analyzing, setAnalyzing] = useState(false);
           fetchRepos();
         })
         .catch(() => {
-          // If connect throws, still attempt to list repos if already attached in DB
+          // If connect fails on auto-mount, attempt listing cached repos directly
           fetchRepos().catch(() => {});
         })
         .finally(() => {
           setConnecting(false);
         });
     }
-  }, [user?.githubUsername, user?.profile?.githubUsername, connected, githubProfile, connecting, fetchRepos]);
+  }, [user?.githubUsername, user?.profile?.githubUsername, fetchRepos]);
 
   const handleAnalyze = async (repoFullName: string) => {
     setSelectedRepo(repoFullName);
