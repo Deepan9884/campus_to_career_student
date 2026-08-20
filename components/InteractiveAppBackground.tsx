@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/stores";
 
 interface Particle {
   x: number;
@@ -12,6 +13,115 @@ interface Particle {
 
 export const InteractiveAppBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { user } = useAuth();
+  const [currentAccent, setCurrentAccent] = useState<string>("indigo");
+
+  // Track active data-accent attribute or user preferences
+  useEffect(() => {
+    const updateAccent = () => {
+      const docAccent = document.documentElement.getAttribute("data-accent");
+      const savedAccent =
+        docAccent ||
+        user?.preferences?.accentColor ||
+        (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_accent") : null) ||
+        "indigo";
+      setCurrentAccent(savedAccent);
+    };
+
+    updateAccent();
+
+    // Observe changes to data-accent on <html>
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "attributes" && m.attributeName === "data-accent") {
+          updateAccent();
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-accent"] });
+    return () => observer.disconnect();
+  }, [user?.preferences?.accentColor]);
+
+  // Orb and Particle palettes
+  const orbConfig = {
+    indigo: {
+      orb1: "from-indigo-600/20 via-purple-600/15 to-transparent",
+      orb2: "from-blue-600/20 via-sky-600/15 to-transparent",
+      grid: "rgba(99, 102, 241, 0.20)",
+      palette: [
+        "rgba(99, 102, 241, 0.70)",
+        "rgba(168, 85, 247, 0.60)",
+        "rgba(56, 189, 248, 0.55)",
+        "rgba(147, 160, 181, 0.45)",
+      ],
+    },
+    purple: {
+      orb1: "from-purple-600/25 via-fuchsia-600/20 to-transparent",
+      orb2: "from-pink-600/20 via-rose-600/15 to-transparent",
+      grid: "rgba(168, 85, 247, 0.20)",
+      palette: [
+        "rgba(147, 51, 234, 0.75)",
+        "rgba(192, 132, 252, 0.65)",
+        "rgba(236, 72, 153, 0.55)",
+        "rgba(168, 85, 247, 0.45)",
+      ],
+    },
+    emerald: {
+      orb1: "from-emerald-600/25 via-teal-600/20 to-transparent",
+      orb2: "from-teal-600/20 via-cyan-600/15 to-transparent",
+      grid: "rgba(16, 185, 129, 0.20)",
+      palette: [
+        "rgba(16, 185, 129, 0.75)",
+        "rgba(5, 150, 105, 0.65)",
+        "rgba(20, 184, 166, 0.55)",
+        "rgba(52, 211, 153, 0.45)",
+      ],
+    },
+    amber: {
+      orb1: "from-amber-600/25 via-orange-600/20 to-transparent",
+      orb2: "from-orange-600/20 via-yellow-600/15 to-transparent",
+      grid: "rgba(245, 158, 11, 0.20)",
+      palette: [
+        "rgba(245, 158, 11, 0.75)",
+        "rgba(217, 119, 6, 0.65)",
+        "rgba(251, 146, 60, 0.55)",
+        "rgba(252, 211, 77, 0.45)",
+      ],
+    },
+    cyan: {
+      orb1: "from-cyan-600/25 via-sky-600/20 to-transparent",
+      orb2: "from-sky-600/20 via-blue-600/15 to-transparent",
+      grid: "rgba(6, 182, 212, 0.20)",
+      palette: [
+        "rgba(6, 182, 212, 0.75)",
+        "rgba(56, 189, 248, 0.65)",
+        "rgba(14, 165, 233, 0.55)",
+        "rgba(125, 211, 252, 0.45)",
+      ],
+    },
+    rose: {
+      orb1: "from-rose-600/25 via-pink-600/20 to-transparent",
+      orb2: "from-pink-600/20 via-red-600/15 to-transparent",
+      grid: "rgba(225, 29, 72, 0.20)",
+      palette: [
+        "rgba(225, 29, 72, 0.75)",
+        "rgba(244, 63, 94, 0.65)",
+        "rgba(251, 113, 133, 0.55)",
+        "rgba(253, 164, 175, 0.45)",
+      ],
+    },
+  }[currentAccent] || {
+    orb1: "from-indigo-600/20 via-purple-600/15 to-transparent",
+    orb2: "from-blue-600/20 via-sky-600/15 to-transparent",
+    grid: "rgba(99, 102, 241, 0.20)",
+    palette: [
+      "rgba(99, 102, 241, 0.70)",
+      "rgba(168, 85, 247, 0.60)",
+      "rgba(56, 189, 248, 0.55)",
+      "rgba(147, 160, 181, 0.45)",
+    ],
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -31,16 +141,10 @@ export const InteractiveAppBackground: React.FC = () => {
 
     window.addEventListener("resize", handleResize);
 
-    // Generate sleek, cool-toned constellation particles
+    // Generate sleek constellation particles matching current accent
     const count = Math.min(36, Math.floor((width * height) / 38000));
     const particles: Particle[] = [];
-
-    const coolPalette = [
-      "rgba(74, 110, 148, 0.65)",  // Steel Blue
-      "rgba(99, 102, 241, 0.55)",  // Indigo
-      "rgba(56, 189, 248, 0.50)",  // Soft Cyan
-      "rgba(147, 160, 181, 0.45)", // Slate
-    ];
+    const coolPalette = orbConfig.palette;
 
     for (let i = 0; i < count; i++) {
       particles.push({
@@ -106,7 +210,7 @@ export const InteractiveAppBackground: React.FC = () => {
           ctx.lineTo(mouseX, mouseY);
           ctx.strokeStyle = isLight
             ? `rgba(79, 70, 229, ${mouseLineAlpha})`
-            : `rgba(99, 102, 241, ${mouseLineAlpha})`;
+            : particles[i].color;
           ctx.lineWidth = 1;
           ctx.stroke();
 
@@ -132,8 +236,8 @@ export const InteractiveAppBackground: React.FC = () => {
         // 4. Render Glowing Particle Nodes
         ctx.beginPath();
         ctx.arc(particles[i].x, particles[i].y, particles[i].radius, 0, Math.PI * 2);
-        ctx.fillStyle = isLight ? "rgba(99, 102, 241, 0.65)" : particles[i].color;
-        ctx.shadowColor = isLight ? "rgba(99, 102, 241, 0.4)" : particles[i].color;
+        ctx.fillStyle = particles[i].color;
+        ctx.shadowColor = particles[i].color;
         ctx.shadowBlur = 6;
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -150,19 +254,29 @@ export const InteractiveAppBackground: React.FC = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, []);
+  }, [currentAccent]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+      {/* Dynamic Aurora Ambient Glowing Orbs */}
+      <div
+        className={`absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-gradient-to-br ${orbConfig.orb1} blur-[140px] animate-pulse pointer-events-none`}
+        style={{ animationDuration: "10s" }}
+      />
+      <div
+        className={`absolute top-1/3 -right-36 w-[550px] h-[550px] rounded-full bg-gradient-to-bl ${orbConfig.orb2} blur-[150px] animate-pulse pointer-events-none`}
+        style={{ animationDuration: "13s" }}
+      />
+
       {/* Interactive Constellation Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
       {/* Cyber Grid with Soft Perspective */}
       <div
-        className="absolute inset-0 opacity-[0.14] dark:block hidden"
+        className="absolute inset-0 opacity-[0.14] dark:block hidden transition-all duration-500"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(74,110,148,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(74,110,148,0.25) 1px, transparent 1px)",
+            `linear-gradient(${orbConfig.grid} 1px, transparent 1px), linear-gradient(90deg, ${orbConfig.grid} 1px, transparent 1px)`,
           backgroundSize: "44px 44px",
         }}
       />

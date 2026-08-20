@@ -28,6 +28,7 @@ export interface User {
   };
   preferences?: {
     theme: "dark" | "light" | "system";
+    accentColor?: "indigo" | "purple" | "emerald" | "amber" | "cyan" | "rose";
     notifyOn: string[];
     emailDigest?: "off" | "daily" | "weekly";
     aiDifficulty?: "Beginner" | "Intermediate" | "Advanced";

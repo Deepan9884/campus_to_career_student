@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FeaturePanelData } from "./FeatureDeck";
-import { ArrowRight, Eye, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Eye, ShieldCheck, CheckCircle2, Check } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/stores";
 
@@ -70,9 +70,10 @@ export const VisualStage: React.FC<VisualStageProps> = ({ panel, onOpenPreviewMo
                 {panel.highlights.map((h, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1 rounded-lg bg-slate-900/90 border border-white/15 text-xs text-slate-200 backdrop-blur-md shadow-sm"
+                    className="px-3 py-1 rounded-lg bg-slate-900/90 border border-white/15 text-xs text-slate-200 backdrop-blur-md shadow-sm flex items-center gap-1"
                   >
-                    ✓ {h}
+                    <Check className="h-3 w-3 text-cyan-400 shrink-0" />
+                    <span>{h}</span>
                   </span>
                 ))}
               </div>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { reportViolation } from "@/lib/proctoring-api";
 import { acquireCameraStream, stopAllCameraStreams } from "@/lib/cameraManager";
+import { getProctoringModel, runProctorDetection } from "@/lib/proctoringAiDetector";
 import type { ModuleType, ViolationType } from "@/lib/proctoring-api";
 
 export interface ProctoringSessionOptions {
@@ -13,6 +14,21 @@ export interface ProctoringSessionOptions {
   videoElement?: HTMLVideoElement | null;
 }
 
+export type ProctoringAiStatus =
+  | "initializing"
+  | "loading_model"
+  | "active"
+  | "face_missing"
+  | "phone_detected"
+  | "multiple_faces"
+  | "error";
+
+export interface ViolationRecord {
+  type: ViolationType;
+  timestamp: string;
+  count: number;
+}
+
 export interface ProctoringSessionState {
   violationCount: number;
   isBlocked: boolean;
@@ -21,6 +37,10 @@ export interface ProctoringSessionState {
   isFullscreen: boolean;
   mediaStream: MediaStream | null;
   aiModelReady: boolean;
+  aiStatus: ProctoringAiStatus;
+  detectedObjects: string[];
+  violationsHistory: ViolationRecord[];
+  retryCamera: () => void;
 }
 
 // Blocked standalone system & function keys
@@ -30,18 +50,37 @@ const BLOCKED_STANDALONE_KEYS = new Set([
   "Meta", "OS", "Windows", "ContextMenu", "PrintScreen", "Snapshot", "Insert", "Pause", "ScrollLock", "Help",
 ]);
 
+// Whitelisted text editing keystrokes when focused inside code/text editor
+const ALLOWED_EDITOR_CTRL_KEYS = new Set(["z", "Z", "y", "Y", "a", "A", "f", "F", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete"]);
+
 function isBlockedShortcut(e: KeyboardEvent): boolean {
+  const targetTag = (e.target as HTMLElement)?.tagName?.toUpperCase();
+  const isInsideEditor = targetTag === "TEXTAREA" || targetTag === "INPUT";
+
   if (BLOCKED_STANDALONE_KEYS.has(e.key)) return true;
   if (e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") return true;
   if (e.altKey || e.key === "Alt" || e.key === "AltGraph") return true;
+
+  // Inside editor, allow standard typing shortcuts like Undo/Redo/Select All
+  if (isInsideEditor && e.ctrlKey && ALLOWED_EDITOR_CTRL_KEYS.has(e.key)) {
+    return false;
+  }
+
+  // Block all other dangerous Ctrl shortcuts (Ctrl+N, Ctrl+T, Ctrl+W, Ctrl+Shift+I, etc.)
   if (e.ctrlKey || e.key === "Control") return true;
   return false;
 }
 
-const AI_INFERENCE_INTERVAL_MS = 1500;
+const AI_INFERENCE_INTERVAL_MS = 600;
 
 export function useProctoringSession(options: ProctoringSessionOptions): ProctoringSessionState {
   const { moduleType, moduleId, onBlocked, onViolation, enabled = true, isStarted = false, videoElement } = options;
+
+  const [cameraAttempt, setCameraAttempt] = useState(0);
+
+  const retryCamera = useCallback(() => {
+    setCameraAttempt((prev) => prev + 1);
+  }, []);
 
   const [state, setState] = useState<ProctoringSessionState>({
     violationCount: 0,
@@ -51,6 +90,10 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     isFullscreen: false,
     mediaStream: null,
     aiModelReady: false,
+    aiStatus: "initializing",
+    detectedObjects: [],
+    violationsHistory: [],
+    retryCamera,
   });
 
   const onBlockedRef = useRef(onBlocked);
@@ -64,25 +107,45 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
   const isBlockedRef = useRef(false);
   const reportingRef = useRef(false);
-  const modelRef = useRef<any>(null);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const videoElementRef = useRef<HTMLVideoElement | null>(videoElement || null);
-  videoElementRef.current = videoElement || null;
+  const inferenceVideoRef = useRef<HTMLVideoElement | null>(null);
+  const externalVideoRef = useRef<HTMLVideoElement | null>(videoElement || null);
+  externalVideoRef.current = videoElement || null;
 
   const phoneStreak = useRef(0);
   const noPersonStreak = useRef(0);
   const multiPersonStreak = useRef(0);
 
+  const lastPhoneViolationTime = useRef(0);
+  const lastMultiPersonViolationTime = useRef(0);
+  const lastNoPersonViolationTime = useRef(0);
+
+  // Synchronize external video whenever videoElement or stream changes
+  useEffect(() => {
+    if (videoElement && state.mediaStream) {
+      if (videoElement.srcObject !== state.mediaStream) {
+        videoElement.srcObject = state.mediaStream;
+        videoElement.play().catch(() => {});
+      }
+    }
+  }, [videoElement, state.mediaStream]);
+
   const sendViolation = useCallback(
     async (type: ViolationType) => {
-      if (reportingRef.current || isBlockedRef.current || !moduleId || !isStartedRef.current) return;
+      const effectiveModuleId = moduleId || "active-session";
+      if (reportingRef.current || isBlockedRef.current || !isStartedRef.current) return;
       reportingRef.current = true;
       try {
-        const result = await reportViolation(moduleType, moduleId, type);
+        const result = await reportViolation(moduleType, effectiveModuleId, type);
+        const timeStr = new Date().toLocaleTimeString();
         setState((prev) => ({
           ...prev,
           violationCount: result.violationCount,
           isBlocked: result.isBlocked,
+          violationsHistory: [
+            ...prev.violationsHistory,
+            { type, timestamp: timeStr, count: result.violationCount },
+          ],
         }));
         onViolationRef.current(result.violationCount, type);
         if (result.isBlocked) {
@@ -201,7 +264,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     };
   }, [enabled, sendViolation]);
 
-  // ── 4. Live Camera & AI Detector (Stable Lifecycle) ───────────────────────
+  // ── 4. Live Camera & Dedicated Self-Contained AI Pipeline ─────────────────
   useEffect(() => {
     if (!enabled) {
       stopAllCameraStreams();
@@ -213,16 +276,56 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     async function startCameraAndAI() {
       try {
+        setState((prev) => ({ ...prev, cameraError: null, aiStatus: "initializing" }));
         const stream = await acquireCameraStream();
-        if (!active) {
-          stopAllCameraStreams();
-          return;
+        if (!active) return;
+
+        // Attach track event listeners for hardware disconnect or manual shutoff
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.onended = () => {
+            if (!active) return;
+            console.warn("[Proctoring AI] Camera track ended by user/hardware!");
+            setState((prev) => ({
+              ...prev,
+              cameraReady: false,
+              cameraError: "Camera feed disconnected or disabled.",
+              aiStatus: "face_missing",
+            }));
+            sendViolation("face_not_detected");
+          };
+
+          videoTrack.onmute = () => {
+            if (!active) return;
+            console.warn("[Proctoring AI] Camera track muted by user/system!");
+            setState((prev) => ({
+              ...prev,
+              aiStatus: "face_missing",
+            }));
+            sendViolation("face_not_detected");
+          };
         }
 
-        // Directly connect to video element if available
-        if (videoElementRef.current) {
-          videoElementRef.current.srcObject = stream;
-          videoElementRef.current.play().catch(() => {});
+        // 1. Create a dedicated off-screen video element for uninterrupted AI inference
+        if (typeof document !== "undefined") {
+          let invVideo = inferenceVideoRef.current;
+          if (!invVideo) {
+            invVideo = document.createElement("video");
+            invVideo.setAttribute("playsinline", "true");
+            invVideo.setAttribute("webkit-playsinline", "true");
+            invVideo.muted = true;
+            invVideo.width = 640;
+            invVideo.height = 480;
+            inferenceVideoRef.current = invVideo;
+          }
+          invVideo.srcObject = stream;
+          invVideo.play().catch(() => {});
+        }
+
+        // 2. Also attach to external video element if provided
+        if (externalVideoRef.current) {
+          externalVideoRef.current.srcObject = stream;
+          externalVideoRef.current.play().catch(() => {});
         }
 
         setState((prev) => ({
@@ -230,100 +333,208 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
           cameraReady: true,
           mediaStream: stream,
           cameraError: null,
+          aiStatus: "loading_model",
         }));
 
-        // Load TensorFlow.js + COCO-SSD asynchronously in background
+        // 3. Load Singleton Neural Detector
         try {
-          const [tf, cocoSsd] = await Promise.all([
-            import("@tensorflow/tfjs"),
-            import("@tensorflow-models/coco-ssd"),
-          ]);
-          await tf.ready();
-          const model = await cocoSsd.load({ base: "lite_mobilenet_v2" });
+          await getProctoringModel();
+
           if (!active) return;
-          modelRef.current = model;
-          setState((prev) => ({ ...prev, aiModelReady: true }));
+
+          setState((prev) => ({
+            ...prev,
+            aiModelReady: true,
+            aiStatus: "active",
+          }));
+          console.log("[Proctoring AI] Neural detector active and scanning.");
         } catch (modelErr) {
-          console.warn("[Proctoring AI] Background COCO-SSD load notice:", modelErr);
+          console.error("[Proctoring AI] Failed to load object detection model:", modelErr);
+          if (active) {
+            setState((prev) => ({ ...prev, aiStatus: "error" }));
+          }
         }
 
-        // Sequential, non-blocking AI Inference Loop on visible video
+        // 4. Autonomous Sequential AI Inference Loop
         async function runInferenceLoop() {
           if (!active) return;
 
-          const targetVideo = videoElementRef.current;
+          // Check if active video track is live and enabled
+          const activeTrack = stream.getVideoTracks()[0];
+          const isTrackLive = activeTrack && activeTrack.readyState === "live" && activeTrack.enabled;
 
-          if (
-            isStartedRef.current &&
-            !isBlockedRef.current &&
-            modelRef.current &&
-            targetVideo &&
-            !isDetecting
-          ) {
-            isDetecting = true;
-            try {
-              if (
-                targetVideo.readyState >= 2 &&
-                !targetVideo.paused &&
-                !targetVideo.ended &&
-                targetVideo.videoWidth > 0
-              ) {
-                const predictions = await modelRef.current.detect(
-                  targetVideo,
-                  10,
-                  0.25
-                );
+          // Prefer visible DOM video element, fallback to offscreen element
+          const targetVideo =
+            externalVideoRef.current &&
+            externalVideoRef.current.readyState >= 2 &&
+            externalVideoRef.current.videoWidth > 0
+              ? externalVideoRef.current
+              : inferenceVideoRef.current;
 
-                const detectedClasses = (predictions || []).map((p: any) => ({
-                  class: p.class.toLowerCase(),
-                  score: p.score,
-                }));
+          if (isStartedRef.current && !isBlockedRef.current) {
+            // Case 1: Camera stream is turned off, muted, or has no valid frames
+            if (!isTrackLive || !targetVideo || targetVideo.readyState < 2 || targetVideo.videoWidth === 0) {
+              noPersonStreak.current += 1;
+              setState((prev) => ({
+                ...prev,
+                aiStatus: "face_missing",
+                detectedObjects: ["Camera Offline / No Feed"],
+              }));
 
-                console.log("[Proctoring AI] Predictions:", detectedClasses);
-
-                // 1. Mobile Phone & Handheld Device Detection
-                const hasPhone = detectedClasses.some(
-                  (p: any) => (p.class === "cell phone" || p.class === "remote" || p.class === "book") && p.score > 0.25
-                );
-
-                if (hasPhone) {
-                  phoneStreak.current += 1;
-                  if (phoneStreak.current >= 1) {
-                    sendViolation("mobile_phone_detected");
-                  }
-                } else {
-                  phoneStreak.current = 0;
-                }
-
-                // 2. Candidate Face / Person Presence Detection
-                const personCount = detectedClasses.filter(
-                  (p: any) => p.class === "person" && p.score > 0.40
-                ).length;
-
-                if (personCount === 0) {
-                  noPersonStreak.current += 1;
-                  if (noPersonStreak.current >= 4) {
-                    noPersonStreak.current = 0;
-                    sendViolation("face_not_detected");
-                  }
-                } else {
-                  noPersonStreak.current = 0;
-                }
-
-                if (personCount > 1) {
-                  multiPersonStreak.current += 1;
-                  if (multiPersonStreak.current >= 2) {
-                    multiPersonStreak.current = 0;
-                    sendViolation("multiple_faces_detected");
-                  }
-                } else {
-                  multiPersonStreak.current = 0;
-                }
+              // If camera stays offline for 3 consecutive ticks (~1.8s) -> trigger violation
+              if (noPersonStreak.current >= 3) {
+                noPersonStreak.current = 0;
+                sendViolation("face_not_detected");
               }
-            } catch {
-              // Frame dropped safely
-            } finally {
-              isDetecting = false;
+            } else if (!isDetecting) {
+              // Case 2: Camera is live -> run neural object & face inference
+              isDetecting = true;
+              try {
+                const predictions = await runProctorDetection(targetVideo);
+
+                if (predictions && predictions.length >= 0) {
+                  const detectedClasses = predictions.map((p) => ({
+                    class: p.class,
+                    score: p.score,
+                  }));
+
+                  const objectSummary = detectedClasses.map((d) => `${d.class} (${Math.round(d.score * 100)}%)`);
+
+                  // ── A. Mobile Phone Detection (High-Precision Neural Recognition) ──
+                  const hasPhone = predictions.some((p) => {
+                    if (p.class !== "cell phone") return false;
+                    // Responsive confidence threshold (>= 0.35) catches real phones held in frame
+                    if (p.score < 0.35) return false;
+                    return true;
+                  });
+
+                  if (hasPhone) {
+                    phoneStreak.current += 1;
+                    setState((prev) => ({
+                      ...prev,
+                      aiStatus: "phone_detected",
+                      detectedObjects: objectSummary,
+                    }));
+
+                    // Immediate violation dispatch upon phone presence, throttled by 4.5s cooldown
+                    const now = Date.now();
+                    if (now - lastPhoneViolationTime.current > 4500) {
+                      lastPhoneViolationTime.current = now;
+                      sendViolation("mobile_phone_detected");
+                    }
+                  } else {
+                    phoneStreak.current = 0;
+                  }
+
+                  // ── B. Face / Candidate Presence Verification with Spatial Deduplication ──
+                  if (!hasPhone) {
+                    // Filter candidate detections: 0.20 threshold catches secondary people in darker / peripheral areas
+                    const personBoxes = predictions
+                      .filter((p) => p.class === "person" && p.score >= 0.20 && p.bbox)
+                      .map((p) => ({
+                        x: p.bbox[0],
+                        y: p.bbox[1],
+                        w: p.bbox[2],
+                        h: p.bbox[3],
+                        centerX: p.bbox[0] + p.bbox[2] / 2,
+                        centerY: p.bbox[1] + p.bbox[3] / 2,
+                        area: p.bbox[2] * p.bbox[3],
+                        score: p.score,
+                      }))
+                      .filter((b) => b.area >= 1500)
+                      .sort((a, b) => b.score - a.score);
+
+                    let distinctPersonsCount = 0;
+                    if (personBoxes.length === 0) {
+                      const anyPerson = predictions.some((p) => p.class === "person" && p.score >= 0.18);
+                      distinctPersonsCount = anyPerson ? 1 : 0;
+                    } else if (personBoxes.length === 1) {
+                      distinctPersonsCount = 1;
+                    } else {
+                      // Deduplicate overlapping/nested boxes for the same individual
+                      const kept: typeof personBoxes = [];
+                      for (const box of personBoxes) {
+                        let isDuplicateOfSamePerson = false;
+                        for (const k of kept) {
+                          const x1 = Math.max(box.x, k.x);
+                          const y1 = Math.max(box.y, k.y);
+                          const x2 = Math.min(box.x + box.w, k.x + k.w);
+                          const y2 = Math.min(box.y + box.h, k.y + k.h);
+
+                          const interW = Math.max(0, x2 - x1);
+                          const interH = Math.max(0, y2 - y1);
+                          const interArea = interW * interH;
+                          const smallerArea = Math.min(box.area, k.area);
+                          const overlapRatio = smallerArea > 0 ? interArea / smallerArea : 0;
+
+                          const centerDistX = Math.abs(box.centerX - k.centerX);
+                          const minW = Math.min(box.w, k.w);
+
+                          // Same person if: significant overlap (> 30%) OR horizontal centers are very close (< 35% width)
+                          if (overlapRatio > 0.30 || centerDistX < minW * 0.35) {
+                            isDuplicateOfSamePerson = true;
+                            break;
+                          }
+                        }
+                        if (!isDuplicateOfSamePerson) {
+                          kept.push(box);
+                        }
+                      }
+                      distinctPersonsCount = kept.length;
+                    }
+
+                    if (distinctPersonsCount === 0) {
+                      noPersonStreak.current += 1;
+                      multiPersonStreak.current = 0;
+                      if (noPersonStreak.current >= 2) {
+                        setState((prev) => ({
+                          ...prev,
+                          aiStatus: "face_missing",
+                          detectedObjects: objectSummary,
+                        }));
+                      }
+
+                      // 4 consecutive absence ticks (~2.4 seconds) triggers missing face violation with 5s cooldown
+                      const now = Date.now();
+                      if (noPersonStreak.current >= 4 && now - lastNoPersonViolationTime.current > 5000) {
+                        lastNoPersonViolationTime.current = now;
+                        noPersonStreak.current = 0;
+                        sendViolation("face_not_detected");
+                      }
+                    } else if (distinctPersonsCount > 1) {
+                      multiPersonStreak.current += 1;
+                      noPersonStreak.current = 0;
+                      if (multiPersonStreak.current >= 1) {
+                        setState((prev) => ({
+                          ...prev,
+                          aiStatus: "multiple_faces",
+                          detectedObjects: objectSummary,
+                        }));
+                      }
+
+                      // 2 consecutive ticks (~1.2 seconds) with verified distinct multiple people triggers violation with 4.5s cooldown
+                      const now = Date.now();
+                      if (multiPersonStreak.current >= 2 && now - lastMultiPersonViolationTime.current > 4500) {
+                        lastMultiPersonViolationTime.current = now;
+                        sendViolation("multiple_faces_detected");
+                      }
+                    } else {
+                      // Exactly 1 candidate verified in frame
+                      noPersonStreak.current = 0;
+                      multiPersonStreak.current = 0;
+                      setState((prev) => ({
+                        ...prev,
+                        aiStatus: "active",
+                        detectedObjects: objectSummary,
+                      }));
+                    }
+                  }
+                }
+              } catch {
+                // Frame dropped safely without crashing loop
+              } finally {
+                isDetecting = false;
+              }
             }
           }
 
@@ -335,11 +546,27 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         loopTimerRef.current = setTimeout(runInferenceLoop, AI_INFERENCE_INTERVAL_MS);
       } catch (err: any) {
         if (!active) return;
-        const errorMsg =
-          err.name === "NotAllowedError" || err.name === "PermissionDeniedError"
-            ? "Camera permission denied. Live camera access is strictly required for proctored exams."
-            : "Camera access failed. Please ensure a working webcam is connected and allowed.";
-        setState((prev) => ({ ...prev, cameraReady: false, mediaStream: null, cameraError: errorMsg }));
+        console.error("[Proctoring] Camera acquisition error:", err);
+        let errorMsg = "Camera access failed. Please ensure a working webcam is connected and allowed.";
+        if (err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError") {
+          errorMsg = "Camera permission denied. Please click the camera icon in your browser address bar and grant camera access.";
+        } else if (err?.name === "NotFoundError" || err?.name === "DevicesNotFoundError") {
+          errorMsg = "No webcam detected. Please connect a webcam or enable your laptop camera.";
+        } else if (err?.name === "NotReadableError" || err?.name === "TrackStartError") {
+          errorMsg = "Camera is currently in use by another application (e.g. Zoom, Teams, Lenovo Vantage). Please close other camera apps and click Retry.";
+        } else if (err?.name === "OverconstrainedError") {
+          errorMsg = "Camera does not support requested settings.";
+        } else if (err?.message) {
+          errorMsg = err.message;
+        }
+
+        setState((prev) => ({
+          ...prev,
+          cameraReady: false,
+          mediaStream: null,
+          cameraError: errorMsg,
+          aiStatus: "error",
+        }));
       }
     }
 
@@ -351,13 +578,17 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         clearTimeout(loopTimerRef.current);
         loopTimerRef.current = null;
       }
-      modelRef.current = null;
-      if (videoElementRef.current) {
-        videoElementRef.current.srcObject = null;
+      if (inferenceVideoRef.current) {
+        inferenceVideoRef.current.pause();
+        inferenceVideoRef.current.srcObject = null;
       }
+      if (externalVideoRef.current) {
+        externalVideoRef.current.srcObject = null;
+      }
+      // Ensure webcam hardware stream is completely closed
       stopAllCameraStreams();
     };
-  }, [enabled, moduleId]);
+  }, [enabled, moduleId, cameraAttempt]);
 
   return state;
 }

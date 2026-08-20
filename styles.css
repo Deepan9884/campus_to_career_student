@@ -90,6 +90,10 @@
   --chart-4: #818CF8;
   --chart-5: #93A0B5;
 
+  --btn-gradient-start: #6366F1;
+  --btn-gradient-end: #3B82F6;
+  --btn-glow: rgba(99, 102, 241, 0.35);
+
   --glass-bg: rgba(17, 24, 39, 0.78);
   --glass-border: rgba(47, 75, 107, 0.55);
   --glass-shadow: rgba(0, 0, 0, 0.45);
@@ -98,6 +102,79 @@
   --glass-strong-shadow: rgba(0, 0, 0, 0.65);
   --glass-input-bg: rgba(26, 36, 56, 0.65);
   --glass-input-border: rgba(47, 75, 107, 0.85);
+}
+
+/* ─── Data Accent Theme Palettes (Dark Mode) ─── */
+[data-accent="indigo"] {
+  --primary: #6366F1;
+  --ring: #6366F1;
+  --accent: #38BDF8;
+  --color-ember: #6366F1;
+  --color-ember-light: #A5B4FC;
+  --color-ember-dim: #4F46E5;
+  --btn-gradient-start: #6366F1;
+  --btn-gradient-end: #3B82F6;
+  --btn-glow: rgba(99, 102, 241, 0.4);
+}
+
+[data-accent="purple"] {
+  --primary: #9333EA;
+  --ring: #9333EA;
+  --accent: #C084FC;
+  --color-ember: #9333EA;
+  --color-ember-light: #C084FC;
+  --color-ember-dim: #7E22CE;
+  --btn-gradient-start: #9333EA;
+  --btn-gradient-end: #EC4899;
+  --btn-glow: rgba(147, 51, 234, 0.4);
+}
+
+[data-accent="emerald"] {
+  --primary: #10B981;
+  --ring: #10B981;
+  --accent: #34D399;
+  --color-ember: #10B981;
+  --color-ember-light: #6EE7B7;
+  --color-ember-dim: #059669;
+  --btn-gradient-start: #059669;
+  --btn-gradient-end: #14B8A6;
+  --btn-glow: rgba(16, 185, 129, 0.4);
+}
+
+[data-accent="amber"] {
+  --primary: #F59E0B;
+  --ring: #F59E0B;
+  --accent: #FBBF24;
+  --color-ember: #F59E0B;
+  --color-ember-light: #FDE68A;
+  --color-ember-dim: #D97706;
+  --btn-gradient-start: #D97706;
+  --btn-gradient-end: #F97316;
+  --btn-glow: rgba(245, 158, 11, 0.4);
+}
+
+[data-accent="cyan"] {
+  --primary: #06B6D4;
+  --ring: #06B6D4;
+  --accent: #38BDF8;
+  --color-ember: #06B6D4;
+  --color-ember-light: #7DD3FC;
+  --color-ember-dim: #0891B2;
+  --btn-gradient-start: #0891B2;
+  --btn-gradient-end: #38BDF8;
+  --btn-glow: rgba(6, 182, 212, 0.4);
+}
+
+[data-accent="rose"] {
+  --primary: #E11D48;
+  --ring: #E11D48;
+  --accent: #FB7185;
+  --color-ember: #E11D48;
+  --color-ember-light: #FDA4AF;
+  --color-ember-dim: #BE123C;
+  --btn-gradient-start: #E11D48;
+  --btn-gradient-end: #F43F5E;
+  --btn-glow: rgba(225, 29, 72, 0.4);
 }
 
 .light {
@@ -129,6 +206,10 @@
   --chart-4: #8B5CF6;
   --chart-5: #64748B;
 
+  --btn-gradient-start: #4F46E5;
+  --btn-gradient-end: #0284C7;
+  --btn-glow: rgba(79, 70, 229, 0.25);
+
   --color-bg: #F8FAFC;
   --color-surface: #FFFFFF;
   --color-surface-raised: #F1F5F9;
@@ -138,13 +219,68 @@
   --color-text-muted: #64748B;
 
   --glass-bg: rgba(255, 255, 255, 0.88);
-  --glass-border: rgba(226, 232, 240, 0.95);
-  --glass-shadow: rgba(15, 23, 42, 0.06);
-  --glass-strong-bg: rgba(255, 255, 255, 0.97);
-  --glass-strong-border: rgba(203, 213, 225, 0.95);
-  --glass-strong-shadow: rgba(15, 23, 42, 0.09);
-  --glass-input-bg: rgba(248, 250, 252, 0.98);
-  --glass-input-border: rgba(203, 213, 225, 0.95);
+  --glass-border: rgba(226, 232, 240, 0.85);
+  --glass-shadow: rgba(0, 0, 0, 0.08);
+  --glass-strong-bg: rgba(255, 255, 255, 0.96);
+  --glass-strong-border: rgba(203, 213, 225, 0.9);
+  --glass-strong-shadow: rgba(0, 0, 0, 0.12);
+  --glass-input-bg: rgba(255, 255, 255, 0.95);
+  --glass-input-border: rgba(203, 213, 225, 0.9);
+}
+
+/* ─── Data Accent Theme Palettes (Light Mode) ─── */
+.light[data-accent="indigo"], html.light[data-accent="indigo"] {
+  --primary: #4F46E5;
+  --ring: #4F46E5;
+  --accent: #0284C7;
+  --color-ember: #4F46E5;
+  --btn-gradient-start: #4F46E5;
+  --btn-gradient-end: #0284C7;
+}
+
+.light[data-accent="purple"], html.light[data-accent="purple"] {
+  --primary: #7E22CE;
+  --ring: #7E22CE;
+  --accent: #9333EA;
+  --color-ember: #7E22CE;
+  --btn-gradient-start: #7E22CE;
+  --btn-gradient-end: #DB2777;
+}
+
+.light[data-accent="emerald"], html.light[data-accent="emerald"] {
+  --primary: #059669;
+  --ring: #059669;
+  --accent: #0D9488;
+  --color-ember: #059669;
+  --btn-gradient-start: #059669;
+  --btn-gradient-end: #0D9488;
+}
+
+.light[data-accent="amber"], html.light[data-accent="amber"] {
+  --primary: #D97706;
+  --ring: #D97706;
+  --accent: #EA580C;
+  --color-ember: #D97706;
+  --btn-gradient-start: #D97706;
+  --btn-gradient-end: #EA580C;
+}
+
+.light[data-accent="cyan"], html.light[data-accent="cyan"] {
+  --primary: #0891B2;
+  --ring: #0891B2;
+  --accent: #0284C7;
+  --color-ember: #0891B2;
+  --btn-gradient-start: #0891B2;
+  --btn-gradient-end: #0284C7;
+}
+
+.light[data-accent="rose"], html.light[data-accent="rose"] {
+  --primary: #BE123C;
+  --ring: #BE123C;
+  --accent: #E11D48;
+  --color-ember: #BE123C;
+  --btn-gradient-start: #BE123C;
+  --btn-gradient-end: #E11D48;
 }
 
 @layer base {
@@ -315,10 +451,10 @@
 }
 
 @utility btn-gradient {
-  background: linear-gradient(135deg, #6366F1 0%, #3B82F6 100%);
+  background: linear-gradient(135deg, var(--btn-gradient-start, #6366F1) 0%, var(--btn-gradient-end, #3B82F6) 100%);
   color: #FFFFFF;
   font-weight: 700;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px var(--btn-glow, rgba(99, 102, 241, 0.35)), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
@@ -326,8 +462,8 @@
 
 @utility btn-gradient-hover {
   &:hover {
-    background: linear-gradient(135deg, #818CF8 0%, #60A5FA 100%);
-    box-shadow: 0 6px 28px rgba(99, 102, 241, 0.5), 0 0 0 3px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    filter: brightness(1.1);
+    box-shadow: 0 6px 28px var(--btn-glow, rgba(99, 102, 241, 0.5)), 0 0 0 3px rgba(var(--color-primary, 99, 102, 241), 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     transform: translateY(-1px);
   }
   &:active {

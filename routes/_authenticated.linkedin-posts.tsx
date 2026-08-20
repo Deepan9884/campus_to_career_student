@@ -23,6 +23,11 @@ import {
   Bold,
   List,
   Smile,
+  Globe,
+  Code,
+  Sparkles,
+  Lightbulb,
+  Rocket,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -347,16 +352,16 @@ function LinkedInPostsPage() {
 
     ctx.font = "bold 16px Inter, system-ui, sans-serif";
     ctx.fillStyle = "#93c5fd";
-    ctx.fillText("⚡ CAMPUS TO CAREER AI • VERIFIED", 90, 98);
+    ctx.fillText("CAMPUS TO CAREER AI • VERIFIED", 90, 98);
 
     const resultText =
       sourceType === "event"
         ? eventResult === "winner"
-          ? "🏆 1ST PLACE WINNER"
+          ? "1ST PLACE WINNER"
           : eventResult === "runner-up"
-          ? "🥈 RUNNER-UP"
-          : "🌟 HACKATHON SHOWCASE"
-        : "🚀 GITHUB PROJECT SHOWCASE";
+          ? "RUNNER-UP"
+          : "HACKATHON SHOWCASE"
+        : "GITHUB PROJECT SHOWCASE";
 
     ctx.fillStyle = "rgba(234, 179, 8, 0.2)";
     ctx.strokeStyle = "rgba(250, 204, 21, 0.5)";
@@ -399,7 +404,7 @@ function LinkedInPostsPage() {
 
     ctx.font = "bold 18px Inter, system-ui, sans-serif";
     ctx.fillStyle = "#38bdf8";
-    ctx.fillText("🌟 KEY ACCOMPLISHMENT & TECHNICAL CONQUEST", 95, 345);
+    ctx.fillText("KEY ACCOMPLISHMENT & TECHNICAL HIGHLIGHTS", 95, 345);
 
     const highlightQuote =
       customHighlights ||
@@ -446,7 +451,7 @@ function LinkedInPostsPage() {
     setAttachedImagePreview(dataUrl);
     setUseCertificateAsAttachment(false);
     setIsGeneratingCard(false);
-    toast.success("✨ Dynamic LinkedIn Achievement Card generated!");
+    toast.success("Dynamic LinkedIn Achievement Card generated!");
   };
 
   const handleGenerate = async () => {
@@ -495,7 +500,7 @@ function LinkedInPostsPage() {
       const result = await generateLinkedInPost(payload);
       setGeneratedResult(result);
       setActiveDraftText(result.draft);
-      toast.success("🚀 High-converting LinkedIn super content generated!");
+      toast.success("High-converting LinkedIn content generated!");
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
       toast.error(apiErr.message || "Failed to generate post");
@@ -542,7 +547,7 @@ function LinkedInPostsPage() {
       id: Date.now().toString(),
       sourceType,
       title,
-      headline: generatedResult?.headline || "🚀 Project Showcase",
+      headline: generatedResult?.headline || "Project Showcase",
       draft: activeDraftText,
       achievementParagraph: generatedResult?.achievementParagraph || "",
       variations: generatedResult?.variations || [],
@@ -952,11 +957,11 @@ function LinkedInPostsPage() {
                     onChange={(e) => setTone(e.target.value as ToneType)}
                     className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-slate-900"
                   >
-                    <option value="exhaustive">🚀 Exhaustive Achievement Story (Story + Tech + Win)</option>
-                    <option value="technical">🛠️ Deep Technical & Architecture Breakdown</option>
-                    <option value="storytelling">📖 Engaging Narrative & Personal Journey</option>
-                    <option value="executive">📈 Executive Impact & Metrics</option>
-                    <option value="celebratory">🎉 Celebratory & Grateful</option>
+                    <option value="exhaustive">Exhaustive Achievement Story (Story + Tech + Win)</option>
+                    <option value="technical">Deep Technical & Architecture Breakdown</option>
+                    <option value="storytelling">Engaging Narrative & Personal Journey</option>
+                    <option value="executive">Executive Impact & Metrics</option>
+                    <option value="celebratory">Celebratory & Grateful</option>
                   </select>
                 </div>
 
@@ -969,9 +974,9 @@ function LinkedInPostsPage() {
                     onChange={(e) => setLength(e.target.value as LengthType)}
                     className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-slate-900"
                   >
-                    <option value="exhaustive">🌟 Exhaustive Deep-Dive (Multi-paragraph)</option>
-                    <option value="standard">📄 Standard Structured (Hook + Bullets)</option>
-                    <option value="punchy">⚡ Quick & Punchy Update</option>
+                    <option value="exhaustive">Exhaustive Deep-Dive (Multi-paragraph)</option>
+                    <option value="standard">Standard Structured (Hook + Bullets)</option>
+                    <option value="punchy">Quick & Punchy Update</option>
                   </select>
                 </div>
               </div>
@@ -1063,7 +1068,7 @@ function LinkedInPostsPage() {
                     className="mt-3 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-300 hover:from-indigo-500/30 hover:to-blue-500/30 border border-indigo-500/30 transition flex items-center gap-1.5"
                   >
                     {isGeneratingCard ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
-                    ✨ Generate Share Card
+                    <span>Generate Share Card</span>
                   </button>
                 </div>
               </div>
@@ -1116,10 +1121,10 @@ function LinkedInPostsPage() {
                   <div className="mt-2 flex items-center justify-between px-2 text-xs text-muted-foreground">
                     <span>
                       {useCertificateAsAttachment
-                        ? "📜 Verified Event Certificate"
+                        ? "Verified Event Certificate"
                         : attachedImageFile
-                        ? `📷 Uploaded: ${attachedImageFile.name}`
-                        : "✨ AI Branded Achievement Card"}
+                        ? `Uploaded: ${attachedImageFile.name}`
+                        : "AI Branded Achievement Card"}
                     </span>
                     <a
                       href={attachedImagePreview}
@@ -1199,7 +1204,9 @@ function LinkedInPostsPage() {
                       {user?.targetRole || "Software Engineering Enthusiast"} | Campus to Career AI
                     </p>
                     <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                      Just now • 🌐
+                      <span>Just now</span>
+                      <span>•</span>
+                      <Globe className="h-3 w-3 text-slate-400" />
                     </p>
                   </div>
                 </div>
@@ -1245,23 +1252,21 @@ function LinkedInPostsPage() {
 
                     <div className="h-4 w-px bg-white/20 mx-0.5" />
 
-                    {/* Emoji Quick Actions */}
+                    {/* Quick Symbols Toolbar */}
                     <div className="flex items-center gap-1">
                       {[
-                        { emoji: "🚀", label: "Rocket" },
-                        { emoji: "🏆", label: "Trophy" },
-                        { emoji: "💡", label: "Idea" },
-                        { emoji: "🔥", label: "Fire" },
-                        { emoji: "✨", label: "Sparkles" },
+                        { char: "• ", label: "Bullet" },
+                        { char: "-> ", label: "Arrow" },
+                        { char: "#", label: "Hashtag" },
                       ].map((item) => (
                         <button
-                          key={item.emoji}
+                          key={item.char}
                           type="button"
-                          onClick={() => handleInsertEmoji(item.emoji)}
-                          className="h-7 w-7 rounded-lg bg-white/5 hover:bg-white/20 text-sm flex items-center justify-center transition-all hover:scale-115 active:scale-95 border border-white/10 hover:border-white/30"
-                          title={`Insert ${item.label} (${item.emoji})`}
+                          onClick={() => handleInsertEmoji(item.char)}
+                          className="h-7 px-2 rounded-lg bg-white/5 hover:bg-white/20 text-xs font-mono text-slate-300 flex items-center justify-center transition border border-white/10"
+                          title={`Insert ${item.label}`}
                         >
-                          {item.emoji}
+                          {item.char}
                         </button>
                       ))}
                     </div>
@@ -1417,7 +1422,7 @@ function LinkedInPostsPage() {
                             : "bg-blue-500/20 text-blue-300 border border-blue-500/40"
                         }`}
                       >
-                        {d.sourceType === "event" ? "🏆 Event" : "💻 GitHub Repo"}
+                        {d.sourceType === "event" ? "Event" : "GitHub Repo"}
                       </span>
                       <span className="text-[11px] text-muted-foreground">
                         {new Date(d.createdAt).toLocaleDateString()}

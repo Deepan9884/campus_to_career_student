@@ -23,8 +23,21 @@ export interface Activity {
   date: string;
 }
 
+export interface MentorTaskNotificationItem {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+  dueDate: string;
+  status: string;
+  actionUrl: string;
+  mentor?: { name: string; avatar?: string };
+}
+
 export interface DashboardResponse {
   readiness: Readiness;
   stats: DashboardStats;
   activities: Activity[];
+  mentorTasks?: MentorTaskNotificationItem[];
 }

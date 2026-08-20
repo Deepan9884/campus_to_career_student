@@ -16,6 +16,12 @@ import {
   Check,
   Plus,
   X,
+  Palette,
+  Server,
+  Layers,
+  BarChart2,
+  Bot,
+  Cloud,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import confetti from "canvas-confetti";
@@ -27,14 +33,14 @@ interface OnboardingWizardProps {
 }
 
 const PRESET_ROLES = [
-  { title: "Software Engineer", icon: "💻" },
-  { title: "Frontend Developer", icon: "🎨" },
-  { title: "Backend Engineer", icon: "⚙️" },
-  { title: "Full Stack Developer", icon: "🌐" },
-  { title: "Data Analyst", icon: "📊" },
-  { title: "Product Manager", icon: "🚀" },
-  { title: "AI/ML Engineer", icon: "🤖" },
-  { title: "DevOps Engineer", icon: "☁️" },
+  { title: "Software Engineer", icon: Code2 },
+  { title: "Frontend Developer", icon: Palette },
+  { title: "Backend Engineer", icon: Server },
+  { title: "Full Stack Developer", icon: Layers },
+  { title: "Data Analyst", icon: BarChart2 },
+  { title: "Product Manager", icon: Briefcase },
+  { title: "AI/ML Engineer", icon: Bot },
+  { title: "DevOps Engineer", icon: Cloud },
 ];
 
 const EXPERIENCE_LEVELS = [
@@ -42,21 +48,21 @@ const EXPERIENCE_LEVELS = [
     id: "Beginner",
     label: "Beginner / Student",
     subLabel: "0-1 Years Experience",
-    badge: "🟢 Gentle",
+    badge: "Foundational",
     desc: "Focus on fundamentals, core data structures, and step-by-step interview hints.",
   },
   {
     id: "Intermediate",
     label: "Intermediate / Associate",
     subLabel: "1-3 Years Experience",
-    badge: "🟡 Standard",
+    badge: "Standard",
     desc: "Balanced practical problems, standard technical rounds, and live code evaluations.",
   },
   {
     id: "Advanced",
     label: "Advanced / Senior",
     subLabel: "3+ Years Experience",
-    badge: "🔴 Senior",
+    badge: "Advanced",
     desc: "Deep system design, architectural trade-offs, edge-case optimization & hard scenarios.",
   },
 ] as const;
@@ -148,7 +154,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
       });
 
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      toast.success("Profile setup complete! Welcome to Campus to Career AI 🎉");
+      toast.success("Profile setup complete! Welcome to Campus to Career AI");
       
       setInternalOpen(false);
       onClose?.();
@@ -231,7 +237,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                           : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-300"
                       }`}
                     >
-                      <span className="text-sm">{preset.icon}</span>
+                      <preset.icon className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
                       <span className="truncate">{preset.title}</span>
                     </button>
                   ))}
@@ -441,7 +447,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                 disabled={saving || !role.trim()}
                 className="btn-gradient px-5 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 disabled:opacity-50 transition shadow-lg shadow-indigo-500/25"
               >
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Complete & Start Product Tour 🚀</>}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Complete & Start Product Tour</>}
               </button>
             )}
           </div>

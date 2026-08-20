@@ -82,6 +82,7 @@ function SettingsPage() {
 
   const [preferences, setPreferences] = useState<{
     theme: "dark" | "light" | "system";
+    accentColor: "indigo" | "purple" | "emerald" | "amber" | "cyan" | "rose";
     notifyOn: string[];
     emailDigest: "off" | "daily" | "weekly";
     aiDifficulty: "Beginner" | "Intermediate" | "Advanced";
@@ -94,6 +95,10 @@ function SettingsPage() {
       typeof document !== "undefined" && document.documentElement.classList.contains("light")
         ? "light"
         : "dark",
+    accentColor:
+      (typeof localStorage !== "undefined"
+        ? (localStorage.getItem("c2c_accent") as any)
+        : null) || "indigo",
     notifyOn: MODULES.map((m) => m.key),
     emailDigest: "off",
     aiDifficulty: "Intermediate",
@@ -137,6 +142,7 @@ function SettingsPage() {
           }
           return {
             theme: resolvedTheme as "dark" | "light" | "system",
+            accentColor: (user.preferences!.accentColor as any) || prev.accentColor || "indigo",
             notifyOn: user.preferences!.notifyOn || prev.notifyOn,
             emailDigest: user.preferences!.emailDigest || "off",
             aiDifficulty: (user.preferences!.aiDifficulty as any) || "Intermediate",
@@ -151,14 +157,18 @@ function SettingsPage() {
     setLoading(false);
   }, [user]);
 
-  // Apply theme to document
+  // Apply theme & accent to document
   useEffect(() => {
     const theme = preferences.theme;
+    const accent = preferences.accentColor || "indigo";
     const root = document.documentElement;
 
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("c2c_theme", theme);
+      localStorage.setItem("c2c_accent", accent);
     }
+
+    root.setAttribute("data-accent", accent);
 
     if (theme === "system") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -168,7 +178,7 @@ function SettingsPage() {
       root.classList.toggle("dark", theme === "dark");
       root.classList.toggle("light", theme === "light");
     }
-  }, [preferences.theme]);
+  }, [preferences.theme, preferences.accentColor]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -594,6 +604,41 @@ function SettingsPage() {
                   <span className="text-xs font-medium">{label}</span>
                 </button>
               ))}
+            </div>
+
+            {/* Accent Theme Color Swatches */}
+            <div className="pt-4 mt-4 border-t border-border dark:border-white/10 space-y-3">
+              <label className="block text-xs font-bold text-foreground">
+                Primary Accent Theme Swatch
+              </label>
+              <div className="flex flex-wrap gap-2.5">
+                {[
+                  { id: "indigo", label: "Indigo Electric", color: "bg-indigo-600", active: "border-indigo-500 bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 ring-2 ring-indigo-500/30" },
+                  { id: "purple", label: "Royal Purple", color: "bg-purple-600", active: "border-purple-500 bg-purple-500/15 text-purple-600 dark:text-purple-300 ring-2 ring-purple-500/30" },
+                  { id: "emerald", label: "Emerald Growth", color: "bg-emerald-600", active: "border-emerald-500 bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-2 ring-emerald-500/30" },
+                  { id: "amber", label: "Amber Glow", color: "bg-amber-500", active: "border-amber-500 bg-amber-500/15 text-amber-600 dark:text-amber-300 ring-2 ring-amber-500/30" },
+                  { id: "cyan", label: "Ocean Cyan", color: "bg-cyan-500", active: "border-cyan-500 bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 ring-2 ring-cyan-500/30" },
+                  { id: "rose", label: "Rose Bloom", color: "bg-rose-500", active: "border-rose-500 bg-rose-500/15 text-rose-600 dark:text-rose-300 ring-2 ring-rose-500/30" },
+                ].map((swatch) => (
+                  <button
+                    key={swatch.id}
+                    type="button"
+                    onClick={() => {
+                      setPreferences({ ...preferences, accentColor: swatch.id as any });
+                      toast.success(`Accent theme set to ${swatch.label}`);
+                    }}
+                    className={cn(
+                      "px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border transition cursor-pointer",
+                      (preferences.accentColor || "indigo") === swatch.id
+                        ? swatch.active
+                        : "border-border dark:border-white/10 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span className={cn("h-3 w-3 rounded-full shadow-sm", swatch.color)} />
+                    {swatch.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </GlassCard>
 

@@ -60,13 +60,20 @@ function RootComponent() {
     checkAuth();
   }, []);
 
-  // Synchronize theme with user preferences or localStorage
+  // Synchronize theme and accent with user preferences or localStorage
   useEffect(() => {
     const savedTheme =
       user?.preferences?.theme ||
       (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_theme") : null) ||
       "dark";
+    const savedAccent =
+      user?.preferences?.accentColor ||
+      (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_accent") : null) ||
+      "indigo";
+
     const root = document.documentElement;
+    root.setAttribute("data-accent", savedAccent);
+
     if (savedTheme === "system") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       root.classList.toggle("dark", prefersDark);
@@ -75,7 +82,7 @@ function RootComponent() {
       root.classList.toggle("dark", savedTheme === "dark");
       root.classList.toggle("light", savedTheme === "light");
     }
-  }, [user?.preferences?.theme]);
+  }, [user?.preferences?.theme, user?.preferences?.accentColor]);
 
   const googleClientId =
     import.meta.env.VITE_GOOGLE_CLIENT_ID ||

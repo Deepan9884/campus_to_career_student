@@ -1,20 +1,25 @@
 export interface InterviewQuestionItem {
   questionId: string | null;
   questionText: string;
-  itemType: "mcq" | "open_ended";
+  itemType: "mcq" | "open_ended" | "coding";
   options?: string[];
   correctOptionIndex?: number | null;
   idealAnswerPoints?: string[];
+  testCases?: Array<{ input: string; expectedOutput: string; description?: string }>;
+  starterCode?: string;
   selectedOptionIndex?: number | null;
   answer?: string | null;
   isCorrect?: boolean | null;
   score?: number | null;
   feedback?: string | null;
+  projectContext?: string | null;
   answeredAt?: string | null;
 }
 
+export type RoundType = "quiz" | "aptitude" | "core" | "technical" | "coding" | "hr";
+
 export interface InterviewRound {
-  roundType: "quiz" | "aptitude" | "core" | "technical" | "hr";
+  roundType: RoundType;
   status: "pending" | "in-progress" | "completed" | "skipped" | "failed";
   gradingMethod: "auto" | "gemini";
   items: InterviewQuestionItem[];
@@ -31,6 +36,8 @@ export interface InterviewSession {
   _id: string;
   user: string;
   targetRole: string | null;
+  resume?: string | null;
+  resumeFilename?: string | null;
   status: "in-progress" | "completed" | "failed";
   currentRoundIndex: number;
   rounds: InterviewRound[];
@@ -73,13 +80,13 @@ export interface InterviewHistoryResponse {
   pagination: Pagination;
 }
 
-export type RoundType = "quiz" | "aptitude" | "core" | "technical" | "hr";
-
 export interface StartInterviewPayload {
   targetRole?: string;
   difficulty?: "easy" | "medium" | "hard";
   questionCount?: number;
   selectedRounds?: RoundType[];
+  resumeId?: string;
+  resumeText?: string;
 }
 
 export interface AnswerPayload {

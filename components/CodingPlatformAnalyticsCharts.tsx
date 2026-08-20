@@ -110,7 +110,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
             <Activity className="h-3.5 w-3.5 text-purple-400" /> Activity Frequency
           </p>
           <p className="text-base font-bold text-foreground mt-1">
-            {totalSolvedCount > 100 ? "Highly Active 🔥" : totalSolvedCount > 30 ? "Consistent ⚡" : "Getting Started 🚀"}
+            {totalSolvedCount > 100 ? "Highly Active" : totalSolvedCount > 30 ? "Consistent" : "Getting Started"}
           </p>
         </div>
 

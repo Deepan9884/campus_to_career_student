@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ArrowRight,
   Map,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
@@ -77,9 +78,9 @@ function ImprovementItem({ imp, role }: { imp: string; role?: string }) {
         <button
           onClick={handleImprove}
           disabled={loading}
-          className="self-end opacity-0 group-hover:opacity-100 transition text-[10px] uppercase font-bold tracking-wider text-[color:var(--color-primary)] hover:text-white bg-[color:var(--color-primary)]/10 hover:bg-[color:var(--color-primary)] disabled:opacity-50 px-3 py-1.5 rounded flex items-center gap-1 relative z-10"
+          className="self-end opacity-0 group-hover:opacity-100 transition text-[10px] uppercase font-bold tracking-wider text-[color:var(--color-primary)] hover:text-white bg-[color:var(--color-primary)]/10 hover:bg-[color:var(--color-primary)] disabled:opacity-50 px-3 py-1.5 rounded flex items-center gap-1.5 relative z-10"
         >
-          {loading ? <RefreshCw className="h-3 w-3 animate-spin" /> : "Improve with AI ✨"}
+          {loading ? <RefreshCw className="h-3 w-3 animate-spin" /> : <><Sparkles className="h-3 w-3 inline" /> Improve with AI</>}
         </button>
       )}
     </motion.li>
@@ -877,7 +878,7 @@ function ResumePage() {
                                       isPositive ? "text-green-400" : "text-red-400"
                                     }`}
                                   >
-                                    {isPositive ? "Improvement Detected! 🎉" : "Score Dropped"}
+                                    {isPositive ? "Improvement Detected!" : "Score Dropped"}
                                   </p>
                                   <p className="text-xs text-muted-foreground mt-1">
                                     Compared to your previous upload ({new Date(previous.createdAt).toLocaleDateString()})

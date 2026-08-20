@@ -21,11 +21,13 @@ import {
   ChevronRight,
   GraduationCap,
   HelpCircle,
+  Search,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/stores";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { StudentProductTour } from "@/components/StudentProductTour";
+import { StudentCommandPalette } from "@/components/StudentCommandPalette";
 import { useNotificationStream } from "@/hooks/useNotificationStream";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -80,6 +82,19 @@ export function AppShell() {
   });
 
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  // Global Cmd+K / Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarCollapsed((prev) => {
@@ -155,7 +170,7 @@ export function AppShell() {
           });
 
           // Toast
-          toast.success(`🏅 ${badgeId}`, {
+          toast.success(badgeId, {
             description: "New badge unlocked!",
           });
         } else {
@@ -180,6 +195,12 @@ export function AppShell() {
     <div className="min-h-screen flex relative bg-background text-foreground">
       {/* Interactive Constellation & Cyber Mesh Background Feature */}
       <InteractiveAppBackground />
+
+      {/* Global Student Command Palette (Cmd+K) */}
+      <StudentCommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+      />
 
       <OnboardingWizard
         open={showOnboardingWizard ? true : undefined}
@@ -301,9 +322,22 @@ export function AppShell() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-muted-foreground">Welcome back</p>
-            <p className="text-sm font-semibold truncate">{user?.name ?? "Guest"}</p>
+          <div className="min-w-0 flex-1 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Welcome back</p>
+              <p className="text-sm font-semibold truncate">{user?.name ?? "Guest"}</p>
+            </div>
+
+            {/* Quick Command Palette Button */}
+            <button
+              onClick={() => setCommandPaletteOpen(true)}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl glass hover:bg-white/10 text-xs text-muted-foreground hover:text-foreground transition border border-border cursor-pointer shadow-sm"
+              title="Search tools or switch theme (⌘K)"
+            >
+              <Search className="h-3.5 w-3.5 text-indigo-500" />
+              <span className="font-medium">Search or jump to...</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono border border-border">⌘K</kbd>
+            </button>
           </div>
           <NotificationBell
             notifications={notifications}

@@ -33,6 +33,8 @@ import {
   Calendar,
   Compass,
   ArrowRight,
+  ListTodo,
+  Sparkles,
 } from "lucide-react";
 import { getDashboardStats } from "@/lib/dashboard-api";
 import { useAuth } from "@/stores";
@@ -260,7 +262,7 @@ function Dashboard() {
       desc: "Complete one coding question and review interview feedback.",
       link: "/interview",
       icon: Flame,
-      reward: "Keep 3-Day Streak Alive 🔥",
+      reward: "Maintain 3-Day Study Streak",
       btnText: "Continue Practice",
     };
   }
@@ -358,21 +360,21 @@ function Dashboard() {
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight">
-                Hey {user?.name?.split(" ")[0] || "Student"}! 🎓 You're{" "}
+                Hey {user?.name?.split(" ")[0] || "Student"}! You're{" "}
                 <span className="text-ember-gradient">{overallScore}% ready</span> for campus placements.
               </h2>
 
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {overallScore >= 80
-                  ? "🎉 Amazing work! You are in great shape for upcoming campus drives and technical interviews."
+                  ? "Amazing work! You are in great shape for upcoming campus drives and technical interviews."
                   : overallScore >= 50
-                    ? "💪 Great progress so far. Complete today's practice tasks to boost your interview score and confidence."
-                    : "🌱 Welcome to your preparation hub! Upload your resume and take a practice interview to get started."}
+                    ? "Great progress so far. Complete today's practice tasks to boost your interview score and confidence."
+                    : "Welcome to your preparation hub! Upload your resume and take a practice interview to get started."}
               </p>
 
               <div className="flex items-center gap-2 pt-1">
                 <span className="text-[11px] font-medium text-foreground bg-muted dark:bg-[#131B2E] px-3 py-1 rounded-xl border border-border dark:border-[#2F4B6B]">
-                  🎯 Target Track: <strong className="text-foreground">{user?.profile?.targetRole || user?.targetRole || "Software Engineer"}</strong>
+                  Target Track: <strong className="text-foreground">{user?.profile?.targetRole || user?.targetRole || "Software Engineer"}</strong>
                 </span>
               </div>
             </div>
@@ -641,6 +643,65 @@ function Dashboard() {
 
         {/* RIGHT COLUMN (5 / 12) — Daily Goal, Checklist & Trophies */}
         <div className="lg:col-span-5 space-y-6">
+          {/* Mentor Assigned Goals & Milestones */}
+          {data?.mentorTasks && data.mentorTasks.length > 0 && (
+            <div className="rounded-3xl p-5 border border-indigo-500/40 shadow-xl relative overflow-hidden bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(99,102,241,0.2)_0%,rgba(17,24,39,0.95)_60%,rgba(8,13,24,1)_100%)] animate-in fade-in">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                    <ListTodo className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-foreground">Assigned by Mentor</h3>
+                </div>
+                <span className="px-2 py-0.5 rounded-md bg-indigo-600/20 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-[10px] font-extrabold uppercase tracking-wider">
+                  {data.mentorTasks.length} Goal{data.mentorTasks.length > 1 ? "s" : ""}
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {data.mentorTasks.map((t) => (
+                  <div
+                    key={t._id}
+                    className="p-3.5 rounded-2xl bg-muted/40 dark:bg-[#080D18]/80 border border-border dark:border-[#2F4B6B]/60 space-y-2 hover:border-indigo-500/40 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30">
+                          {t.category}
+                        </span>
+                        {t.priority === "urgent" && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-500">
+                            Urgent
+                          </span>
+                        )}
+                      </div>
+                      {t.dueDate && (
+                        <span className="text-[10px] text-muted-foreground font-medium">
+                          Due {new Date(t.dueDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+
+                    <h4 className="text-xs font-bold text-foreground leading-snug">{t.title}</h4>
+                    {t.description && (
+                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+                        {t.description}
+                      </p>
+                    )}
+
+                    <Link
+                      to={t.actionUrl as any}
+                      className="w-full py-1.5 rounded-xl btn-gradient btn-gradient-hover text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-sm mt-1"
+                    >
+                      <span>Complete Milestone</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Today's Study Goal Card */}
           <div id="section-mission" className="scroll-mt-24">
             <div className="rounded-3xl p-5 border border-indigo-500/40 shadow-xl relative overflow-hidden bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.18)_0%,rgba(17,24,39,0.95)_60%,rgba(8,13,24,1)_100%)]">

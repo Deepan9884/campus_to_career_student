@@ -25,6 +25,8 @@ import {
   Flame,
   Eye,
   Sparkles,
+  Check,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/stores";
 import { StudyConstellation } from "./StudyConstellation";
@@ -545,9 +547,10 @@ export const LandingPage: React.FC = () => {
                         {panel.highlights.slice(0, 2).map((h, i) => (
                           <span
                             key={i}
-                            className="text-[9px] font-medium bg-[#111827]/90 text-slate-200 px-2 py-0.5 rounded-md border border-[#2F4B6B]/80 backdrop-blur-md"
+                            className="text-[9px] font-medium bg-[#111827]/90 text-slate-200 px-2 py-0.5 rounded-md border border-[#2F4B6B]/80 backdrop-blur-md flex items-center gap-1"
                           >
-                            ✓ {h}
+                            <Check className="h-2.5 w-2.5 text-cyan-400 shrink-0" />
+                            <span>{h}</span>
                           </span>
                         ))}
                       </div>
@@ -776,8 +779,9 @@ export const LandingPage: React.FC = () => {
             </button>
           </div>
 
-          <p className="relative text-[11px] text-[#93A0B5]/80 mt-4">
-            ⚡ No credit card required · Instant access to all AI tools · Free student tier
+          <p className="relative text-[11px] text-[#93A0B5]/80 mt-4 flex items-center justify-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+            <span>No credit card required · Instant access to all AI tools · Free student tier</span>
           </p>
         </motion.div>
       </section>

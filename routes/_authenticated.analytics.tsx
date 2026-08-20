@@ -320,7 +320,7 @@ function AnalyticsPage() {
   const triggerAchievementCelebration = (achievement: any) => {
     if (achievement.earned) {
       confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
-      toast.success(`Achievement Unlocked: ${achievement.name}! 🏆`);
+      toast.success(`Achievement Unlocked: ${achievement.name}`);
     } else {
       toast.info(`${achievement.name}: ${achievement.progress}% completed — ${achievement.desc}`);
     }

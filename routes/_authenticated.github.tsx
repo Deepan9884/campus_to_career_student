@@ -15,6 +15,7 @@ import {
   Loader2,
   AlertCircle,
   History,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -258,8 +259,8 @@ const [analyzing, setAnalyzing] = useState(false);
                 className="w-8 h-8 rounded-full"
               />
               <div className="text-xs">
-                <p className="text-[color:var(--color-success)]">
-                  ✓ Connected as {githubProfile.login}
+                <p className="text-[color:var(--color-success)] flex items-center gap-1">
+                  <Check className="h-3.5 w-3.5 shrink-0" /> Connected as {githubProfile.login}
                 </p>
                 <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
               </div>
@@ -594,7 +595,7 @@ const [analyzing, setAnalyzing] = useState(false);
                 <div className="p-3.5 rounded-2xl bg-muted/50 dark:bg-[#131B2E]/60 border border-border dark:border-[#2F4B6B]/40 flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                    <span>⚡ 10,000+ student repositories audited for campus placement drives</span>
+                    <span>10,000+ student repositories audited for campus placement drives</span>
                   </span>
                   <span className="text-indigo-600 dark:text-indigo-400 font-semibold">100% Free & Open-Source Friendly</span>
                 </div>

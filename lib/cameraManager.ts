@@ -1,74 +1,117 @@
 /**
  * Global Camera Stream Manager
- * Ensures zero-leak camera lifecycle, cancels pending promises on unmount,
- * and shuts off hardware webcam immediately.
+ * Provides reliable, race-condition-free webcam acquisition with
+ * automatic constraint fallback and clean track lifecycle management.
  */
 
-const activeStreams = new Set<MediaStream>();
-let isAcquiring = false;
-let cancelAcquisition = false;
+let activeStream: MediaStream | null = null;
+let acquisitionPromise: Promise<MediaStream> | null = null;
 
 export async function acquireCameraStream(): Promise<MediaStream> {
-  // If we already have an active stream with live tracks, reuse it!
-  for (const stream of activeStreams) {
-    if (stream.active && stream.getVideoTracks().some((t) => t.readyState === "live")) {
-      return stream;
-    }
+  // 1. If we already have a healthy, active media stream with live video tracks, return it immediately
+  if (
+    activeStream &&
+    activeStream.active &&
+    activeStream.getVideoTracks().some((t) => t.readyState === "live" && t.enabled)
+  ) {
+    return activeStream;
   }
 
-  // Stop any stale tracks
-  stopAllCameraStreams();
-  
-  isAcquiring = true;
-  cancelAcquisition = false;
+  // 2. If an acquisition is already in flight, reuse the promise to prevent device conflicts
+  if (acquisitionPromise) {
+    return acquisitionPromise;
+  }
 
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: { ideal: 640 },
-        height: { ideal: 480 },
-        facingMode: "user",
-      },
-      audio: false,
-    });
+  if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+    throw new Error(
+      "WebRTC Camera API is not available. Please ensure you are accessing via HTTPS or localhost."
+    );
+  }
 
-    // If cancelled while getUserMedia was resolving, kill it immediately!
-    if (cancelAcquisition) {
-      stream.getTracks().forEach((track) => {
+  acquisitionPromise = (async () => {
+    try {
+      // Clean up any stale dead tracks first
+      if (activeStream) {
+        activeStream.getTracks().forEach((track) => {
+          try {
+            track.stop();
+          } catch {}
+        });
+        activeStream = null;
+      }
+
+      let stream: MediaStream | null = null;
+
+      // Attempt 1: Standard recommended ideal constraints
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+          },
+          audio: false,
+        });
+      } catch (err: any) {
+        console.warn("[CameraManager] Ideal constraint failed, trying basic video:", err);
+      }
+
+      // Attempt 2: Basic fallback without resolution/frame constraints
+      if (!stream) {
         try {
-          track.stop();
-          track.enabled = false;
-        } catch {}
-      });
-      isAcquiring = false;
-      throw new Error("Camera acquisition cancelled");
-    }
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        } catch (fallbackErr: any) {
+          console.error("[CameraManager] Basic video acquisition failed:", fallbackErr);
+          throw fallbackErr;
+        }
+      }
 
-    activeStreams.add(stream);
-    isAcquiring = false;
-    return stream;
-  } catch (err) {
-    isAcquiring = false;
-    throw err;
-  }
+      activeStream = stream;
+      return stream;
+    } finally {
+      acquisitionPromise = null;
+    }
+  })();
+
+  return acquisitionPromise;
 }
 
 export function stopAllCameraStreams(): void {
-  cancelAcquisition = true;
-  for (const stream of activeStreams) {
-    stream.getTracks().forEach((track) => {
-      try {
+  if (activeStream) {
+    try {
+      activeStream.getTracks().forEach((track) => {
         track.stop();
         track.enabled = false;
-      } catch {}
-    });
+      });
+    } catch {}
+    activeStream = null;
   }
-  activeStreams.clear();
+
+  // Also sweep any active video elements in the DOM to stop lingering streams
+  if (typeof document !== "undefined") {
+    try {
+      const videos = document.querySelectorAll("video");
+      videos.forEach((v) => {
+        if (v.srcObject instanceof MediaStream) {
+          v.srcObject.getTracks().forEach((t) => {
+            try {
+              t.stop();
+              t.enabled = false;
+            } catch {}
+          });
+          v.srcObject = null;
+        }
+      });
+    } catch {}
+  }
 }
 
-// Emergency cleanup on page unload / refresh
+// Emergency cleanup on page unload / hide
 if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", stopAllCameraStreams);
   window.addEventListener("pagehide", stopAllCameraStreams);
 }
+
 
