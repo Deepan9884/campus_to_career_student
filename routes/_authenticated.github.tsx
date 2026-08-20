@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import {
   Github,
@@ -17,6 +17,7 @@ import {
   History,
   Check,
   RotateCw,
+  Edit3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/_authenticated/github")({
 
 function GithubPage() {
   const { user } = useAuth();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [connected, setConnected] = useState(false);
   const [username, setUsername] = useState(user?.githubUsername || "");
   const [githubProfile, setGithubProfile] = useState<GithubProfile | null>(null);
@@ -267,6 +269,7 @@ const [analyzing, setAnalyzing] = useState(false);
                 <>
                   <div className="flex gap-2">
                     <input
+                      ref={inputRef}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder="GitHub username"
@@ -311,11 +314,15 @@ const [analyzing, setAnalyzing] = useState(false);
                       </div>
                       {isCurrentConnected && (
                         <button
-                          onClick={() => setUsername("")}
-                          className="text-[11px] text-muted-foreground hover:text-foreground underline px-1.5 py-1 shrink-0 font-medium"
-                          title="Switch account"
+                          onClick={() => {
+                            setUsername("");
+                            setTimeout(() => inputRef.current?.focus(), 50);
+                          }}
+                          className="text-xs text-indigo-400 hover:text-white px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 transition flex items-center gap-1 font-medium shrink-0"
+                          title="Switch GitHub Account"
                         >
-                          Change
+                          <Edit3 className="h-3 w-3" />
+                          <span>Change</span>
                         </button>
                       )}
                     </div>
