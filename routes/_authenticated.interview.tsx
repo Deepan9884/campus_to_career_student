@@ -340,10 +340,17 @@ function ResumeSelectorModule({
 function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
   const { user } = useAuth();
   const [targetRole, setTargetRole] = useState(user?.profile?.targetRole || user?.targetRole || "");
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
+  const defaultDifficulty =
+    user?.preferences?.aiDifficulty === "Beginner"
+      ? "easy"
+      : user?.preferences?.aiDifficulty === "Advanced"
+      ? "hard"
+      : "medium";
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(defaultDifficulty);
   const [questionCount, setQuestionCount] = useState(5);
   const [loading, setLoading] = useState(false);
 
+  const isResumePrivacy = user?.preferences?.resumePrivacy === true;
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
   const [selectedResumeName, setSelectedResumeName] = useState<string | null>(null);
 
@@ -379,7 +386,7 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
         targetRole: targetRole || undefined,
         difficulty,
         questionCount,
-        resumeId: selectedResumeId || undefined,
+        resumeId: isResumePrivacy ? undefined : selectedResumeId || undefined,
         selectedRounds: selectedRounds.size === allRoundKeys.length
           ? undefined // all selected = don't send (backward compatible)
           : (allRoundKeys.filter((k) => selectedRounds.has(k)) as Array<
@@ -522,13 +529,25 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
       </div>
 
       {/* Resume & Project Intelligence Selector (Shown when HR round is active) */}
-      {selectedRounds.has("hr") && (
+      {selectedRounds.has("hr") && !isResumePrivacy && (
         <ResumeSelectorModule
           selectedResumeId={selectedResumeId}
           onSelectResumeId={setSelectedResumeId}
           selectedResumeName={selectedResumeName}
           onSelectResumeName={setSelectedResumeName}
         />
+      )}
+
+      {selectedRounds.has("hr") && isResumePrivacy && (
+        <div className="mt-4 p-3.5 rounded-xl bg-muted/40 dark:bg-black/30 border border-border dark:border-white/10 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-foreground">
+            <Lock className="w-4 h-4 text-indigo-400 shrink-0" />
+            <span>
+              <strong>Resume Privacy Mode Active:</strong> Your HR round will use role-based behavioral scenarios instead of parsing your resume.
+            </span>
+          </div>
+          <span className="text-[11px] text-muted-foreground shrink-0">Managed in Settings</span>
+        </div>
       )}
 
       <button
