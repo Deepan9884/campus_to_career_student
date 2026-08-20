@@ -16,7 +16,9 @@ import {
   AlertCircle,
   History,
   Check,
+  RotateCw,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   connectGithub,
@@ -248,141 +250,186 @@ const [analyzing, setAnalyzing] = useState(false);
         <p className="text-muted-foreground text-sm mt-1">See how recruiters view your code.</p>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_2fr] gap-6">
-        <GlassCard>
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <Github className="h-4 w-4" /> GitHub Connection
-          </h3>
-          {(() => {
-            const isCurrentConnected = Boolean(
-              connected &&
-                githubProfile?.login &&
-                username.trim().toLowerCase() === githubProfile.login.toLowerCase(),
-            );
-            return (
-              <>
-                <div className="flex gap-2">
-                  <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="GitHub username"
-                    disabled={connecting}
-                    className="flex-1 glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && !isCurrentConnected && !connecting && username.trim() && handleConnect()
-                    }
-                  />
-                  <button
-                    onClick={() => handleConnect()}
-                    disabled={isCurrentConnected || connecting || !username.trim()}
-                    className="btn-gradient btn-gradient-hover rounded-xl px-4 text-sm font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0"
-                  >
-                    {connecting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : isCurrentConnected ? (
-                      <>
-                        <Check className="h-4 w-4" /> Connected
-                      </>
-                    ) : connected ? (
-                      "Switch"
-                    ) : (
-                      "Connect"
-                    )}
-                  </button>
-                </div>
-                {connected && githubProfile && (
-                  <div className="mt-3 flex items-center justify-between gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={githubProfile.avatar_url}
-                        alt={githubProfile.login}
-                        className="w-8 h-8 rounded-full border border-white/20 shrink-0"
-                      />
-                      <div className="text-xs min-w-0">
-                        <p className="text-[color:var(--color-success)] flex items-center gap-1 truncate font-medium">
-                          <Check className="h-3.5 w-3.5 shrink-0" /> Connected as @{githubProfile.login}
-                        </p>
-                        <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
-                      </div>
-                    </div>
-                    {isCurrentConnected && (
-                      <button
-                        onClick={() => {
-                          setUsername("");
-                        }}
-                        className="text-[11px] text-muted-foreground hover:text-white underline px-1.5 py-1 shrink-0"
-                        title="Switch account"
-                      >
-                        Change
-                      </button>
-                    )}
+      <div className="grid lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column (Connection & Repository Navigator) */}
+        <div className="lg:col-span-5 xl:col-span-4 space-y-4">
+          <GlassCard className="space-y-4">
+            <h3 className="font-semibold flex items-center gap-2 text-foreground">
+              <Github className="h-4 w-4 text-[color:var(--color-primary)]" /> GitHub Connection
+            </h3>
+            {(() => {
+              const isCurrentConnected = Boolean(
+                connected &&
+                  githubProfile?.login &&
+                  username.trim().toLowerCase() === githubProfile.login.toLowerCase(),
+              );
+              return (
+                <>
+                  <div className="flex gap-2">
+                    <input
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="GitHub username"
+                      disabled={connecting}
+                      className="flex-1 glass-input rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && !isCurrentConnected && !connecting && username.trim() && handleConnect()
+                      }
+                    />
+                    <button
+                      onClick={() => handleConnect()}
+                      disabled={isCurrentConnected || connecting || !username.trim()}
+                      className="btn-gradient btn-gradient-hover rounded-xl px-4 text-sm font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+                    >
+                      {connecting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isCurrentConnected ? (
+                        <>
+                          <Check className="h-4 w-4" /> Connected
+                        </>
+                      ) : connected ? (
+                        "Switch"
+                      ) : (
+                        "Connect"
+                      )}
+                    </button>
                   </div>
-                )}
-              </>
-            );
-          })()}
+                  {connected && githubProfile && (
+                    <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/40 dark:bg-black/30 border border-border dark:border-white/10">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={githubProfile.avatar_url}
+                          alt={githubProfile.login}
+                          className="w-9 h-9 rounded-full border border-white/20 shrink-0"
+                        />
+                        <div className="text-xs min-w-0">
+                          <p className="text-[color:var(--color-success)] flex items-center gap-1 font-semibold truncate">
+                            <Check className="h-3.5 w-3.5 shrink-0" /> @{githubProfile.login}
+                          </p>
+                          <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
+                        </div>
+                      </div>
+                      {isCurrentConnected && (
+                        <button
+                          onClick={() => setUsername("")}
+                          className="text-[11px] text-muted-foreground hover:text-foreground underline px-1.5 py-1 shrink-0 font-medium"
+                          title="Switch account"
+                        >
+                          Change
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
-          <h4 className="text-xs uppercase tracking-wider text-muted-foreground mt-6 mb-2">
-            Repositories
-          </h4>
-          <div className="relative mb-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search repos"
-              disabled={!connected}
-              className="w-full glass-input rounded-xl pl-9 pr-3 py-2 text-sm outline-none disabled:opacity-50"
-            />
-          </div>
-          {loadingRepos ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <ul className="space-y-2 max-h-80 overflow-auto">
-              {filteredRepos.map((r) => (
-                <li key={r.full_name}>
+            <div className="pt-2 border-t border-border dark:border-white/10">
+              <div className="flex items-center justify-between mb-2.5">
+                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                  <span>Repositories</span>
+                  {repos.length > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-muted dark:bg-white/10 text-[10px] font-mono text-foreground font-normal">
+                      {repos.length}
+                    </span>
+                  )}
+                </h4>
+                {connected && (
                   <button
-                    onClick={() => handleAnalyze(r.full_name)}
-                    disabled={analyzing}
-                    className={`w-full text-left p-3 rounded-xl transition ${selectedRepo === r.full_name ? "btn-gradient" : "glass hover:bg-white/10"} disabled:opacity-50`}
+                    onClick={() => fetchRepos()}
+                    disabled={loadingRepos}
+                    className="text-xs text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted dark:hover:bg-white/5 transition flex items-center gap-1"
+                    title="Refresh repositories"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm truncate">{r.name}</span>
-                      <span className="text-xs flex items-center gap-1">
-                        <Star className="h-3 w-3" />
-                        {r.stargazers_count}
-                      </span>
-                    </div>
-                    <div className="text-xs opacity-80 mt-1">
-                      {r.language || "N/A"} • {r.forks_count} forks
-                    </div>
+                    <RotateCw className={cn("h-3.5 w-3.5", loadingRepos && "animate-spin")} />
                   </button>
-                </li>
-              ))}
-              {connected && (filteredRepos || []).length === 0 && !loadingRepos && (
-                <li className="text-xs text-muted-foreground text-center py-4">No repositories found</li>
+                )}
+              </div>
+
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search repositories..."
+                  disabled={!connected}
+                  className="w-full glass-input rounded-xl pl-9 pr-3 py-2 text-sm outline-none disabled:opacity-50"
+                />
+              </div>
+
+              {loadingRepos ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin text-[color:var(--color-primary)]" />
+                  <span className="text-xs">Fetching repositories...</span>
+                </div>
+              ) : (
+                <ul className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                  {filteredRepos.map((r) => (
+                    <li key={r.full_name}>
+                      <button
+                        onClick={() => handleAnalyze(r.full_name)}
+                        disabled={analyzing}
+                        className={cn(
+                          "w-full text-left p-3 rounded-xl border transition-all text-xs group",
+                          selectedRepo === r.full_name
+                            ? "bg-indigo-500/15 dark:bg-indigo-500/20 border-indigo-500 text-foreground font-medium shadow-sm ring-1 ring-indigo-500/30"
+                            : "bg-muted/30 dark:bg-black/20 border-border dark:border-white/5 hover:border-indigo-500/40 hover:bg-muted/60 dark:hover:bg-white/5 text-foreground",
+                          analyzing && "opacity-50 cursor-not-allowed",
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-semibold text-sm truncate group-hover:text-[color:var(--color-primary)] transition-colors">
+                            {r.name}
+                          </span>
+                          <span className="text-[11px] font-mono flex items-center gap-1 text-amber-500 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md shrink-0">
+                            <Star className="h-3 w-3 fill-amber-400" />
+                            {r.stargazers_count}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-2">
+                          <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--color-primary)]" />
+                            {r.language || "Other"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <GitFork className="h-3 w-3" /> {r.forks_count}
+                          </span>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                  {connected && (filteredRepos || []).length === 0 && !loadingRepos && (
+                    <li className="text-xs text-muted-foreground text-center py-8">
+                      {query ? "No matching repositories found" : "No public repositories found"}
+                    </li>
+                  )}
+                  {!connected && (
+                    <li className="text-xs text-muted-foreground text-center py-8">
+                      Connect your GitHub account above to view your repositories
+                    </li>
+                  )}
+                </ul>
               )}
-            </ul>
-          )}
 
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <button
-              onClick={() => {
-                setShowHistory(!showHistory);
-                setSelectedRepo(null);
-                setAnalysis(null);
-              }}
-              className="w-full flex items-center justify-center gap-2 glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10"
-            >
-              <History className="h-4 w-4" />
-              {showHistory ? "Hide History" : "Analysis History"}
-            </button>
-          </div>
-        </GlassCard>
+              <div className="mt-3 pt-3 border-t border-border dark:border-white/10">
+                <button
+                  onClick={() => {
+                    setShowHistory(!showHistory);
+                    setSelectedRepo(null);
+                    setAnalysis(null);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 glass rounded-xl px-4 py-2.5 text-sm hover:bg-muted/60 dark:hover:bg-white/10 text-foreground transition"
+                >
+                  <History className="h-4 w-4" />
+                  {showHistory ? "Hide History" : "Analysis History"}
+                </button>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
 
-        <div className="space-y-6">
+        {/* Right Column (Analysis Workspace) */}
+        <div className="lg:col-span-7 xl:col-span-8 space-y-6">
           {showHistory && !selectedRepo && (
             <GlassCard>
               <h3 className="font-semibold mb-4">Analysis History</h3>
