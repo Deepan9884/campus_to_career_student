@@ -140,9 +140,15 @@ const [analyzing, setAnalyzing] = useState(false);
     setLoadingRepos(true);
     try {
       const data = await listRepos();
-      setRepos(data.repos);
-    } catch {
-      toast.error("Failed to load repositories");
+      setRepos(data.repos || []);
+      if ((data.repos || []).length > 0) {
+        setConnected(true);
+      }
+    } catch (err: unknown) {
+      const apiErr = err as { statusCode?: number; message?: string };
+      if (apiErr?.statusCode === 429) {
+        toast.error(apiErr.message || "Rate limit reached. Please wait a few minutes.");
+      }
     } finally {
       setLoadingRepos(false);
     }
@@ -152,7 +158,7 @@ const [analyzing, setAnalyzing] = useState(false);
     setLoadingHistory(true);
     try {
       const data = await getAnalysisHistory(page, 10);
-      setHistory(data.analyses);
+      setHistory(data.analyses || []);
       setHistoryPagination(data.pagination);
     } catch {
       toast.error("Failed to load analysis history");
@@ -181,8 +187,8 @@ const [analyzing, setAnalyzing] = useState(false);
           user: state.user ? { ...state.user, ...data.user, githubUsername: data.user.githubUsername } : data.user,
         }));
       }
-      fetchRepos();
-      toast.success(`Connected as ${data.github.login}`);
+      await fetchRepos();
+      toast.success(`Connected as @${data.github.login}`);
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
       toast.error(apiErr.message || "Failed to connect GitHub account");
@@ -202,12 +208,15 @@ const [analyzing, setAnalyzing] = useState(false);
           setGithubProfile(data.github);
           fetchRepos();
         })
-        .catch(() => {})
+        .catch(() => {
+          // If connect throws, still attempt to list repos if already attached in DB
+          fetchRepos().catch(() => {});
+        })
         .finally(() => {
           setConnecting(false);
         });
     }
-  }, [user?.githubUsername, user?.profile?.githubUsername]);
+  }, [user?.githubUsername, user?.profile?.githubUsername, connected, githubProfile, connecting, fetchRepos]);
 
   const handleAnalyze = async (repoFullName: string) => {
     setSelectedRepo(repoFullName);
