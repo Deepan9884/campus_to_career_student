@@ -18,6 +18,11 @@ import {
   Check,
   RotateCw,
   Edit3,
+  GripVertical,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -75,6 +80,61 @@ const [analyzing, setAnalyzing] = useState(false);
   const [linkedinPost, setLinkedinPost] = useState<string>("");
   const [generatingPost, setGeneratingPost] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+
+  // Adjustable Layout States
+  const [leftWidthPercent, setLeftWidthPercent] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("c2c_github_split_ratio");
+      if (saved) {
+        const parsed = Number(saved);
+        if (parsed >= 20 && parsed <= 60) return parsed;
+      }
+    }
+    return 33;
+  });
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !containerRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newPercent = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+      if (newPercent >= 20 && newPercent <= 60) {
+        setLeftWidthPercent(Math.round(newPercent));
+        localStorage.setItem("c2c_github_split_ratio", String(Math.round(newPercent)));
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+      }
+    };
+
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    } else {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isDragging]);
 
   const fetchRepos = useCallback(async () => {
     setLoadingRepos(true);
@@ -247,89 +307,186 @@ const [analyzing, setAnalyzing] = useState(false);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">GitHub Project Analyzer</h1>
-        <p className="text-muted-foreground text-sm mt-1">See how recruiters view your code.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">GitHub Project Analyzer</h1>
+          <p className="text-muted-foreground text-sm mt-1">See how recruiters evaluate and benchmark your code.</p>
+        </div>
+
+        {/* Layout Adjustment Controls */}
+        <div className="hidden lg:flex items-center gap-1.5 p-1 rounded-xl bg-muted/40 dark:bg-black/30 border border-border dark:border-white/10 text-xs text-muted-foreground">
+          <span className="px-2 font-medium text-[11px] text-muted-foreground">Split:</span>
+          <button
+            type="button"
+            onClick={() => {
+              setIsLeftCollapsed(false);
+              setLeftWidthPercent(25);
+              localStorage.setItem("c2c_github_split_ratio", "25");
+            }}
+            className={cn(
+              "px-2.5 py-1 rounded-lg font-medium transition text-[11px]",
+              !isLeftCollapsed && leftWidthPercent === 25
+                ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-sm"
+                : "hover:text-foreground",
+            )}
+            title="Wide Workspace (25% Repos / 75% Analysis)"
+          >
+            Wide (75%)
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsLeftCollapsed(false);
+              setLeftWidthPercent(33);
+              localStorage.setItem("c2c_github_split_ratio", "33");
+            }}
+            className={cn(
+              "px-2.5 py-1 rounded-lg font-medium transition text-[11px]",
+              !isLeftCollapsed && leftWidthPercent === 33
+                ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-sm"
+                : "hover:text-foreground",
+            )}
+            title="Balanced Split (33% Repos / 67% Analysis)"
+          >
+            Balanced (67%)
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsLeftCollapsed(false);
+              setLeftWidthPercent(50);
+              localStorage.setItem("c2c_github_split_ratio", "50");
+            }}
+            className={cn(
+              "px-2.5 py-1 rounded-lg font-medium transition text-[11px]",
+              !isLeftCollapsed && leftWidthPercent === 50
+                ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-sm"
+                : "hover:text-foreground",
+            )}
+            title="Equal Split (50% Repos / 50% Analysis)"
+          >
+            Equal (50/50)
+          </button>
+          <div className="w-[1px] h-4 bg-border/60 dark:bg-white/10 my-auto" />
+          <button
+            type="button"
+            onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
+            className={cn(
+              "px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1.5 text-[11px]",
+              isLeftCollapsed
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "hover:text-foreground",
+            )}
+            title={isLeftCollapsed ? "Restore Repository List" : "Focus Mode (Maximize Workspace)"}
+          >
+            {isLeftCollapsed ? (
+              <>
+                <PanelLeftOpen className="h-3.5 w-3.5" />
+                <span>Show Repos</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="h-3.5 w-3.5" />
+                <span>Focus</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-6 items-start">
+      <div
+        ref={containerRef}
+        className="flex flex-col lg:flex-row items-stretch relative"
+      >
         {/* Left Column (Connection & Repository Navigator) */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-4">
-          <GlassCard className="space-y-4">
-            <h3 className="font-semibold flex items-center gap-2 text-foreground">
-              <Github className="h-4 w-4 text-[color:var(--color-primary)]" /> GitHub Connection
-            </h3>
-            {(() => {
-              const isCurrentConnected = Boolean(
-                connected &&
-                  githubProfile?.login &&
-                  username.trim().toLowerCase() === githubProfile.login.toLowerCase(),
-              );
-              return (
-                <>
-                  <div className="flex gap-2">
-                    <input
-                      ref={inputRef}
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="GitHub username"
-                      disabled={connecting}
-                      className="flex-1 glass-input rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && !isCurrentConnected && !connecting && username.trim() && handleConnect()
-                      }
-                    />
-                    <button
-                      onClick={() => handleConnect()}
-                      disabled={isCurrentConnected || connecting || !username.trim()}
-                      className="btn-gradient btn-gradient-hover rounded-xl px-4 text-sm font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0"
-                    >
-                      {connecting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : isCurrentConnected ? (
-                        <>
-                          <Check className="h-4 w-4" /> Connected
-                        </>
-                      ) : connected ? (
-                        "Switch"
-                      ) : (
-                        "Connect"
-                      )}
-                    </button>
-                  </div>
-                  {connected && githubProfile && (
-                    <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/40 dark:bg-black/30 border border-border dark:border-white/10">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <img
-                          src={githubProfile.avatar_url}
-                          alt={githubProfile.login}
-                          className="w-9 h-9 rounded-full border border-white/20 shrink-0"
-                        />
-                        <div className="text-xs min-w-0">
-                          <p className="text-[color:var(--color-success)] flex items-center gap-1 font-semibold truncate">
-                            <Check className="h-3.5 w-3.5 shrink-0" /> @{githubProfile.login}
-                          </p>
-                          <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
+        {!isLeftCollapsed && (
+          <div
+            style={{
+              width: typeof window !== "undefined" && window.innerWidth >= 1024 ? `${leftWidthPercent}%` : "100%",
+            }}
+            className="w-full space-y-4 shrink-0 transition-[width] duration-75 lg:pr-3"
+          >
+            <GlassCard className="space-y-4">
+              <h3 className="font-semibold flex items-center gap-2 text-foreground">
+                <Github className="h-4 w-4 text-[color:var(--color-primary)]" /> GitHub Connection
+              </h3>
+              {(() => {
+                const isCurrentConnected = Boolean(
+                  connected &&
+                    githubProfile?.login &&
+                    username.trim().toLowerCase() === githubProfile.login.toLowerCase(),
+                );
+                return (
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        ref={inputRef}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="GitHub username"
+                        disabled={connecting}
+                        className="flex-1 glass-input rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && !isCurrentConnected && !connecting && username.trim() && handleConnect()
+                        }
+                      />
+                      {isCurrentConnected ? (
+                        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <span>Connected</span>
                         </div>
-                      </div>
-                      {isCurrentConnected && (
+                      ) : (
                         <button
-                          onClick={() => {
-                            setUsername("");
-                            setTimeout(() => inputRef.current?.focus(), 50);
-                          }}
-                          className="text-xs text-indigo-400 hover:text-white px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 transition flex items-center gap-1 font-medium shrink-0"
-                          title="Switch GitHub Account"
+                          onClick={() => handleConnect()}
+                          disabled={connecting || !username.trim()}
+                          className="btn-gradient btn-gradient-hover rounded-xl px-4 text-xs font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0 transition-transform active:scale-95 shadow-md"
                         >
-                          <Edit3 className="h-3 w-3" />
-                          <span>Change</span>
+                          {connecting ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <span>Connecting...</span>
+                            </>
+                          ) : connected ? (
+                            "Switch"
+                          ) : (
+                            "Connect"
+                          )}
                         </button>
                       )}
                     </div>
-                  )}
-                </>
-              );
-            })()}
+                    {connected && githubProfile && (
+                      <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/40 dark:bg-black/30 border border-border dark:border-white/10">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={githubProfile.avatar_url}
+                            alt={githubProfile.login}
+                            className="w-9 h-9 rounded-full border border-white/20 shrink-0"
+                          />
+                          <div className="text-xs min-w-0">
+                            <p className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-semibold truncate">
+                              <Check className="h-3.5 w-3.5 shrink-0" /> @{githubProfile.login}
+                            </p>
+                            <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
+                          </div>
+                        </div>
+                        {isCurrentConnected && (
+                          <button
+                            onClick={() => {
+                              setUsername("");
+                              setTimeout(() => inputRef.current?.focus(), 50);
+                            }}
+                            className="text-xs text-indigo-400 hover:text-white px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 transition flex items-center gap-1 font-medium shrink-0"
+                            title="Switch GitHub Account"
+                          >
+                            <Edit3 className="h-3 w-3" />
+                            <span>Change</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
             <div className="pt-2 border-t border-border dark:border-white/10">
               <div className="flex items-center justify-between mb-2.5">
@@ -434,9 +591,43 @@ const [analyzing, setAnalyzing] = useState(false);
             </div>
           </GlassCard>
         </div>
+      )}
+
+        {/* Desktop Draggable Resizer Bar */}
+        {!isLeftCollapsed && (
+          <div
+            onMouseDown={handleMouseDown}
+            className={cn(
+              "hidden lg:flex w-4 -ml-2 -mr-2 z-20 cursor-col-resize self-stretch items-center justify-center group touch-none select-none",
+              isDragging && "pointer-events-auto",
+            )}
+            title="Drag to resize columns"
+          >
+            <div
+              className={cn(
+                "w-1 h-full rounded-full transition-all flex flex-col items-center justify-center gap-1 py-4",
+                isDragging
+                  ? "bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.8)] w-1.5"
+                  : "bg-border/60 dark:bg-white/10 group-hover:bg-indigo-500/80 group-hover:w-1.5",
+              )}
+            >
+              <div className="w-4 h-8 rounded-full bg-card dark:bg-[#131B2E] border border-border dark:border-white/20 shadow-md flex items-center justify-center">
+                <GripVertical className="h-3 w-3 text-muted-foreground group-hover:text-foreground" />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Right Column (Analysis Workspace) */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+        <div
+          style={{
+            width:
+              typeof window !== "undefined" && window.innerWidth >= 1024 && !isLeftCollapsed
+                ? `${100 - leftWidthPercent}%`
+                : "100%",
+          }}
+          className="w-full space-y-6 flex-1 min-w-0 transition-[width] duration-75 lg:pl-3"
+        >
           {showHistory && !selectedRepo && (
             <GlassCard>
               <h3 className="font-semibold mb-4">Analysis History</h3>
