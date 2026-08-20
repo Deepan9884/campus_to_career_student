@@ -529,33 +529,37 @@ const [analyzing, setAnalyzing] = useState(false);
           {analysis && !analyzing && !loadingAnalysis && (
             <>
               <GlassCard variant="strong">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-xl font-semibold">{analysis.repoFullName}</h3>
+                <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-border/50 dark:border-white/10">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <h3 className="text-lg sm:text-xl font-bold break-all leading-snug text-foreground">
+                      {analysis.repoFullName}
+                    </h3>
                     <a
                       href={analysis.repoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground mt-1 flex items-center gap-1 hover:text-[color:var(--color-primary)]"
+                      className="text-xs text-muted-foreground mt-1.5 inline-flex items-center gap-1.5 hover:text-[color:var(--color-primary)] break-all"
                     >
-                      {analysis.repoUrl} <ExternalLink className="h-3 w-3" />
+                      <span>{analysis.repoUrl}</span>
+                      <ExternalLink className="h-3 w-3 shrink-0" />
                     </a>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full ${
                         analysis.status === "completed"
-                          ? "bg-green-500/20 text-green-300"
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                           : analysis.status === "processing"
-                            ? "bg-yellow-500/20 text-yellow-300"
-                            : "bg-red-500/20 text-red-300"
+                            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
                       }`}
                     >
                       {analysis.status}
                     </span>
                     <button
                       onClick={() => setDeleteId(analysis._id)}
-                      className="p-2 text-muted-foreground hover:text-red-400 transition"
+                      className="p-1.5 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                      title="Delete Analysis"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -738,16 +742,23 @@ const [analyzing, setAnalyzing] = useState(false);
 function Overview({ analysis }: { analysis: RepoAnalysis }) {
   return (
     <div className="grid md:grid-cols-2 gap-4">
-      <div className="glass rounded-xl p-4">
-        <p className="text-xs text-muted-foreground">Summary</p>
-        <p className="text-sm mt-2 whitespace-pre-wrap">
+      <div className="glass rounded-2xl p-4 space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Project Summary
+        </p>
+        <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
           {analysis.overview || "No overview available"}
         </p>
       </div>
-      <div className="glass rounded-xl p-4 space-y-2 text-sm">
-        <Row k="Repository" v={analysis.repoFullName} />
-        <Row k="Files analyzed" v={String(analysis.filesAnalyzed?.length || 0)} />
-        <Row k="Created" v={new Date(analysis.createdAt).toLocaleDateString()} />
+      <div className="glass rounded-2xl p-4 space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+          Repository Metadata
+        </p>
+        <div className="space-y-2">
+          <Row k="Repository" v={analysis.repoFullName} />
+          <Row k="Files Analyzed" v={String(analysis.filesAnalyzed?.length || 0)} />
+          <Row k="Audit Date" v={new Date(analysis.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })} />
+        </div>
       </div>
     </div>
   );
@@ -759,12 +770,12 @@ function Quality({ analysis }: { analysis: RepoAnalysis }) {
       <div className="flex items-center gap-3">
         <Code2 className="h-8 w-8 text-[color:var(--color-primary)]" />
         <div>
-          <p className="text-sm font-semibold">Code Quality Assessment</p>
-          <p className="text-xs text-muted-foreground">Based on files analyzed</p>
+          <p className="text-sm font-semibold text-foreground">Code Quality Assessment</p>
+          <p className="text-xs text-muted-foreground">Based on analyzed project architecture</p>
         </div>
       </div>
-      <div className="glass rounded-xl p-4">
-        <p className="text-sm whitespace-pre-wrap">
+      <div className="glass rounded-2xl p-4">
+        <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
           {analysis.quality || "No quality assessment available"}
         </p>
       </div>
@@ -778,12 +789,12 @@ function Security({ analysis }: { analysis: RepoAnalysis }) {
       <div className="flex items-center gap-3">
         <ShieldCheck className="h-8 w-8 text-[color:var(--color-success)]" />
         <div>
-          <p className="text-sm font-semibold">Security Assessment</p>
-          <p className="text-xs text-muted-foreground">Based on files analyzed</p>
+          <p className="text-sm font-semibold text-foreground">Security & API Health Assessment</p>
+          <p className="text-xs text-muted-foreground">Vulnerability checks and secrets audit</p>
         </div>
       </div>
-      <div className="glass rounded-xl p-4">
-        <p className="text-sm whitespace-pre-wrap">
+      <div className="glass rounded-2xl p-4">
+        <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
           {analysis.security || "No security assessment available"}
         </p>
       </div>
@@ -798,20 +809,20 @@ function ResumeImpact({ analysis }: { analysis: RepoAnalysis }) {
       <div className="flex items-center gap-3">
         <Briefcase className="h-8 w-8 text-[color:var(--color-accent)]" />
         <div>
-          <p className="text-sm font-semibold">Resume Impact</p>
-          <p className="text-xs text-muted-foreground">How this project strengthens your resume</p>
+          <p className="text-sm font-semibold text-foreground">Resume Impact Bullets</p>
+          <p className="text-xs text-muted-foreground">How this project strengthens your career resume</p>
         </div>
       </div>
       {impacts && (impacts || []).length > 0 ? (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {impacts.map((item, i) => (
-            <div key={i} className="glass rounded-xl p-3">
-              <p className="text-sm">{item}</p>
+            <div key={i} className="glass rounded-2xl p-3.5 border border-border/50 dark:border-white/10">
+              <p className="text-sm leading-relaxed text-foreground">{item}</p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="glass rounded-xl p-4 text-sm text-muted-foreground">
+        <div className="glass rounded-2xl p-4 text-sm text-muted-foreground">
           No resume impact data available
         </div>
       )}
@@ -821,9 +832,11 @@ function ResumeImpact({ analysis }: { analysis: RepoAnalysis }) {
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex justify-between">
-      <span className="text-muted-foreground">{k}</span>
-      <span className="font-medium">{v}</span>
+    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 py-1.5 border-b border-border/40 dark:border-white/5 last:border-b-0">
+      <span className="text-xs text-muted-foreground shrink-0">{k}</span>
+      <span className="font-medium text-xs break-all sm:text-right text-foreground max-w-full sm:max-w-[280px]">
+        {v}
+      </span>
     </div>
   );
 }
