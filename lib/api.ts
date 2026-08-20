@@ -95,17 +95,19 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   try {
     json = text ? JSON.parse(text) : {};
   } catch {
-    throw new ApiError(
-      res.status || 500,
-      res.ok ? "Invalid response format from server" : `Server error (${res.status}): Please check backend server`,
-    );
+    json = { message: text };
   }
 
   if (!res.ok || json.success === false) {
+    const errorMsg =
+      (typeof json === "object" && json?.message) ||
+      (typeof json === "string" && json) ||
+      text ||
+      `Request failed (${res.status})`;
     throw new ApiError(
-      json.statusCode || res.status,
-      json.message || "Request failed",
-      json.errors || [],
+      json?.statusCode || res.status,
+      errorMsg,
+      json?.errors || [],
     );
   }
 

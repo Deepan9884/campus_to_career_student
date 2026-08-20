@@ -204,15 +204,24 @@ const [analyzing, setAnalyzing] = useState(false);
       autoConnectAttempted.current = handle;
       setUsername(handle);
       setConnecting(true);
-      connectGithub({ githubUsername: handle })
+      listRepos()
         .then((data) => {
           setConnected(true);
-          setGithubProfile(data.github);
-          fetchRepos();
+          setRepos(data.repos || []);
+          connectGithub({ githubUsername: handle })
+            .then((res) => {
+              setGithubProfile(res.github);
+            })
+            .catch(() => {});
         })
         .catch(() => {
-          // If connect fails on auto-mount, attempt listing cached repos directly
-          fetchRepos().catch(() => {});
+          connectGithub({ githubUsername: handle })
+            .then((res) => {
+              setConnected(true);
+              setGithubProfile(res.github);
+              fetchRepos();
+            })
+            .catch(() => {});
         })
         .finally(() => {
           setConnecting(false);
