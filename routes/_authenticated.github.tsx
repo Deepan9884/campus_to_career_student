@@ -110,6 +110,11 @@ const [analyzing, setAnalyzing] = useState(false);
       const data = await connectGithub({ githubUsername: username.trim() });
       setConnected(true);
       setGithubProfile(data.github);
+      if (data.user) {
+        useAuth.setState((state) => ({
+          user: state.user ? { ...state.user, ...data.user, githubUsername: data.user.githubUsername } : data.user,
+        }));
+      }
       fetchRepos();
       toast.success(`Connected as ${data.github.login}`);
     } catch (err: unknown) {

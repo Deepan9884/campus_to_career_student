@@ -17,6 +17,12 @@ import {
   Lightbulb,
   Linkedin,
   Share2,
+  ShieldCheck,
+  Palette,
+  Command,
+  Camera,
+  Code2,
+  Sparkles,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -43,7 +49,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     step: 1,
     title: "360° Placement Readiness",
-    subtitle: "Real-time benchmark across 5 telemetry streams",
+    subtitle: "Real-time benchmark across 5 telemetry streams & mentor tasks",
     icon: Target,
     iconColor: "text-indigo-400",
     badge: "Readiness Index",
@@ -59,7 +65,7 @@ const TOUR_STEPS: TourStep[] = [
         <div className="p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-indigo-500/5 border border-indigo-500/20 text-indigo-200 text-xs flex items-start gap-2.5 shadow-sm">
           <Lightbulb className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            <span className="font-semibold text-white">Pro Tip:</span> Reach 75%+ readiness to unlock Tier-1 placement recommendations!
+            <span className="font-semibold text-white">Pro Tip:</span> Mentor-assigned milestone tasks and action items appear directly on your dashboard header!
           </div>
         </div>
       </div>
@@ -68,7 +74,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     step: 2,
     title: "ATS Resume Studio",
-    subtitle: "Instant ATS scoring & AI bullet optimization",
+    subtitle: "Instant ATS scoring & AI STAR bullet rewrites",
     icon: FileText,
     iconColor: "text-blue-400",
     badge: "Resume Studio",
@@ -84,7 +90,7 @@ const TOUR_STEPS: TourStep[] = [
               <CheckCircle2 className="h-3.5 w-3.5" />
             </div>
             <span className="leading-relaxed">
-              <strong className="text-white font-semibold">Smart Parser:</strong> Upload PDF or DOCX resumes for deep section-by-section ATS evaluation.
+              <strong className="text-white font-semibold">Smart Parser:</strong> Upload PDF or DOCX resumes for deep section-by-section ATS evaluation and keyword matching.
             </span>
           </li>
           <li className="flex items-start gap-2.5">
@@ -92,7 +98,7 @@ const TOUR_STEPS: TourStep[] = [
               <CheckCircle2 className="h-3.5 w-3.5" />
             </div>
             <span className="leading-relaxed">
-              <strong className="text-white font-semibold">STAR Rewriter:</strong> Rewrite bullets into impact-driven achievements with quantifiable results.
+              <strong className="text-white font-semibold">STAR Rewriter:</strong> Rewrite bullets into impact-driven achievements with quantifiable industry metrics.
             </span>
           </li>
         </ul>
@@ -101,8 +107,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     step: 3,
-    title: "AI Voice Interview Engine",
-    subtitle: "Multi-round technical & HR voice simulations",
+    title: "Multi-Round AI Voice Interview Engine",
+    subtitle: "5 structured technical & HR voice simulations",
     icon: Mic,
     iconColor: "text-purple-400",
     badge: "Mock Interviews",
@@ -113,19 +119,72 @@ const TOUR_STEPS: TourStep[] = [
     content: (
       <div className="space-y-3">
         <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed">
-          Simulate real recruiter interviews across <strong className="text-white font-semibold">5 structured rounds</strong>: CS Fundamentals, Aptitude, Core CS, Technical DSA, and HR STAR questions.
+          Practice realistic recruitment rounds across <strong className="text-white font-semibold">5 structured stages</strong>:
         </p>
-        <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/5 border border-purple-500/20 text-purple-200 text-xs flex items-start gap-2.5 shadow-sm">
-          <Lightbulb className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            Practice with real-time Speech-to-Text transcription and receive instant AI performance scoring.
-          </div>
+        <div className="grid grid-cols-2 gap-2 text-xs font-medium text-slate-200">
+          <span className="p-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+            <Code2 className="h-3.5 w-3.5 text-indigo-400" /> CS Fundamentals
+          </span>
+          <span className="p-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+            <Target className="h-3.5 w-3.5 text-blue-400" /> Aptitude & Logic
+          </span>
+          <span className="p-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-emerald-400" /> Core CS & OOPs
+          </span>
+          <span className="p-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5">
+            <Trophy className="h-3.5 w-3.5 text-amber-400" /> Technical DSA & STAR HR
+          </span>
         </div>
+        <p className="text-xs text-slate-400">
+          Features real-time speech transcription, pronunciation clarity feedback, and instant AI rubric scoring.
+        </p>
       </div>
     ),
   },
   {
     step: 4,
+    title: "AI Anti-Cheating & Proctored Exam Room",
+    subtitle: "Enterprise-grade real-time proctoring with movable camera",
+    icon: ShieldCheck,
+    iconColor: "text-rose-400",
+    badge: "AI Proctoring",
+    routeName: "Interview Engine",
+    route: "/interview",
+    targetSelector: '[data-tour="interview-setup-card"]',
+    preferredPlacement: "right",
+    content: (
+      <div className="space-y-3 text-xs sm:text-[13px] text-slate-300">
+        <ul className="space-y-2">
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-rose-500/15 text-rose-400 mt-0.5 shrink-0">
+              <Camera className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">Draggable Video Preview:</strong> Move your proctoring camera PiP anywhere on screen to prevent blocking test questions or code editors.
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-amber-500/15 text-amber-400 mt-0.5 shrink-0">
+              <ShieldCheck className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">AI Detection Shield:</strong> Real-time detection of mobile devices, multiple faces, tab switching, and fullscreen lockouts.
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-emerald-500/15 text-emerald-400 mt-0.5 shrink-0">
+              <Code2 className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">Live Sandbox Execution:</strong> Write code directly with real testcase compilation, automated validation, and clean camera release upon completion.
+            </span>
+          </li>
+        </ul>
+      </div>
+    ),
+  },
+  {
+    step: 5,
     title: "Competitive Coding Telemetry",
     subtitle: "Auto-sync LeetCode, CodeChef, HackerRank & GFG",
     icon: BarChart3,
@@ -143,7 +202,7 @@ const TOUR_STEPS: TourStep[] = [
               <CheckCircle2 className="h-3.5 w-3.5" />
             </div>
             <span className="leading-relaxed">
-              <strong className="text-white font-semibold">Live Profile Sync:</strong> Link your coding handles for automatic problem-solving telemetry.
+              <strong className="text-white font-semibold">Live Profile Sync:</strong> Link your coding handles for automatic problem-solving telemetry and contest ratings.
             </span>
           </li>
           <li className="flex items-start gap-2.5">
@@ -151,7 +210,7 @@ const TOUR_STEPS: TourStep[] = [
               <CheckCircle2 className="h-3.5 w-3.5" />
             </div>
             <span className="leading-relaxed">
-              <strong className="text-white font-semibold">Smart Practice:</strong> AI recommends targeted problems based on your identified weak areas.
+              <strong className="text-white font-semibold">Smart Practice:</strong> AI recommends targeted problems based on your identified weak data structure topics.
             </span>
           </li>
         </ul>
@@ -159,9 +218,9 @@ const TOUR_STEPS: TourStep[] = [
     ),
   },
   {
-    step: 5,
+    step: 6,
     title: "Skill Gap Matrix & Quizzes",
-    subtitle: "Identify missing skills & level up your rating",
+    subtitle: "Identify missing skills & level up your verified badges",
     icon: Target,
     iconColor: "text-amber-400",
     badge: "Skill Matrix",
@@ -177,14 +236,14 @@ const TOUR_STEPS: TourStep[] = [
         <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2.5 shadow-sm">
           <Trophy className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            Pass milestone quizzes with &ge; 80% to upgrade your verified skill badge levels.
+            Pass milestone quizzes with &ge; 80% to upgrade your verified skill badge levels!
           </div>
         </div>
       </div>
     ),
   },
   {
-    step: 6,
+    step: 7,
     title: "Verified Hackathons & Proofs",
     subtitle: "Build recruiter-verified proof of work",
     icon: Trophy,
@@ -203,7 +262,7 @@ const TOUR_STEPS: TourStep[] = [
     ),
   },
   {
-    step: 7,
+    step: 8,
     title: "AI LinkedIn Post Creator",
     subtitle: "Turn hackathons & GitHub projects into viral posts",
     icon: Linkedin,
@@ -228,7 +287,41 @@ const TOUR_STEPS: TourStep[] = [
     ),
   },
   {
-    step: 8,
+    step: 9,
+    title: "Theme & Accent Customization + ⌘K Hub",
+    subtitle: "Tailor your visual theme & lightning-fast command palette",
+    icon: Palette,
+    iconColor: "text-fuchsia-400",
+    badge: "Customization & ⌘K",
+    routeName: "Settings",
+    route: "/settings",
+    targetSelector: '[data-tour="settings-customization-card"]',
+    preferredPlacement: "bottom",
+    content: (
+      <div className="space-y-3 text-xs sm:text-[13px] text-slate-300">
+        <ul className="space-y-2">
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-fuchsia-500/15 text-fuchsia-400 mt-0.5 shrink-0">
+              <Palette className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">6 Dynamic Accent Themes:</strong> Personalize your UI across Indigo Electric, Royal Purple, Emerald Growth, Amber Glow, Ocean Cyan, or Rose Bloom.
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5">
+            <div className="p-0.5 rounded-full bg-indigo-500/15 text-indigo-400 mt-0.5 shrink-0">
+              <Command className="h-3.5 w-3.5" />
+            </div>
+            <span className="leading-relaxed">
+              <strong className="text-white font-semibold">Global Command Palette (<kbd className="px-1 py-0.5 rounded bg-slate-800 text-[11px] font-mono border border-slate-700">⌘K</kbd>):</strong> Press <strong className="text-white font-mono">⌘K</strong> or <strong className="text-white font-mono">Ctrl+K</strong> anytime to jump to any module or trigger quick actions.
+            </span>
+          </li>
+        </ul>
+      </div>
+    ),
+  },
+  {
+    step: 10,
     title: "You're All Set!",
     subtitle: "Relaunch this interactive guide anytime",
     icon: GraduationCap,

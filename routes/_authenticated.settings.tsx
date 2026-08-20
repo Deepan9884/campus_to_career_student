@@ -205,15 +205,23 @@ function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const trimmedGithub = (form.githubUsername || "").trim();
+      const trimmedName = (form.name || "").trim();
+      const trimmedRole = (form.targetRole || "").trim();
+      const trimmedBio = (form.bio || "").trim();
+      const trimmedLocation = (form.location || "").trim();
+
       const payload: any = {
-        name: form.name,
-        targetRole: form.targetRole,
-        githubUsername: form.githubUsername,
+        name: trimmedName,
+        targetRole: trimmedRole,
+        githubUsername: trimmedGithub,
+        bio: trimmedBio,
+        location: trimmedLocation,
         profile: {
-          targetRole: form.targetRole,
-          githubUsername: form.githubUsername,
-          bio: form.bio,
-          location: form.location,
+          targetRole: trimmedRole,
+          githubUsername: trimmedGithub,
+          bio: trimmedBio,
+          location: trimmedLocation,
         },
       };
 
@@ -227,7 +235,7 @@ function SettingsPage() {
       }
 
       await updateUser({ ...payload, preferences });
-      toast.success("Settings saved");
+      toast.success("Settings saved successfully");
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to save settings");
     } finally {
@@ -580,7 +588,7 @@ function SettingsPage() {
           </GlassCard>
 
           {/* Theme & Appearance */}
-          <GlassCard>
+          <GlassCard data-tour="settings-customization-card">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-foreground">
               <Sun className="h-5 w-5 text-amber-500" /> Appearance
             </h3>
