@@ -5,8 +5,10 @@ export type ViolationType =
   | "face_not_detected"
   | "multiple_faces_detected"
   | "fullscreen_exit"
+  | "fullscreen_timeout"
   | "tab_switch"
-  | "keyboard_shortcut";
+  | "keyboard_shortcut"
+  | "eye_tracking_violation";
 
 export type ModuleType = "quiz" | "interview";
 
@@ -26,12 +28,14 @@ export interface ViolationStatusResponse {
 export async function reportViolation(
   moduleType: ModuleType,
   moduleId: string,
-  violationType: ViolationType
+  violationType: ViolationType,
+  forceBlock?: boolean
 ): Promise<ViolationResponse> {
   return api.post<ViolationResponse>("/proctoring/violation", {
     moduleType,
     moduleId,
     violationType,
+    ...(forceBlock ? { forceBlock: true } : {}),
   });
 }
 

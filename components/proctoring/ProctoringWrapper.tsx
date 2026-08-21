@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useProctoringSession, type ProctoringSessionOptions } from "@/hooks/useProctoringSession";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
+import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
 import type { ViolationType } from "@/lib/proctoring-api";
 import {
   Shield,
@@ -16,6 +17,8 @@ import {
   Move,
   Minimize2,
   Maximize2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,10 +31,12 @@ interface ProctoringWrapperProps extends Omit<ProctoringSessionOptions, "onBlock
 const VIOLATION_LABELS: Record<ViolationType, string> = {
   mobile_phone_detected: "Mobile phone detected in camera frame",
   fullscreen_exit: "Exam window exited fullscreen mode",
+  fullscreen_timeout: "Failed to return to fullscreen within 15 seconds",
   tab_switch: "Tab or window switch detected",
   keyboard_shortcut: "Restricted keyboard shortcut was pressed",
   face_not_detected: "Face not detected in camera frame",
   multiple_faces_detected: "Multiple faces detected in camera frame",
+  eye_tracking_violation: "Repeated eye gaze deviation (4 warnings reached)",
 };
 
 const STRIKE_MESSAGES: Record<number, string> = {
@@ -302,7 +307,7 @@ export function ProctoringWrapper({
             <p className="font-bold text-white/90 text-sm mb-2">Examination Integrity Rules</p>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">Full Screen Enforced:</strong> The exam must stay in fullscreen. Exiting will record a strike.</span>
+              <span><strong className="text-white/90">Full Screen Enforced:</strong> The exam must stay in fullscreen. Exiting records a strike and gives 15 seconds to return before an automatic block.</span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
@@ -311,6 +316,10 @@ export function ProctoringWrapper({
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
               <span><strong className="text-white/90">Restricted Shortcuts:</strong> Tab switches, DevTools, Win+G, and copy/paste are blocked.</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+              <span><strong className="text-white/90">Full Face & Eye Gaze Enforced:</strong> Entire face must remain visible and centered. Half-face, quarter-face, edge cutoffs, or looking away trigger warnings (4 warnings = 1 strike).</span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
@@ -346,26 +355,13 @@ export function ProctoringWrapper({
   // 3. Active Exam in Progress (Portal to document.body, entirely replacing the platform viewport)
   return createPortal(
     <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col h-screen w-screen overflow-hidden select-none font-sans p-0 m-0">
-      {/* If exited fullscreen during exam, overlay with resume button */}
+      {/* If exited fullscreen during exam, overlay with 15s countdown timer */}
       {!proctoringState.isFullscreen && !isActuallyBlocked && (
-        <div className="fixed inset-0 z-[999999] bg-black/90 flex items-center justify-center p-6 backdrop-blur-md">
-          <div className="max-w-md w-full glass rounded-3xl p-8 text-center space-y-5 border border-yellow-500/40 shadow-2xl">
-            <div className="w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/40 flex items-center justify-center mx-auto text-yellow-400">
-              <AlertTriangle className="h-8 w-8" />
-            </div>
-            <h2 className="text-xl font-bold text-yellow-300">Fullscreen Mode Required</h2>
-            <p className="text-xs text-muted-foreground">
-              You exited fullscreen mode during the examination. This incident has been logged. Click below to return to fullscreen and resume answering.
-            </p>
-            <button
-              onClick={handleReEnterFullscreen}
-              className="w-full btn-gradient btn-gradient-hover rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2 shadow-lg"
-            >
-              <Maximize className="h-4 w-4" />
-              Re-enter Fullscreen to Continue
-            </button>
-          </div>
-        </div>
+        <FullscreenCountdownModal
+          countdown={proctoringState.fullscreenCountdown}
+          violationCount={proctoringState.violationCount}
+          onReEnterFullscreen={handleReEnterFullscreen}
+        />
       )}
 
       {/* Main Fullscreen Exam Workspace */}
@@ -406,6 +402,10 @@ export function ProctoringWrapper({
                       ? "bg-yellow-400"
                       : proctoringState.aiStatus === "multiple_faces"
                       ? "bg-orange-500"
+                      : proctoringState.aiStatus === "partial_face"
+                      ? "bg-amber-500"
+                      : proctoringState.aiStatus === "looking_away"
+                      ? "bg-amber-400"
                       : proctoringState.aiStatus === "active"
                       ? "bg-green-400"
                       : "bg-blue-400"
@@ -418,6 +418,10 @@ export function ProctoringWrapper({
                     ? "No Face"
                     : proctoringState.aiStatus === "multiple_faces"
                     ? "Multiple People"
+                    : proctoringState.aiStatus === "partial_face"
+                    ? "Partial Face!"
+                    : proctoringState.aiStatus === "looking_away"
+                    ? "Looking Away!"
                     : proctoringState.aiStatus === "active"
                     ? "Face Verified"
                     : "Scanning..."}
@@ -458,9 +462,42 @@ export function ProctoringWrapper({
                       ? "border-yellow-500/80 bg-yellow-500/10"
                       : proctoringState.aiStatus === "multiple_faces"
                       ? "border-orange-500/80 bg-orange-500/10"
+                      : proctoringState.aiStatus === "partial_face"
+                      ? "border-amber-500/80 bg-amber-500/10"
+                      : proctoringState.aiStatus === "looking_away"
+                      ? "border-amber-500/80 bg-amber-500/10"
                       : "border-green-500/20"
                   }`}
                 />
+              </div>
+            )}
+
+            {/* Real-time Face & Eye Gaze Warning Progress Meter (4 Warnings = 1 Strike) */}
+            {!isPipMinimized && (
+              <div className="px-2.5 py-1.5 bg-slate-900/95 border-t border-white/10 flex items-center justify-between text-[10px]">
+                <span className="text-slate-300 flex items-center gap-1 font-medium">
+                  <Eye className="h-3 w-3 text-indigo-400 shrink-0" />
+                  Face & Gaze
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4].map((step) => (
+                      <span
+                        key={step}
+                        className={`w-2.5 h-1.5 rounded-sm transition-all duration-300 ${
+                          step <= proctoringState.gazeWarningsInCurrentStrike
+                            ? step === 4
+                              ? "bg-red-500 shadow-sm shadow-red-500"
+                              : "bg-amber-400 shadow-sm shadow-amber-400"
+                            : "bg-slate-700/60"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="font-mono text-[9px] font-bold text-slate-300">
+                    {proctoringState.gazeWarningsInCurrentStrike}/4
+                  </span>
+                </div>
               </div>
             )}
           </div>

@@ -3,6 +3,9 @@ import { reportViolation } from "@/lib/proctoring-api";
 import { acquireCameraStream, stopAllCameraStreams } from "@/lib/cameraManager";
 import { getProctoringModel, runProctorDetection } from "@/lib/proctoringAiDetector";
 import type { ModuleType, ViolationType } from "@/lib/proctoring-api";
+import { analyzeEyeGaze, type GazeDirection, type FaceFramingStatus } from "@/lib/eyeGazeDetector";
+import { playGazeWarningTone, playViolationStrikeTone, playClipboardAlertTone } from "@/lib/proctoringAudio";
+import { toast } from "sonner";
 
 export interface ProctoringSessionOptions {
   moduleType: ModuleType;
@@ -18,6 +21,8 @@ export type ProctoringAiStatus =
   | "initializing"
   | "loading_model"
   | "active"
+  | "looking_away"
+  | "partial_face"
   | "face_missing"
   | "phone_detected"
   | "multiple_faces"
@@ -35,12 +40,22 @@ export interface ProctoringSessionState {
   cameraReady: boolean;
   cameraError: string | null;
   isFullscreen: boolean;
+  fullscreenCountdown: number | null;
+  reEnterFullscreen: () => Promise<void>;
   mediaStream: MediaStream | null;
   aiModelReady: boolean;
   aiStatus: ProctoringAiStatus;
   detectedObjects: string[];
   violationsHistory: ViolationRecord[];
   retryCamera: () => void;
+  // Eye Gaze & Face Framing Tracking & Warnings
+  gazeDirection: GazeDirection;
+  isLookingAway: boolean;
+  isFullFace: boolean;
+  faceFramingStatus: FaceFramingStatus;
+  gazeWarningsCount: number;
+  gazeWarningsInCurrentStrike: number; // 0, 1, 2, 3
+  lastGazeWarningMessage: string | null;
 }
 
 // Blocked standalone system & function keys
@@ -82,18 +97,38 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     setCameraAttempt((prev) => prev + 1);
   }, []);
 
+  const reEnterFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement && typeof document !== "undefined") {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (err) {
+      console.warn("[Proctoring] Failed to re-enter fullscreen:", err);
+      throw err;
+    }
+  }, []);
+
   const [state, setState] = useState<ProctoringSessionState>({
     violationCount: 0,
     isBlocked: false,
     cameraReady: false,
     cameraError: null,
     isFullscreen: false,
+    fullscreenCountdown: null,
+    reEnterFullscreen,
     mediaStream: null,
     aiModelReady: false,
     aiStatus: "initializing",
     detectedObjects: [],
     violationsHistory: [],
     retryCamera,
+    gazeDirection: "center",
+    isLookingAway: false,
+    isFullFace: true,
+    faceFramingStatus: "full_face",
+    gazeWarningsCount: 0,
+    gazeWarningsInCurrentStrike: 0,
+    lastGazeWarningMessage: null,
   });
 
   const onBlockedRef = useRef(onBlocked);
@@ -112,13 +147,19 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   const externalVideoRef = useRef<HTMLVideoElement | null>(videoElement || null);
   externalVideoRef.current = videoElement || null;
 
+  const fullscreenIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fullscreenCountdownRef = useRef<number | null>(null);
+
   const phoneStreak = useRef(0);
   const noPersonStreak = useRef(0);
   const multiPersonStreak = useRef(0);
+  const lookAwayStreak = useRef(0);
 
   const lastPhoneViolationTime = useRef(0);
   const lastMultiPersonViolationTime = useRef(0);
   const lastNoPersonViolationTime = useRef(0);
+  const lastGazeWarningTime = useRef(0);
+  const gazeWarningsCountRef = useRef(0);
 
   // Synchronize external video whenever videoElement or stream changes
   useEffect(() => {
@@ -131,12 +172,12 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   }, [videoElement, state.mediaStream]);
 
   const sendViolation = useCallback(
-    async (type: ViolationType) => {
+    async (type: ViolationType, forceBlock = false) => {
       const effectiveModuleId = moduleId || "active-session";
-      if (reportingRef.current || isBlockedRef.current || !isStartedRef.current) return;
+      if (reportingRef.current || (isBlockedRef.current && !forceBlock) || !isStartedRef.current) return;
       reportingRef.current = true;
       try {
-        const result = await reportViolation(moduleType, effectiveModuleId, type);
+        const result = await reportViolation(moduleType, effectiveModuleId, type, forceBlock);
         const timeStr = new Date().toLocaleTimeString();
         setState((prev) => ({
           ...prev,
@@ -161,26 +202,89 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     [moduleType, moduleId]
   );
 
-  // ── 1. Fullscreen Tracking ────────────────────────────────────────────────
+  const clearFullscreenCountdown = useCallback(() => {
+    if (fullscreenIntervalRef.current) {
+      clearInterval(fullscreenIntervalRef.current);
+      fullscreenIntervalRef.current = null;
+    }
+    fullscreenCountdownRef.current = null;
+    setState((prev) => (prev.fullscreenCountdown !== null ? { ...prev, fullscreenCountdown: null } : prev));
+  }, []);
+
+  const handleFullscreenTimeout = useCallback(async () => {
+    if (fullscreenIntervalRef.current) {
+      clearInterval(fullscreenIntervalRef.current);
+      fullscreenIntervalRef.current = null;
+    }
+    fullscreenCountdownRef.current = 0;
+    isBlockedRef.current = true;
+    setState((prev) => ({
+      ...prev,
+      isBlocked: true,
+      fullscreenCountdown: 0,
+    }));
+    await sendViolation("fullscreen_timeout", true);
+    onBlockedRef.current();
+  }, [sendViolation]);
+
+  const startFullscreenCountdown = useCallback(() => {
+    if (fullscreenIntervalRef.current) {
+      clearInterval(fullscreenIntervalRef.current);
+    }
+    const INITIAL_COUNTDOWN = 15;
+    fullscreenCountdownRef.current = INITIAL_COUNTDOWN;
+    setState((prev) => ({ ...prev, fullscreenCountdown: INITIAL_COUNTDOWN }));
+
+    fullscreenIntervalRef.current = setInterval(() => {
+      if (fullscreenCountdownRef.current === null) {
+        if (fullscreenIntervalRef.current) clearInterval(fullscreenIntervalRef.current);
+        return;
+      }
+      const nextCount = fullscreenCountdownRef.current - 1;
+      fullscreenCountdownRef.current = nextCount;
+
+      if (nextCount <= 0) {
+        if (fullscreenIntervalRef.current) {
+          clearInterval(fullscreenIntervalRef.current);
+          fullscreenIntervalRef.current = null;
+        }
+        handleFullscreenTimeout();
+      } else {
+        setState((prev) => ({ ...prev, fullscreenCountdown: nextCount }));
+      }
+    }, 1000);
+  }, [handleFullscreenTimeout]);
+
+  // ── 1. Fullscreen Tracking & 15-Second Grace Countdown ────────────────────
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      clearFullscreenCountdown();
+      return;
+    }
 
     function handleFSChange() {
       const isFS = Boolean(document.fullscreenElement);
       setState((prev) => ({ ...prev, isFullscreen: isFS }));
 
-      if (!isFS && isStartedRef.current && !isBlockedRef.current) {
+      if (isFS) {
+        // Re-entered fullscreen within grace period -> cancel countdown
+        clearFullscreenCountdown();
+      } else if (isStartedRef.current && !isBlockedRef.current) {
+        // Left fullscreen during active exam -> strike violation + start 15s timer
         sendViolation("fullscreen_exit");
+        startFullscreenCountdown();
       }
     }
 
     document.addEventListener("fullscreenchange", handleFSChange);
-    setState((prev) => ({ ...prev, isFullscreen: Boolean(document.fullscreenElement) }));
+    const initialFS = Boolean(document.fullscreenElement);
+    setState((prev) => ({ ...prev, isFullscreen: initialFS }));
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFSChange);
+      clearFullscreenCountdown();
     };
-  }, [enabled, sendViolation]);
+  }, [enabled, sendViolation, startFullscreenCountdown, clearFullscreenCountdown]);
 
   // ── 2. Tab Visibility & Focus Blur Detection ──────────────────────────────
   useEffect(() => {
@@ -206,16 +310,53 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     };
   }, [enabled, sendViolation]);
 
-  // ── 3. Strict Keyboard Lockdown, Clipboard & Context Menu ─────────────────
+  // ── 3. Strict Keyboard Lockdown, Clipboard Sanitization & Anti-Copy ─────
   useEffect(() => {
     if (!enabled) return;
 
+    async function wipeClipboard() {
+      try {
+        if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText("");
+        }
+      } catch {}
+    }
+
+    // Auto-wipe clipboard upon proctored session active or tab focus
+    if (isStarted) {
+      wipeClipboard();
+    }
+
+    function handleWindowFocus() {
+      if (isStartedRef.current && !isBlockedRef.current) {
+        wipeClipboard();
+      }
+    }
+
     function handleKeyDown(e: KeyboardEvent) {
       if (!isStartedRef.current || isBlockedRef.current) return;
-      if (isBlockedShortcut(e)) {
+
+      const isCopyCombo =
+        (e.ctrlKey || e.metaKey) &&
+        (e.key === "c" || e.key === "C" || e.key === "v" || e.key === "V" || e.key === "x" || e.key === "X" || e.key === "Insert");
+
+      if (isCopyCombo || isBlockedShortcut(e)) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
+
+        if (isCopyCombo) {
+          wipeClipboard();
+          try {
+            window.getSelection()?.removeAllRanges();
+          } catch {}
+          playClipboardAlertTone();
+          toast.error("Clipboard Sanitized: Copying and pasting is prohibited during the exam. All clipboard copies have been erased.", {
+            id: "proctoring-clipboard-wipe",
+            duration: 3500,
+          });
+        }
+
         sendViolation("keyboard_shortcut");
       }
     }
@@ -233,13 +374,37 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       if (!isStartedRef.current) return;
       e.preventDefault();
       e.stopPropagation();
+
+      const clipEvent = e as ClipboardEvent;
+      if (clipEvent.clipboardData) {
+        try {
+          clipEvent.clipboardData.setData("text/plain", "");
+          clipEvent.clipboardData.setData("text/html", "");
+        } catch {}
+      }
+
+      try {
+        window.getSelection()?.removeAllRanges();
+      } catch {}
+
+      wipeClipboard();
+      playClipboardAlertTone();
+      toast.error("Clipboard Sanitized: Copying and pasting is disabled. All copied data has been cleared from clipboard.", {
+        id: "proctoring-clipboard-wipe",
+        duration: 3500,
+      });
+
       sendViolation("keyboard_shortcut");
     }
 
     function handleContextMenu(e: MouseEvent) {
-      if (isStartedRef.current) e.preventDefault();
+      if (isStartedRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     }
 
+    window.addEventListener("focus", handleWindowFocus);
     window.addEventListener("keydown", handleKeyDown, { capture: true });
     window.addEventListener("keyup", handleKeyUp, { capture: true });
     document.addEventListener("keydown", handleKeyDown, { capture: true });
@@ -252,6 +417,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     document.addEventListener("dragstart", (e) => e.preventDefault(), { capture: true });
 
     return () => {
+      window.removeEventListener("focus", handleWindowFocus);
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
       window.removeEventListener("keyup", handleKeyUp, { capture: true });
       document.removeEventListener("keydown", handleKeyDown, { capture: true });
@@ -262,7 +428,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       document.removeEventListener("cut", handleClipboard, { capture: true });
       document.removeEventListener("paste", handleClipboard, { capture: true });
     };
-  }, [enabled, sendViolation]);
+  }, [enabled, isStarted, sendViolation]);
 
   // ── 4. Live Camera & Dedicated Self-Contained AI Pipeline ─────────────────
   useEffect(() => {
@@ -402,9 +568,9 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
                   // ── A. Mobile Phone Detection (High-Precision Neural Recognition) ──
                   const hasPhone = predictions.some((p) => {
-                    if (p.class !== "cell phone") return false;
-                    // Responsive confidence threshold (>= 0.35) catches real phones held in frame
-                    if (p.score < 0.35) return false;
+                    if (p.class !== "cell phone" && p.class !== "remote") return false;
+                    // Responsive confidence threshold (>= 0.25) catches phones held in frame or angled
+                    if (p.score < 0.25) return false;
                     return true;
                   });
 
@@ -519,14 +685,94 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
                         sendViolation("multiple_faces_detected");
                       }
                     } else {
-                      // Exactly 1 candidate verified in frame
+                      // Exactly 1 candidate verified in frame -> Run Eye Gaze & Head Pose Analysis
                       noPersonStreak.current = 0;
                       multiPersonStreak.current = 0;
-                      setState((prev) => ({
-                        ...prev,
-                        aiStatus: "active",
-                        detectedObjects: objectSummary,
-                      }));
+
+                      const primaryPerson = personBoxes[0];
+                      const gaze = analyzeEyeGaze(
+                        targetVideo,
+                        primaryPerson ? [primaryPerson.x, primaryPerson.y, primaryPerson.w, primaryPerson.h] : undefined
+                      );
+
+                      const now = Date.now();
+
+                      const isWarningCondition = gaze.isLookingAway || !gaze.isFullFace;
+
+                      if (isWarningCondition) {
+                        lookAwayStreak.current += 1;
+
+                        const isFaceMissing = gaze.framingStatus === "no_face_features";
+                        const isPartialFace = !gaze.isFullFace && !isFaceMissing;
+                        const requiredStreak = 2; // 2 ticks (~1.2s) of continuous look-away confirmation
+
+                        // After 2 continuous look-away ticks (~1.2s) with 2.8s cooldown
+                        if (lookAwayStreak.current >= requiredStreak && now - lastGazeWarningTime.current > 2800) {
+                          lastGazeWarningTime.current = now;
+                          lookAwayStreak.current = 0;
+
+                          const totalWarnings = gazeWarningsCountRef.current + 1;
+                          gazeWarningsCountRef.current = totalWarnings;
+                          const warningInCurrentStrike = ((totalWarnings - 1) % 4) + 1;
+
+                          const warningMsg = isFaceMissing
+                            ? `Face Missing Alert: ${gaze.framingWarning || "Full face must be visible"} (Warning ${warningInCurrentStrike}/4)`
+                            : isPartialFace
+                            ? `Face Alert: ${gaze.framingWarning || "Full face must be visible (no half/quarter face)"} (Warning ${warningInCurrentStrike}/4)`
+                            : `Eye Gaze Alert: ${gaze.description} (Warning ${warningInCurrentStrike}/4)`;
+
+                          setState((prev) => ({
+                            ...prev,
+                            aiStatus: isFaceMissing ? "face_missing" : isPartialFace ? "partial_face" : "looking_away",
+                            gazeDirection: gaze.direction,
+                            isLookingAway: gaze.isLookingAway,
+                            isFullFace: gaze.isFullFace,
+                            faceFramingStatus: gaze.framingStatus,
+                            gazeWarningsCount: totalWarnings,
+                            gazeWarningsInCurrentStrike: warningInCurrentStrike,
+                            lastGazeWarningMessage: warningMsg,
+                            detectedObjects: objectSummary,
+                          }));
+
+                          if (warningInCurrentStrike === 4) {
+                            // 4 Warnings reached -> 1 Violation Strike
+                            playViolationStrikeTone();
+                            toast.error(`🚨 Proctoring Strike: 4 Warnings Reached (${isFaceMissing ? "Face not visible" : isPartialFace ? gaze.framingWarning : gaze.description})`, {
+                              duration: 6000,
+                              id: `proctor-strike-converted-${totalWarnings}`,
+                            });
+                            sendViolation("eye_tracking_violation");
+                          } else {
+                            // Warning 1, 2, or 3 of 4
+                            playGazeWarningTone();
+                            toast.warning(`⚠️ ${isFaceMissing ? "Face Missing" : isPartialFace ? "Face" : "Eye Gaze"} Warning (${warningInCurrentStrike}/4): ${isFaceMissing ? "Full face must be visible in front of camera!" : isPartialFace ? gaze.framingWarning : gaze.description}`, {
+                              duration: 4000,
+                              id: `proctor-warning-active-${totalWarnings}`,
+                            });
+                          }
+                        } else if (lookAwayStreak.current >= 1) {
+                          setState((prev) => ({
+                            ...prev,
+                            aiStatus: isFaceMissing ? "face_missing" : isPartialFace ? "partial_face" : "looking_away",
+                            gazeDirection: gaze.direction,
+                            isLookingAway: gaze.isLookingAway,
+                            isFullFace: gaze.isFullFace,
+                            faceFramingStatus: gaze.framingStatus,
+                            detectedObjects: objectSummary,
+                          }));
+                        }
+                      } else {
+                        lookAwayStreak.current = 0;
+                        setState((prev) => ({
+                          ...prev,
+                          aiStatus: "active",
+                          gazeDirection: "center",
+                          isLookingAway: false,
+                          isFullFace: true,
+                          faceFramingStatus: "full_face",
+                          detectedObjects: objectSummary,
+                        }));
+                      }
                     }
                   }
                 }

@@ -38,6 +38,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/stores";
 import { useProctoringSession } from "@/hooks/useProctoringSession";
+import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { executeCode } from "@/lib/quiz-api";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -465,8 +466,10 @@ export function ProctoredExamConsole({
         face_not_detected: "Candidate face not visible in camera feed",
         multiple_faces_detected: "Multiple people detected in exam frame",
         fullscreen_exit: "Exam window exited fullscreen mode",
+        fullscreen_timeout: "Failed to return to fullscreen within 15 seconds",
         tab_switch: "Tab or window switch detected",
         keyboard_shortcut: "Restricted keyboard shortcut was pressed",
+        eye_tracking_violation: "Repeated eye gaze deviation (4 warnings reached)",
       };
       toast.error(`Strike ${count}/3: ${typeLabels[type] || type}`, {
         duration: 6000,
@@ -953,6 +956,15 @@ export function ProctoredExamConsole({
         isLightMode ? "bg-[#f8fafc] text-slate-900" : "bg-[#0b1120] text-slate-100"
       } flex flex-col h-screen w-screen overflow-hidden select-none font-sans`}
     >
+      {/* ── 15-SECOND FULLSCREEN GRACE PERIOD COUNTDOWN MODAL ── */}
+      {!proctorState.isFullscreen && !isCandidateDisqualified && (
+        <FullscreenCountdownModal
+          countdown={proctorState.fullscreenCountdown}
+          violationCount={proctorState.violationCount}
+          onReEnterFullscreen={proctorState.reEnterFullscreen}
+        />
+      )}
+
       {/* ── TOP ASSESSMENT HEADER BAR ────────────────────────────────────────── */}
       <header
         className={`h-16 ${

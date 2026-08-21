@@ -567,13 +567,17 @@
 
 /* ─── Hero Particle Stars ─────────────────────────────────────── */
 
-.hero-star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  background: rgba(99, 102, 241, 0.75);
-  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
-  animation: star-drift linear infinite;
+/* ─── Recharts Global Responsive Isolation ─────────────────────── */
+.recharts-responsive-container {
+  overflow: hidden !important;
+}
+
+.recharts-surface {
+  overflow: visible;
+}
+
+.recharts-tooltip-wrapper {
+  z-index: 50 !important;
   pointer-events: none;
 }
+

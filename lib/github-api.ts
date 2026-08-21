@@ -61,6 +61,7 @@ export interface GenerateLinkedInPostPayload {
   teamName?: string;
   teamSize?: number;
   teamMembers?: string[];
+  teammates?: string[];
   projectTitle?: string;
   problemStatement?: string;
   techStack?: string[] | string;

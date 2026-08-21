@@ -28,6 +28,9 @@ import {
   Sparkles,
   Lightbulb,
   Rocket,
+  Users,
+  UserPlus,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -147,7 +150,8 @@ function LinkedInPostsPage() {
   const [eventOrganizer, setEventOrganizer] = useState("");
   const [eventRole, setEventRole] = useState("Lead Developer");
   const [eventTeamName, setEventTeamName] = useState("");
-  const [eventTeamSize, setEventTeamSize] = useState(4);
+  const [eventTeamSize, setEventTeamSize] = useState<number>(3);
+  const [teammateNames, setTeammateNames] = useState<string[]>(["", "", ""]);
   const [eventProjectTitle, setEventProjectTitle] = useState("");
   const [eventProblem, setEventProblem] = useState("");
   const [eventTechStack, setEventTechStack] = useState("React, TypeScript, Node.js, MongoDB, Gemini AI");
@@ -157,6 +161,41 @@ function LinkedInPostsPage() {
   const [eventResult, setEventResult] = useState("winner");
   const [eventPrize, setEventPrize] = useState("1st Place Winner & Best UI/UX");
   const [eventCertificateUrl, setEventCertificateUrl] = useState("");
+
+  const handleTeamSizeChange = (newSize: number) => {
+    const size = Math.max(0, Math.min(10, newSize));
+    setEventTeamSize(size);
+    setTeammateNames((prev) => {
+      const next = [...prev];
+      if (size > next.length) {
+        while (next.length < size) next.push("");
+      } else {
+        return next.slice(0, size);
+      }
+      return next;
+    });
+  };
+
+  const handleTeammateNameChange = (index: number, name: string) => {
+    setTeammateNames((prev) => {
+      const next = [...prev];
+      next[index] = name;
+      return next;
+    });
+  };
+
+  const addTeammate = () => {
+    setEventTeamSize((prev) => prev + 1);
+    setTeammateNames((prev) => [...prev, ""]);
+  };
+
+  const removeTeammate = (index: number) => {
+    setTeammateNames((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      setEventTeamSize(next.length);
+      return next;
+    });
+  };
 
   // GitHub Inputs
   const [repoFullName, setRepoFullName] = useState("");
@@ -239,7 +278,19 @@ function LinkedInPostsPage() {
     setEventOrganizer(ev.organizer || "");
     setEventRole(ev.role || "Lead Developer");
     setEventTeamName(ev.teamName || "");
-    setEventTeamSize(ev.teamSize || 1);
+
+    if (Array.isArray(ev.teamMembers) && ev.teamMembers.length > 0) {
+      setTeammateNames(ev.teamMembers);
+      setEventTeamSize(ev.teamMembers.length);
+    } else if (ev.teamSize && ev.teamSize > 1) {
+      const count = ev.teamSize - 1;
+      setEventTeamSize(count);
+      setTeammateNames(Array.from({ length: count }, () => ""));
+    } else {
+      setEventTeamSize(0);
+      setTeammateNames([]);
+    }
+
     setEventProjectTitle(ev.projectTitle || ev.eventName || "");
     setEventProblem(ev.problemStatement || "");
     setEventTechStack(Array.isArray(ev.techStack) ? ev.techStack.join(", ") : "");
@@ -474,7 +525,11 @@ function LinkedInPostsPage() {
         organizer: sourceType === "event" ? eventOrganizer : undefined,
         role: sourceType === "event" ? eventRole : undefined,
         teamName: sourceType === "event" ? eventTeamName : undefined,
-        teamSize: sourceType === "event" ? eventTeamSize : undefined,
+        teamSize: sourceType === "event" ? eventTeamSize + 1 : undefined,
+        teamMembers:
+          sourceType === "event" ? teammateNames.filter((t) => t.trim().length > 0) : undefined,
+        teammates:
+          sourceType === "event" ? teammateNames.filter((t) => t.trim().length > 0) : undefined,
         projectTitle: sourceType === "event" ? eventProjectTitle : undefined,
         problemStatement: sourceType === "event" ? eventProblem : undefined,
         techStack:
@@ -764,17 +819,7 @@ function LinkedInPostsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium mb-1.5">My Role in Team</label>
-                    <input
-                      type="text"
-                      value={eventRole}
-                      onChange={(e) => setEventRole(e.target.value)}
-                      placeholder="e.g. Lead Full-Stack Dev"
-                      className="w-full glass-input rounded-xl p-2.5 text-sm outline-none"
-                    />
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium mb-1.5">Result / Placement</label>
                     <select
@@ -798,6 +843,118 @@ function LinkedInPostsPage() {
                       className="w-full glass-input rounded-xl p-2.5 text-sm outline-none"
                     />
                   </div>
+                </div>
+
+                {/* Team & Teammates Section */}
+                <div className="p-4 rounded-xl border border-indigo-500/25 bg-indigo-950/25 space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
+                      <Users className="h-4 w-4 text-indigo-400" />
+                      Team & Teammates Information
+                    </label>
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium border border-indigo-500/30">
+                      {eventTeamSize === 0
+                        ? "Solo Project"
+                        : `${eventTeamSize} Teammate${eventTeamSize > 1 ? "s" : ""}`}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] text-muted-foreground font-medium mb-1">
+                        My Role in Team
+                      </label>
+                      <input
+                        type="text"
+                        value={eventRole}
+                        onChange={(e) => setEventRole(e.target.value)}
+                        placeholder="e.g. Lead Full-Stack Dev"
+                        className="w-full glass-input rounded-xl p-2.5 text-sm outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-muted-foreground font-medium mb-1">
+                        Team Name (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={eventTeamName}
+                        onChange={(e) => setEventTeamName(e.target.value)}
+                        placeholder="e.g. NeuralShift"
+                        className="w-full glass-input rounded-xl p-2.5 text-sm outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-muted-foreground font-medium mb-1">
+                        No. of Teammates
+                      </label>
+                      <select
+                        value={eventTeamSize}
+                        onChange={(e) => handleTeamSizeChange(Number(e.target.value))}
+                        className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-slate-900"
+                      >
+                        <option value={0}>0 (Solo / Individual)</option>
+                        <option value={1}>1 Teammate</option>
+                        <option value={2}>2 Teammates</option>
+                        <option value={3}>3 Teammates</option>
+                        <option value={4}>4 Teammates</option>
+                        <option value={5}>5 Teammates</option>
+                        <option value={6}>6+ Teammates</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Teammate Names Dynamic Inputs */}
+                  {eventTeamSize > 0 && (
+                    <div className="space-y-2.5 pt-3 border-t border-indigo-500/15">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <label className="block text-[11px] text-indigo-300 font-semibold">
+                            Teammate Names
+                          </label>
+                          <span className="text-[10px] text-muted-foreground">
+                            AI will mention and tag each teammate in your post
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={addTeammate}
+                          title="Add another teammate"
+                          className="px-2.5 py-1 rounded-lg glass bg-indigo-500/20 hover:bg-indigo-600/40 text-indigo-300 hover:text-white border border-indigo-500/30 transition flex items-center gap-1.5 text-xs font-semibold shrink-0"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          Add Teammate
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {teammateNames.map((name, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5">
+                            <div className="relative flex-1">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-400 font-mono">
+                                #{idx + 1}
+                              </span>
+                              <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => handleTeammateNameChange(idx, e.target.value)}
+                                placeholder={`Teammate ${idx + 1} Name (e.g. Alex Chen)`}
+                                className="w-full glass-input rounded-xl py-2 pl-8 pr-3 text-xs outline-none focus:border-indigo-500"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeTeammate(idx)}
+                              title="Remove teammate"
+                              className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition shrink-0"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

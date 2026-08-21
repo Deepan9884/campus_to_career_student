@@ -462,7 +462,7 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
               <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
                 <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Full-Screen Lockdown:</strong> Leaving fullscreen records a strike.
+                  <strong className="text-white">Full-Screen Lockdown:</strong> Leaving fullscreen records a strike and starts a 15-second timer to return or get blocked.
                 </span>
               </div>
               <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
@@ -475,6 +475,12 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
                 <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-white">Continuous Presence:</strong> Stay in front of the camera at all times.
+                </span>
+              </div>
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">Full Face & Eye Gaze:</strong> Full face must be visible (no half/quarter face or edge cutoffs) and eyes focused on screen (4 warnings = 1 strike).
                 </span>
               </div>
               <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
