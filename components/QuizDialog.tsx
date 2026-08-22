@@ -153,14 +153,14 @@ export function QuizDialog({
   // 1. Loading Phase Overlay
   if (phase === "loading" || (!gen && phase !== "error")) {
     return createPortal(
-      <div className="fixed inset-0 z-[999999] bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center justify-center p-6 select-none font-sans">
-        <div className="max-w-md w-full bg-[var(--popover)] border border-[var(--border)] rounded-3xl p-8 shadow-2xl text-center space-y-5">
+      <div className="fixed inset-0 z-[999999] bg-background text-foreground flex flex-col items-center justify-center p-6 select-none font-sans">
+        <div className="max-w-md w-full bg-popover border border-border rounded-3xl p-8 shadow-2xl text-center space-y-5">
           <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mx-auto text-blue-400">
             <Brain className="h-8 w-8 animate-pulse" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-[var(--foreground)]">Initializing Assessment Environment</h3>
-            <p className="text-xs text-[var(--muted-foreground)]">
+            <h3 className="text-lg font-bold text-foreground">Initializing Assessment Environment</h3>
+            <p className="text-xs text-muted-foreground">
               Generating questions & activating AI proctoring for {subTopicName}...
             </p>
           </div>
@@ -170,7 +170,7 @@ export function QuizDialog({
           </div>
           <button
             onClick={handleClose}
-            className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition pt-2"
+            className="text-xs text-muted-foreground hover:text-foreground transition pt-2"
           >
             Cancel
           </button>
@@ -199,23 +199,23 @@ export function QuizDialog({
   // 2. Error Phase
   if (phase === "error") {
     return createPortal(
-      <div className="fixed inset-0 z-[999999] bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center justify-center p-6 select-none font-sans">
-        <div className="max-w-md w-full bg-[var(--popover)] border border-red-500/30 rounded-3xl p-8 shadow-2xl text-center space-y-4">
+      <div className="fixed inset-0 z-[999999] bg-background text-foreground flex flex-col items-center justify-center p-6 select-none font-sans">
+        <div className="max-w-md w-full bg-popover border border-red-500/30 rounded-3xl p-8 shadow-2xl text-center space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto text-red-400">
             <AlertTriangle className="h-8 w-8" />
           </div>
-          <h3 className="text-lg font-bold text-[var(--foreground)]">Assessment Generation Failed</h3>
-          <p className="text-xs text-[var(--muted-foreground)]">{error || "An unexpected error occurred while preparing your exam."}</p>
+          <h3 className="text-lg font-bold text-foreground">Assessment Generation Failed</h3>
+          <p className="text-xs text-muted-foreground">{error || "An unexpected error occurred while preparing your exam."}</p>
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleRetry}
-              className="flex-1 bg-[var(--primary)] hover:brightness-110 text-[var(--primary-foreground)] py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+              className="flex-1 bg-primary hover:brightness-110 text-primary-foreground py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
             >
               <RotateCcw className="h-3.5 w-3.5" /> Try Again
             </button>
             <button
               onClick={handleClose}
-              className="px-5 bg-[var(--glass-input-bg)] hover:brightness-110 text-[var(--foreground)] py-2.5 rounded-xl text-xs font-semibold"
+              className="px-5 bg-[var(--glass-input-bg)] hover:brightness-110 text-foreground py-2.5 rounded-xl text-xs font-semibold"
             >
               Close
             </button>
@@ -375,17 +375,17 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[999999] bg-[var(--background)]/95 backdrop-blur-xl text-[var(--foreground)] flex flex-col items-center justify-center p-4 md:p-6 select-none overflow-y-auto font-sans">
-      <div className="max-w-3xl w-full bg-[var(--popover)] border border-[var(--border)] rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-[999999] bg-background/95 backdrop-blur-xl text-foreground flex flex-col items-center justify-center p-4 md:p-6 select-none overflow-y-auto font-sans">
+      <div className="max-w-3xl w-full bg-popover border border-border rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
         {/* Header Title */}
-        <div className="flex items-center justify-between border-b border-[var(--border)] pb-4">
+        <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
               <Shield className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[var(--foreground)]">Proctored Assessment Check-In</h2>
-              <p className="text-xs text-[var(--muted-foreground)]">
+              <h2 className="text-lg font-bold text-foreground">Proctored Assessment Check-In</h2>
+              <p className="text-xs text-muted-foreground">
                 {skillName} • {subTopicName}
               </p>
             </div>
@@ -400,7 +400,7 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
           {/* Left Column: Live AI Camera Preview */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[var(--muted-foreground)]">Live Camera & AI Feed</span>
+              <span className="text-xs font-semibold text-muted-foreground">Live Camera & AI Feed</span>
               <span
                 className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${
                   aiStatus === "ok"
@@ -439,7 +439,7 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
               </span>
             </div>
 
-            <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-[var(--popover)] border border-[var(--border)] shadow-inner flex items-center justify-center">
+            <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-popover border border-border shadow-inner flex items-center justify-center">
               {stream ? (
                 <video
                   ref={videoRef}
@@ -455,7 +455,7 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
                   <p className="text-xs text-red-300">{cameraError}</p>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-xs text-[var(--muted-foreground)]">
+                <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
                   <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
                   <span>Accessing camera...</span>
                 </div>
@@ -463,52 +463,52 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
 
               {/* Status Banner inside Video */}
               {stream && (
-                <div className="absolute bottom-2 left-2 right-2 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] text-slate-300 flex items-center justify-between">
+                <div className="absolute bottom-2 left-2 right-2 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] text-muted-foreground flex items-center justify-between">
                   <span>Inference: COCO-SSD</span>
-                  <span className="truncate max-w-[140px] text-[var(--muted-foreground)] font-mono">
+                  <span className="truncate max-w-[140px] text-muted-foreground font-mono">
                     {detectedSummary.length > 0 ? detectedSummary.slice(0, 2).join(", ") : "Scanning..."}
                   </span>
                 </div>
               )}
             </div>
 
-            <p className="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
               Ensure your face is well-lit and directly in front of the camera before starting.
             </p>
           </div>
 
           {/* Right Column: Rules Checklist & Terms */}
           <div className="space-y-3.5">
-            <span className="text-xs font-semibold text-[var(--muted-foreground)]">Exam Integrity Policy</span>
-            <div className="space-y-2.5 text-xs text-[var(--muted-foreground)]">
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-[var(--border)]">
+            <span className="text-xs font-semibold text-muted-foreground">Exam Integrity Policy</span>
+            <div className="space-y-2.5 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
                 <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[var(--foreground)]">Full-Screen Lockdown:</strong> Leaving fullscreen records a strike and starts a 15-second timer to return or get blocked.
+                  <strong className="text-foreground">Full-Screen Lockdown:</strong> Leaving fullscreen records a strike and starts a 15-second timer to return or get blocked.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-[var(--border)]">
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
                 <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[var(--foreground)]">No External Devices:</strong> AI camera continuously checks for phones.
+                  <strong className="text-foreground">No External Devices:</strong> AI camera continuously checks for phones.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-[var(--border)]">
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
                 <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[var(--foreground)]">Continuous Presence:</strong> Stay in front of the camera at all times.
+                  <strong className="text-foreground">Continuous Presence:</strong> Stay in front of the camera at all times.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-[var(--border)]">
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
                 <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[var(--foreground)]">Full Face & Eye Gaze:</strong> Full face must be visible (no half/quarter face or edge cutoffs) and eyes focused on screen (4 warnings = 1 strike).
+                  <strong className="text-foreground">Full Face & Eye Gaze:</strong> Full face must be visible (no half/quarter face or edge cutoffs) and eyes focused on screen (4 warnings = 1 strike).
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-[var(--border)]">
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
                 <CheckCircle2 className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-[var(--foreground)]">3-Strike Rule:</strong> 3 violations lock the exam and notify your mentor.
+                  <strong className="text-foreground">3-Strike Rule:</strong> 3 violations lock the exam and notify your mentor.
                 </span>
               </div>
             </div>
@@ -519,9 +519,9 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="w-4 h-4 rounded border-[var(--border)] bg-[var(--glass-input-bg)] text-[var(--primary)] focus:ring-[var(--primary)] accent-[var(--primary)]"
+                className="w-4 h-4 rounded border-border bg-[var(--glass-input-bg)] text-primary focus:ring-primary accent-primary"
               />
-              <span className="text-xs text-[var(--muted-foreground)] font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 I agree to adhere to all exam integrity guidelines
               </span>
             </label>
@@ -529,10 +529,10 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t border-[var(--border)] pt-4">
+        <div className="flex items-center justify-between border-t border-border pt-4">
           <button
             onClick={onCancel}
-            className="px-5 py-2.5 rounded-xl bg-[var(--glass-input-bg)] hover:brightness-110 text-[var(--foreground)] text-xs font-semibold transition"
+            className="px-5 py-2.5 rounded-xl bg-[var(--glass-input-bg)] hover:brightness-110 text-foreground text-xs font-semibold transition"
           >
             Cancel
           </button>
