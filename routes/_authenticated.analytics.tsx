@@ -57,10 +57,10 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 /* ─── Color Palettes ─────────────────────────────────────────────── */
 const FEATURE_COLORS = ["#38BDF8", "#818CF8", "#34D399", "#FBBF24", "#F472B6"];
 const TIER_COLORS = {
-  bronze: "from-amber-700/30 to-amber-900/10 border-amber-600/40 text-amber-300",
+  bronze: "from-amber-700/30 to-amber-900/10 border-amber-600/40 text-amber-700 dark:text-amber-300",
   silver: "from-slate-400/30 to-slate-700/10 border-border text-foreground",
-  gold: "from-yellow-400/30 to-amber-600/10 border-yellow-400/50 text-yellow-300",
-  platinum: "from-cyan-400/30 to-indigo-600/10 border-cyan-400/50 text-cyan-300",
+  gold: "from-yellow-400/30 to-amber-600/10 border-yellow-400/50 text-yellow-600 dark:text-yellow-300",
+  platinum: "from-cyan-400/30 to-indigo-600/10 border-cyan-400/50 text-cyan-600 dark:text-cyan-300",
 };
 
 /* ─── Weekly Progress Digest ─────────────────────────────────────── */
