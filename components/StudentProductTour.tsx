@@ -231,9 +231,9 @@ const TOUR_STEPS: TourStep[] = [
     content: (
       <div className="space-y-3">
         <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed">
-          Select your target role (e.g. <em className="text-indigo-300 not-italic font-medium">Full Stack Engineer</em>, <em className="text-indigo-300 not-italic font-medium">Data Scientist</em>) to visualize gaps and unlock custom benchmark quizzes.
+          Select your target role (e.g. <em className="text-primary not-italic font-medium">Full Stack Engineer</em>, <em className="text-primary not-italic font-medium">Data Scientist</em>) to visualize gaps and unlock custom benchmark quizzes.
         </p>
-        <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2.5 shadow-sm">
+        <div className="p-3 rounded-xl bg-[var(--warning)]/10 border border-[var(--warning)]/20 text-[var(--warning)] text-xs flex items-start gap-2.5 shadow-sm">
           <Trophy className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             Pass milestone quizzes with &ge; 80% to upgrade your verified skill badge levels!
@@ -277,7 +277,7 @@ const TOUR_STEPS: TourStep[] = [
         <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed">
           Transform your logged hackathon wins and GitHub repo analyses directly into recruiter-tailored, high-engagement LinkedIn posts with 1-click generation.
         </p>
-        <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-500/5 border border-blue-500/20 text-blue-200 text-xs flex items-start gap-2.5 shadow-sm">
+        <div className="p-3 rounded-xl bg-chart-5/10 border border-chart-5/20 text-chart-5 text-xs flex items-start gap-2.5 shadow-sm">
           <Share2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             <span className="font-semibold text-foreground">Pro Tip:</span> Generates custom achievement social banners, bold Unicode styling, and optimized hashtags!
@@ -309,7 +309,7 @@ const TOUR_STEPS: TourStep[] = [
             </span>
           </li>
           <li className="flex items-start gap-2.5">
-            <div className="p-0.5 rounded-full bg-indigo-500/15 text-indigo-400 mt-0.5 shrink-0">
+            <div className="p-0.5 rounded-full bg-primary/15 text-primary mt-0.5 shrink-0">
               <Command className="h-3.5 w-3.5" />
             </div>
             <span className="leading-relaxed">
@@ -733,7 +733,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           className="z-50 w-[calc(100vw-32px)] sm:w-[420px] max-w-[420px] max-h-[calc(100vh-32px)] transition-all duration-300 ease-out animate-in zoom-in-95"
         >
           <div
-            className="p-5 sm:p-6 space-y-4 border border-white/[0.12] bg-popover/95 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_35px_rgba(99,102,241,0.18)] relative overflow-hidden rounded-3xl flex flex-col max-h-[calc(100vh-32px)]"
+            className="p-5 sm:p-6 space-y-4 border border-border bg-popover/95 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_35px_rgba(99,102,241,0.18)] relative overflow-hidden rounded-3xl flex flex-col max-h-[calc(100vh-32px)]"
           >
             {/* Pointer Arrow Element */}
             <div
@@ -752,12 +752,12 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
             />
 
             {/* Ambient Background Glow Accents */}
-            <div className="absolute -top-16 -right-16 w-36 h-36 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-36 h-36 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-16 -left-16 w-36 h-36 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
 
             {/* Top Bar: Section Badge + Step Counter + Close Button */}
-            <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/[0.08] relative z-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold tracking-wide">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-border relative z-10">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
                 <Compass className="h-3.5 w-3.5 text-indigo-400 animate-spin" style={{ animationDuration: "16s" }} />
                 <span>{current.routeName}</span>
               </div>
@@ -788,7 +788,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 uppercase tracking-wider mb-1">
+                <div className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/15 text-primary border border-primary/25 uppercase tracking-wider mb-1">
                   {current.badge}
                 </div>
                 <h3 className="text-base font-bold text-foreground tracking-tight leading-snug">
@@ -827,7 +827,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
             </div>
 
             {/* Footer & Navigation Controls */}
-            <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3 relative z-10">
+            <div className="pt-3 border-t border-border flex items-center justify-between gap-3 relative z-10">
               <button
                 onClick={() => {
                   localStorage.setItem("cf-student-tour-done", "true");
