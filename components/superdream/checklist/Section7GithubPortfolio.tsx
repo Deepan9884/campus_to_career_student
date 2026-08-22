@@ -269,7 +269,7 @@ export function Section7GithubPortfolio() {
                 href={`https://github.com/${connectedUsername}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-xl bg-white/8 hover:bg-white/10/80 text-[var(--foreground)]/80 hover:text-white border border-white/12 transition shrink-0"
+                className="p-2 rounded-xl bg-white/8 hover:bg-white/10 text-[var(--foreground)]/80 hover:text-white border border-white/12 transition shrink-0"
                 title="Open GitHub Profile"
               >
                 <ExternalLink className="w-4 h-4" />
@@ -340,8 +340,8 @@ export function Section7GithubPortfolio() {
                     <tr
                       key={item.id}
                       className={cn(
-                        "transition-colors hover:bg-white/8/40 group",
-                        idx % 2 === 0 ? "bg-transparent/30" : "bg-transparent"
+                        "transition-colors hover:bg-white/8 group",
+                        idx % 2 === 0 ? "bg-white/5" : "bg-transparent"
                       )}
                     >
                       {/* 1. Activity Column */}
