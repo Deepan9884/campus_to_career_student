@@ -712,11 +712,11 @@ function SkillsPage() {
 
                 {coreGaps.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
-                    <p className="text-xs text-red-300 mb-2 font-semibold">Core Gaps</p>
+                    <p className="text-xs text-destructive mb-2 font-semibold">Core Gaps</p>
                     {coreGaps.map((g) => (
                       <div key={g.skillName} className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-slate-200">{g.skillName}</p>
+                          <p className="text-sm font-medium text-foreground">{g.skillName}</p>
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-300">
                             core
                           </span>
@@ -729,11 +729,11 @@ function SkillsPage() {
 
                 {niceGaps.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
-                    <p className="text-xs text-yellow-300 mb-2 font-semibold">Nice-to-have Gaps</p>
+                    <p className="text-xs text-[var(--warning)] mb-2 font-semibold">Nice-to-have Gaps</p>
                     {niceGaps.map((g) => (
                       <div key={g.skillName} className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-slate-200">{g.skillName}</p>
+                          <p className="text-sm font-medium text-foreground">{g.skillName}</p>
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">
                             nice-to-have
                           </span>
