@@ -34,7 +34,6 @@ import {
   Compass,
   ArrowRight,
   ListTodo,
-  Sparkles,
 } from "lucide-react";
 import { getDashboardStats } from "@/lib/dashboard-api";
 import { useAuth } from "@/stores";

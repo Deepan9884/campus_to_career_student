@@ -98,15 +98,15 @@ function RegisterPage() {
 
   return (
     <AuthShell>
-      <h1 className="text-3xl font-bold">Create your account</h1>
-      <p className="text-muted-foreground mt-1 text-sm">Start your prep journey in 60 seconds.</p>
+      <h1 className="text-3xl font-bold text-white tracking-tight">Create your account</h1>
+      <p className="text-slate-300 mt-1 text-sm">Start your prep journey in 60 seconds.</p>
       <form onSubmit={submit} className="mt-6 space-y-3">
         <Field label="Full name" error={errors.name}>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Jane Doe"
-            className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+            className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
           />
         </Field>
         <Field label="Email" error={errors.email}>
@@ -115,7 +115,7 @@ function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+            className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
           />
         </Field>
         <Field label="Phone (optional)">
@@ -123,7 +123,7 @@ function RegisterPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+1 555 0100"
-            className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+            className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
           />
         </Field>
         <Field label="Password" error={errors.pw}>
@@ -132,12 +132,13 @@ function RegisterPage() {
               type={show ? "text" : "password"}
               value={pw}
               onChange={(e) => setPw(e.target.value)}
-              className="w-full glass-input rounded-xl px-3 pr-10 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+              placeholder="••••••••"
+              className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
             />
             <button
               type="button"
               onClick={() => setShow((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer"
             >
               {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -150,7 +151,7 @@ function RegisterPage() {
                   style={{ width: `${((st.score + 1) / 4) * 100}%` }}
                 />
               </div>
-              <span className="text-xs text-muted-foreground w-16 text-right">{st.label}</span>
+              <span className="text-xs text-slate-300 w-16 text-right font-medium">{st.label}</span>
             </div>
           )}
         </Field>
@@ -159,41 +160,42 @@ function RegisterPage() {
             type={show ? "text" : "password"}
             value={pw2}
             onChange={(e) => setPw2(e.target.value)}
-            className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+            placeholder="••••••••"
+            className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
           />
         </Field>
-        <label className="flex items-start gap-2 text-xs text-muted-foreground">
+        <label className="flex items-start gap-2 text-xs text-slate-300 cursor-pointer pt-1">
           <input
             type="checkbox"
             checked={terms}
             onChange={(e) => setTerms(e.target.checked)}
-            className="mt-0.5 accent-[color:var(--color-primary)]"
+            className="mt-0.5 accent-[color:var(--color-primary)] rounded cursor-pointer"
           />
-          I agree to the Terms of Service and Privacy Policy.
+          <span>I agree to the Terms of Service and Privacy Policy.</span>
         </label>
         {errors.terms && (
-          <p className="text-xs text-[color:var(--color-destructive)]">{errors.terms}</p>
+          <p className="text-xs text-rose-400 font-medium">{errors.terms}</p>
         )}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full btn-gradient btn-gradient-hover rounded-xl py-2.5 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full btn-gradient btn-gradient-hover rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 cursor-pointer mt-2"
         >
           {isLoading && <Loader2 className="h-4 w-4 animate-spin" />} Create account
         </button>
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-sm text-slate-400">
           Have an account?{" "}
-          <Link to="/login" className="text-gradient font-semibold">
+          <Link to="/login" className="text-indigo-400 hover:text-indigo-300 font-semibold hover:underline">
             Sign in
           </Link>
         </p>
 
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-700"></div>
+            <div className="w-full border-t border-slate-700/80"></div>
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-[#0f172a] px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-[#0f172a] px-3 text-slate-400 font-medium">Or continue with</span>
           </div>
         </div>
 

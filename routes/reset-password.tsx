@@ -85,9 +85,9 @@ function ResetPasswordPage() {
   if (status === "loading") {
     return (
       <AuthShell>
-        <div className="flex flex-col items-center gap-3 py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-[color:var(--color-primary)]" />
-          <p className="text-sm text-muted-foreground">Verifying your reset link...</p>
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+          <p className="text-sm text-slate-300">Verifying your reset link...</p>
         </div>
       </AuthShell>
     );
@@ -97,9 +97,9 @@ function ResetPasswordPage() {
     return (
       <AuthShell>
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <AlertCircle className="h-10 w-10 text-[color:var(--color-destructive)]" />
-          <h1 className="text-2xl font-bold">Link invalid or expired</h1>
-          <p className="text-sm text-muted-foreground max-w-xs">
+          <AlertCircle className="h-10 w-10 text-rose-400" />
+          <h1 className="text-2xl font-bold text-white">Link invalid or expired</h1>
+          <p className="text-sm text-slate-300 max-w-xs">
             {reason === "expired"
               ? "This reset link has expired. Reset links are valid for 15 minutes."
               : reason === "used"
@@ -108,11 +108,11 @@ function ResetPasswordPage() {
           </p>
           <Link
             to="/forgot-password"
-            className="mt-4 btn-gradient btn-gradient-hover rounded-xl px-6 py-2.5 text-sm font-semibold"
+            className="mt-4 btn-gradient btn-gradient-hover rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/20"
           >
             Request a new link
           </Link>
-          <Link to="/login" className="text-sm text-gradient font-semibold mt-2">
+          <Link to="/login" className="text-sm text-indigo-400 hover:text-indigo-300 font-semibold mt-2 hover:underline">
             Back to sign in
           </Link>
         </div>
@@ -124,9 +124,9 @@ function ResetPasswordPage() {
     return (
       <AuthShell>
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <CheckCircle2 className="h-10 w-10 text-[color:var(--color-success)]" />
-          <h1 className="text-2xl font-bold">Password reset!</h1>
-          <p className="text-sm text-muted-foreground">Redirecting to your dashboard...</p>
+          <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+          <h1 className="text-2xl font-bold text-white">Password reset!</h1>
+          <p className="text-sm text-slate-300">Redirecting to your dashboard...</p>
         </div>
       </AuthShell>
     );
@@ -134,23 +134,23 @@ function ResetPasswordPage() {
 
   return (
     <AuthShell>
-      <h1 className="text-3xl font-bold">Set new password</h1>
-      <p className="text-muted-foreground mt-1 text-sm">Choose a strong password for your account.</p>
+      <h1 className="text-3xl font-bold text-white tracking-tight">Set new password</h1>
+      <p className="text-slate-300 mt-1 text-sm">Choose a strong password for your account.</p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <Field label="New password" error={errors.password}>
           <div className="relative">
-            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type={show ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full glass-input rounded-xl pl-10 pr-10 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+              className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
             />
             <button
               type="button"
               onClick={() => setShow((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer"
             >
               {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -158,25 +158,25 @@ function ResetPasswordPage() {
         </Field>
         <Field label="Confirm password" error={errors.confirm}>
           <div className="relative">
-            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type={show ? "text" : "password"}
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="••••••••"
-              className="w-full glass-input rounded-xl pl-10 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+              className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-indigo-500 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
             />
           </div>
         </Field>
         <button
           type="submit"
           disabled={submitting}
-          className="w-full btn-gradient btn-gradient-hover rounded-xl py-2.5 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full btn-gradient btn-gradient-hover rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 cursor-pointer"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Reset password
         </button>
-        <p className="text-center text-sm text-muted-foreground">
-          <Link to="/login" className="text-gradient font-semibold">
+        <p className="text-center text-sm text-slate-400">
+          <Link to="/login" className="text-indigo-400 hover:text-indigo-300 font-semibold hover:underline">
             Back to sign in
           </Link>
         </p>

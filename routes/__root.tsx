@@ -30,7 +30,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap",
       },
     ],
   }),
@@ -94,13 +94,15 @@ function RootComponent() {
         <Outlet />
         <Toaster
           position="top-right"
-          theme="dark"
           toastOptions={{
             style: {
-              background: "rgba(30, 41, 59, 0.85)",
-              backdropFilter: "blur(16px)",
-              border: "1px solid rgba(255,255,255,0.18)",
-              color: "#F1F5F9",
+              background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)",
+              backdropFilter: "blur(32px) saturate(180%)",
+              border: "1px solid rgba(167,139,250,0.25)",
+              color: "#F0EEFF",
+              borderRadius: "16px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.18)",
+              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
             },
           }}
         />

@@ -52,6 +52,8 @@ import { getBadges } from "@/lib/badges-api";
 import type { BadgeId, EarnedBadge } from "@/types/badges";
 import { BrandLogo } from "@/components/BrandLogo";
 import { InteractiveAppBackground } from "@/components/InteractiveAppBackground";
+import { AmbientLightingCustomizer } from "@/components/AmbientLightingCustomizer";
+import { Sparkles } from "lucide-react";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -175,6 +177,7 @@ export function AppShell() {
 
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [ambientCustomizerOpen, setAmbientCustomizerOpen] = useState(false);
 
   // Global Cmd+K / Ctrl+K keyboard shortcut
   useEffect(() => {
@@ -292,6 +295,12 @@ export function AppShell() {
       <StudentCommandPalette
         open={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
+      />
+
+      {/* Atmospheric Lighting & Interactive Stars Studio */}
+      <AmbientLightingCustomizer
+        open={ambientCustomizerOpen}
+        onClose={() => setAmbientCustomizerOpen(false)}
       />
 
       <OnboardingWizard
@@ -614,6 +623,14 @@ export function AppShell() {
             onMarkAsRead={markAsRead}
             onMarkAllAsRead={markAllAsRead}
           />
+          <button
+            onClick={() => setAmbientCustomizerOpen(true)}
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--foreground)] hover:text-[var(--primary)] transition border border-white/10 relative group cursor-pointer"
+            title="Atmospheric Lighting & Stars Studio (Customize background)"
+            aria-label="Customize background lights & stars"
+          >
+            <Sparkles className="h-4.5 w-4.5 text-[var(--primary)] group-hover:rotate-12 transition-transform" />
+          </button>
           <Link to="/settings" className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition" aria-label="Settings">
             <Settings className="h-5 w-5" />
           </Link>

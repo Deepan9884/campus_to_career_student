@@ -72,7 +72,15 @@ function isBlockedShortcut(e: KeyboardEvent): boolean {
   const targetTag = (e.target as HTMLElement)?.tagName?.toUpperCase();
   const isInsideEditor = targetTag === "TEXTAREA" || targetTag === "INPUT";
 
-  if (BLOCKED_STANDALONE_KEYS.has(e.key)) return true;
+  // Check PrintScreen
+  if (e.key === "PrintScreen" || e.code === "PrintScreen" || e.keyCode === 44) return true;
+
+  // Screenshot hotkeys: Win+Shift+S, Cmd+Shift+3/4/5, Ctrl+Shift+S
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "S" || e.key === "s" || e.key === "3" || e.key === "4" || e.key === "5")) {
+    return true;
+  }
+
+  if (BLOCKED_STANDALONE_KEYS.has(e.key) || BLOCKED_STANDALONE_KEYS.has(e.code)) return true;
   if (e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") return true;
   if (e.altKey || e.key === "Alt" || e.key === "AltGraph") return true;
 
@@ -141,7 +149,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   isStartedRef.current = isStarted;
 
   const isBlockedRef = useRef(false);
-  const reportingRef = useRef(false);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inferenceVideoRef = useRef<HTMLVideoElement | null>(null);
   const externalVideoRef = useRef<HTMLVideoElement | null>(videoElement || null);
@@ -160,6 +167,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   const lastNoPersonViolationTime = useRef(0);
   const lastGazeWarningTime = useRef(0);
   const gazeWarningsCountRef = useRef(0);
+  const lastViolationDispatchTime = useRef<Record<string, number>>({});
 
   // Synchronize external video whenever videoElement or stream changes
   useEffect(() => {
@@ -172,32 +180,51 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   }, [videoElement, state.mediaStream]);
 
   const sendViolation = useCallback(
-    async (type: ViolationType, forceBlock = false) => {
+    (type: ViolationType, forceBlock = false) => {
       const effectiveModuleId = moduleId || "active-session";
-      if (reportingRef.current || (isBlockedRef.current && !forceBlock) || !isStartedRef.current) return;
-      reportingRef.current = true;
-      try {
-        const result = await reportViolation(moduleType, effectiveModuleId, type, forceBlock);
+      if ((isBlockedRef.current && !forceBlock) || !isStartedRef.current) return;
+
+      const now = Date.now();
+      const lastTime = lastViolationDispatchTime.current[type] || 0;
+      // 1.2s cooldown to prevent multiple stacked event triggers for one user gesture
+      if (now - lastTime < 1200 && !forceBlock) {
+        return;
+      }
+      lastViolationDispatchTime.current[type] = now;
+
+      // Immediately increment local count & calculate block
+      setState((prev) => {
+        const nextCount = forceBlock ? 3 : Math.min(3, prev.violationCount + 1);
+        const shouldBlock = forceBlock || nextCount >= 3;
         const timeStr = new Date().toLocaleTimeString();
-        setState((prev) => ({
-          ...prev,
-          violationCount: result.violationCount,
-          isBlocked: result.isBlocked,
-          violationsHistory: [
-            ...prev.violationsHistory,
-            { type, timestamp: timeStr, count: result.violationCount },
-          ],
-        }));
-        onViolationRef.current(result.violationCount, type);
-        if (result.isBlocked) {
+
+        if (shouldBlock) {
           isBlockedRef.current = true;
+        }
+
+        // Fire audio tone and callback immediately
+        playViolationStrikeTone();
+        onViolationRef.current(nextCount, type);
+
+        if (shouldBlock) {
           onBlockedRef.current();
         }
-      } catch (err) {
-        console.error("[Proctoring] Failed to report violation:", err);
-      } finally {
-        reportingRef.current = false;
-      }
+
+        return {
+          ...prev,
+          violationCount: nextCount,
+          isBlocked: shouldBlock,
+          violationsHistory: [
+            ...prev.violationsHistory,
+            { type, timestamp: timeStr, count: nextCount },
+          ],
+        };
+      });
+
+      // Fire-and-forget sync to backend
+      reportViolation(moduleType, effectiveModuleId, type, forceBlock).catch((err) => {
+        console.warn("[Proctoring Sync] Remote violation log error, local strike recorded:", err);
+      });
     },
     [moduleType, moduleId]
   );
@@ -211,7 +238,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     setState((prev) => (prev.fullscreenCountdown !== null ? { ...prev, fullscreenCountdown: null } : prev));
   }, []);
 
-  const handleFullscreenTimeout = useCallback(async () => {
+  const handleFullscreenTimeout = useCallback(() => {
     if (fullscreenIntervalRef.current) {
       clearInterval(fullscreenIntervalRef.current);
       fullscreenIntervalRef.current = null;
@@ -223,7 +250,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       isBlocked: true,
       fullscreenCountdown: 0,
     }));
-    await sendViolation("fullscreen_timeout", true);
+    sendViolation("fullscreen_timeout", true);
     onBlockedRef.current();
   }, [sendViolation]);
 
@@ -297,7 +324,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     }
 
     function handleWindowBlur() {
-      if (isStartedRef.current && !isBlockedRef.current && document.fullscreenElement) {
+      if (isStartedRef.current && !isBlockedRef.current) {
         sendViolation("tab_switch");
       }
     }
@@ -310,7 +337,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     };
   }, [enabled, sendViolation]);
 
-  // ── 3. Strict Keyboard Lockdown, Clipboard Sanitization & Anti-Copy ─────
+  // ── 3. Strict Keyboard Lockdown, Screenshot Detection & Anti-Copy ─────────
   useEffect(() => {
     if (!enabled) return;
 
@@ -322,7 +349,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       } catch {}
     }
 
-    // Auto-wipe clipboard upon proctored session active or tab focus
     if (isStarted) {
       wipeClipboard();
     }
@@ -335,6 +361,26 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleKeyDown(e: KeyboardEvent) {
       if (!isStartedRef.current || isBlockedRef.current) return;
+
+      const isPrintScreen = e.key === "PrintScreen" || e.code === "PrintScreen" || e.keyCode === 44;
+      const isScreenshotCombo =
+        ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "S" || e.key === "s" || e.key === "3" || e.key === "4" || e.key === "5")) ||
+        (e.altKey && isPrintScreen) ||
+        (e.ctrlKey && isPrintScreen);
+
+      if (isPrintScreen || isScreenshotCombo) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        wipeClipboard();
+        playClipboardAlertTone();
+        toast.error("Screenshot Blocked: Screenshots and screen captures are strictly prohibited during the assessment.", {
+          id: `proctor-screenshot-${Date.now()}`,
+          duration: 5000,
+        });
+        sendViolation("keyboard_shortcut");
+        return;
+      }
 
       const isCopyCombo =
         (e.ctrlKey || e.metaKey) &&
@@ -351,9 +397,9 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
             window.getSelection()?.removeAllRanges();
           } catch {}
           playClipboardAlertTone();
-          toast.error("Clipboard Sanitized: Copying and pasting is prohibited during the exam. All clipboard copies have been erased.", {
-            id: "proctoring-clipboard-wipe",
-            duration: 3500,
+          toast.error("Clipboard Sanitized: Copying and pasting is prohibited during the exam. All clipboard data has been erased.", {
+            id: `proctor-copy-${Date.now()}`,
+            duration: 4000,
           });
         }
 
@@ -363,6 +409,17 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleKeyUp(e: KeyboardEvent) {
       if (!isStartedRef.current) return;
+
+      const isPrintScreen = e.key === "PrintScreen" || e.code === "PrintScreen" || e.keyCode === 44;
+      if (isPrintScreen) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        wipeClipboard();
+        sendViolation("keyboard_shortcut");
+        return;
+      }
+
       if (isBlockedShortcut(e)) {
         e.preventDefault();
         e.stopPropagation();
@@ -390,7 +447,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       wipeClipboard();
       playClipboardAlertTone();
       toast.error("Clipboard Sanitized: Copying and pasting is disabled. All copied data has been cleared from clipboard.", {
-        id: "proctoring-clipboard-wipe",
+        id: `proctor-clip-${Date.now()}`,
         duration: 3500,
       });
 

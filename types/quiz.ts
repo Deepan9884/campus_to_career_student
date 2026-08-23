@@ -47,7 +47,9 @@ export interface TestCaseResult {
   expectedOutput: string;
   actualOutput: string;
   passed: boolean;
+  status?: string;
   executionTimeMs: number;
+  error?: string;
 }
 
 export interface CodeExecutionResult {
@@ -55,6 +57,11 @@ export interface CodeExecutionResult {
   language: string;
   stdout: string;
   stderr: string;
+  isCompilationError?: boolean;
+  compilationError?: boolean;
+  isRuntimeError?: boolean;
+  passedCount?: number;
+  totalCount?: number;
   testCaseResults: TestCaseResult[];
 }
 

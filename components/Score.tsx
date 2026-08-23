@@ -13,7 +13,7 @@ export function AnimatedCounter({ value, duration = 900 }: { value: number; dura
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [value, duration]);
-  return <span className="font-mono font-medium">{n}</span>;
+  return <span className="tabular-nums font-bold">{n}</span>;
 }
 
 export function ScoreRing({
@@ -70,11 +70,11 @@ export function ScoreRing({
         />
       </svg>
       <div className="absolute text-center">
-        <div className="text-4xl font-bold font-mono text-foreground">
+        <div className="text-4xl font-extrabold text-foreground tabular-nums tracking-tight">
           <AnimatedCounter value={score} />
-          <span className="text-base text-muted-foreground font-mono">%</span>
+          <span className="text-base text-muted-foreground font-semibold ml-0.5">%</span>
         </div>
-        {label && <div className="text-xs text-muted-foreground mt-1">{label}</div>}
+        {label && <div className="text-xs text-muted-foreground mt-1 font-medium">{label}</div>}
       </div>
     </div>
   );
@@ -121,11 +121,11 @@ export function MiniRing({
             }}
           />
         </svg>
-        <div className="absolute inset-0 grid place-items-center text-sm font-semibold font-mono">
+        <div className="absolute inset-0 grid place-items-center text-sm font-bold tabular-nums">
           <AnimatedCounter value={value} />%
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-xs text-muted-foreground font-medium">{label}</p>
     </div>
   );
 }

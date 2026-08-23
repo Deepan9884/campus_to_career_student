@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Zap } from "lucide-react";
 
 interface LandingIntroAnimationProps {
   onComplete: () => void;
@@ -344,7 +344,7 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
               transition={{ duration: 0.6, delay: 0.3 }}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#111827]/90 border border-indigo-500/40 text-indigo-300 text-xs sm:text-sm font-semibold tracking-wider uppercase mb-4 shadow-xl backdrop-blur-md"
             >
-              <Sparkles className="w-3.5 h-3.5 text-sky-400 animate-spin-slow" />
+              <Zap className="w-3.5 h-3.5 text-sky-400" />
               <span>Next-Gen Career Intelligence</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </motion.div>

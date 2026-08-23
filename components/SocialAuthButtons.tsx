@@ -83,10 +83,10 @@ function GoogleClientButton({
       type="button"
       onClick={triggerDemoGoogleLogin}
       disabled={isAnyLoading}
-      className="w-full glass-input hover:bg-slate-800/80 border border-slate-700/60 hover:border-slate-500/80 text-slate-200 rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
+      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
     >
       <GoogleIcon className="w-4 h-4 shrink-0" />
-      <span>Google</span>
+      <span className="text-white font-medium">Google</span>
     </button>
   );
 }
@@ -121,10 +121,10 @@ function RealGoogleButton({
       type="button"
       onClick={() => handleGoogleAuth()}
       disabled={isAnyLoading}
-      className="w-full glass-input hover:bg-slate-800/80 border border-slate-700/60 hover:border-slate-500/80 text-slate-200 rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
+      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
     >
       <GoogleIcon className="w-4 h-4 shrink-0" />
-      <span>Google</span>
+      <span className="text-white font-medium">Google</span>
     </button>
   );
 }
@@ -162,14 +162,14 @@ export function SocialAuthButtons({
         type="button"
         onClick={triggerGithubLogin}
         disabled={isAnyLoading}
-        className="w-full glass-input hover:bg-slate-800/80 border border-slate-700/60 hover:border-slate-500/80 text-slate-200 rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
+        className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
       >
         {githubBusy ? (
-          <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+          <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
         ) : (
           <GithubIcon className="w-4 h-4 shrink-0 fill-current text-white" />
         )}
-        <span>GitHub</span>
+        <span className="text-white font-medium">GitHub</span>
       </button>
     </div>
   );

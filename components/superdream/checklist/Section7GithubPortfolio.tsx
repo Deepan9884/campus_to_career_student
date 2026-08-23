@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
@@ -12,8 +12,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ExternalLink,
-  Plus,
-  Minus,
   RefreshCw,
   FolderGit2,
   Check,
@@ -46,11 +44,12 @@ export function Section7GithubPortfolio() {
   const summary = summaries.find((s) => s.sectionId === 7) || summaries[6];
 
   // UI View Mode: 'table' (Exact image replica) vs 'cards' (Interactive Showcase)
-  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
 
   // GitHub Account Telemetry Sync state
-  const [githubInput, setGithubInput] = useState(user?.githubUsername || user?.github || "");
-  const [connectedUsername, setConnectedUsername] = useState(user?.githubUsername || user?.github || "");
+  const initialUsername = user?.githubUsername || user?.github || "Deepan9884";
+  const [githubInput, setGithubInput] = useState(initialUsername);
+  const [connectedUsername, setConnectedUsername] = useState(initialUsername);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [userProfileData, setUserProfileData] = useState<{
@@ -74,7 +73,7 @@ export function Section7GithubPortfolio() {
     return clean.replace(/[^a-zA-Z0-9-_]/g, "");
   };
 
-  // Real GitHub Public API Sync
+  // Real GitHub Public API Sync across all 7 metrics
   const handleSyncGithub = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const username = parseGithubUsername(githubInput);
@@ -87,17 +86,118 @@ export function Section7GithubPortfolio() {
     toast.loading(`Fetching live GitHub telemetry for @${username}...`, { id: "gh-sync" });
 
     try {
+      const headers: Record<string, string> = {
+        Accept: "application/vnd.github.cloak-preview+json, application/vnd.github.v3+json",
+      };
+
       // 1. Fetch User Profile
-      const userRes = await fetch(`https://api.github.com/users/${username}`);
+      const userRes = await fetch(`https://api.github.com/users/${username}`, { headers });
       if (!userRes.ok) {
         throw new Error(userRes.status === 404 ? "GitHub user not found" : "GitHub API limit or network error");
       }
       const userData = await userRes.json();
 
       // 2. Fetch Public Repositories (up to 100)
-      const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`);
+      const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers });
       const reposData = reposRes.ok ? await reposRes.json() : [];
 
+      // 3. Fetch Commits Count & Recent Repository Commits
+      let totalCommits = 0;
+      let commitBreakdown: { name: string; count: number; note?: string }[] = [];
+
+      try {
+        const commitsRes = await fetch(`https://api.github.com/search/commits?q=author:${username}`, { headers });
+        if (commitsRes.ok) {
+          const commitsData = await commitsRes.json();
+          totalCommits = Number(commitsData.total_count || 0);
+        }
+      } catch (e) {
+        console.warn("Commits search API error:", e);
+      }
+
+      // Query public events for recent push events and active repositories
+      try {
+        const eventsRes = await fetch(`https://api.github.com/users/${username}/events?per_page=100`, { headers });
+        if (eventsRes.ok) {
+          const eventsData = await eventsRes.json();
+          if (Array.isArray(eventsData)) {
+            const pushEvents = eventsData.filter((evt: any) => evt.type === "PushEvent");
+            const pushCommitsTotal = pushEvents.reduce((acc: number, evt: any) => acc + (evt.payload?.commits?.length || 1), 0);
+            totalCommits = Math.max(totalCommits, pushCommitsTotal);
+
+            const repoPushMap: Record<string, number> = {};
+            pushEvents.forEach((evt: any) => {
+              const repoName = evt.repo?.name?.split("/").slice(-1)[0] || evt.repo?.name || "Repository";
+              const count = evt.payload?.commits?.length || 1;
+              repoPushMap[repoName] = (repoPushMap[repoName] || 0) + count;
+            });
+
+            commitBreakdown = Object.entries(repoPushMap)
+              .slice(0, 4)
+              .map(([repoName, count]) => ({
+                name: repoName,
+                count,
+                note: `${count} tracked push commits`,
+              }));
+          }
+        }
+      } catch (e) {
+        console.warn("Events API error:", e);
+      }
+
+      // 4. Fetch Pull Requests from Search Issues
+      let totalPrs = 0;
+      let prBreakdown: { name: string; count: number; note?: string }[] = [];
+      try {
+        const prsRes = await fetch(`https://api.github.com/search/issues?q=type:pr+author:${username}`, { headers });
+        if (prsRes.ok) {
+          const prsData = await prsRes.json();
+          totalPrs = Number(prsData.total_count || 0);
+          if (Array.isArray(prsData.items)) {
+            prBreakdown = prsData.items.slice(0, 3).map((pr: any) => ({
+              name: pr.title,
+              count: 1,
+              note: `${pr.repository_url?.split("/").slice(-1)[0] || "Repo"} #${pr.number} (${pr.state})`,
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn("PRs search API error:", e);
+      }
+
+      // 5. Fetch External Open Source Contributions
+      let externalPrsCount = 0;
+      let osBreakdown: { name: string; count: number; note?: string }[] = [];
+      try {
+        const extPrsRes = await fetch(`https://api.github.com/search/issues?q=type:pr+author:${username}+-user:${username}`, { headers });
+        if (extPrsRes.ok) {
+          const extPrsData = await extPrsRes.json();
+          externalPrsCount = Number(extPrsData.total_count || 0);
+          if (Array.isArray(extPrsData.items)) {
+            osBreakdown = extPrsData.items.slice(0, 3).map((pr: any) => ({
+              name: pr.title,
+              count: 1,
+              note: `Upstream in ${pr.repository_url?.split("/").slice(-2).join("/") || "open source"}`,
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn("Open source search API error:", e);
+      }
+
+      const forkedRepos = Array.isArray(reposData) ? reposData.filter((r: any) => r.fork) : [];
+      const totalOpenSource = externalPrsCount + forkedRepos.length;
+      if (forkedRepos.length > 0 && osBreakdown.length < 3) {
+        forkedRepos.slice(0, 3 - osBreakdown.length).forEach((f: any) => {
+          osBreakdown.push({
+            name: f.name,
+            count: 1,
+            note: "Public Open Source Fork & Contribution",
+          });
+        });
+      }
+
+      // 6. Repositories, Stars & Languages
       const totalPublicRepos = userData.public_repos || reposData.length || 0;
       let totalStars = 0;
       const languageMap: Record<string, number> = {};
@@ -133,13 +233,50 @@ export function Section7GithubPortfolio() {
             }))
         : [];
 
-      // Update Section 7 Checklist items with real metrics
-      updateGithubMetric("gh-1", totalPublicRepos, totalPublicRepos >= 30, { breakdown: repoBreakdown });
-      updateGithubMetric("gh-5", totalStars, totalStars >= 75, { breakdown: topStarredRepos });
+      // 7. Technical Documentation (READMEs, Architecture Specs, Wiki, Pages)
+      const documentedRepos = Array.isArray(reposData)
+        ? reposData.filter((r: any) => r.description || r.has_wiki || r.has_pages || !r.fork)
+        : [];
+      const totalDocsCount = documentedRepos.length;
+      const docBreakdown = documentedRepos.slice(0, 4).map((r: any) => ({
+        name: r.name,
+        count: 1,
+        note: r.description || "Architecture README & Documentation",
+      }));
 
-      if (userData.blog) {
-        updateGithubMetric("gh-7", 1, true, { liveUrl: userData.blog });
-      }
+      // 8. Portfolio Website Detection
+      const portfolioRepo = Array.isArray(reposData)
+        ? reposData.find(
+            (r: any) =>
+              (r.homepage && r.homepage.startsWith("http")) ||
+              r.name.toLowerCase().includes("portfolio") ||
+              r.name.toLowerCase().includes("github.io") ||
+              r.name.toLowerCase() === "personal-website"
+          )
+        : null;
+
+      const portfolioUrl =
+        userData.blog && userData.blog.trim() !== ""
+          ? userData.blog
+          : portfolioRepo?.homepage || portfolioRepo?.html_url || "";
+
+      const hasPortfolio = Boolean(portfolioUrl && portfolioUrl.trim() !== "");
+
+      // Update ALL 7 Section 7 Checklist items with real telemetry metrics
+      updateGithubMetric("gh-1", totalPublicRepos, totalPublicRepos >= 30, { breakdown: repoBreakdown });
+      updateGithubMetric("gh-2", totalCommits, totalCommits >= 3000, { breakdown: commitBreakdown });
+      updateGithubMetric("gh-3", totalPrs, totalPrs >= 30, { breakdown: prBreakdown });
+      updateGithubMetric("gh-4", totalOpenSource, totalOpenSource >= 15, { breakdown: osBreakdown });
+      updateGithubMetric("gh-5", totalStars, totalStars >= 75, { breakdown: topStarredRepos });
+      updateGithubMetric("gh-6", totalDocsCount, totalDocsCount >= 60, { breakdown: docBreakdown });
+      updateGithubMetric("gh-7", hasPortfolio ? 1 : 0, hasPortfolio, {
+        liveUrl: portfolioUrl,
+        isCompleted: hasPortfolio,
+        currentDisplay: hasPortfolio ? "Live" : "Pending",
+        breakdown: hasPortfolio
+          ? [{ name: "Live Portfolio", count: 1, note: portfolioUrl }]
+          : [],
+      });
 
       setConnectedUsername(username);
       setUserProfileData({
@@ -152,9 +289,10 @@ export function Section7GithubPortfolio() {
       });
 
       setLastSynced(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-      toast.success(`GitHub Telemetry Synced! @${username} (${totalPublicRepos} public repos, ${totalStars} stars)`, {
-        id: "gh-sync",
-      });
+      toast.success(
+        `GitHub Telemetry Synced! @${username} (${totalPublicRepos} repos, ${totalCommits} commits, ${totalPrs} PRs, ${totalDocsCount} docs)`,
+        { id: "gh-sync" }
+      );
     } catch (err: any) {
       console.warn("GitHub API error:", err);
       toast.error(err.message || "Failed to fetch GitHub data. Please check username.", { id: "gh-sync" });
@@ -162,6 +300,14 @@ export function Section7GithubPortfolio() {
       setIsSyncing(false);
     }
   };
+
+  useEffect(() => {
+    const handle = parseGithubUsername(githubInput || connectedUsername);
+    const itemCommits = studentChecklist.section7GithubPortfolio.find((i) => i.id === "gh-2");
+    if (handle && (!itemCommits || itemCommits.current === 0)) {
+      handleSyncGithub();
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -208,16 +354,16 @@ export function Section7GithubPortfolio() {
               {connectedUsername ? (
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm sm:text-base font-bold text-[var(--foreground)] flex items-center gap-1.5 font-mono">
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--foreground)] flex items-center gap-1.5">
                       @{connectedUsername}
                     </h3>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--success)]/10 text-[var(--success)] border border-[var(--success)]/20 text-[10px] font-medium font-mono">
-                      <ShieldCheck className="w-3 h-3 text-[var(--success)]" /> Live Synced
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--success)]/10 text-[var(--success)] border border-[var(--success)]/20 text-[11px] font-semibold">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[var(--success)]" /> Live Synced
                     </span>
                   </div>
-                  <p className="text-xs text-[var(--muted-foreground)]">
+                  <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
                     {userProfileData?.name || "Connected Profile"} • {userProfileData?.publicRepos || 0} Repos • {userProfileData?.starsCount || 0} Stars • Synced:{" "}
-                    <span className="text-[var(--foreground)]/80 font-mono">{lastSynced || "Live"}</span>
+                    <span className="text-[var(--foreground)]/90 font-medium">{lastSynced || "Live"}</span>
                   </p>
                 </div>
               ) : (
@@ -287,7 +433,7 @@ export function Section7GithubPortfolio() {
               value={githubInput}
               onChange={(e) => setGithubInput(e.target.value)}
               placeholder="Enter GitHub username or URL (e.g. Deepan9884 or https://github.com/Deepan9884)"
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-transparent border border-white/10 text-xs text-[var(--foreground)] placeholder-slate-500 focus:outline-none focus:border-[var(--primary)]/40 font-mono"
+              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-transparent border border-white/10 text-xs text-[var(--foreground)] placeholder-slate-500 focus:outline-none focus:border-[var(--primary)]/40"
             />
           </div>
 
@@ -310,7 +456,7 @@ export function Section7GithubPortfolio() {
               <TableIcon className="w-4 h-4 text-[var(--primary)]" />
               7. GitHub Portfolio
             </h3>
-            <span className="text-xs text-[var(--muted-foreground)] font-mono">
+            <span className="text-xs text-[var(--muted-foreground)] font-medium">
               7 / 7 Target Deliverables Tracked
             </span>
           </div>
@@ -363,7 +509,7 @@ export function Section7GithubPortfolio() {
 
                       {/* 2. Target Column */}
                       <td className="py-3.5 px-4 sm:px-6 text-center">
-                        <span className="inline-block font-mono font-bold text-[var(--foreground)] bg-transparent border border-white/10 px-3 py-1 rounded-lg text-xs sm:text-sm">
+                        <span className="inline-block font-bold text-[var(--foreground)] bg-transparent border border-white/10 px-3 py-1 rounded-lg text-xs sm:text-sm">
                           {targetStr}
                         </span>
                       </td>
@@ -372,60 +518,28 @@ export function Section7GithubPortfolio() {
                       <td className="py-3.5 px-4 sm:px-6 text-center">
                         {item.id === "gh-7" || item.activity === "Portfolio Website" ? (
                           <div className="flex items-center justify-center">
-                            <button
-                              onClick={() =>
-                                updateGithubMetric(item.id, isCompleted ? 0 : 1, !isCompleted)
-                              }
+                            <span
                               className={cn(
-                                "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold border transition cursor-pointer",
+                                "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border",
                                 isCompleted
-                                  ? "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/25 hover:bg-emerald-500/20"
-                                  : "bg-[var(--warning)]/10 text-[var(--warning)] border-amber-500/25 hover:bg-amber-500/20"
+                                  ? "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/25"
+                                  : "bg-[var(--warning)]/10 text-[var(--warning)] border-amber-500/25"
                               )}
                             >
                               {isCompleted ? (
                                 <>
-                                  <CheckCircle2 className="w-3 h-3 text-[var(--success)]" /> Completed
+                                  <CheckCircle2 className="w-3 h-3 text-[var(--success)]" /> Synced / Live
                                 </>
                               ) : (
-                                "In Progress"
+                                "Pending Sync"
                               )}
-                            </button>
+                            </span>
                           </div>
                         ) : (
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              onClick={() =>
-                                updateGithubMetric(
-                                  item.id,
-                                  Math.max(0, item.current - (item.id === "gh-2" ? 100 : 1))
-                                )
-                              }
-                              className="p-1 rounded bg-white/8 hover:bg-white/10 text-[var(--foreground)]/80 border border-white/12 cursor-pointer transition"
-                              title="Decrease"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <input
-                              type="number"
-                              value={item.current}
-                              onChange={(e) =>
-                                updateGithubMetric(item.id, parseInt(e.target.value || "0", 10))
-                              }
-                              className="w-16 text-center font-mono font-bold text-[var(--foreground)] bg-transparent border border-white/10 rounded-lg py-1 text-xs sm:text-sm focus:outline-none focus:border-sky-500"
-                            />
-                            <button
-                              onClick={() =>
-                                updateGithubMetric(
-                                  item.id,
-                                  item.current + (item.id === "gh-2" ? 100 : 1)
-                                )
-                              }
-                              className="p-1 rounded bg-white/8 hover:bg-white/10 text-[var(--foreground)]/80 border border-white/12 cursor-pointer transition"
-                              title="Increase"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
+                          <div className="flex items-center justify-center">
+                            <span className="inline-block font-mono font-bold text-sm text-[var(--foreground)] bg-transparent border border-white/10 px-3.5 py-1 rounded-lg">
+                              {item.current}
+                            </span>
                           </div>
                         )}
                       </td>
@@ -434,11 +548,11 @@ export function Section7GithubPortfolio() {
                       <td className="py-3.5 px-4 sm:px-6 text-right">
                         <div className="flex items-center justify-end">
                           {isCompleted ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[var(--success)] font-medium bg-[var(--success)]/10 px-2.5 py-1 rounded-md border border-[var(--success)]/20">
+                            <span className="inline-flex items-center gap-1 text-[11px] text-[var(--success)] font-semibold bg-[var(--success)]/10 px-2.5 py-1 rounded-md border border-[var(--success)]/20">
                               <CheckCircle2 className="w-3 h-3" /> Target Met
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[var(--warning)] font-medium bg-[var(--warning)]/10 px-2.5 py-1 rounded-md border border-[var(--warning)]/20">
+                            <span className="inline-flex items-center gap-1 text-[11px] text-[var(--warning)] font-semibold bg-[var(--warning)]/10 px-2.5 py-1 rounded-md border border-[var(--warning)]/20">
                               <AlertCircle className="w-3 h-3" /> Pending
                             </span>
                           )}
@@ -503,7 +617,7 @@ export function Section7GithubPortfolio() {
                           <h4 className="text-xs sm:text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition">
                             {item.activity}
                           </h4>
-                          <span className="text-[10px] font-mono text-[var(--muted-foreground)]">
+                          <span className="text-[10px] text-[var(--muted-foreground)]">
                             Target: <strong className="text-[var(--foreground)] font-bold">{targetStr}</strong>
                           </span>
                         </div>
@@ -511,7 +625,7 @@ export function Section7GithubPortfolio() {
 
                       <span
                         className={cn(
-                          "text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border",
+                          "text-[10px] font-bold px-2.5 py-0.5 rounded-lg border",
                           isCompleted
                             ? "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/25"
                             : "bg-transparent text-[var(--muted-foreground)] border-white/10"
@@ -525,7 +639,7 @@ export function Section7GithubPortfolio() {
 
                     {/* Progress Bar */}
                     <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[10px] font-mono text-[var(--muted-foreground)]">
+                      <div className="flex items-center justify-between text-[10px] text-[var(--muted-foreground)] font-medium">
                         <span>Pacing: {percent}% Delivered</span>
                         <span>{isCompleted ? "✓ Target Met" : "In Progress"}</span>
                       </div>
@@ -549,7 +663,7 @@ export function Section7GithubPortfolio() {
                             className="flex items-center justify-between text-[11px] bg-transparent px-2.5 py-1 rounded-lg border border-white/8"
                           >
                             <span className="text-[var(--foreground)]/80 truncate max-w-[140px]">{sub.name}</span>
-                            <span className="font-mono text-xs font-bold text-[var(--primary)] shrink-0">
+                            <span className="text-xs font-bold text-[var(--primary)] shrink-0">
                               {sub.count}
                             </span>
                           </div>
@@ -558,53 +672,27 @@ export function Section7GithubPortfolio() {
                     )}
                   </div>
 
-                  {/* Actions & Interactive Controls */}
+                  {/* Actions & Telemetry Display */}
                   <div className="flex items-center justify-between pt-2.5 border-t border-white/10 text-xs">
-                    <span className="text-[11px] text-[var(--muted-foreground)] font-mono">
+                    <span className="text-[11px] text-[var(--muted-foreground)] font-medium">
                       {item.unit || "Metrics"}
                     </span>
 
-                    {/* Numeric Counter adjustment */}
                     {item.id !== "gh-7" && item.activity !== "Portfolio Website" ? (
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() =>
-                            updateGithubMetric(
-                              item.id,
-                              Math.max(0, item.current - (item.id === "gh-2" ? 100 : 1))
-                            )
-                          }
-                          className="p-1 rounded-lg bg-white/8 hover:bg-white/10 text-[var(--foreground)]/80 border border-white/12 transition cursor-pointer"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="font-mono text-xs font-bold text-[var(--foreground)] px-1.5">
-                          {item.current}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateGithubMetric(
-                              item.id,
-                              item.current + (item.id === "gh-2" ? 100 : 1)
-                            )
-                          }
-                          className="p-1 rounded-lg bg-white/8 hover:bg-white/10 text-[var(--foreground)]/80 border border-white/12 transition cursor-pointer"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
+                      <span className="font-mono text-xs font-bold text-[var(--foreground)] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">
+                        {item.current} Synced
+                      </span>
                     ) : (
-                      <button
-                        onClick={() => updateGithubMetric(item.id, isCompleted ? 0 : 1, !isCompleted)}
+                      <span
                         className={cn(
-                          "px-2.5 py-1 rounded-lg text-xs font-mono font-medium border transition cursor-pointer",
+                          "px-2.5 py-1 rounded-lg text-xs font-semibold border",
                           isCompleted
                             ? "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/30"
-                            : "bg-white/8 text-[var(--foreground)]/80 border-white/12"
+                            : "bg-white/8 text-[var(--muted-foreground)] border-white/12"
                         )}
                       >
-                        {isCompleted ? "✓ Completed" : "Mark Done"}
-                      </button>
+                        {isCompleted ? "✓ Synced" : "Pending Link"}
+                      </span>
                     )}
                   </div>
                 </div>

@@ -18,8 +18,7 @@ import {
   Mic,
   ChevronRight,
   ArrowRight,
-  Map,
-  Sparkles,
+  Bot,
 } from "lucide-react";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
@@ -80,7 +79,7 @@ function ImprovementItem({ imp, role }: { imp: string; role?: string }) {
           disabled={loading}
           className="self-end opacity-0 group-hover:opacity-100 transition text-[10px] uppercase font-bold tracking-wider text-[color:var(--color-primary)] hover:text-white bg-[color:var(--color-primary)]/10 hover:bg-[color:var(--color-primary)] disabled:opacity-50 px-3 py-1.5 rounded flex items-center gap-1.5 relative z-10"
         >
-          {loading ? <RefreshCw className="h-3 w-3 animate-spin" /> : <><Sparkles className="h-3 w-3 inline" /> Improve with AI</>}
+          {loading ? <RefreshCw className="h-3 w-3 animate-spin" /> : <><Bot className="h-3 w-3 inline" /> Improve with AI</>}
         </button>
       )}
     </motion.li>

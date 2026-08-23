@@ -135,8 +135,8 @@ export const FeatureDeck: React.FC<FeatureDeckProps> = ({ activeId, onSelectPane
             whileHover={{ x: 2 }}
             className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 border ${
               isActive
-                ? "bg-slate-800/80 border-indigo-500/50 shadow-lg shadow-indigo-500/10 text-white"
-                : "bg-slate-900/40 hover:bg-slate-800/40 border-white/5 text-slate-300"
+                ? "bg-indigo-50/90 dark:bg-slate-800/80 border-indigo-500/50 shadow-lg shadow-indigo-500/10 text-slate-900 dark:text-white"
+                : "bg-white/80 dark:bg-slate-900/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/40 border-slate-200/80 dark:border-white/5 text-slate-700 dark:text-slate-300"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -145,19 +145,19 @@ export const FeatureDeck: React.FC<FeatureDeckProps> = ({ activeId, onSelectPane
                   className={`p-2.5 rounded-xl flex items-center justify-center transition-all ${
                     isActive
                       ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                      : "bg-white/5 text-slate-400"
+                      : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                 </span>
 
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                     {panel.badge}
                   </span>
                   <h3
                     className={`text-sm font-semibold mt-0.5 leading-tight ${
-                      isActive ? "text-white" : "text-slate-200"
+                      isActive ? "text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"
                     }`}
                   >
                     {panel.title}
@@ -167,7 +167,7 @@ export const FeatureDeck: React.FC<FeatureDeckProps> = ({ activeId, onSelectPane
 
               <ChevronRight
                 className={`w-4 h-4 transition-transform duration-300 ${
-                  isActive ? "text-indigo-400 translate-x-0.5" : "text-slate-600"
+                  isActive ? "text-indigo-600 dark:text-indigo-400 translate-x-0.5" : "text-slate-400 dark:text-slate-600"
                 }`}
               />
             </div>
@@ -177,13 +177,13 @@ export const FeatureDeck: React.FC<FeatureDeckProps> = ({ activeId, onSelectPane
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 transition={{ duration: 0.2 }}
-                className="mt-3 pt-3 border-t border-white/10 text-xs text-slate-300 space-y-2"
+                className="mt-3 pt-3 border-t border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-slate-300 space-y-2"
               >
-                <p className="text-xs text-slate-300 font-medium">{panel.subtitle}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">{panel.subtitle}</p>
                 <div className="space-y-1.5 pt-1">
                   {panel.highlights.map((item, idx) => (
-                    <div key={idx} className="flex items-center space-x-2 text-[11px] text-slate-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <div key={idx} className="flex items-center space-x-2 text-[11px] text-slate-600 dark:text-slate-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                       <span>{item}</span>
                     </div>
                   ))}

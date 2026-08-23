@@ -61,6 +61,7 @@ export const StudyConstellation: React.FC = () => {
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
+      const isLight = document.documentElement.classList.contains("light");
 
       // Draw Connection Lines
       for (let i = 0; i < nodes.length; i++) {
@@ -70,12 +71,14 @@ export const StudyConstellation: React.FC = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < 150) {
-            const alpha = (1 - dist / 150) * 0.18;
+            const alpha = (1 - dist / 150) * (isLight ? 0.22 : 0.18);
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(74, 110, 148, ${alpha})`;
-            ctx.lineWidth = 0.8;
+            ctx.strokeStyle = isLight
+              ? `rgba(99, 102, 241, ${alpha})`
+              : `rgba(74, 110, 148, ${alpha})`;
+            ctx.lineWidth = isLight ? 1 : 0.8;
             ctx.stroke();
           }
         }
@@ -85,12 +88,14 @@ export const StudyConstellation: React.FC = () => {
         const mdy = nodes[i].y - mouseY;
         const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
         if (mDist < 160) {
-          const alpha = (1 - mDist / 160) * 0.3;
+          const alpha = (1 - mDist / 160) * (isLight ? 0.4 : 0.3);
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
           ctx.lineTo(mouseX, mouseY);
-          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = isLight
+            ? `rgba(79, 70, 229, ${alpha})`
+            : `rgba(99, 102, 241, ${alpha})`;
+          ctx.lineWidth = isLight ? 1.2 : 1;
           ctx.stroke();
         }
       }
@@ -107,9 +112,9 @@ export const StudyConstellation: React.FC = () => {
         // Draw node circle
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = node.color;
+        ctx.fillStyle = isLight ? (node.color === "#6366F1" ? "#4F46E5" : "#0284C7") : node.color;
         ctx.shadowColor = node.glowColor;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = isLight ? 4 : 8;
         ctx.fill();
         ctx.shadowBlur = 0;
       }
@@ -129,8 +134,7 @@ export const StudyConstellation: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 opacity-60"
-      style={{ mixBlendMode: "screen" }}
+      className="fixed inset-0 pointer-events-none z-0 opacity-50 dark:opacity-60 dark:mix-blend-screen"
     />
   );
 };
