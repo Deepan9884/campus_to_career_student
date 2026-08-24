@@ -43,6 +43,7 @@ import confetti from "canvas-confetti";
 import { useAuth } from "@/stores";
 import { useProctoringSession } from "@/hooks/useProctoringSession";
 import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
+import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { executeCode } from "@/lib/quiz-api";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -97,109 +98,7 @@ function handleCodeEditorKeyDown(
   currentVal: string,
   onUpdate: (val: string) => void
 ) {
-  const textarea = e.currentTarget;
-  const { selectionStart, selectionEnd } = textarea;
-
-  // 1. Tab & Shift+Tab: Indent / Unindent 4 spaces
-  if (e.key === "Tab") {
-    e.preventDefault();
-    if (e.shiftKey) {
-      const before = currentVal.slice(0, selectionStart);
-      const lineStart = before.lastIndexOf("\n") + 1;
-      const currentLine = currentVal.slice(lineStart);
-      if (currentLine.startsWith("    ")) {
-        const nextVal = currentVal.slice(0, lineStart) + currentLine.slice(4);
-        onUpdate(nextVal);
-        setTimeout(() => {
-          textarea.selectionStart = textarea.selectionEnd = Math.max(lineStart, selectionStart - 4);
-        }, 0);
-      }
-    } else {
-      const nextVal = currentVal.slice(0, selectionStart) + "    " + currentVal.slice(selectionEnd);
-      onUpdate(nextVal);
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = selectionStart + 4;
-      }, 0);
-    }
-    return;
-  }
-
-  // 2. Enter: Retain leading indentation
-  if (e.key === "Enter") {
-    e.preventDefault();
-    const before = currentVal.slice(0, selectionStart);
-    const lineStart = before.lastIndexOf("\n") + 1;
-    const currentLine = currentVal.slice(lineStart, selectionStart);
-    const leadingSpaces = currentLine.match(/^\s*/)?.[0] || "";
-    const extraIndent = /[:{[(]\s*$/.test(currentLine) ? "    " : "";
-    const indentToAdd = "\n" + leadingSpaces + extraIndent;
-
-    const nextVal = currentVal.slice(0, selectionStart) + indentToAdd + currentVal.slice(selectionEnd);
-    onUpdate(nextVal);
-    setTimeout(() => {
-      textarea.selectionStart = textarea.selectionEnd = selectionStart + indentToAdd.length;
-    }, 0);
-    return;
-  }
-
-  // 3. Auto-closing pairs
-  const PAIRS: Record<string, string> = {
-    "(": ")",
-    "[": "]",
-    "{": "}",
-    '"': '"',
-    "'": "'",
-    "`": "`",
-  };
-
-  if (PAIRS[e.key]) {
-    const closing = PAIRS[e.key];
-    if (selectionStart !== selectionEnd) {
-      e.preventDefault();
-      const selected = currentVal.slice(selectionStart, selectionEnd);
-      const nextVal = currentVal.slice(0, selectionStart) + e.key + selected + closing + currentVal.slice(selectionEnd);
-      onUpdate(nextVal);
-      setTimeout(() => {
-        textarea.selectionStart = selectionStart + 1;
-        textarea.selectionEnd = selectionEnd + 1;
-      }, 0);
-      return;
-    }
-
-    if (currentVal[selectionStart] === closing && e.key === closing) {
-      e.preventDefault();
-      textarea.selectionStart = textarea.selectionEnd = selectionStart + 1;
-      return;
-    }
-
-    e.preventDefault();
-    const nextVal = currentVal.slice(0, selectionStart) + e.key + closing + currentVal.slice(selectionEnd);
-    onUpdate(nextVal);
-    setTimeout(() => {
-      textarea.selectionStart = textarea.selectionEnd = selectionStart + 1;
-    }, 0);
-    return;
-  }
-
-  // 4. Backspace between empty pairs
-  if (e.key === "Backspace" && selectionStart === selectionEnd && selectionStart > 0) {
-    const charBefore = currentVal[selectionStart - 1];
-    const charAfter = currentVal[selectionStart];
-    if (
-      (charBefore === "(" && charAfter === ")") ||
-      (charBefore === "[" && charAfter === "]") ||
-      (charBefore === "{" && charAfter === "}") ||
-      (charBefore === '"' && charAfter === '"') ||
-      (charBefore === "'" && charAfter === "'")
-    ) {
-      e.preventDefault();
-      const nextVal = currentVal.slice(0, selectionStart - 1) + currentVal.slice(selectionStart + 1);
-      onUpdate(nextVal);
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = selectionStart - 1;
-      }, 0);
-    }
-  }
+  handleCodeTextareaKeyDown(e, currentVal, onUpdate, 4);
 }
 
 /**
