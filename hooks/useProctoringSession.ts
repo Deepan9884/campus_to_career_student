@@ -86,6 +86,17 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
     return true;
   }
 
+  // DevTools inspection hotkeys (ALWAYS strictly blocked even inside code editor)
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c" || e.key === "K" || e.key === "k")) {
+    return true;
+  }
+  if ((e.ctrlKey || e.metaKey) && (e.key === "U" || e.key === "u")) {
+    return true;
+  }
+  if (e.altKey && (e.metaKey || e.ctrlKey) && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) {
+    return true;
+  }
+
   if (BLOCKED_STANDALONE_KEYS.has(e.key) || BLOCKED_STANDALONE_KEYS.has(e.code)) return true;
   if (e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") return true;
   if (e.altKey || e.key === "Alt" || e.key === "AltGraph") return true;
