@@ -97,6 +97,11 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
     return true;
   }
 
+  // Prohibit any key bindings with Tab (e.g. Alt+Tab, Ctrl+Tab, Win+Tab). Standalone Tab is reserved only for code indentation.
+  if ((e.key === "Tab" || e.code === "Tab") && (e.altKey || e.ctrlKey || e.metaKey)) {
+    return true;
+  }
+
   if (BLOCKED_STANDALONE_KEYS.has(e.key) || BLOCKED_STANDALONE_KEYS.has(e.code)) return true;
   if (e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") return true;
   if (e.altKey || e.key === "Alt" || e.key === "AltGraph") return true;

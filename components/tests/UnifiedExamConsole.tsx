@@ -43,6 +43,7 @@ import {
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
+import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/stores";
 import { useProctoringSession } from "@/hooks/useProctoringSession";
@@ -414,83 +415,9 @@ function CodeEditorWithGutter({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const target = e.currentTarget;
-    const start = target.selectionStart;
-    const end = target.selectionEnd;
-
-    // 1. Tab Indentation: 2 spaces
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const newCode = code.substring(0, start) + "  " + code.substring(end);
-      onChange(newCode);
-      setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 2;
-        updateActiveLine(e);
-      }, 0);
-      return;
-    }
-
-    // 2. Auto-Indent on Enter
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const lineStart = code.lastIndexOf("\n", start - 1) + 1;
-      const currentLine = code.substring(lineStart, start);
-      const matchIndent = currentLine.match(/^\s*/);
-      let indent = matchIndent ? matchIndent[0] : "";
-
-      if (currentLine.trim().endsWith(":") || currentLine.trim().endsWith("{")) {
-        indent += "  ";
-      }
-
-      const newCode = code.substring(0, start) + "\n" + indent + code.substring(end);
-      onChange(newCode);
-      setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 1 + indent.length;
-        updateActiveLine(e);
-      }, 0);
-      return;
-    }
-
-    // 3. Auto-Closing Pairs
-    const PAIRS: Record<string, string> = {
-      "(": ")",
-      "[": "]",
-      "{": "}",
-      '"': '"',
-      "'": "'",
-      "`": "`",
-    };
-
-    if (PAIRS[e.key]) {
-      const closing = PAIRS[e.key];
-      if (start !== end) {
-        e.preventDefault();
-        const selected = code.substring(start, end);
-        const newCode = code.substring(0, start) + e.key + selected + closing + code.substring(end);
-        onChange(newCode);
-        setTimeout(() => {
-          target.selectionStart = start + 1;
-          target.selectionEnd = end + 1;
-          updateActiveLine(e);
-        }, 0);
-        return;
-      }
-
-      if (code[start] === closing && e.key === closing) {
-        e.preventDefault();
-        target.selectionStart = target.selectionEnd = start + 1;
-        updateActiveLine(e);
-        return;
-      }
-
-      e.preventDefault();
-      const newCode = code.substring(0, start) + e.key + closing + code.substring(end);
-      onChange(newCode);
-      setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 1;
-        updateActiveLine(e);
-      }, 0);
-      return;
+    const handled = handleCodeTextareaKeyDown(e, code, onChange, 2);
+    if (handled) {
+      setTimeout(() => updateActiveLine(e), 0);
     }
   };
 

@@ -28,6 +28,7 @@ import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { executeCode } from "@/lib/quiz-api";
+import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
 import { PROGRAMMING_LANGUAGES_CURRICULUM } from "@/lib/super-dream-languages-data";
 import {
   getPracticeProblemsForSkill,
@@ -285,19 +286,9 @@ export function PracticeCodingConsole({
     };
   }, [open]);
 
-  // Code Editor Tab key handler
+  // Code Editor Key handler (smart Tab, auto-closing brackets)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const target = e.currentTarget;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
-      const newVal = code.substring(0, start) + "    " + code.substring(end);
-      setCode(newVal);
-      setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 4;
-      }, 0);
-    }
+    handleCodeTextareaKeyDown(e, code, setCode, 4);
   };
 
   // Run Code online execution
