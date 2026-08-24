@@ -22,6 +22,7 @@ import {
   Code2,
   Sparkles,
   Star,
+  FileCode,
 } from "lucide-react";
 import { useAuth } from "@/stores";
 import { useSuperDream } from "@/stores/superDreamStore";
@@ -122,8 +123,22 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       },
     },
     {
+      id: "nav-online-tests",
+      title: "Proctored Online Coding Tests",
+      category: "superdream",
+      icon: FileCode,
+      badge: "Super Dream",
+      keywords: ["exam", "test", "tests", "assessment", "proctor", "proctored", "mcq", "coding", "scorecard", "results", "arena"],
+      action: () => {
+        enterSuperDreamMode(false);
+        setActiveTab("tests");
+        navigate({ to: "/super-dream" });
+        onClose();
+      },
+    },
+    {
       id: "nav-tests",
-      title: "Proctored Coding Tests & Assessment Arena",
+      title: "Super Dream Coding Tests Arena",
       category: "navigation",
       icon: Code2,
       badge: "Super Dream",

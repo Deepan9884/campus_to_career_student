@@ -62,7 +62,7 @@ export function SuperDreamTravelRoadmap() {
     setSubmissionNotes(task.submissionNote || "");
   };
 
-  const handleConfirmSubmission = (e: React.FormEvent) => {
+  const handleConfirmSubmission = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeTaskModal) return;
     if (!deliverableUrl.trim()) {
@@ -71,12 +71,15 @@ export function SuperDreamTravelRoadmap() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      submitMentorTask(activeTaskModal.id, deliverableUrl, submissionNotes);
-      setIsSubmitting(false);
+    try {
+      await Promise.resolve(submitMentorTask(activeTaskModal.id, deliverableUrl, submissionNotes));
       setActiveTaskModal(null);
       toast.success("Deliverable submitted to mentor for review!");
-    }, 450);
+    } catch {
+      toast.error("Failed to submit deliverable. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -100,20 +103,26 @@ export function SuperDreamTravelRoadmap() {
           {/* Mentor Profile Card */}
           <div className="flex items-center gap-3.5 bg-slate-900/80 p-3.5 rounded-2xl border border-indigo-500/30 shadow-lg shadow-indigo-950/40 shrink-0">
             <div className="relative">
-              <img
-                src={mentorInfo.avatar}
-                alt={mentorInfo.name}
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-400/60"
-              />
+              {mentorInfo.avatar ? (
+                <img
+                  src={mentorInfo.avatar}
+                  alt={mentorInfo.name || "Mentor"}
+                  className="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-400/60"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-indigo-500/20 grid place-items-center text-indigo-300 ring-2 ring-indigo-400/60 font-bold text-sm">
+                  {mentorInfo.name ? mentorInfo.name.charAt(0) : "M"}
+                </div>
+              )}
               <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <p className="text-xs font-bold text-white">{mentorInfo.name}</p>
+                <p className="text-xs font-bold text-white">{mentorInfo.name || "Faculty Mentor"}</p>
                 <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
               </div>
-              <p className="text-[11px] text-indigo-300/90 line-clamp-1">{mentorInfo.title.split("&")[0]}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">{mentorInfo.officeHours}</p>
+              <p className="text-[11px] text-indigo-300/90 line-clamp-1">{mentorInfo.title ? mentorInfo.title.split("&")[0] : "Super Dream Mentorship Board"}</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">{mentorInfo.officeHours || "Office Hours: By Appointment"}</p>
             </div>
           </div>
         </div>
@@ -209,7 +218,7 @@ export function SuperDreamTravelRoadmap() {
           <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 text-xs">
             <Compass className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-amber-300">Mentor Directive ({mentorInfo.name}):</span>{" "}
+              <span className="font-bold text-amber-300">Mentor Directive ({mentorInfo.name || "Faculty Mentor"}):</span>{" "}
               <span className="text-slate-200 italic">"{activeMilestone.mentorNotes}"</span>
             </div>
           </div>

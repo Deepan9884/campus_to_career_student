@@ -192,8 +192,8 @@ export function LanguageProgressDrawerModal({
             <div className="p-4 rounded-2xl bg-[#161c27] border border-zinc-800/80 space-y-2">
               <span className="text-xs text-zinc-400 font-medium block">Problems Solved</span>
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-zinc-100 font-mono">{problemsSolved}</span>
-                <span className="text-[10px] text-zinc-500 font-mono">Practice Console</span>
+                <span className="text-2xl font-bold text-zinc-100 tabular-nums">{problemsSolved}</span>
+                <span className="text-[10px] text-zinc-500 font-medium">Practice Console</span>
               </div>
             </div>
 
@@ -201,8 +201,8 @@ export function LanguageProgressDrawerModal({
             <div className="p-4 rounded-2xl bg-[#161c27] border border-zinc-800/80 space-y-2">
               <span className="text-xs text-zinc-400 font-medium block">Practice Hours</span>
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-zinc-100 font-mono">{displayHours}</span>
-                <span className="text-[10px] text-zinc-500 font-mono">Console Time</span>
+                <span className="text-2xl font-bold text-zinc-100 tabular-nums">{displayHours}</span>
+                <span className="text-[10px] text-zinc-500 font-medium">Console Time</span>
               </div>
             </div>
 
@@ -210,7 +210,7 @@ export function LanguageProgressDrawerModal({
             <div className="p-4 rounded-2xl bg-[#161c27] border border-zinc-800/80 space-y-2">
               <span className="text-xs text-zinc-400 font-medium block">Proctored Score</span>
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-indigo-400 font-mono">
+                <span className="text-2xl font-bold text-indigo-400 tabular-nums">
                   {bestScore > 0 ? `${bestScore}%` : "Not Taken"}
                 </span>
                 {bestScore >= 70 && (

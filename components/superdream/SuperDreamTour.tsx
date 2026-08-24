@@ -66,7 +66,7 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     tab: "travel-roadmap",
     badge: "Module 1",
     title: "Mentor Travel Roadmap",
-    subtitle: "Phased engineering trajectory directed by Dr. Rajesh Kumar",
+    subtitle: "Phased engineering trajectory directed by your Faculty Mentor",
     icon: Compass,
     iconColor: "text-cyan-400",
     accentGradient: "from-cyan-500/20 via-indigo-500/20 to-transparent",

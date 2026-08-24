@@ -367,7 +367,7 @@ export function Section5AiDataScience() {
                     {items.length === 0 ? (
                       <div className="p-2.5 rounded-xl panel-empty text-xs text-[var(--muted-foreground)] text-center flex items-center justify-center gap-1.5 transition">
                         <Plus className="w-3.5 h-3.5 text-[var(--primary)]" />
-                        <span>Attach Model &amp; Repo</span>
+                        <span>Attach Model & Repo</span>
                       </div>
                     ) : (
                       <div className="space-y-1.5">
@@ -444,7 +444,7 @@ export function Section5AiDataScience() {
                   <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1.5 mt-0.5">
                     <span>Target Quota: {activeCategoryModal.targetCount} Deliverables</span>
                     <span>•</span>
-                    <span>Attached Code, Loss Curves, Live Demos &amp; Videos</span>
+                    <span>Attached Code, Loss Curves, Live Demos & Videos</span>
                   </p>
                 </div>
               </div>
@@ -511,7 +511,7 @@ export function Section5AiDataScience() {
 
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-[var(--foreground)] block">
-                        Framework &amp; Model Type
+                        Framework & Model Type
                       </label>
                       <input
                         type="text"
@@ -882,7 +882,7 @@ export function Section5AiDataScience() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-white/[0.06] text-xs">
                         <div className="space-y-1">
                           <label className="text-xs font-medium text-[var(--muted-foreground)] block">
-                            Framework &amp; Tech Stack:
+                            Framework & Tech Stack:
                           </label>
                           <input
                             type="text"

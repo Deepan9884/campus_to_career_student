@@ -106,15 +106,15 @@ export function SuperDreamCodingSection() {
   useEffect(() => {
     // Auto sync from classic section if available
     syncWithClassicCodingProfiles();
-  }, []);
+  }, [syncWithClassicCodingProfiles]);
 
   useEffect(() => {
-    setProfileUrls((prev) => ({
-      leetcode: prev.leetcode || codingPlatformsStats?.leetcode?.profileUrl || codingPlatformsStats?.leetcode?.username || "",
-      codechef: prev.codechef || codingPlatformsStats?.codechef?.profileUrl || codingPlatformsStats?.codechef?.username || "",
-      hackerrank: prev.hackerrank || codingPlatformsStats?.hackerrank?.profileUrl || codingPlatformsStats?.hackerrank?.username || "",
-      gfg: prev.gfg || codingPlatformsStats?.gfg?.profileUrl || codingPlatformsStats?.gfg?.username || "",
-    }));
+    setProfileUrls({
+      leetcode: codingPlatformsStats?.leetcode?.profileUrl || codingPlatformsStats?.leetcode?.username || "",
+      codechef: codingPlatformsStats?.codechef?.profileUrl || codingPlatformsStats?.codechef?.username || "",
+      hackerrank: codingPlatformsStats?.hackerrank?.profileUrl || codingPlatformsStats?.hackerrank?.username || "",
+      gfg: codingPlatformsStats?.gfg?.profileUrl || codingPlatformsStats?.gfg?.username || "",
+    });
   }, [codingPlatformsStats]);
 
   const aggregate = calculateAggregateCodingTelemetry(codingPlatformsStats);
@@ -135,7 +135,7 @@ export function SuperDreamCodingSection() {
         description: "Profile connected and stats updated in placement readiness tracker.",
       });
     } catch {
-      toast.success(`${PLATFORMS.find((p) => p.key === platform)?.label} profile saved.`);
+      toast.error(`Could not fetch live telemetry for ${PLATFORMS.find((p) => p.key === platform)?.label}. Profile URL saved locally.`);
     } finally {
       setLoading((prev) => ({ ...prev, [platform]: false }));
     }
@@ -155,7 +155,7 @@ export function SuperDreamCodingSection() {
       toast.success("Coding telemetry synchronized across all platforms!");
     } catch {
       syncCodingPlatformTelemetry();
-      toast.success("Telemetry updated.");
+      toast.error("Some platforms failed to sync live metrics. Saved cached data.");
     } finally {
       setRefreshing(false);
     }
@@ -192,19 +192,19 @@ export function SuperDreamCodingSection() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <GlassCard className="p-4 border-sky-500/30 bg-slate-900/70">
           <p className="text-xs text-slate-400">Total Solved</p>
-          <p className="text-3xl font-black text-sky-300 font-mono mt-1">{aggregate.totalSolved}</p>
+          <p className="text-3xl font-extrabold text-sky-300 tabular-nums mt-1">{aggregate.totalSolved}</p>
           <p className="text-[11px] text-sky-400/90 mt-1 font-medium">Across all platforms</p>
         </GlassCard>
 
         <GlassCard className="p-4 border-emerald-500/30 bg-slate-900/70">
           <p className="text-xs text-slate-400">Easy Solved</p>
-          <p className="text-3xl font-black text-emerald-400 font-mono mt-1">{aggregate.totalEasy}</p>
+          <p className="text-3xl font-extrabold text-emerald-400 tabular-nums mt-1">{aggregate.totalEasy}</p>
           <p className="text-[11px] text-emerald-400/90 mt-1 font-medium">Foundational</p>
         </GlassCard>
 
         <GlassCard className="p-4 border-amber-500/30 bg-slate-900/70">
           <p className="text-xs text-slate-400">Medium Solved</p>
-          <p className="text-3xl font-black text-amber-400 font-mono mt-1">{aggregate.totalMedium}</p>
+          <p className="text-3xl font-extrabold text-amber-400 tabular-nums mt-1">{aggregate.totalMedium}</p>
           <p className="text-[11px] text-amber-400/90 mt-1 font-medium">Core Interview Tier</p>
         </GlassCard>
 
@@ -213,7 +213,7 @@ export function SuperDreamCodingSection() {
             <p className="text-xs text-slate-400">Hard Solved (FAANG)</p>
             <Flame className="w-4 h-4 text-rose-400" />
           </div>
-          <p className="text-3xl font-black text-rose-400 font-mono mt-1">{aggregate.totalHard}</p>
+          <p className="text-3xl font-extrabold text-rose-400 tabular-nums mt-1">{aggregate.totalHard}</p>
           <p className="text-[11px] text-rose-400/90 mt-1 font-medium">Top 2.5% Bracket</p>
         </GlassCard>
       </div>

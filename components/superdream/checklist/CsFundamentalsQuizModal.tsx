@@ -766,7 +766,7 @@ export function CsFundamentalsQuizModal({
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
                   <span>Question Palette</span>
-                  <span className="text-[10px] font-mono text-cyan-400">15 Qs</span>
+                  <span className="text-[10px] font-semibold text-cyan-400 tabular-nums">15 Qs</span>
                 </h4>
 
                 {/* Question Grid 1 to 15 */}
@@ -781,7 +781,7 @@ export function CsFundamentalsQuizModal({
                         key={item.q.id}
                         onClick={() => setCurrentIdx(idx)}
                         className={cn(
-                          "h-10 rounded-xl font-mono text-xs font-bold transition flex items-center justify-center relative cursor-pointer",
+                          "h-10 rounded-xl text-xs font-bold transition flex items-center justify-center relative cursor-pointer tabular-nums",
                           isCurrent
                             ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-950 z-10"
                             : "",

@@ -23,13 +23,24 @@ export function StudentProfileHeader({ onOpenPrintModal }: StudentProfileHeaderP
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: profile.name && profile.name !== "Student" ? profile.name : user?.name || profile.name || "Student",
-    registerNumber: profile.registerNumber || "",
-    department: profile.department || "Computer Science & Engineering",
-    batch: profile.batch || "2023 - 2027",
-    facultyMentor: profile.facultyMentor || "",
-    currentSemester: profile.currentSemester || "Semester 6",
+    name: profile.name && profile.name !== "Student" && profile.name !== "Student Candidate" ? profile.name : user?.name || profile.name || "",
+    registerNumber: profile.registerNumber || user?.profile?.registerNumber || "",
+    department: profile.department || user?.profile?.department || "",
+    batch: profile.batch || user?.profile?.batch || "",
+    facultyMentor: profile.facultyMentor || user?.profile?.facultyMentor || "",
+    currentSemester: profile.currentSemester || user?.profile?.currentSemester || "",
   });
+
+  React.useEffect(() => {
+    setFormData({
+      name: profile.name && profile.name !== "Student" && profile.name !== "Student Candidate" ? profile.name : user?.name || profile.name || "",
+      registerNumber: profile.registerNumber || user?.profile?.registerNumber || "",
+      department: profile.department || user?.profile?.department || "",
+      batch: profile.batch || user?.profile?.batch || "",
+      facultyMentor: profile.facultyMentor || user?.profile?.facultyMentor || "",
+      currentSemester: profile.currentSemester || user?.profile?.currentSemester || "",
+    });
+  }, [profile, user]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +76,7 @@ export function StudentProfileHeader({ onOpenPrintModal }: StudentProfileHeaderP
               </span>
             </div>
             <p className="text-xs text-[var(--muted-foreground)] font-medium mt-0.5">
-              Elite Placement Readiness Checklist — Target: ₹20 LPA &amp; Above Product &amp; Technology Roles
+              Elite Placement Readiness Checklist — Target: ₹20 LPA & Above Product & Technology Roles
             </p>
           </div>
         </div>
@@ -136,12 +147,12 @@ export function StudentProfileHeader({ onOpenPrintModal }: StudentProfileHeaderP
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
             {[
-              { label: "Student Name", value: profile.name && profile.name !== "Student" ? profile.name : user?.name || "Deepan D", color: "var(--foreground)" },
-              { label: "Register Number", value: profile.registerNumber || "(Click Edit to add)", color: "var(--primary)" },
-              { label: "Department", value: profile.department || "Computer Science & Engineering", color: "var(--foreground)" },
-              { label: "Batch", value: profile.batch || "2023 - 2027", color: "var(--foreground)" },
-              { label: "Faculty Mentor", value: profile.facultyMentor || "(Unassigned)", color: "#FDE68A" },
-              { label: "Semester", value: profile.currentSemester || "Semester 6", color: "var(--foreground)" },
+              { label: "Student Name", value: profile.name && profile.name !== "Student" && profile.name !== "Student Candidate" ? profile.name : user?.name || profile.name || "Student", color: "var(--foreground)" },
+              { label: "Register Number", value: profile.registerNumber || user?.profile?.registerNumber || "(Click Edit to add)", color: "var(--primary)" },
+              { label: "Department", value: profile.department || user?.profile?.department || "(Click Edit to add)", color: "var(--foreground)" },
+              { label: "Batch", value: profile.batch || user?.profile?.batch || "(Click Edit to add)", color: "var(--foreground)" },
+              { label: "Faculty Mentor", value: profile.facultyMentor || user?.profile?.facultyMentor || "(Unassigned)", color: "#FDE68A" },
+              { label: "Semester", value: profile.currentSemester || user?.profile?.currentSemester || "(Click Edit to add)", color: "var(--foreground)" },
             ].map(({ label, value, color }) => (
               <div
                 key={label}

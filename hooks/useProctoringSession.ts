@@ -15,6 +15,10 @@ export interface ProctoringSessionOptions {
   enabled?: boolean;
   isStarted?: boolean;
   videoElement?: HTMLVideoElement | null;
+  webcamRequired?: boolean;
+  fullscreenEnforced?: boolean;
+  tabSwitchLimit?: number;
+  copyPasteDisabled?: boolean;
 }
 
 export type ProctoringAiStatus =
@@ -48,6 +52,7 @@ export interface ProctoringSessionState {
   detectedObjects: string[];
   violationsHistory: ViolationRecord[];
   retryCamera: () => void;
+  resetSession: () => void;
   // Eye Gaze & Face Framing Tracking & Warnings
   gazeDirection: GazeDirection;
   isLookingAway: boolean;
@@ -67,8 +72,9 @@ const BLOCKED_STANDALONE_KEYS = new Set([
 
 // Whitelisted text editing keystrokes when focused inside code/text editor
 const ALLOWED_EDITOR_CTRL_KEYS = new Set(["z", "Z", "y", "Y", "a", "A", "f", "F", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete"]);
+const ALLOWED_COPY_PASTE_KEYS = new Set(["c", "C", "v", "V", "x", "X", "Insert"]);
 
-function isBlockedShortcut(e: KeyboardEvent): boolean {
+function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
   const targetTag = (e.target as HTMLElement)?.tagName?.toUpperCase();
   const isInsideEditor = targetTag === "TEXTAREA" || targetTag === "INPUT";
 
@@ -85,7 +91,11 @@ function isBlockedShortcut(e: KeyboardEvent): boolean {
   if (e.altKey || e.key === "Alt" || e.key === "AltGraph") return true;
 
   // Inside editor, allow standard typing shortcuts like Undo/Redo/Select All
-  if (isInsideEditor && e.ctrlKey && ALLOWED_EDITOR_CTRL_KEYS.has(e.key)) {
+  if (isInsideEditor && e.ctrlKey && (ALLOWED_EDITOR_CTRL_KEYS.has(e.key) || (allowCopyPaste && ALLOWED_COPY_PASTE_KEYS.has(e.key)))) {
+    return false;
+  }
+
+  if (allowCopyPaste && (e.ctrlKey || e.metaKey) && ALLOWED_COPY_PASTE_KEYS.has(e.key)) {
     return false;
   }
 
@@ -97,7 +107,19 @@ function isBlockedShortcut(e: KeyboardEvent): boolean {
 const AI_INFERENCE_INTERVAL_MS = 600;
 
 export function useProctoringSession(options: ProctoringSessionOptions): ProctoringSessionState {
-  const { moduleType, moduleId, onBlocked, onViolation, enabled = true, isStarted = false, videoElement } = options;
+  const {
+    moduleType,
+    moduleId,
+    onBlocked,
+    onViolation,
+    enabled = true,
+    isStarted = false,
+    videoElement,
+    webcamRequired = true,
+    fullscreenEnforced = true,
+    tabSwitchLimit = 3,
+    copyPasteDisabled = false,
+  } = options;
 
   const [cameraAttempt, setCameraAttempt] = useState(0);
 
@@ -110,26 +132,52 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       if (!document.fullscreenElement && typeof document !== "undefined") {
         await document.documentElement.requestFullscreen();
       }
+      clearFullscreenCountdown();
+      setState((prev) => ({ ...prev, isFullscreen: true, fullscreenCountdown: null }));
     } catch (err) {
       console.warn("[Proctoring] Failed to re-enter fullscreen:", err);
       throw err;
     }
   }, []);
 
+  const resetSession = useCallback(() => {
+    isBlockedRef.current = false;
+    if (fullscreenIntervalRef.current) {
+      clearInterval(fullscreenIntervalRef.current);
+      fullscreenIntervalRef.current = null;
+    }
+    fullscreenCountdownRef.current = null;
+    phoneStreak.current = 0;
+    noPersonStreak.current = 0;
+    multiPersonStreak.current = 0;
+    lookAwayStreak.current = 0;
+    setState((prev) => ({
+      ...prev,
+      violationCount: 0,
+      isBlocked: false,
+      fullscreenCountdown: null,
+      gazeWarningsCount: 0,
+      gazeWarningsInCurrentStrike: 0,
+      lastGazeWarningMessage: null,
+      violationsHistory: [],
+    }));
+  }, []);
+
   const [state, setState] = useState<ProctoringSessionState>({
     violationCount: 0,
     isBlocked: false,
-    cameraReady: false,
+    cameraReady: !webcamRequired,
     cameraError: null,
     isFullscreen: false,
     fullscreenCountdown: null,
     reEnterFullscreen,
     mediaStream: null,
     aiModelReady: false,
-    aiStatus: "initializing",
+    aiStatus: webcamRequired ? "initializing" : "active",
     detectedObjects: [],
     violationsHistory: [],
     retryCamera,
+    resetSession,
     gazeDirection: "center",
     isLookingAway: false,
     isFullFace: true,
@@ -194,8 +242,8 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
       // Immediately increment local count & calculate block
       setState((prev) => {
-        const nextCount = forceBlock ? 3 : Math.min(3, prev.violationCount + 1);
-        const shouldBlock = forceBlock || nextCount >= 3;
+        const nextCount = forceBlock ? tabSwitchLimit : Math.min(tabSwitchLimit, prev.violationCount + 1);
+        const shouldBlock = forceBlock || nextCount >= tabSwitchLimit;
         const timeStr = new Date().toLocaleTimeString();
 
         if (shouldBlock) {
@@ -226,7 +274,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         console.warn("[Proctoring Sync] Remote violation log error, local strike recorded:", err);
       });
     },
-    [moduleType, moduleId]
+    [moduleType, moduleId, tabSwitchLimit]
   );
 
   const clearFullscreenCountdown = useCallback(() => {
@@ -320,28 +368,49 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     function handleVisibility() {
       if (document.hidden && isStartedRef.current && !isBlockedRef.current) {
         sendViolation("tab_switch");
+        if (fullscreenCountdownRef.current === null) {
+          startFullscreenCountdown();
+        }
+        setState((prev) => ({ ...prev, isFullscreen: false }));
+      } else if (!document.hidden && document.fullscreenElement) {
+        clearFullscreenCountdown();
+        setState((prev) => ({ ...prev, isFullscreen: true }));
       }
     }
 
     function handleWindowBlur() {
       if (isStartedRef.current && !isBlockedRef.current) {
         sendViolation("tab_switch");
+        if (fullscreenCountdownRef.current === null) {
+          startFullscreenCountdown();
+        }
+        setState((prev) => ({ ...prev, isFullscreen: false }));
+      }
+    }
+
+    function handleWindowFocus() {
+      if (document.fullscreenElement) {
+        clearFullscreenCountdown();
+        setState((prev) => ({ ...prev, isFullscreen: true }));
       }
     }
 
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focus", handleWindowFocus);
     };
-  }, [enabled, sendViolation]);
+  }, [enabled, sendViolation, startFullscreenCountdown, clearFullscreenCountdown]);
 
   // ── 3. Strict Keyboard Lockdown, Screenshot Detection & Anti-Copy ─────────
   useEffect(() => {
     if (!enabled) return;
 
     async function wipeClipboard() {
+      if (!copyPasteDisabled) return;
       try {
         if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText("");
@@ -349,12 +418,12 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       } catch {}
     }
 
-    if (isStarted) {
+    if (isStarted && copyPasteDisabled) {
       wipeClipboard();
     }
 
     function handleWindowFocus() {
-      if (isStartedRef.current && !isBlockedRef.current) {
+      if (isStartedRef.current && !isBlockedRef.current && copyPasteDisabled) {
         wipeClipboard();
       }
     }
@@ -386,23 +455,32 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         (e.ctrlKey || e.metaKey) &&
         (e.key === "c" || e.key === "C" || e.key === "v" || e.key === "V" || e.key === "x" || e.key === "X" || e.key === "Insert");
 
-      if (isCopyCombo || isBlockedShortcut(e)) {
+      // If copy-paste avoidance is NOT selected by admin, allow standard copy/paste/cut/undo keys!
+      if (!copyPasteDisabled && isCopyCombo) {
+        return; // Allow!
+      }
+
+      if (copyPasteDisabled && isCopyCombo) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
+        wipeClipboard();
+        try {
+          window.getSelection()?.removeAllRanges();
+        } catch {}
+        playClipboardAlertTone();
+        toast.error("Clipboard Sanitized: Copying and pasting is prohibited during the exam. All clipboard data has been erased.", {
+          id: `proctor-copy-${Date.now()}`,
+          duration: 4000,
+        });
+        sendViolation("keyboard_shortcut");
+        return;
+      }
 
-        if (isCopyCombo) {
-          wipeClipboard();
-          try {
-            window.getSelection()?.removeAllRanges();
-          } catch {}
-          playClipboardAlertTone();
-          toast.error("Clipboard Sanitized: Copying and pasting is prohibited during the exam. All clipboard data has been erased.", {
-            id: `proctor-copy-${Date.now()}`,
-            duration: 4000,
-          });
-        }
-
+      if (isBlockedShortcut(e, !copyPasteDisabled)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         sendViolation("keyboard_shortcut");
       }
     }
@@ -420,7 +498,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         return;
       }
 
-      if (isBlockedShortcut(e)) {
+      if (isBlockedShortcut(e, !copyPasteDisabled)) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
@@ -428,7 +506,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     }
 
     function handleClipboard(e: Event) {
-      if (!isStartedRef.current) return;
+      if (!isStartedRef.current || !copyPasteDisabled) return;
       e.preventDefault();
       e.stopPropagation();
 
@@ -455,23 +533,27 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     }
 
     function handleContextMenu(e: MouseEvent) {
-      if (isStartedRef.current) {
+      if (isStartedRef.current && copyPasteDisabled) {
         e.preventDefault();
         e.stopPropagation();
       }
     }
 
-    window.addEventListener("focus", handleWindowFocus);
+    if (copyPasteDisabled) {
+      window.addEventListener("focus", handleWindowFocus);
+    }
     window.addEventListener("keydown", handleKeyDown, { capture: true });
     window.addEventListener("keyup", handleKeyUp, { capture: true });
     document.addEventListener("keydown", handleKeyDown, { capture: true });
     document.addEventListener("keyup", handleKeyUp, { capture: true });
-    window.addEventListener("contextmenu", handleContextMenu, { capture: true });
-    document.addEventListener("contextmenu", handleContextMenu, { capture: true });
-    document.addEventListener("copy", handleClipboard, { capture: true });
-    document.addEventListener("cut", handleClipboard, { capture: true });
-    document.addEventListener("paste", handleClipboard, { capture: true });
-    document.addEventListener("dragstart", (e) => e.preventDefault(), { capture: true });
+    if (copyPasteDisabled) {
+      window.addEventListener("contextmenu", handleContextMenu, { capture: true });
+      document.addEventListener("contextmenu", handleContextMenu, { capture: true });
+      document.addEventListener("copy", handleClipboard, { capture: true });
+      document.addEventListener("cut", handleClipboard, { capture: true });
+      document.addEventListener("paste", handleClipboard, { capture: true });
+      document.addEventListener("dragstart", (e) => e.preventDefault(), { capture: true });
+    }
 
     return () => {
       window.removeEventListener("focus", handleWindowFocus);
@@ -485,12 +567,20 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       document.removeEventListener("cut", handleClipboard, { capture: true });
       document.removeEventListener("paste", handleClipboard, { capture: true });
     };
-  }, [enabled, isStarted, sendViolation]);
+  }, [enabled, isStarted, copyPasteDisabled, sendViolation]);
 
   // ── 4. Live Camera & Dedicated Self-Contained AI Pipeline ─────────────────
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !webcamRequired) {
       stopAllCameraStreams();
+      if (!webcamRequired) {
+        setState((prev) => ({
+          ...prev,
+          cameraReady: true,
+          cameraError: null,
+          aiStatus: "active",
+        }));
+      }
       return;
     }
 

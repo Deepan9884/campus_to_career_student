@@ -25,6 +25,11 @@ export interface User {
     githubUsername?: string;
     bio?: string;
     location?: string;
+    registerNumber?: string;
+    department?: string;
+    batch?: string;
+    currentSemester?: string;
+    facultyMentor?: string;
   };
   preferences?: {
     theme: "dark" | "light" | "system";

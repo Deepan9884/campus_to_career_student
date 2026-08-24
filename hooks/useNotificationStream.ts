@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { getAccessToken } from "@/lib/api";
+import { getAccessToken, tryRefresh } from "@/lib/api";
 
 export interface Notification {
   _id: string;
@@ -54,8 +54,20 @@ export function useNotificationSSE({
   }, []);
 
   const connectSSE = useCallback(async () => {
-    const token = getAccessToken();
-    if (!token) return;
+    // Ensure we have a valid access token before attempting the ticket fetch.
+    // If the in-memory token is missing (e.g. page reload) try a silent refresh first.
+    let token = getAccessToken();
+    if (!token) {
+      try {
+        await tryRefresh();
+        token = getAccessToken();
+      } catch {
+        // Refresh failed — user is not authenticated; stop the reconnect loop.
+        reconnectAttemptRef.current = 0;
+        return;
+      }
+      if (!token) return;
+    }
 
     closeEventSource();
 
@@ -65,14 +77,42 @@ export function useNotificationSSE({
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (ticketRes.ok) {
+
+      if (ticketRes.status === 401) {
+        // Access token was expired — attempt a single silent refresh and retry.
+        try {
+          await tryRefresh();
+          const freshToken = getAccessToken();
+          if (!freshToken) return;
+          token = freshToken;
+          const retryRes = await fetch(`${BASE_URL}/notifications/ticket`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (retryRes.ok) {
+            const retryJson = await retryRes.json();
+            if (retryJson.data?.ticket) {
+              streamParam = retryJson.data.ticket;
+            } else {
+              streamParam = token;
+            }
+          } else {
+            // Still failing after refresh — stop reconnect loop; session truly invalid.
+            reconnectAttemptRef.current = 0;
+            return;
+          }
+        } catch {
+          reconnectAttemptRef.current = 0;
+          return;
+        }
+      } else if (ticketRes.ok) {
         const ticketJson = await ticketRes.json();
         if (ticketJson.data?.ticket) {
           streamParam = ticketJson.data.ticket;
         }
       }
     } catch {
-      // fallback to token if ticket endpoint is unavailable
+      // Network error — fall back to access token; SSE will reconnect normally.
     }
 
     const es = new EventSource(
@@ -89,9 +129,24 @@ export function useNotificationSSE({
       }
     });
 
-    es.onerror = () => {
+    es.onerror = async () => {
       es.close();
       esInstance = null;
+
+      // Before scheduling a reconnect, attempt a token refresh so we don't
+      // hammer the server with repeated 401s if the access token expired.
+      try {
+        await tryRefresh();
+      } catch {
+        // Refresh failed — user session is over; stop reconnect loop.
+        reconnectAttemptRef.current = 0;
+        return;
+      }
+
+      if (!getAccessToken()) {
+        reconnectAttemptRef.current = 0;
+        return;
+      }
 
       const attempt = reconnectAttemptRef.current;
       const delay = Math.min(1000 * 2 ** attempt, 30000);

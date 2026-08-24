@@ -92,7 +92,7 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)] tracking-tight flex items-center gap-2">
-                Atmospheric Lighting &amp; Stars Studio
+                Atmospheric Lighting & Stars Studio
               </h3>
               <p className="text-xs text-[var(--muted-foreground)]">
                 Customize ambient glow orbs, color themes, and interactive starry background.
@@ -341,7 +341,7 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
                   <div>
                     <h5 className="text-xs font-bold text-[var(--foreground)]">Cursor Constellations</h5>
                     <p className="text-[10px] text-[var(--muted-foreground)] mt-0.5">
-                      Connects stars &amp; adds magnetic gravity around pointer.
+                      Connects stars & adds magnetic gravity around pointer.
                     </p>
                   </div>
                 </div>
@@ -510,7 +510,7 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
             onClick={onClose}
             className="px-5 py-2 rounded-full btn-gradient btn-gradient-hover text-white text-xs font-semibold transition shadow-md active:scale-95 cursor-pointer"
           >
-            Apply &amp; Done
+            Apply & Done
           </button>
         </div>
       </div>

@@ -47,7 +47,7 @@ export function Section7GithubPortfolio() {
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
 
   // GitHub Account Telemetry Sync state
-  const initialUsername = user?.githubUsername || user?.github || "Deepan9884";
+  const initialUsername = user?.githubUsername || user?.github || "";
   const [githubInput, setGithubInput] = useState(initialUsername);
   const [connectedUsername, setConnectedUsername] = useState(initialUsername);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -432,7 +432,7 @@ export function Section7GithubPortfolio() {
               type="text"
               value={githubInput}
               onChange={(e) => setGithubInput(e.target.value)}
-              placeholder="Enter GitHub username or URL (e.g. Deepan9884 or https://github.com/Deepan9884)"
+              placeholder="Enter GitHub username or URL (e.g. yourusername or https://github.com/yourusername)"
               className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-transparent border border-white/10 text-xs text-[var(--foreground)] placeholder-slate-500 focus:outline-none focus:border-[var(--primary)]/40"
             />
           </div>

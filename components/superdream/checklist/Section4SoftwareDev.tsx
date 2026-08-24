@@ -391,7 +391,7 @@ export function Section4SoftwareDev() {
                       {items.length === 0 ? (
                         <div className="p-2.5 rounded-xl panel-empty text-xs text-[var(--muted-foreground)] text-center flex items-center justify-center gap-1.5 transition">
                           <Plus className="w-3.5 h-3.5 text-[var(--primary)]" />
-                          <span>Link GitHub Repo &amp; Demo</span>
+                          <span>Link GitHub Repo & Demo</span>
                         </div>
                       ) : (
                         <div className="space-y-1.5">
@@ -553,7 +553,7 @@ export function Section4SoftwareDev() {
                   <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1.5 mt-0.5">
                     <span>Target Quota: {activeCategoryModal.targetCount} Projects</span>
                     <span>•</span>
-                    <span>Attached Code, Screenshots, Live URLs &amp; Videos</span>
+                    <span>Attached Code, Screenshots, Live URLs & Videos</span>
                   </p>
                 </div>
               </div>
@@ -1064,7 +1064,7 @@ export function Section4SoftwareDev() {
               {/* Live Catalog List */}
               <div className="space-y-2.5">
                 <span className="text-xs font-semibold text-[var(--foreground)] block tracking-tight">
-                  Catalog &amp; Verification Telemetry
+                  Catalog & Verification Telemetry
                 </span>
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                   {activeDevOpsModal.catalog.map((entry, idx) => (

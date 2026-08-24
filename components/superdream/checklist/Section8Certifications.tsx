@@ -556,7 +556,7 @@ export function Section8Certifications() {
                     Verify Industry Credential
                   </h3>
                   <p className="text-xs text-[var(--muted-foreground)]">
-                    {activeCertModal.certification} • AI Authenticity &amp; Credential Match
+                    {activeCertModal.certification} • AI Authenticity & Credential Match
                   </p>
                 </div>
               </div>
@@ -778,7 +778,7 @@ export function Section8Certifications() {
 
                 <div className="space-y-1">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--primary)] font-semibold block">
-                    Certificate of Completion &amp; Competency
+                    Certificate of Completion & Competency
                   </span>
                   <h4 className="text-lg font-bold text-[var(--foreground)] tracking-tight">
                     {viewingPdfCert.certification}

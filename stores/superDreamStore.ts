@@ -9,6 +9,10 @@ import {
   INITIAL_SUPER_DREAM_TESTS,
   INITIAL_SUPER_DREAM_ANALYTICS,
   INITIAL_COHORT_STUDENTS,
+  fetchMySuperDreamState,
+  syncSuperDreamState,
+  logSuperDreamAction,
+  resetSuperDreamState,
   type MentorTask,
   type TravelMilestone,
   type SuperDreamCourse,
@@ -26,6 +30,7 @@ import {
   type GithubPortfolioMetricItem,
   type IndustryCertItem,
   createDefaultChecklist,
+  ensureValidChecklist,
 } from "@/lib/super-dream-checklist";
 import {
   type CodingPlatformKey,
@@ -67,6 +72,8 @@ interface SuperDreamState {
   activeSectionId: number; // 0 = Track Road overview, 1..10 = respective sections
   showWelcomeAnimation: boolean;
   hasSeenWelcomeIntro: boolean;
+  isLiveSyncing: boolean;
+  lastSyncedAt: string | null;
   mentorInfo: typeof INITIAL_MENTOR_INFO;
   travelMilestones: TravelMilestone[];
   mentorTasks: MentorTask[];
@@ -79,6 +86,16 @@ interface SuperDreamState {
 
   // New Comprehensive Elite Checklist Data per student
   studentChecklist: StudentChecklistData;
+
+  // Real-time backend connection actions
+  loadLiveSuperDreamState: () => Promise<void>;
+  syncToBackend: (newMovement?: {
+    actionType: string;
+    sectionId?: number;
+    title: string;
+    details?: string;
+    metadata?: any;
+  }) => Promise<void>;
 
   // Student & Navigation Actions
   enterSuperDreamMode: (triggerAnimation?: boolean) => void;
@@ -180,7 +197,7 @@ interface SuperDreamState {
   ) => void;
   updateInterviewMetric: (id: string, current: number) => void;
   updateMentorEvaluation: (evalData: Partial<MentorEvaluation>) => void;
-  resetChecklistToDefault: () => void;
+  resetChecklistToDefault: () => Promise<void>;
 
   // Legacy & Aux Actions
   submitCourseCertificate: (
@@ -202,7 +219,7 @@ interface SuperDreamState {
     score: number
   ) => void;
   recalculateAnalytics: () => void;
-  resetSuperDreamData: () => void;
+  resetSuperDreamData: () => Promise<void>;
 
   // Mentor Actions
   setActiveStudentId: (studentId: string) => void;
@@ -223,6 +240,14 @@ interface SuperDreamState {
   deleteMentorRoadmapMilestone: (milestoneId: string) => void;
 }
 
+let syncTimer: any = null;
+function scheduleBackendSync(get: () => SuperDreamState, newMovement?: any) {
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    get().syncToBackend(newMovement).catch(() => {});
+  }, 1200);
+}
+
 export const useSuperDream = create<SuperDreamState>()(
   persist(
     (set, get) => ({
@@ -231,6 +256,8 @@ export const useSuperDream = create<SuperDreamState>()(
       activeSectionId: 0, // default to Section 0 (Track Road)
       showWelcomeAnimation: false,
       hasSeenWelcomeIntro: false,
+      isLiveSyncing: false,
+      lastSyncedAt: null,
       mentorInfo: INITIAL_MENTOR_INFO,
       travelMilestones: INITIAL_TRAVEL_MILESTONES,
       mentorTasks: INITIAL_MENTOR_TASKS,
@@ -239,14 +266,69 @@ export const useSuperDream = create<SuperDreamState>()(
       tests: INITIAL_SUPER_DREAM_TESTS,
       analytics: INITIAL_SUPER_DREAM_ANALYTICS,
       cohortStudents: INITIAL_COHORT_STUDENTS,
-      activeStudentId: "std-1",
+      activeStudentId: "",
       csQuizAttempts: {},
       visitedCsCourses: [],
       codingPlatformsStats: INITIAL_PLATFORM_STATS,
       allocatedProjects: INITIAL_ALLOCATED_PROJECTS,
       allocatedAiProjects: INITIAL_ALLOCATED_AI_PROJECTS,
 
-      studentChecklist: createDefaultChecklist("Student", "", "Computer Science & Engineering"),
+      studentChecklist: ensureValidChecklist(undefined, "Student"),
+
+      loadLiveSuperDreamState: async () => {
+        try {
+          set({ isLiveSyncing: true });
+          const res = await fetchMySuperDreamState();
+          if (res?.superDream) {
+            const sd = res.superDream;
+            set((state) => ({
+              studentChecklist: ensureValidChecklist(
+                sd.checklist,
+                state.studentChecklist?.profile?.name || "Student"
+              ),
+              codingPlatformsStats: sd.codingPlatformsStats && Object.keys(sd.codingPlatformsStats).length > 0 ? sd.codingPlatformsStats : state.codingPlatformsStats,
+              csQuizAttempts: sd.csQuizAttempts && Object.keys(sd.csQuizAttempts).length > 0 ? sd.csQuizAttempts : state.csQuizAttempts,
+              visitedCsCourses: sd.visitedCsCourses && sd.visitedCsCourses.length > 0 ? sd.visitedCsCourses : state.visitedCsCourses,
+              allocatedProjects: sd.allocatedProjects && sd.allocatedProjects.length > 0 ? sd.allocatedProjects : state.allocatedProjects,
+              allocatedAiProjects: sd.allocatedAiProjects && sd.allocatedAiProjects.length > 0 ? sd.allocatedAiProjects : state.allocatedAiProjects,
+              courses: sd.courses && sd.courses.length > 0 ? sd.courses : state.courses,
+              tests: sd.tests && sd.tests.length > 0 ? sd.tests : state.tests,
+              mentorRoadmap: sd.mentorRoadmap && sd.mentorRoadmap.length > 0 ? sd.mentorRoadmap : state.mentorRoadmap,
+              travelMilestones: sd.travelMilestones && sd.travelMilestones.length > 0 ? sd.travelMilestones : state.travelMilestones,
+              lastSyncedAt: new Date().toISOString(),
+              isLiveSyncing: false,
+            }));
+          }
+        } catch {
+          set({ isLiveSyncing: false });
+        }
+      },
+
+      syncToBackend: async (newMovement) => {
+        try {
+          const state = get();
+          set({ isLiveSyncing: true });
+          await syncSuperDreamState({
+            checklist: ensureValidChecklist(
+              state.studentChecklist,
+              state.studentChecklist?.profile?.name || "Student"
+            ),
+            codingPlatformsStats: state.codingPlatformsStats,
+            csQuizAttempts: state.csQuizAttempts,
+            visitedCsCourses: state.visitedCsCourses,
+            allocatedProjects: state.allocatedProjects,
+            allocatedAiProjects: state.allocatedAiProjects,
+            courses: state.courses,
+            tests: state.tests,
+            mentorRoadmap: state.mentorRoadmap,
+            travelMilestones: state.travelMilestones,
+            newMovement,
+          });
+          set({ lastSyncedAt: new Date().toISOString(), isLiveSyncing: false });
+        } catch {
+          set({ isLiveSyncing: false });
+        }
+      },
 
       enterSuperDreamMode: (triggerAnimation = true) => {
         set({
@@ -288,6 +370,11 @@ export const useSuperDream = create<SuperDreamState>()(
             },
           },
         }));
+        scheduleBackendSync(get, {
+          actionType: "profile_updated",
+          sectionId: 0,
+          title: "Student profile details updated",
+        });
       },
 
       updateSkillStatus: (id, status, remarks) => {
@@ -377,6 +464,12 @@ export const useSuperDream = create<SuperDreamState>()(
             }),
           },
         }));
+        scheduleBackendSync(get, {
+          actionType: "quiz_completed",
+          sectionId: 1,
+          title: `Language Quiz Completed (${id})`,
+          details: `Score: ${score}% • Status: ${passed ? "Passed" : "Attempted"} • Integrity: ${integrityScore}%`,
+        });
       },
 
       recordCsQuizAttempt: (quizId, score, passed, rawScore = score, warningsCount = 0) => {
@@ -404,6 +497,12 @@ export const useSuperDream = create<SuperDreamState>()(
             },
           };
         });
+        scheduleBackendSync(get, {
+          actionType: "quiz_completed",
+          sectionId: 2,
+          title: `CS Core Diagnostic Quiz (${quizId})`,
+          details: `Score: ${score}% • Raw: ${rawScore} • Warnings: ${warningsCount}`,
+        });
       },
 
       markCsCourseVisited: (courseId) => {
@@ -413,6 +512,7 @@ export const useSuperDream = create<SuperDreamState>()(
             visitedCsCourses: [...state.visitedCsCourses, courseId],
           };
         });
+        scheduleBackendSync(get);
       },
 
       updateCsRating: (id, rating, completed, remarks) => {
@@ -431,6 +531,12 @@ export const useSuperDream = create<SuperDreamState>()(
             ),
           },
         }));
+        scheduleBackendSync(get, {
+          actionType: "rating_updated",
+          sectionId: 2,
+          title: `Updated CS Subject Rating (${id})`,
+          details: `Rated ${rating}/5 Stars • ${remarks || "Self-evaluation updated"}`,
+        });
       },
 
       updateCodingPlatformUrl: (platform, url) => {
@@ -577,6 +683,13 @@ export const useSuperDream = create<SuperDreamState>()(
         } catch (err) {
           // Backend offline or non-blocking
         }
+
+        scheduleBackendSync(get, {
+          actionType: "coding_synced",
+          sectionId: 3,
+          title: `Synced ${platform.toUpperCase()} Coding Telemetry`,
+          details: `Verified ${get().codingPlatformsStats[platform]?.totalSolved || 0} problems solved`,
+        });
       },
 
       syncWithClassicCodingProfiles: async () => {
@@ -738,6 +851,12 @@ export const useSuperDream = create<SuperDreamState>()(
             }),
           },
         }));
+        scheduleBackendSync(get, {
+          actionType: "deliverable_updated",
+          sectionId: 4,
+          title: `Updated Software Dev Project (${id})`,
+          details: `Repo: ${repoUrl || (typeof updatesOrCurrent === "object" ? updatesOrCurrent.githubUrl : "") || "Updated"}`,
+        });
       },
 
       addNewDevProject: (projectData) => {
@@ -767,6 +886,12 @@ export const useSuperDream = create<SuperDreamState>()(
             },
           };
         });
+        scheduleBackendSync(get, {
+          actionType: "repo_submitted",
+          sectionId: 4,
+          title: "Added New Software Engineering Project",
+          details: projectData?.activity || "Enterprise full-stack repository created",
+        });
       },
 
       deleteDevProject: (id) => {
@@ -778,6 +903,7 @@ export const useSuperDream = create<SuperDreamState>()(
               .map((item, idx) => ({ ...item, projectNumber: idx + 1 })),
           },
         }));
+        scheduleBackendSync(get);
       },
 
       updateAiDeliverable: (id, current, verified) => {
@@ -885,10 +1011,27 @@ export const useSuperDream = create<SuperDreamState>()(
         }));
       },
 
-      resetChecklistToDefault: () => {
+      resetChecklistToDefault: async () => {
+        const clean = createDefaultChecklist("Student", "", "Computer Science & Engineering");
         set({
-          studentChecklist: createDefaultChecklist("Deepan S", "310622104001", "Computer Science & Engineering"),
+          studentChecklist: clean,
+          codingPlatformsStats: INITIAL_PLATFORM_STATS,
+          csQuizAttempts: {},
+          visitedCsCourses: [],
+          allocatedProjects: INITIAL_ALLOCATED_PROJECTS,
+          allocatedAiProjects: INITIAL_ALLOCATED_AI_PROJECTS,
+          courses: INITIAL_SUPER_DREAM_COURSES,
+          tests: INITIAL_SUPER_DREAM_TESTS,
+          mentorRoadmap: INITIAL_MENTOR_ROADMAP,
+          travelMilestones: INITIAL_TRAVEL_MILESTONES,
         });
+        
+        // Delete the backend database record completely
+        try {
+          await resetSuperDreamState();
+        } catch (error) {
+          console.error("Failed to reset backend state:", error);
+        }
       },
 
       submitCourseCertificate: (courseId, proofData) => {
@@ -1005,7 +1148,8 @@ export const useSuperDream = create<SuperDreamState>()(
         // Recalculates metrics based on state
       },
 
-      resetSuperDreamData: () => {
+      resetSuperDreamData: async () => {
+        const cleanChecklist = createDefaultChecklist();
         set({
           travelMilestones: INITIAL_TRAVEL_MILESTONES,
           mentorTasks: INITIAL_MENTOR_TASKS,
@@ -1014,8 +1158,20 @@ export const useSuperDream = create<SuperDreamState>()(
           tests: INITIAL_SUPER_DREAM_TESTS,
           analytics: INITIAL_SUPER_DREAM_ANALYTICS,
           cohortStudents: INITIAL_COHORT_STUDENTS,
-          studentChecklist: createDefaultChecklist(),
+          studentChecklist: cleanChecklist,
+          csQuizAttempts: {},
+          visitedCsCourses: [],
+          codingPlatformsStats: INITIAL_PLATFORM_STATS,
+          allocatedProjects: INITIAL_ALLOCATED_PROJECTS,
+          allocatedAiProjects: INITIAL_ALLOCATED_AI_PROJECTS,
         });
+        
+        // Delete the backend database record completely
+        try {
+          await resetSuperDreamState();
+        } catch (error) {
+          console.error("Failed to reset backend state:", error);
+        }
       },
 
       setActiveStudentId: (studentId: string) => {
@@ -1129,7 +1285,7 @@ export const useSuperDream = create<SuperDreamState>()(
                   credentialId: `CERT-MENTOR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
                   issuedBy: c.provider,
                   issueDate: new Date().toISOString().split("T")[0],
-                  studentName: "Deepan S",
+                  studentName: state.studentChecklist?.profile?.name || "Student",
                   verificationScore: 99,
                   verifiedAt: new Date().toISOString(),
                   verificationChecks: {
@@ -1196,7 +1352,12 @@ export const useSuperDream = create<SuperDreamState>()(
       },
     }),
     {
-      name: "campus_super_dream_checklist_v4",
+      name: "campus_super_dream_checklist_v6",
+      onRehydrateStorage: () => (state) => {
+        if (state && state.studentChecklist) {
+          state.studentChecklist = ensureValidChecklist(state.studentChecklist);
+        }
+      },
     }
   )
 );

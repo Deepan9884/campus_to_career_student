@@ -258,7 +258,7 @@ export function Section1Programming() {
               <Code2 className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] font-mono">
+          <p className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] tabular-nums">
             {totalProblemsSolved}+
           </p>
         </div>
@@ -272,7 +272,7 @@ export function Section1Programming() {
               <Clock className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[var(--warning)] font-mono">
+          <p className="text-2xl sm:text-3xl font-bold text-[var(--warning)] tabular-nums">
             {totalHoursSpent}h <span className="text-xs font-normal text-[var(--muted-foreground)] uppercase">Logged</span>
           </p>
         </div>
@@ -286,7 +286,7 @@ export function Section1Programming() {
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[var(--success)] font-mono">
+          <p className="text-2xl sm:text-3xl font-bold text-[var(--success)] tabular-nums">
             {totalVerifiedQuizzes} / {studentChecklist.section1Programming.length} <span className="text-xs font-normal text-[var(--muted-foreground)] uppercase">Verified</span>
           </p>
         </div>
@@ -301,9 +301,9 @@ export function Section1Programming() {
             </div>
           </div>
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/25">GFG</span>
-            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-[var(--warning)]/15 text-[var(--warning)] border border-[var(--warning)]/25">CodeChef</span>
-            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25">HackerRank</span>
+            <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/25">GFG</span>
+            <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--warning)]/15 text-[var(--warning)] border border-[var(--warning)]/25">CodeChef</span>
+            <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25">HackerRank</span>
           </div>
         </div>
       </div>
@@ -386,7 +386,7 @@ const visitedLinks = item.visitedLinks || [];
                       <h4 className="text-base font-semibold text-[var(--foreground)] tracking-tight">
                         {item.skill}
                       </h4>
-                      <span className={cn("text-[10px] font-mono px-2 py-0.2 rounded-full font-medium inline-block mt-0.5 border", theme.accentBadge)}>
+                      <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-semibold inline-block mt-0.5 border", theme.accentBadge)}>
                         Target: {item.target}
                       </span>
                     </div>
@@ -415,7 +415,7 @@ const visitedLinks = item.visitedLinks || [];
                     <span className="flex items-center gap-1.5 text-[var(--foreground)]/80">
                       <BookOpen className="w-3.5 h-3.5 text-[var(--primary)]" /> Free Learning Portals
                     </span>
-                    <span className="text-[10px] text-[var(--muted-foreground)] font-mono font-semibold">
+                    <span className="text-[10px] text-[var(--muted-foreground)] font-semibold tabular-nums">
                       {visitedLinks.length}/3 visited
                     </span>
                   </div>
@@ -495,7 +495,7 @@ const visitedLinks = item.visitedLinks || [];
                     <span className="text-[var(--muted-foreground)] font-medium">
                       Problems Solved
                     </span>
-                    <span className="font-mono font-bold text-[var(--primary)]">
+                    <span className="font-bold text-[var(--primary)] tabular-nums">
                       {problems} Qs
                     </span>
                   </div>
@@ -504,7 +504,7 @@ const visitedLinks = item.visitedLinks || [];
                     <span className="text-[var(--muted-foreground)] font-medium">
                       Practice Time
                     </span>
-                    <span className="font-mono font-bold text-[var(--warning)]">
+                    <span className="font-bold text-[var(--warning)] tabular-nums">
                       {hours % 1 === 0 ? hours : hours.toFixed(1)} Hours
                     </span>
                   </div>
@@ -515,7 +515,7 @@ const visitedLinks = item.visitedLinks || [];
                     </span>
                     <span
                       className={cn(
-                        "font-mono font-bold px-2 py-0.5 rounded-full text-[11px]",
+                        "font-bold px-2.5 py-0.5 rounded-full text-[11px] tabular-nums",
                         bestScore >= 70
                           ? "text-[var(--success)] bg-[var(--success)]/15 border border-[var(--success)]/30"
                           : bestScore > 0

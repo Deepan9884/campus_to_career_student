@@ -304,7 +304,7 @@ export function SuperDreamBrainAnalyzer() {
             }}
           >
             <Brain className="w-3.5 h-3.5" />
-            Super Dream Placement Intelligence &amp; Analytics
+            Super Dream Placement Intelligence & Analytics
           </div>
           <h2 className="text-2xl sm:text-3xl font-[var(--font-display)] tracking-tight text-[var(--foreground)]">
             Placement Intelligence
@@ -427,7 +427,7 @@ export function SuperDreamBrainAnalyzer() {
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
               <TrendingUp className="w-3.5 h-3.5" style={{ color: "#86EFAC" }} />
-              9-Category Marks Weightage &amp; Attainment
+              9-Category Marks Weightage & Attainment
             </h3>
             <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
               Official 100 marks weightage distribution across evaluation domains.
@@ -611,10 +611,10 @@ export function SuperDreamBrainAnalyzer() {
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
                 <Code2 className="w-3.5 h-3.5 text-emerald-400" />
-                Competitive Coding &amp; Problem Solving Velocity
+                Competitive Coding & Problem Solving Velocity
               </h3>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                Target vs Synced Solved metrics across LeetCode, HackerRank, Contests &amp; DP.
+                Target vs Synced Solved metrics across LeetCode, HackerRank, Contests & DP.
               </p>
             </div>
             <button
@@ -676,7 +676,7 @@ export function SuperDreamBrainAnalyzer() {
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
                 <PieIcon className="w-3.5 h-3.5 text-pink-400" />
-                10-Section Deliverables &amp; Verification Pipeline
+                10-Section Deliverables & Verification Pipeline
               </h3>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
                 Real-time breakdown of all {completedCount + inProgressCount + pendingCount} curriculum requirements.

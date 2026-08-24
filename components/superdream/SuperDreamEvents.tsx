@@ -95,7 +95,7 @@ export function SuperDreamEvents() {
   }>({
     eventName: "",
     eventType: "hackathon",
-    organizer: "Host Organization",
+    organizer: "",
     mode: "online",
     level: "national",
     result: "participated",
@@ -329,7 +329,7 @@ export function SuperDreamEvents() {
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-emerald-400 font-mono mt-1">
-            {stats?.totalEvents ?? 4}
+            {events.filter((e) => !!e.certificateUrl).length}
           </p>
         </GlassCard>
       </div>
@@ -362,31 +362,58 @@ export function SuperDreamEvents() {
       </div>
 
       {/* Events List */}
-      {loading ? (
-        <div className="py-12 text-center text-slate-400 flex items-center justify-center gap-2 text-xs">
-          <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> Loading event portfolio...
-        </div>
-      ) : events.length === 0 ? (
-        <div className="p-10 rounded-2xl bg-slate-900/40 border border-white/10 text-center text-slate-400 space-y-3">
-          <Trophy className="w-10 h-10 mx-auto text-amber-400/50" />
-          <p className="font-semibold text-white text-sm">No events logged yet</p>
-          <p className="text-xs max-w-sm mx-auto">
-            Log your hackathon participations and contest achievements.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {events.map((evt) => (
-            <EventCard
-              key={evt._id}
-              event={evt}
-              onEdit={() => handleOpenLogModal(evt)}
-              onDelete={() => handleDelete(evt._id)}
-              onViewCertificate={(url) => setCertificateViewUrl(url)}
-            />
-          ))}
-        </div>
-      )}
+      {(() => {
+        const filteredEvents = events
+          .filter((e) => selectedCategory === "all" || e.eventType === selectedCategory)
+          .filter((e) => {
+            if (!searchQuery.trim()) return true;
+            const q = searchQuery.toLowerCase();
+            return (
+              e.eventName?.toLowerCase().includes(q) ||
+              e.projectTitle?.toLowerCase().includes(q) ||
+              e.techStack?.some((t) => t.toLowerCase().includes(q)) ||
+              e.organizer?.toLowerCase().includes(q)
+            );
+          });
+
+        if (loading) {
+          return (
+            <div className="py-12 text-center text-slate-400 flex items-center justify-center gap-2 text-xs">
+              <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> Loading event portfolio...
+            </div>
+          );
+        }
+
+        if (filteredEvents.length === 0) {
+          return (
+            <div className="p-10 rounded-2xl bg-slate-900/40 border border-white/10 text-center text-slate-400 space-y-3">
+              <Trophy className="w-10 h-10 mx-auto text-amber-400/50" />
+              <p className="font-semibold text-white text-sm">
+                {events.length === 0 ? "No events logged yet" : "No matching events found"}
+              </p>
+              <p className="text-xs max-w-sm mx-auto">
+                {events.length === 0
+                  ? "Log your hackathon participations and contest achievements."
+                  : "Try clearing your search query or selecting a different category."}
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredEvents.map((evt) => (
+              <EventCard
+                key={evt._id}
+                event={evt}
+                onEdit={() => handleOpenLogModal(evt)}
+                onDelete={() => handleDelete(evt._id)}
+                onViewCertificate={(url) => setCertificateViewUrl(url)}
+              />
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Log Modal */}
       {showLogModal && (

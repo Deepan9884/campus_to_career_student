@@ -94,17 +94,8 @@ function RootComponent() {
         <Outlet />
         <Toaster
           position="top-right"
-          toastOptions={{
-            style: {
-              background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)",
-              backdropFilter: "blur(32px) saturate(180%)",
-              border: "1px solid rgba(167,139,250,0.25)",
-              color: "#F0EEFF",
-              borderRadius: "16px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.18)",
-              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
-            },
-          }}
+          duration={3500}
+          closeButton
         />
       </GoogleOAuthProvider>
     </QueryClientProvider>

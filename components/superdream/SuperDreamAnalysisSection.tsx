@@ -43,7 +43,7 @@ export function SuperDreamAnalysisSection() {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
-  const { totalObtained, tier } = calculateStudentChecklistScores(studentChecklist);
+  const { totalObtained, tier, summaries } = calculateStudentChecklistScores(studentChecklist);
   const codingStats = calculateAggregateCodingTelemetry(codingPlatformsStats);
   const verifiedCourses = courses.filter((c) => c.status === "completed").length;
   const completedMilestones = travelMilestones.filter((m) => m.status === "completed").length;
@@ -57,14 +57,14 @@ export function SuperDreamAnalysisSection() {
 
   const competencyRadar = [
     { subject: "Algorithms & DP", score: Math.min(100, Math.round((codingStats.totalSolved / 300) * 100)), benchmark: 80 },
-    { subject: "System Design", score: Math.min(100, totalObtained), benchmark: 75 },
-    { subject: "Concurrency & OS", score: Math.min(100, totalObtained), benchmark: 70 },
-    { subject: "Microservices & Cloud", score: Math.min(100, totalObtained), benchmark: 72 },
-    { subject: "GenAI & Models", score: Math.min(100, totalObtained), benchmark: 65 },
+    { subject: "System Design", score: summaries.find((s) => s.sectionId === 2)?.readinessScore ?? 0, benchmark: 75 },
+    { subject: "Concurrency & OS", score: summaries.find((s) => s.sectionId === 4)?.readinessScore ?? 0, benchmark: 70 },
+    { subject: "Microservices & Cloud", score: summaries.find((s) => s.sectionId === 6)?.readinessScore ?? 0, benchmark: 72 },
+    { subject: "GenAI & Models", score: summaries.find((s) => s.sectionId === 5)?.readinessScore ?? 0, benchmark: 65 },
     { subject: "Problem Speed", score: Math.min(100, Math.round((codingStats.totalSolved / 200) * 100)), benchmark: 78 },
   ];
 
-  const handleExportDossier = () => {
+  const handleExportDossier = async () => {
     const summary = `
 ========================================
 SUPER DREAM CANDIDATE PLACEMENT DOSSIER
@@ -86,10 +86,14 @@ METRICS BREAKDOWN:
 ========================================
     `.trim();
 
-    navigator.clipboard.writeText(summary);
-    setCopied(true);
-    toast.success("Placement Dossier copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopied(true);
+      toast.success("Placement Dossier copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy to clipboard automatically. Please copy manually.");
+    }
   };
 
   return (
@@ -126,7 +130,7 @@ METRICS BREAKDOWN:
             <Crown className="w-4 h-4 text-amber-400" />
           </div>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-3xl font-black font-mono text-amber-300">{totalObtained}</span>
+            <span className="text-3xl font-extrabold tabular-nums text-amber-300">{totalObtained}</span>
             <span className="text-xs text-slate-400">/ 100</span>
           </div>
           <p className="text-xs text-emerald-400 mt-1 font-semibold flex items-center gap-1">
@@ -139,7 +143,7 @@ METRICS BREAKDOWN:
             <p className="text-xs text-slate-400">Verified Courses</p>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <p className="text-3xl font-black font-mono text-emerald-400 mt-1">
+          <p className="text-3xl font-extrabold tabular-nums text-emerald-400 mt-1">
             {verifiedCourses} / {courses.length}
           </p>
           <p className="text-xs text-slate-400 mt-1">{courses.length - verifiedCourses} Remaining</p>
@@ -150,7 +154,7 @@ METRICS BREAKDOWN:
             <p className="text-xs text-slate-400">Proctored Tests</p>
             <Award className="w-4 h-4 text-purple-400" />
           </div>
-          <p className="text-3xl font-black font-mono text-purple-300 mt-1">
+          <p className="text-3xl font-extrabold tabular-nums text-purple-300 mt-1">
             {completedTests.length} <span className="text-sm font-normal text-slate-400">/ {tests.length}</span>
           </p>
           <p className="text-xs text-purple-400/90 mt-1 font-medium">{tests.length - completedTests.length} Modules Remaining</p>
@@ -162,7 +166,7 @@ METRICS BREAKDOWN:
             <Zap className="w-4 h-4 text-sky-400" />
           </div>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-3xl font-black font-mono text-sky-300">{codingStats.totalSolved}</span>
+            <span className="text-3xl font-extrabold tabular-nums text-sky-300">{codingStats.totalSolved}</span>
             <span className="text-xs text-slate-400">Problems</span>
           </div>
           <p className="text-xs text-slate-400 mt-1">{codingStats.platformCount} Platforms Connected</p>
@@ -266,7 +270,7 @@ METRICS BREAKDOWN:
           <div className="mb-2">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-purple-400" />
-              <h3 className="text-sm font-bold text-white">Assessment Modules &amp; Coverage</h3>
+              <h3 className="text-sm font-bold text-white">Assessment Modules & Coverage</h3>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">Problem complexity count across proctored test suites</p>
           </div>
@@ -293,7 +297,7 @@ METRICS BREAKDOWN:
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               <h3 className="text-sm font-bold text-white">Problem Difficulty Distribution</h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">Breakdown of 400 solved problems</p>
+            <p className="text-xs text-slate-400 mt-0.5">Breakdown of {codingStats.totalSolved} solved problems</p>
           </div>
 
           <div className="h-64 w-full flex items-center justify-center">
@@ -334,22 +338,55 @@ METRICS BREAKDOWN:
             <p className="font-bold text-emerald-300 flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Verified Core Strengths:
             </p>
-            <ul className="space-y-1.5 text-slate-300 list-disc list-inside text-xs">
-              <li>Graph Algorithms & Tree Dynamic Programming (94% accuracy).</li>
-              <li>Distributed consensus and memory architecture foundation verified.</li>
-              <li>Consistent 48-day coding streak across competitive platforms.</li>
-            </ul>
+            {(() => {
+              const strengths = summaries.filter((s) => s.readinessScore >= 80);
+              if (strengths.length === 0) {
+                return (
+                  <p className="text-slate-400 text-xs italic">
+                    Complete sections with ≥ 80% readiness to unlock verified strengths.
+                  </p>
+                );
+              }
+              return (
+                <ul className="space-y-1.5 text-slate-300 list-disc list-inside text-xs">
+                  {strengths.slice(0, 3).map((s) => (
+                    <li key={s.sectionId}>
+                      <span className="font-semibold text-white">{s.title.replace(/^\d+\.\s*/, "")}</span>: {s.readinessScore}% readiness index ({s.completedTasks}/{s.totalTasks} deliverables met).
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
           </div>
 
           <div className="p-4 rounded-xl bg-slate-950/80 border border-amber-500/30 space-y-2">
             <p className="font-bold text-amber-300 flex items-center gap-1.5">
               <Target className="w-4 h-4 text-amber-400" /> Target Next Milestones:
             </p>
-            <ul className="space-y-1.5 text-slate-300 list-disc list-inside text-xs">
-              <li>Submit code deliverable for the Distributed Rate Limiter task.</li>
-              <li>Complete the Stanford System Design course module.</li>
-              <li>Attempt the High Concurrency live speed assessment.</li>
-            </ul>
+            {(() => {
+              const pendingSections = [...summaries]
+                .sort((a, b) => a.completionPercent - b.completionPercent)
+                .filter((s) => s.completionPercent < 100)
+                .slice(0, 3);
+
+              if (pendingSections.length === 0) {
+                return (
+                  <p className="text-emerald-400 text-xs font-semibold">
+                    Outstanding! All placement readiness sections are 100% completed.
+                  </p>
+                );
+              }
+
+              return (
+                <ul className="space-y-1.5 text-slate-300 list-disc list-inside text-xs">
+                  {pendingSections.map((s) => (
+                    <li key={s.sectionId}>
+                      Advance <span className="font-semibold text-white">{s.title.replace(/^\d+\.\s*/, "")}</span> — currently at {s.completionPercent}% completion ({s.totalTasks - s.completedTasks} tasks remaining).
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
           </div>
         </div>
       </GlassCard>

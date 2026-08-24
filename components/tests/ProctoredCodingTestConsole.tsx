@@ -338,6 +338,8 @@ export function ProctoredCodingTestConsole({
     }
   }, []);
 
+  const isCopyPasteDisabled = Boolean(assessment.proctoringConfig?.copyPasteDisabled === true);
+
   // Proctoring session hook (enabled both in lobby and during active exam)
   const proctorState = useProctoringSession({
     moduleType: "quiz",
@@ -345,6 +347,7 @@ export function ProctoredCodingTestConsole({
     enabled: !isTestFinished && !finalScoreResult,
     isStarted: hasStartedExam,
     videoElement: videoElement,
+    copyPasteDisabled: isCopyPasteDisabled,
     onBlocked: () => {
       toast.error("Candidate disqualified due to proctoring policy violation.");
     },
@@ -388,7 +391,12 @@ export function ProctoredCodingTestConsole({
       }
 
       // 3. Ctrl combinations: block browser devtools, print, reload, tab actions
-      if (e.ctrlKey) {
+      if (e.ctrlKey || e.metaKey) {
+        const isEditingKey = ["c", "C", "v", "V", "x", "X", "a", "A", "z", "Z", "y", "Y"].includes(e.key);
+        if (!isCopyPasteDisabled && isEditingKey) {
+          return;
+        }
+
         const blockedCtrl = ["r", "R", "p", "P", "u", "U", "s", "S", "w", "W", "t", "T", "n", "N", "j", "J", "h", "H", "l", "L"];
         if (blockedCtrl.includes(e.key) || e.shiftKey) {
           e.preventDefault();
@@ -399,7 +407,7 @@ export function ProctoredCodingTestConsole({
     };
 
     const handleCopyPasteBlock = (e: ClipboardEvent) => {
-      // Block clipboard copy/cut from outside and sanitize
+      if (!isCopyPasteDisabled) return;
       try {
         if (typeof navigator !== "undefined" && navigator.clipboard) {
           navigator.clipboard.writeText("").catch(() => {});
@@ -408,15 +416,17 @@ export function ProctoredCodingTestConsole({
     };
 
     window.addEventListener("keydown", handleStrictKeyDown, { capture: true });
-    window.addEventListener("copy", handleCopyPasteBlock);
-    window.addEventListener("paste", handleCopyPasteBlock);
+    if (isCopyPasteDisabled) {
+      window.addEventListener("copy", handleCopyPasteBlock);
+      window.addEventListener("paste", handleCopyPasteBlock);
+    }
 
     return () => {
       window.removeEventListener("keydown", handleStrictKeyDown, { capture: true });
       window.removeEventListener("copy", handleCopyPasteBlock);
       window.removeEventListener("paste", handleCopyPasteBlock);
     };
-  }, [hasStartedExam, isTestFinished, finalScoreResult, proctorState.isBlocked]);
+  }, [hasStartedExam, isTestFinished, finalScoreResult, proctorState.isBlocked, isCopyPasteDisabled]);
 
   // Switch starter code when language changes
   const handleLanguageChange = (newLang: string) => {
@@ -991,7 +1001,7 @@ export function ProctoredCodingTestConsole({
                         onClick={() => proctorState.retryCamera()}
                         className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition cursor-pointer"
                       >
-                        Grant &amp; Retry Camera
+                        Grant & Retry Camera
                       </button>
                     </div>
                   ) : (
@@ -1045,7 +1055,7 @@ export function ProctoredCodingTestConsole({
                     }`}
                   >
                     <span className={`flex items-center gap-2 ${isLightMode ? "text-slate-700" : "text-slate-300"}`}>
-                      <Eye className="h-4 w-4 text-indigo-500" /> Eye Gaze &amp; Attention AI
+                      <Eye className="h-4 w-4 text-indigo-500" /> Eye Gaze & Attention AI
                     </span>
                     <span className="text-[11px] font-bold text-indigo-500">Ready ✓</span>
                   </div>
@@ -1179,7 +1189,7 @@ export function ProctoredCodingTestConsole({
                 <div className={`space-y-2 pt-3 border-t ${isLightMode ? "border-slate-200" : "border-white/[0.08]"}`}>
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
                     <ShieldAlert className="h-4 w-4 text-amber-500" />
-                    Strict Anti-Cheat &amp; Examination Conduct Policy
+                    Strict Anti-Cheat & Examination Conduct Policy
                   </h4>
                   <ul className={`space-y-1.5 text-xs leading-relaxed ${isLightMode ? "text-slate-700" : "text-slate-300"}`}>
                     <li className="flex items-start gap-2">
@@ -1551,7 +1561,7 @@ export function ProctoredCodingTestConsole({
                       }`}>
                         <Lock className="w-4 h-4 text-indigo-400 shrink-0" />
                         <span className="text-[11px] leading-relaxed">
-                          <strong>Hidden Test Cases (2 Cases • 50% Marks):</strong> Case 3 &amp; Case 4 are evaluated on code execution to verify edge cases and algorithmic correctness.
+                          <strong>Hidden Test Cases (2 Cases • 50% Marks):</strong> Case 3 & Case 4 are evaluated on code execution to verify edge cases and algorithmic correctness.
                         </span>
                       </div>
                     </div>
@@ -2055,7 +2065,7 @@ export function ProctoredCodingTestConsole({
                 onClick={handleSubmitAssessment}
                 className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black transition shadow-lg shadow-emerald-500/25 cursor-pointer active:scale-98 border border-white/20"
               >
-                Confirm &amp; Submit
+                Confirm & Submit
               </button>
             </div>
           </div>

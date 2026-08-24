@@ -34,6 +34,8 @@ import {
   Volume2,
   Lock,
   Zap,
+  ArrowLeft,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -78,6 +80,12 @@ export interface InterviewEngineProps {
   subtitle?: string;
   onSessionComplete?: (session: InterviewSession) => void;
   showHistory?: boolean;
+  initialSelectedRounds?: Array<"quiz" | "aptitude" | "core" | "technical" | "coding" | "hr">;
+  initialTargetRole?: string;
+  initialDifficulty?: "easy" | "medium" | "hard";
+  initialQuestionCount?: number;
+  autoStart?: boolean;
+  onBackToPillars?: () => void;
 }
 
 export function InterviewEngine({
@@ -85,9 +93,18 @@ export function InterviewEngine({
   subtitle,
   onSessionComplete,
   showHistory = true,
+  initialSelectedRounds,
+  initialTargetRole,
+  initialDifficulty,
+  initialQuestionCount = 5,
+  autoStart = false,
+  onBackToPillars,
 }: InterviewEngineProps) {
+  const { user } = useAuth();
   const [mode, setMode] = useState<ViewMode>("setup");
   const [session, setSession] = useState<InterviewSession | null>(null);
+  const [isAutoStarting, setIsAutoStarting] = useState(Boolean(autoStart));
+  const autoStartedRef = useRef(false);
   const [historyViewingId, setHistoryViewingId] = useState<string | null>(null);
   const [historyViewingDetail, setHistoryViewingDetail] = useState<InterviewSession | null>(null);
 
@@ -95,6 +112,44 @@ export function InterviewEngine({
     setHistoryViewingId(null);
     setHistoryViewingDetail(null);
   }
+
+  // Auto-start interview directly if requested
+  useEffect(() => {
+    if (autoStart && !session && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      setIsAutoStarting(true);
+
+      const isPrivacy = user?.preferences?.resumePrivacy === true;
+      const effectiveDifficulty =
+        initialDifficulty ||
+        (user?.preferences?.aiDifficulty === "Beginner"
+          ? "easy"
+          : user?.preferences?.aiDifficulty === "Advanced"
+          ? "hard"
+          : "medium");
+
+      startInterview({
+        targetRole: initialTargetRole || user?.profile?.targetRole || user?.targetRole || undefined,
+        difficulty: effectiveDifficulty,
+        questionCount: initialQuestionCount,
+        resumeId: isPrivacy ? undefined : undefined,
+        selectedRounds:
+          initialSelectedRounds && initialSelectedRounds.length > 0 ? initialSelectedRounds : undefined,
+      })
+        .then((res) => {
+          clearHistoryDetail();
+          setSession(res);
+          setMode("active");
+        })
+        .catch((err: unknown) => {
+          const apiErr = err as { message?: string };
+          toast.error(apiErr?.message || "Failed to auto-start interview round. Please start manually below.");
+        })
+        .finally(() => {
+          setIsAutoStarting(false);
+        });
+    }
+  }, [autoStart]);
 
   const handleFinishSession = (s: InterviewSession) => {
     stopAllCameraStreams();
@@ -133,37 +188,90 @@ export function InterviewEngine({
         </div>
       ) : (
         <>
-          <div className="relative z-30">
-            <h1 className="text-2xl md:text-3xl font-bold text-white">
-              {title || (session ? `${session.rounds.length}-Round` : "Custom") + " Mock Interview Engine"}
-            </h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              {subtitle || "Practice comprehensive rounds with AI adaptive evaluation, resume-driven project questions & instant scoring."}
-            </p>
+          <div className="relative z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                {onBackToPillars && (
+                  <button
+                    onClick={onBackToPillars}
+                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-muted-foreground hover:text-white border border-white/10 flex items-center gap-1.5 transition cursor-pointer"
+                    title="Return to Target Pillars"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Pillars</span>
+                  </button>
+                )}
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                  {title || (session ? `${session.rounds.length}-Round` : "Custom") + " Mock Interview Engine"}
+                </h1>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                {subtitle || "Practice comprehensive rounds with AI adaptive evaluation, resume-driven project questions & instant scoring."}
+              </p>
+            </div>
+
+            {onBackToPillars && (
+              <button
+                onClick={onBackToPillars}
+                className="glass rounded-xl px-3.5 py-2 text-xs font-medium hover:bg-white/10 flex items-center gap-1.5 text-muted-foreground hover:text-white transition cursor-pointer self-start sm:self-auto"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to Pillars
+              </button>
+            )}
           </div>
 
-          <div className="relative z-20">
-            {mode === "setup" && (
-              <SetupView
-                onStart={(s) => {
-                  clearHistoryDetail();
-                  setSession(s);
-                  setMode("active");
-                }}
-              />
-            )}
-            {mode === "results" && session && (
-              <ResultsView
-                session={session}
-                onRetry={() => {
-                  stopAllCameraStreams();
-                  clearHistoryDetail();
-                  setSession(null);
-                  setMode("setup");
-                }}
-              />
-            )}
-          </div>
+          {isAutoStarting ? (
+            <div className="min-h-[380px] flex flex-col items-center justify-center text-center p-8 panel-card rounded-3xl border border-white/10 space-y-4 shadow-xl">
+              <div className="w-16 h-16 rounded-2xl bg-[color:var(--color-primary)]/15 border border-[color:var(--color-primary)]/30 flex items-center justify-center text-[color:var(--color-primary)] shadow-lg animate-pulse">
+                <Sparkles className="w-8 h-8" />
+              </div>
+              <div className="space-y-1.5 max-w-md">
+                <h3 className="text-lg font-bold text-white tracking-tight">Initializing Interview Session</h3>
+                <p className="text-xs text-muted-foreground">
+                  Generating calibrated AI questions, setting up real-time proctoring telemetry & speech engine...
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-[color:var(--color-primary)] font-semibold pt-1">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Connecting to Placement AI Engine...</span>
+              </div>
+              {onBackToPillars && (
+                <button
+                  onClick={onBackToPillars}
+                  className="mt-4 px-4 py-1.5 rounded-xl glass text-xs text-muted-foreground hover:text-white transition cursor-pointer"
+                >
+                  Cancel & Return to Pillars
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="relative z-20">
+              {mode === "setup" && (
+                <SetupView
+                  initialSelectedRounds={initialSelectedRounds}
+                  initialTargetRole={initialTargetRole}
+                  initialDifficulty={initialDifficulty}
+                  initialQuestionCount={initialQuestionCount}
+                  onStart={(s) => {
+                    clearHistoryDetail();
+                    setSession(s);
+                    setMode("active");
+                  }}
+                />
+              )}
+              {mode === "results" && session && (
+                <ResultsView
+                  session={session}
+                  onRetry={() => {
+                    stopAllCameraStreams();
+                    clearHistoryDetail();
+                    setSession(null);
+                    setMode("setup");
+                  }}
+                />
+              )}
+            </div>
+          )}
 
           {showHistory && (
             <div className="relative z-10">
@@ -349,17 +457,32 @@ function ResumeSelectorModule({
 
 /* ─── Setup ─── */
 
-function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
+function SetupView({
+  onStart,
+  initialSelectedRounds,
+  initialTargetRole,
+  initialDifficulty,
+  initialQuestionCount = 5,
+}: {
+  onStart: (s: InterviewSession) => void;
+  initialSelectedRounds?: Array<"quiz" | "aptitude" | "core" | "technical" | "coding" | "hr">;
+  initialTargetRole?: string;
+  initialDifficulty?: "easy" | "medium" | "hard";
+  initialQuestionCount?: number;
+}) {
   const { user } = useAuth();
-  const [targetRole, setTargetRole] = useState(user?.profile?.targetRole || user?.targetRole || "");
+  const [targetRole, setTargetRole] = useState(
+    initialTargetRole || user?.profile?.targetRole || user?.targetRole || ""
+  );
   const defaultDifficulty =
-    user?.preferences?.aiDifficulty === "Beginner"
+    initialDifficulty ||
+    (user?.preferences?.aiDifficulty === "Beginner"
       ? "easy"
       : user?.preferences?.aiDifficulty === "Advanced"
       ? "hard"
-      : "medium";
+      : "medium");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(defaultDifficulty);
-  const [questionCount, setQuestionCount] = useState(5);
+  const [questionCount, setQuestionCount] = useState(initialQuestionCount);
   const [loading, setLoading] = useState(false);
 
   const isResumePrivacy = user?.preferences?.resumePrivacy === true;
@@ -367,7 +490,13 @@ function SetupView({ onStart }: { onStart: (s: InterviewSession) => void }) {
   const [selectedResumeName, setSelectedResumeName] = useState<string | null>(null);
 
   const allRoundKeys = Object.keys(ROUND_META) as Array<keyof typeof ROUND_META>;
-  const [selectedRounds, setSelectedRounds] = useState<Set<string>>(new Set(allRoundKeys));
+  const [selectedRounds, setSelectedRounds] = useState<Set<string>>(
+    new Set(
+      initialSelectedRounds && initialSelectedRounds.length > 0
+        ? initialSelectedRounds
+        : allRoundKeys
+    )
+  );
 
   function toggleRound(key: string) {
     setSelectedRounds((prev) => {

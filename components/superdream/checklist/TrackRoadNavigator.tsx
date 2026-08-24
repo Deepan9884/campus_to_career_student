@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Target,
   Code2,
+  RotateCcw,
 } from "lucide-react";
 
 const ICONS_MAP: Record<string, React.ElementType> = {
@@ -48,10 +49,16 @@ const SECTION_ACCENTS: Record<number, { bg: string; border: string; icon: string
 };
 
 export function TrackRoadNavigator() {
-  const { studentChecklist, setActiveSectionId, setActiveTab } = useSuperDream();
+  const { studentChecklist, setActiveSectionId, setActiveTab, resetChecklistToDefault } = useSuperDream();
   const { summaries, totalObtained, tier } = calculateStudentChecklistScores(studentChecklist);
 
   const qualifiedCount = summaries.filter((s) => s.readinessScore >= 80).length;
+
+  const handleReset = () => {
+    if (window.confirm("Reset all 10 sections to fresh 0% progress? This removes any test/mock metrics and resets everything to 0.")) {
+      resetChecklistToDefault();
+    }
+  };
 
   return (
     <div className="space-y-6 animate-slide-up-fade">
@@ -71,29 +78,29 @@ export function TrackRoadNavigator() {
               Section 0 · Placement Tracking Roadmap
             </div>
             <h2 className="text-2xl sm:text-3xl font-[var(--font-display)] tracking-tight text-[var(--foreground)]">
-              10-Stage Product &amp; Technology
+              10-Stage Product & Technology
               <span className="text-aurora-gradient ml-2">Track Road</span>
             </h2>
             <p className="text-sm text-[var(--muted-foreground)] max-w-2xl leading-relaxed">
-              Comprehensive readiness roadmap for ₹20 LPA &amp; Above campus placement drives. Select any section below to review curriculum, practice questions, and faculty evaluation.
+              Comprehensive readiness roadmap for ₹20 LPA & Above campus placement drives. Select any section below to review curriculum, practice questions, and faculty evaluation.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             {/* Score Badge */}
-            <div className="p-4 rounded-2xl text-right relative overflow-hidden"
+            <div className="p-4 sm:px-6 rounded-2xl text-center flex flex-col items-center justify-center relative overflow-hidden min-w-[200px]"
               style={{
                 background: "linear-gradient(135deg, rgba(167,139,250,0.18) 0%, rgba(249,168,212,0.10) 100%)",
                 border: "1px solid rgba(167,139,250,0.28)",
               }}>
-              <span className="text-[11px] text-[var(--muted-foreground)] font-medium block uppercase tracking-wider">
+              <span className="text-[11px] text-[var(--muted-foreground)] font-semibold block uppercase tracking-wider text-center">
                 Placement Score
               </span>
-              <div className="flex items-baseline justify-end gap-1 mt-0.5">
-                <span className="text-3xl font-[var(--font-mono)] font-bold text-[var(--primary)]">{totalObtained}</span>
-                <span className="text-xs text-[var(--muted-foreground)]">/ 100</span>
+              <div className="flex items-baseline justify-center gap-1.5 mt-1">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[var(--primary)] tabular-nums">{totalObtained}</span>
+                <span className="text-xs text-[var(--muted-foreground)] font-medium">/ 100</span>
               </div>
-              <span className="text-[11px] font-medium block mt-0.5" style={{ color: "#86EFAC" }}>
+              <span className="text-[11px] font-semibold block mt-1 text-center" style={{ color: "#86EFAC" }}>
                 {tier.tierName}
               </span>
             </div>
@@ -114,6 +121,16 @@ export function TrackRoadNavigator() {
               >
                 <Target className="w-4 h-4 text-purple-400" />
                 <span>Skill Analyzer</span>
+              </button>
+
+              <button
+                onClick={handleReset}
+                title="Reset all 10 sections back to 0% clean state"
+                className="px-4 py-1.5 rounded-full text-[11px] font-medium flex items-center gap-1.5 cursor-pointer text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset to 0%</span>
               </button>
             </div>
           </div>

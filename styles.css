@@ -56,7 +56,8 @@
 
   --font-display: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-mono: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-code: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 :root {
@@ -335,6 +336,13 @@
   }
   p, span, div, button, input, label {
     font-family: var(--font-sans);
+  }
+  code, pre, kbd, samp, .font-code {
+    font-family: var(--font-code);
+  }
+  .font-mono {
+    font-family: var(--font-sans) !important;
+    font-variant-numeric: tabular-nums;
   }
   select option, option {
     background-color: var(--popover);
@@ -882,3 +890,81 @@
 .section-accent-amber   { border-left: 3px solid rgba(253, 230, 138, 0.6); }
 .section-accent-sky     { border-left: 3px solid rgba(125, 211, 252, 0.6); }
 .section-accent-peach   { border-left: 3px solid rgba(253, 186, 116, 0.6); }
+
+/* ─── Sonner Toast Liquid Glass & High Contrast Typography ─── */
+[data-sonner-toaster] {
+  font-family: var(--font-sans) !important;
+}
+
+[data-sonner-toast] {
+  background: linear-gradient(135deg, rgba(28, 21, 64, 0.96) 0%, rgba(14, 11, 30, 0.98) 100%) !important;
+  border: 1px solid rgba(167, 139, 250, 0.35) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 24px rgba(167, 139, 250, 0.18) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border-radius: 18px !important;
+  padding: 14px 18px !important;
+  color: #F8FAFC !important;
+}
+
+.light [data-sonner-toast], html.light [data-sonner-toast] {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(167, 139, 250, 0.30) !important;
+  box-shadow: 0 12px 36px rgba(124, 58, 237, 0.15), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  color: #0F172A !important;
+}
+
+[data-sonner-toast] [data-title] {
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  letter-spacing: -0.01em !important;
+  color: #FFFFFF !important;
+  line-height: 1.35 !important;
+}
+
+.light [data-sonner-toast] [data-title], html.light [data-sonner-toast] [data-title] {
+  color: #0F172A !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  font-size: 12.5px !important;
+  line-height: 1.45 !important;
+  color: #DDD6FE !important;
+  opacity: 0.95 !important;
+  margin-top: 3px !important;
+}
+
+.light [data-sonner-toast] [data-description], html.light [data-sonner-toast] [data-description] {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+
+[data-sonner-toast] [data-icon] {
+  margin-right: 12px !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #86EFAC !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #FB7185 !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #FDE68A !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: #A78BFA !important;
+}
+
+[data-sonner-toast] [data-button] {
+  border-radius: 12px !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}

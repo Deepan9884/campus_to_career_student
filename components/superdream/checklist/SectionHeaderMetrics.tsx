@@ -30,24 +30,31 @@ export function SectionHeaderMetrics({
   recommendedStatLabel,
   recommendedStatValue,
   recommendedStatSub,
+  statusColor,
   onBackToRoadmap,
 }: SectionHeaderMetricsProps) {
   const { setActiveSectionId } = useSuperDream();
 
+  const safeReadinessScore = Number.isFinite(readinessScore) ? Math.max(0, Math.min(100, Math.round(readinessScore))) : 0;
+  const safeCompletedTasks = Number.isFinite(completedTasks) ? Math.max(0, Math.round(completedTasks)) : 0;
+  const safeTotalTasks = Number.isFinite(totalTasks) ? Math.max(0, Math.round(totalTasks)) : 0;
+  const safeCompletionPercent = Number.isFinite(completionPercent) ? Math.max(0, Math.min(100, Math.round(completionPercent))) : 0;
+  const safeRecommendedStatValue = String(recommendedStatValue || "").includes("NaN") ? "0%" : recommendedStatValue;
+
   const readinessData = [
-    { name: "Readiness", value: readinessScore },
-    { name: "Gap", value: Math.max(0, 100 - readinessScore) },
+    { name: "Readiness", value: safeReadinessScore },
+    { name: "Gap", value: Math.max(0, 100 - safeReadinessScore) },
   ];
 
   const tasksData = [
-    { name: "Completed", value: completedTasks },
-    { name: "Remaining", value: Math.max(0, totalTasks - completedTasks) },
+    { name: "Completed", value: safeCompletedTasks },
+    { name: "Remaining", value: Math.max(0, safeTotalTasks - safeCompletedTasks) },
   ];
 
   const numericRecommended =
-    typeof recommendedStatValue === "number"
-      ? Math.min(100, Math.round(recommendedStatValue > 100 ? (recommendedStatValue / 2000) * 100 : recommendedStatValue))
-      : parseInt(String(recommendedStatValue).replace(/[^0-9]/g, ""), 10) || 85;
+    typeof safeRecommendedStatValue === "number"
+      ? Math.min(100, Math.round(safeRecommendedStatValue > 100 ? (safeRecommendedStatValue / 2000) * 100 : safeRecommendedStatValue))
+      : parseInt(String(safeRecommendedStatValue).replace(/[^0-9]/g, ""), 10) || 85;
 
   const benchmarkData = [
     { name: "Target Index", value: Math.min(100, Math.max(10, numericRecommended)) },
@@ -76,7 +83,11 @@ export function SectionHeaderMetrics({
             <span className="text-white/20 text-xs">•</span>
             <span
               className="text-[10px] font-medium px-2 py-0.5 rounded-full font-[var(--font-mono)]"
-              style={{ background: "rgba(167,139,250,0.12)", border: "1px solid rgba(167,139,250,0.22)", color: "var(--primary)" }}
+              style={{
+                background: statusColor ? `${statusColor}18` : "rgba(167,139,250,0.12)",
+                border: `1px solid ${statusColor ? `${statusColor}35` : "rgba(167,139,250,0.22)"}`,
+                color: statusColor || "var(--primary)",
+              }}
             >
               Section {sectionId} / 10
             </span>
@@ -119,12 +130,12 @@ export function SectionHeaderMetrics({
               A. Section Readiness
             </span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[var(--primary)]">{readinessScore}%</span>
+              <span className="text-2xl sm:text-3xl font-extrabold text-[var(--primary)]">{safeReadinessScore}%</span>
               <span className="text-[11px] text-[var(--muted-foreground)] font-medium">score</span>
             </div>
             <p className="text-[11px] font-medium flex items-center gap-1" style={{ color: "#86EFAC" }}>
               <CheckCircle2 className="w-3 h-3" />
-              {readinessScore >= 85 ? "Super Dream Qualified" : "In Progress"}
+              {safeReadinessScore >= 85 ? "Super Dream Qualified" : "In Progress"}
             </p>
           </div>
           <div className="w-20 h-20 shrink-0 relative flex items-center justify-center">
@@ -152,7 +163,7 @@ export function SectionHeaderMetrics({
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-xs font-bold" style={{ color: "var(--primary)" }}>{readinessScore}%</span>
+              <span className="text-xs font-bold" style={{ color: "var(--primary)" }}>{safeReadinessScore}%</span>
             </div>
           </div>
         </div>
@@ -171,12 +182,12 @@ export function SectionHeaderMetrics({
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-2xl sm:text-3xl font-extrabold" style={{ color: "#86EFAC" }}>
-                {completedTasks}
-                <span className="text-xs font-normal text-[var(--muted-foreground)]"> / {totalTasks}</span>
+                {safeCompletedTasks}
+                <span className="text-xs font-normal text-[var(--muted-foreground)]"> / {safeTotalTasks}</span>
               </span>
             </div>
             <p className="text-[11px] font-medium flex items-center gap-1" style={{ color: "#86EFAC" }}>
-              <CheckCircle2 className="w-3 h-3" /> {completionPercent}% deliverables met
+              <CheckCircle2 className="w-3 h-3" /> {safeCompletionPercent}% deliverables met
             </p>
           </div>
           <div className="w-20 h-20 shrink-0 relative flex items-center justify-center">
@@ -204,7 +215,7 @@ export function SectionHeaderMetrics({
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-xs font-bold" style={{ color: "#86EFAC" }}>{completionPercent}%</span>
+              <span className="text-xs font-bold" style={{ color: "#86EFAC" }}>{safeCompletionPercent}%</span>
             </div>
           </div>
         </div>
@@ -223,7 +234,7 @@ export function SectionHeaderMetrics({
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-extrabold truncate max-w-[140px]" style={{ color: "#FDE68A" }}>
-                {recommendedStatValue}
+                {safeRecommendedStatValue}
               </span>
             </div>
             <p className="text-[11px] text-[var(--muted-foreground)] font-medium truncate max-w-[160px]">

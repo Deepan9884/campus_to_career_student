@@ -67,7 +67,7 @@ export function SuperDreamCourses() {
     try {
       const result = await verifyCourseCertificateAI({
         courseTitle: activeCourseModal.title,
-        studentName: user?.name || "Deepan S",
+        studentName: user?.name || "Student",
         credentialId,
         issuedBy: issuerName,
         proofFileOrUrl: proofUrl || selectedFileName,
@@ -84,7 +84,7 @@ export function SuperDreamCourses() {
             credentialId,
             issuedBy: issuerName,
             issueDate: new Date().toISOString().split("T")[0],
-            studentName: user?.name || "Deepan S",
+            studentName: user?.name || "Student",
             verificationScore: result.score,
             verifiedAt: new Date().toISOString(),
             verificationChecks: result.verificationChecks,
@@ -151,19 +151,28 @@ export function SuperDreamCourses() {
       </GlassCard>
 
       {/* Courses Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {courses.map((course) => {
-          const isVerified = course.status === "completed";
-          const isLocked = course.status === "locked";
+      {courses.length === 0 ? (
+        <GlassCard className="p-12 text-center text-slate-400 space-y-3 border-slate-800 bg-slate-900/40">
+          <GraduationCap className="w-10 h-10 text-slate-500 mx-auto" />
+          <h3 className="text-base font-bold text-white">No Courses Assigned Yet</h3>
+          <p className="text-xs max-w-md mx-auto">
+            Your faculty mentor or placement cell will curate and assign accredited certification courses here.
+          </p>
+        </GlassCard>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {courses.map((course) => {
+            const isVerified = course.status === "completed";
+            const isLocked = course.status === "locked";
 
-          return (
-            <GlassCard
-              key={course.id}
-              className={cn(
-                "p-6 border-slate-800 bg-slate-900/70 flex flex-col justify-between gap-5 card-hover-lift transition-all relative overflow-hidden",
-                isVerified && "border-emerald-500/40 bg-slate-900/85"
-              )}
-            >
+            return (
+              <GlassCard
+                key={course.id}
+                className={cn(
+                  "p-6 border-slate-800 bg-slate-900/70 flex flex-col justify-between gap-5 card-hover-lift transition-all relative overflow-hidden",
+                  isVerified && "border-emerald-500/40 bg-slate-900/85"
+                )}
+              >
               {isVerified && (
                 <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-teal-500 text-slate-950 text-[10px] font-black uppercase px-3 py-1 rounded-bl-xl flex items-center gap-1 shadow-md">
                   <Check className="w-3 h-3 stroke-[3]" /> AI Verified
@@ -258,6 +267,7 @@ export function SuperDreamCourses() {
           );
         })}
       </div>
+      )}
 
       {/* AI Verification Scanner Modal */}
       {activeCourseModal && (
@@ -279,7 +289,7 @@ export function SuperDreamCourses() {
               </div>
               <h3 className="text-lg font-bold text-white">{activeCourseModal.title}</h3>
               <p className="text-xs text-slate-400">
-                Candidate: <strong className="text-white">{user?.name || "Deepan S"}</strong> • Provider: {activeCourseModal.provider}
+                Candidate: <strong className="text-white">{user?.name || "Student"}</strong> • Provider: {activeCourseModal.provider}
               </p>
             </div>
 
@@ -377,7 +387,13 @@ export function SuperDreamCourses() {
                   <label className="text-xs font-semibold text-[var(--foreground)] block mb-1">
                     Upload Certificate PDF / Image
                   </label>
-                  <div className="p-4 rounded-2xl panel-slot hover:bg-white/[0.08] hover:border-[var(--primary)]/40 transition flex items-center justify-center gap-3 cursor-pointer text-center">
+                  <label className="p-4 rounded-2xl panel-slot hover:bg-white/[0.08] hover:border-[var(--primary)]/40 transition flex items-center justify-center gap-3 cursor-pointer text-center block">
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      className="sr-only"
+                      onChange={(e) => setSelectedFileName(e.target.files?.[0]?.name || "")}
+                    />
                     <div className="w-10 h-10 rounded-xl bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 flex items-center justify-center shrink-0">
                       <FileUp className="w-5 h-5" />
                     </div>
@@ -387,7 +403,7 @@ export function SuperDreamCourses() {
                       </p>
                       <p className="text-[11px] text-[var(--muted-foreground)] font-medium">PDF, PNG, JPG up to 10MB</p>
                     </div>
-                  </div>
+                  </label>
                 </div>
 
                 <div className="flex justify-end gap-2.5 pt-2">

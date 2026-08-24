@@ -5,18 +5,13 @@ import {
   calculateStudentChecklistScores,
   calculateCompanyMatches,
   generatePlacementSWOT,
-  RECOMMENDED_LEARNING_PATHS_OPTIONS,
   SUPER_DREAM_COMPANIES,
-  getReadinessTier,
-  type CategoryScoreItem,
 } from "@/lib/super-dream-checklist";
 import {
   Crown,
   Award,
   CheckCircle2,
   Printer,
-  PenTool,
-  Sliders,
   Building2,
   Layers,
   Sparkles,
@@ -32,7 +27,6 @@ import {
   Briefcase,
   Zap,
   BarChart3,
-  RefreshCw,
   Compass,
   FileCheck,
   Terminal,
@@ -50,31 +44,7 @@ interface Section10Props {
   onOpenPrintModal?: () => void;
 }
 
-type TabType = "scorecard" | "company-fit" | "gap-matrix" | "ai-advisor" | "institutional";
-
-const SMART_MENTOR_PRESETS = [
-  {
-    label: "👑 FAANG & Elite Fast-Track",
-    strengths: "Outstanding algorithmic speed, high contest rating (>1800), clean low-latency code, and strong OS memory foundation.",
-    improvements: "Refine multi-region distributed system design and practice complex trade-off justifications in Bar Raiser loops.",
-    actionPlan: "Target 5 mock Bar Raiser loops, solve 50 Hard DP/Graph problems on LeetCode, and publish 2 high-level system architecture blogs.",
-    paths: ["DSA Intensive", "AI & Generative AI", "Cloud & DevOps"],
-  },
-  {
-    label: "🚀 High-Scale Cloud & Microservices",
-    strengths: "Production-grade microservices portfolio, automated Docker/K8s pipelines, and verified AWS cloud architecture.",
-    improvements: "Deepen database internals (LSM trees vs B-Trees, raft consensus) and asynchronous message broker patterns.",
-    actionPlan: "Deploy a distributed rate limiter and event-driven pipeline on AWS EKS with Terraform IaC, target CKA certification.",
-    paths: ["Full Stack Development", "Cloud & DevOps", "Data Engineering"],
-  },
-  {
-    label: "💎 Algorithmic & Core Systems",
-    strengths: "Deep C++/Java concurrency, solid understanding of kernel memory models, and zero-dependency programming skills.",
-    improvements: "Increase live competitive programming contest participation and broaden full-stack REST API familiarity.",
-    actionPlan: "Participate in 10 Codeforces Div 2/3 rounds, build a high-performance Redis clone from scratch in C++/Go.",
-    paths: ["DSA Intensive", "Competitive Programming", "Cyber Security"],
-  },
-];
+type TabType = "scorecard" | "company-fit" | "gap-matrix" | "ai-advisor";
 
 // 9 Category visual themes
 const CATEGORY_VISUALS: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; sectionId: number }> = {
@@ -99,20 +69,12 @@ function getCategoryVisual(name: string) {
 }
 
 export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Props) {
-  const { studentChecklist, updateMentorEvaluation, setActiveSectionId } = useSuperDream();
+  const { studentChecklist, setActiveSectionId } = useSuperDream();
   const [activeSubTab, setActiveSubTab] = useState<TabType>("scorecard");
 
   // Filter state for company matcher
   const [companyTierFilter, setCompanyTierFilter] = useState<string>("all");
   const [companySearchQuery, setCompanySearchQuery] = useState<string>("");
-
-  // What-If Simulation Sandbox State
-  const [simActive, setSimActive] = useState<boolean>(false);
-  const [simDsaBoost, setSimDsaBoost] = useState<number>(0);
-  const [simCsBoost, setSimCsBoost] = useState<number>(0);
-  const [simDevBoost, setSimDevBoost] = useState<number>(0);
-  const [simCertsBoost, setSimCertsBoost] = useState<number>(0);
-  const [simIvBoost, setSimIvBoost] = useState<number>(0);
 
   const { categoryScores, totalObtained, tier, summaries } = useMemo(
     () => calculateStudentChecklistScores(studentChecklist),
@@ -120,50 +82,10 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
   );
   const summary = summaries.find((s) => s.sectionId === 10) || summaries[9];
 
-  const evalData = studentChecklist.section10Evaluation;
-
-  // Simulated Scores Calculation
-  const simulatedScores = useMemo(() => {
-    if (!simActive) {
-      return {
-        categoryScores,
-        totalObtained,
-        tier,
-      };
-    }
-
-    const simCats: CategoryScoreItem[] = categoryScores.map((c) => {
-      let extra = 0;
-      if (c.key === "Coding & DSA") extra = (simDsaBoost / 300) * 3;
-      if (c.key === "Core CS Subjects") extra = (simCsBoost / 6) * 3;
-      if (c.key === "Software Development") extra = (simDevBoost / 10) * 2.5;
-      if (c.key === "Cloud & DevOps" || c.key === "Communication & Leadership") extra = (simCertsBoost / 4) * 2;
-      if (c.key === "Interview Readiness") extra = (simIvBoost / 25) * 2.5;
-
-      const newObtained = Math.min(c.maxMarks, Math.round((c.obtained + extra) * 10) / 10);
-      return {
-        ...c,
-        obtained: newObtained,
-        obtainedMarks: newObtained,
-      };
-    });
-
-    const newTotal = Math.min(100, Math.round(simCats.reduce((acc, curr) => acc + curr.obtained, 0)));
-    const newTier = getReadinessTier(newTotal);
-
-    return {
-      categoryScores: simCats,
-      totalObtained: newTotal,
-      tier: newTier,
-    };
-  }, [simActive, simDsaBoost, simCsBoost, simDevBoost, simCertsBoost, simIvBoost, categoryScores, totalObtained, tier]);
-
   // Company Match Results
   const companyMatches = useMemo(() => {
-    const scores = simActive ? simulatedScores.categoryScores : categoryScores;
-    const total = simActive ? simulatedScores.totalObtained : totalObtained;
-    return calculateCompanyMatches(scores, total);
-  }, [simActive, simulatedScores, categoryScores, totalObtained]);
+    return calculateCompanyMatches(categoryScores, totalObtained);
+  }, [categoryScores, totalObtained]);
 
   const filteredCompanyMatches = useMemo(() => {
     return companyMatches.filter((item) => {
@@ -188,35 +110,6 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
     return generatePlacementSWOT(studentChecklist, categoryScores, totalObtained);
   }, [studentChecklist, categoryScores, totalObtained]);
 
-  const toggleLearningPath = (path: string) => {
-    const current = evalData.recommendedLearningPaths || [];
-    const next = current.includes(path)
-      ? current.filter((p) => p !== path)
-      : [...current, path];
-    updateMentorEvaluation({ recommendedLearningPaths: next });
-    toast.success(`Updated learning path: ${path}`);
-  };
-
-  const applyMentorPreset = (preset: (typeof SMART_MENTOR_PRESETS)[0]) => {
-    updateMentorEvaluation({
-      strengths: preset.strengths,
-      areasForImprovement: preset.improvements,
-      actionPlanNextSemester: preset.actionPlan,
-      recommendedLearningPaths: preset.paths,
-    });
-    toast.success(`Applied ${preset.label} rubric template!`);
-  };
-
-  const resetSimulation = () => {
-    setSimDsaBoost(0);
-    setSimCsBoost(0);
-    setSimDevBoost(0);
-    setSimCertsBoost(0);
-    setSimIvBoost(0);
-    setSimActive(false);
-    toast.info("Simulation sandbox reset to current verified portfolio.");
-  };
-
   return (
     <div className="space-y-6 font-[var(--font-sans)]">
       {/* 1. 3 Calm Pie Charts Header */}
@@ -224,13 +117,13 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
         sectionId={10}
         title="10. Placement Readiness Command Center"
         subtitle="Comprehensive 9-domain evaluation, LPA package forecasting, FAANG company matching matrix, AI SWOT advisor & institutional signoff."
-        readinessScore={simActive ? simulatedScores.totalObtained : summary.readinessScore}
+        readinessScore={summary.readinessScore}
         completedTasks={summary.completedTasks}
         totalTasks={summary.totalTasks}
-        completionPercent={simActive ? simulatedScores.totalObtained : summary.completionPercent}
-        recommendedStatLabel={simActive ? "Simulated Target Tier" : summary.recommendedStatLabel}
-        recommendedStatValue={simActive ? simulatedScores.tier.packageRange : summary.recommendedStatValue}
-        recommendedStatSub={simActive ? simulatedScores.tier.tierName : summary.recommendedStatSub}
+        completionPercent={summary.completionPercent}
+        recommendedStatLabel={summary.recommendedStatLabel}
+        recommendedStatValue={summary.recommendedStatValue}
+        recommendedStatSub={summary.recommendedStatSub}
         statusColor={summary.statusColor}
       />
 
@@ -247,7 +140,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
             )}
           >
             <Crown className="w-3.5 h-3.5 text-[var(--warning)]" />
-            <span>Scorecard &amp; Tier</span>
+            <span>Scorecard & Tier</span>
           </button>
 
           <button
@@ -289,42 +182,11 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
             )}
           >
             <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
-            <span>AI SWOT &amp; Sprint</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab("institutional")}
-            className={cn(
-              "px-4 py-2 rounded-full text-xs font-semibold transition flex items-center gap-2 cursor-pointer whitespace-nowrap active:scale-95",
-              activeSubTab === "institutional"
-                ? "bg-white/[0.14] text-white shadow-sm border border-white/[0.18]"
-                : "text-[var(--muted-foreground)] hover:text-white hover:bg-white/[0.06]"
-            )}
-          >
-            <PenTool className="w-3.5 h-3.5 text-[var(--warning)]" />
-            <span>Faculty Signoff &amp; Dossier</span>
+            <span>AI SWOT & Sprint</span>
           </button>
         </div>
 
         <div className="flex items-center gap-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-white/[0.08]">
-          <button
-            onClick={() => {
-              setSimActive(!simActive);
-              if (!simActive) {
-                toast.success("What-If Simulation Sandbox activated! Adjust prospective parameters below.");
-              }
-            }}
-            className={cn(
-              "px-4 py-2 rounded-full text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer border active:scale-95 shadow-sm",
-              simActive
-                ? "bg-amber-500/20 text-amber-200 border-amber-500/40"
-                : "bg-white/[0.06] hover:bg-white/[0.12] text-[var(--foreground)] border-white/[0.12]"
-            )}
-          >
-            <Sliders className="w-3.5 h-3.5 text-[var(--warning)]" />
-            <span>{simActive ? "Sandbox Active" : "What-If Simulator"}</span>
-          </button>
-
           {onOpenPrintModal && (
             <button
               onClick={onOpenPrintModal}
@@ -336,135 +198,6 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
           )}
         </div>
       </div>
-
-      {/* What-If Simulator Sandbox Bar (when active) */}
-      {simActive && (
-        <div className="p-5 sm:p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-slate-900/90 to-amber-950/20 space-y-4 shadow-[0_20px_70px_rgba(0,0,0,0.6)] animate-in fade-in panel-card">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-500/20 pb-3">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-[var(--warning)] text-[10px] font-bold uppercase">
-                  Sandbox Active
-                </span>
-                <h4 className="text-sm font-semibold text-[var(--foreground)] tracking-tight">
-                  Target What-If Simulator &amp; Reverse Goal Calculator
-                </h4>
-              </div>
-              <p className="text-xs text-[var(--muted-foreground)]">
-                Adjust prospective achievements to simulate potential score increases, package jumps, and new company unlocks.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-medium block">Simulated Score</span>
-                <span className="text-2xl font-black text-[var(--warning)]">
-                  {simulatedScores.totalObtained}
-                  <span className="text-xs text-[var(--muted-foreground)] font-normal"> / 100</span>
-                </span>
-              </div>
-              <button
-                onClick={resetSimulation}
-                className="px-3 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-[var(--foreground)] text-xs font-semibold flex items-center gap-1 transition cursor-pointer border border-white/[0.12] active:scale-95"
-              >
-                <RefreshCw className="w-3 h-3 text-[var(--muted-foreground)]" /> Reset
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 text-xs">
-            {/* Slider 1: DSA */}
-            <div className="p-3.5 rounded-2xl panel-slot border border-white/[0.10] space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--foreground)]">+ LeetCode Solved</span>
-                <span className="text-[var(--warning)] font-bold">+{simDsaBoost}</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={300}
-                step={25}
-                value={simDsaBoost}
-                onChange={(e) => setSimDsaBoost(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer"
-              />
-              <span className="text-[10px] text-[var(--muted-foreground)] block">Target: 300+ Problems</span>
-            </div>
-
-            {/* Slider 2: CS Fundamentals */}
-            <div className="p-3.5 rounded-2xl panel-slot border border-white/[0.10] space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--foreground)]">+ 5★ CS Subjects</span>
-                <span className="text-[var(--primary)] font-bold">+{simCsBoost}</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={6}
-                step={1}
-                value={simCsBoost}
-                onChange={(e) => setSimCsBoost(Number(e.target.value))}
-                className="w-full accent-sky-400 cursor-pointer"
-              />
-              <span className="text-[10px] text-[var(--muted-foreground)] block">Target: All 12 Subjects</span>
-            </div>
-
-            {/* Slider 3: Dev Deliverables */}
-            <div className="p-3.5 rounded-2xl panel-slot border border-white/[0.10] space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--foreground)]">+ Production Apps</span>
-                <span className="text-[var(--success)] font-bold">+{simDevBoost}</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={10}
-                step={1}
-                value={simDevBoost}
-                onChange={(e) => setSimDevBoost(Number(e.target.value))}
-                className="w-full accent-emerald-400 cursor-pointer"
-              />
-              <span className="text-[10px] text-[var(--muted-foreground)] block">Target: 10 Microservices</span>
-            </div>
-
-            {/* Slider 4: Certifications */}
-            <div className="p-3.5 rounded-2xl panel-slot border border-white/[0.10] space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--foreground)]">+ Cloud Badges</span>
-                <span className="text-[var(--primary)] font-bold">+{simCertsBoost}</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={4}
-                step={1}
-                value={simCertsBoost}
-                onChange={(e) => setSimCertsBoost(Number(e.target.value))}
-                className="w-full accent-indigo-400 cursor-pointer"
-              />
-              <span className="text-[10px] text-[var(--muted-foreground)] block">Target: AWS / CKA / Azure</span>
-            </div>
-
-            {/* Slider 5: Mock Interviews */}
-            <div className="p-3.5 rounded-2xl panel-slot border border-white/[0.10] space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--foreground)]">+ Mock Tech Rounds</span>
-                <span className="text-[var(--accent)] font-bold">+{simIvBoost}</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={25}
-                step={5}
-                value={simIvBoost}
-                onChange={(e) => setSimIvBoost(Number(e.target.value))}
-                className="w-full accent-purple-400 cursor-pointer"
-              />
-              <span className="text-[10px] text-[var(--muted-foreground)] block">Target: 40 Total Rounds</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* SUB-TAB 1: EXECUTIVE SCORECARD & TIER ENGINE */}
@@ -480,13 +213,13 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                   <span>Official Placement Readiness Forecast</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--foreground)] tracking-tight">
-                  {simActive ? simulatedScores.tier.tierName : tier.tierName}{" "}
+                  {tier.tierName}{" "}
                   <span className="text-[var(--warning)] font-bold text-lg sm:text-2xl">
-                    ({simActive ? simulatedScores.tier.packageRange : tier.packageRange})
+                    ({tier.packageRange})
                   </span>
                 </h3>
                 <p className="text-xs sm:text-sm text-[var(--muted-foreground)] max-w-2xl leading-relaxed">
-                  {simActive ? simulatedScores.tier.recommendation : tier.recommendation}
+                  {tier.recommendation}
                 </p>
               </div>
 
@@ -497,7 +230,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                   </span>
                   <div className="flex items-baseline justify-center gap-1 mt-0.5">
                     <span className="text-3xl sm:text-4xl font-black text-[var(--warning)]">
-                      {simActive ? simulatedScores.totalObtained : totalObtained}
+                      {totalObtained}
                     </span>
                     <span className="text-xs text-[var(--muted-foreground)]">/ 100</span>
                   </div>
@@ -519,7 +252,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
               <div
                 className={cn(
                   "p-3 rounded-2xl panel-slot border transition-all duration-300",
-                  (simActive ? simulatedScores.totalObtained : totalObtained) >= 95
+                  totalObtained >= 95
                     ? "border-amber-500/50 bg-amber-500/15 shadow-[0_0_25px_rgba(251,191,36,0.2)] ring-1 ring-amber-400/40"
                     : "border-white/[0.08] text-[var(--muted-foreground)] opacity-80"
                 )}
@@ -531,8 +264,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
               <div
                 className={cn(
                   "p-3 rounded-2xl panel-slot border transition-all duration-300",
-                  (simActive ? simulatedScores.totalObtained : totalObtained) >= 90 &&
-                    (simActive ? simulatedScores.totalObtained : totalObtained) < 95
+                  totalObtained >= 90 && totalObtained < 95
                     ? "border-sky-500/50 bg-sky-500/15 shadow-[0_0_25px_rgba(56,189,248,0.2)] ring-1 ring-sky-400/40"
                     : "border-white/[0.08] text-[var(--muted-foreground)] opacity-80"
                 )}
@@ -544,8 +276,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
               <div
                 className={cn(
                   "p-3 rounded-2xl panel-slot border transition-all duration-300",
-                  (simActive ? simulatedScores.totalObtained : totalObtained) >= 80 &&
-                    (simActive ? simulatedScores.totalObtained : totalObtained) < 90
+                  totalObtained >= 80 && totalObtained < 90
                     ? "border-indigo-500/50 bg-indigo-500/15 shadow-[0_0_25px_rgba(129,140,248,0.2)] ring-1 ring-indigo-400/40"
                     : "border-white/[0.08] text-[var(--muted-foreground)] opacity-80"
                 )}
@@ -557,8 +288,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
               <div
                 className={cn(
                   "p-3 rounded-2xl panel-slot border transition-all duration-300",
-                  (simActive ? simulatedScores.totalObtained : totalObtained) >= 70 &&
-                    (simActive ? simulatedScores.totalObtained : totalObtained) < 80
+                  totalObtained >= 70 && totalObtained < 80
                     ? "border-emerald-500/50 bg-emerald-500/15 shadow-[0_0_25px_rgba(52,211,153,0.2)] ring-1 ring-emerald-400/40"
                     : "border-white/[0.08] text-[var(--muted-foreground)] opacity-80"
                 )}
@@ -570,7 +300,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
               <div
                 className={cn(
                   "p-3 rounded-2xl panel-slot border transition-all duration-300",
-                  (simActive ? simulatedScores.totalObtained : totalObtained) < 70
+                  totalObtained < 70
                     ? "border-rose-500/50 bg-rose-500/15 shadow-[0_0_25px_rgba(251,113,133,0.2)] ring-1 ring-rose-400/40"
                     : "border-white/[0.08] text-[var(--muted-foreground)] opacity-80"
                 )}
@@ -598,7 +328,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(simActive ? simulatedScores.categoryScores : categoryScores).map((cat, idx) => {
+              {categoryScores.map((cat, idx) => {
                 const catName = cat?.categoryName || cat?.category || cat?.key || `Category ${idx + 1}`;
                 const obtained = cat?.obtainedMarks ?? cat?.obtained ?? 0;
                 const max = cat?.maxMarks || 1;
@@ -613,7 +343,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2.5">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div
                             className="w-10 h-10 rounded-2xl grid place-items-center shrink-0 shadow-sm"
                             style={{
@@ -624,17 +354,17 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                           >
                             <Icon className="w-5 h-5" />
                           </div>
-                          <div>
-                            <h4 className="text-sm font-semibold text-[var(--foreground)] group-hover:text-white transition tracking-tight">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-semibold text-[var(--foreground)] group-hover:text-white transition tracking-tight truncate">
                               {catName}
                             </h4>
-                            <span className="text-[10px] font-mono text-[var(--muted-foreground)]">
+                            <span className="text-[10px] font-mono text-[var(--muted-foreground)] block truncate">
                               Weightage: {max} Marks
                             </span>
                           </div>
                         </div>
 
-                        <div className="text-right shrink-0">
+                        <div className="text-right shrink-0 pl-2">
                           <span className="text-lg font-bold font-mono text-[var(--foreground)]">{obtained}</span>
                           <span className="text-xs text-[var(--muted-foreground)] font-mono"> / {max}</span>
                         </div>
@@ -696,7 +426,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-full bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/30 text-[10px] font-mono font-bold uppercase">
-                  FAANG &amp; Tier-1 Matcher
+                  FAANG & Tier-1 Matcher
                 </span>
                 <h3 className="text-base font-semibold text-[var(--foreground)] tracking-tight">
                   Super Dream Company Match Engine
@@ -780,7 +510,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                   {/* Top: Company Header & Match Badge */}
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div
                           className={cn(
                             "w-11 h-11 rounded-2xl grid place-items-center font-bold text-xs shrink-0 border shadow-sm",
@@ -789,23 +519,23 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                         >
                           {company.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <div>
-                          <h4 className="text-sm font-semibold text-[var(--foreground)] tracking-tight group-hover:text-white transition">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-semibold text-[var(--foreground)] tracking-tight group-hover:text-white transition truncate">
                             {company.name}
                           </h4>
-                          <span className="text-xs text-[var(--muted-foreground)] block truncate mt-0.5">
+                          <span className="text-xs text-[var(--muted-foreground)] block truncate mt-0.5" title={company.role}>
                             {company.role}
                           </span>
                         </div>
                       </div>
 
-                      <div className="text-right shrink-0">
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[var(--warning)] font-mono text-[11px] font-bold block">
+                      <div className="text-right shrink-0 pl-2">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[var(--warning)] font-mono text-[11px] font-bold inline-block whitespace-nowrap">
                           {company.packageLPA}
                         </span>
                         <span
                           className={cn(
-                            "text-[10px] font-semibold block mt-1",
+                            "text-[10px] font-semibold block mt-1 whitespace-nowrap",
                             status === "Direct Fit"
                               ? "text-[var(--success)]"
                               : status === "Near Target"
@@ -871,7 +601,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                     ) : (
                       <div className="p-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-[11px] text-[var(--success)] font-semibold flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
-                        <span>Eligible for Fast-Track Shortlist &amp; OA Bypass</span>
+                        <span>Eligible for Fast-Track Shortlist & OA Bypass</span>
                       </div>
                     )}
 
@@ -907,7 +637,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                   Institutional Diagnosis
                 </span>
                 <h3 className="text-base font-semibold text-[var(--foreground)] tracking-tight">
-                  9 Evaluation Pillars &amp; Gap Matrix
+                  9 Evaluation Pillars & Gap Matrix
                 </h3>
               </div>
               <p className="text-xs text-[var(--muted-foreground)] max-w-2xl">
@@ -1023,7 +753,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                   <Sparkles className="w-3 h-3 text-[var(--accent)]" /> AI Strategic Advisor
                 </span>
                 <h3 className="text-base font-semibold text-[var(--foreground)] tracking-tight">
-                  Super Dream Placement SWOT &amp; 30-Day Sprint
+                  Super Dream Placement SWOT & 30-Day Sprint
                 </h3>
               </div>
               <p className="text-xs text-[var(--muted-foreground)] max-w-2xl">
@@ -1112,7 +842,7 @@ ${swotAnalysis.threats.map((t) => "• " + t).join("\n")}
               <div className="flex items-center justify-between border-b border-sky-500/20 pb-3">
                 <h4 className="text-xs font-semibold text-[var(--primary)] uppercase tracking-wider flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-[var(--primary)]" />
-                  <span>Hiring Opportunities &amp; Super Dream Tracks</span>
+                  <span>Hiring Opportunities & Super Dream Tracks</span>
                 </h4>
                 <span className="text-[10px] font-mono text-[var(--primary)] bg-[var(--primary)]/10 px-2.5 py-0.5 rounded-full border border-sky-500/20">
                   High Upside
@@ -1133,7 +863,7 @@ ${swotAnalysis.threats.map((t) => "• " + t).join("\n")}
               <div className="flex items-center justify-between border-b border-rose-500/20 pb-3">
                 <h4 className="text-xs font-semibold text-rose-300 uppercase tracking-wider flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-rose-400" />
-                  <span>Hiring Bar Hurdles &amp; Elimination Factors</span>
+                  <span>Hiring Bar Hurdles & Elimination Factors</span>
                 </h4>
                 <span className="text-[10px] font-mono text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
                   Risk Mitigation
@@ -1192,203 +922,6 @@ ${swotAnalysis.threats.map((t) => "• " + t).join("\n")}
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* SUB-TAB 5: FACULTY MENTOR EVALUATION & INSTITUTIONAL DOSSIER */}
-      {/* ========================================================================= */}
-      {activeSubTab === "institutional" && (
-        <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="panel-card rounded-3xl p-6 sm:p-7 border border-white/[0.18] shadow-[0_15px_50px_rgba(0,0,0,0.5)] space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2">
-                  <PenTool className="w-4 h-4 text-[var(--warning)]" />
-                  <span>Faculty Mentor Evaluation &amp; Institutional Signoff</span>
-                </h3>
-                <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                  Official qualitative review and endorsements matching Easwari Engineering College Placement Protocol.
-                </p>
-              </div>
-
-              {/* Predefined Smart Template Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                <span className="text-[11px] text-[var(--muted-foreground)] font-medium shrink-0 mr-1">Smart Presets:</span>
-                {SMART_MENTOR_PRESETS.map((preset, pIdx) => (
-                  <button
-                    key={pIdx}
-                    onClick={() => applyMentorPreset(preset)}
-                    className="px-3 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-[var(--foreground)] text-[11px] font-semibold transition cursor-pointer border border-white/[0.12] shrink-0 active:scale-95"
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Qualitative Feedback Textareas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[var(--foreground)]/90">Student Strengths:</label>
-                <textarea
-                  rows={4}
-                  value={evalData.strengths}
-                  onChange={(e) => updateMentorEvaluation({ strengths: e.target.value })}
-                  placeholder="e.g. Exceptional DSA speed, distributed consensus mastery, high system design clarity..."
-                  className="w-full p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.09] text-xs text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.07] leading-relaxed transition"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[var(--foreground)]/90">Areas for Improvement:</label>
-                <textarea
-                  rows={4}
-                  value={evalData.areasForImprovement}
-                  onChange={(e) => updateMentorEvaluation({ areasForImprovement: e.target.value })}
-                  placeholder="e.g. Expand Kubernetes ingress controller configurations, practice LLD state machines..."
-                  className="w-full p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.09] text-xs text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.07] leading-relaxed transition"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[var(--foreground)]/90">Action Plan (Next Semester):</label>
-                <textarea
-                  rows={4}
-                  value={evalData.actionPlanNextSemester}
-                  onChange={(e) => updateMentorEvaluation({ actionPlanNextSemester: e.target.value })}
-                  placeholder="e.g. Complete 5 mock Bar Raiser loops, publish 2 system design blogs, target LeetCode 2000+..."
-                  className="w-full p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.09] text-xs text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.07] leading-relaxed transition"
-                />
-              </div>
-            </div>
-
-            {/* Recommended Learning Paths Checkboxes */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <h4 className="text-xs font-semibold text-[var(--foreground)]/90 uppercase tracking-wider">
-                Recommended Next Semester Learning Paths (Multi-Select)
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
-                {RECOMMENDED_LEARNING_PATHS_OPTIONS.map((path) => {
-                  const isChecked = (evalData.recommendedLearningPaths || []).includes(path);
-
-                  return (
-                    <button
-                      key={path}
-                      onClick={() => toggleLearningPath(path)}
-                      className={cn(
-                        "p-3 rounded-2xl text-xs font-semibold text-left transition flex items-center gap-2.5 cursor-pointer border active:scale-95",
-                        isChecked
-                          ? "bg-[var(--primary)]/15 text-[var(--primary)] border-[var(--primary)]/35 shadow-sm"
-                          : "panel-slot text-[var(--muted-foreground)] border-white/[0.10] hover:text-[var(--foreground)]"
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "w-4 h-4 rounded-md grid place-items-center shrink-0 text-[10px]",
-                          isChecked
-                            ? "bg-[var(--primary)] text-white shadow-sm"
-                            : "border border-white/20 bg-white/[0.04]"
-                        )}
-                      >
-                        {isChecked && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                      <span className="truncate">{path}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Official Institutional Signatures Triad */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-white/[0.08] text-xs">
-              <div className="p-4 rounded-2xl panel-slot border border-white/[0.12] space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold">1. Student Digital Sign</span>
-                  {evalData.studentSignature && (
-                    <span className="text-[10px] text-[var(--success)] font-mono font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Signed
-                    </span>
-                  )}
-                </div>
-                <input
-                  type="text"
-                  value={evalData.studentSignature}
-                  onChange={(e) => updateMentorEvaluation({ studentSignature: e.target.value })}
-                  placeholder="Full Name / Digital Signature"
-                  className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.09] text-[var(--foreground)] text-xs font-mono focus:outline-none focus:border-[var(--primary)]/40"
-                />
-                <span className="text-[10px] text-[var(--muted-foreground)] block font-mono">
-                  {studentChecklist.profile.name || "Student"} ({studentChecklist.profile.registerNumber || "Reg No"})
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl panel-slot border border-white/[0.12] space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold">2. Faculty Mentor Sign</span>
-                  {evalData.facultyMentorSignature && (
-                    <span className="text-[10px] text-[var(--success)] font-mono font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Endorsed
-                    </span>
-                  )}
-                </div>
-                <input
-                  type="text"
-                  value={evalData.facultyMentorSignature}
-                  onChange={(e) => updateMentorEvaluation({ facultyMentorSignature: e.target.value })}
-                  placeholder="Faculty Mentor Name / Sign"
-                  className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.09] text-[var(--foreground)] text-xs font-mono focus:outline-none focus:border-[var(--primary)]/40"
-                />
-                <span className="text-[10px] text-[var(--muted-foreground)] block font-mono">
-                  {studentChecklist.profile.facultyMentor || "Assigned Faculty Mentor"}
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl panel-slot border border-white/[0.12] space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold">3. HoD / Placement Dean</span>
-                  {evalData.hodSignature && (
-                    <span className="text-[10px] text-[var(--success)] font-mono font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Authorized
-                    </span>
-                  )}
-                </div>
-                <input
-                  type="text"
-                  value={evalData.hodSignature}
-                  onChange={(e) => updateMentorEvaluation({ hodSignature: e.target.value })}
-                  placeholder="HoD / Placement Dean Signature"
-                  className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.09] text-[var(--foreground)] text-xs font-mono focus:outline-none focus:border-[var(--primary)]/40"
-                />
-                <span className="text-[10px] text-[var(--muted-foreground)] block font-mono">
-                  Head of Department / Placement Directorate
-                </span>
-              </div>
-            </div>
-
-            {/* Printable Document Quick Action */}
-            {onOpenPrintModal && (
-              <div className="p-5 rounded-2xl panel-slot border border-[var(--primary)]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <h4 className="text-xs font-semibold text-[var(--foreground)] flex items-center gap-2">
-                    <FileCheck className="w-4 h-4 text-[var(--primary)]" />
-                    <span>Official Easwari Engineering College Placement Dossier</span>
-                  </h4>
-                  <p className="text-xs text-[var(--muted-foreground)]">
-                    Generates the official printable physical checklist document with academic endorsements and full breakdown.
-                  </p>
-                </div>
-
-                <button
-                  onClick={onOpenPrintModal}
-                  className="px-5 py-2.5 rounded-full btn-gradient btn-gradient-hover text-white text-xs font-semibold transition flex items-center gap-2 cursor-pointer shrink-0 shadow-sm active:scale-95"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Print Dossier PDF</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}

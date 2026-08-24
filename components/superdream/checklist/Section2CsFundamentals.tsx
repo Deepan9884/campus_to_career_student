@@ -687,7 +687,7 @@ export function Section2CsFundamentals() {
                   </div>
 
                   <div className="pt-2.5 border-t border-border/40 text-xs text-[var(--muted-foreground)] flex items-center justify-between">
-                    <span>Theory &amp; Practice Verification</span>
+                    <span>Theory & Practice Verification</span>
                     <span className="text-[var(--foreground)] font-semibold">100% Tracked</span>
                   </div>
                 </div>

@@ -63,7 +63,6 @@ const MODULES = [
 
 function SettingsPage() {
   const { user, updateUser, isCheckingAuth, checkAuth } = useAuth();
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -80,14 +79,19 @@ function SettingsPage() {
   // Linked profiles
   const [linkedProfiles, setLinkedProfiles] = useState<any[]>([]);
 
-  const [form, setForm] = useState({
-    name: "",
-    bio: "",
-    location: "",
-    targetRole: "",
-    githubUsername: "",
-    avatar: "",
-  });
+  const [form, setForm] = useState(() => ({
+    name: user?.name ?? "",
+    bio: user?.profile?.bio ?? user?.bio ?? "",
+    location: user?.profile?.location ?? "",
+    targetRole: user?.profile?.targetRole ?? user?.targetRole ?? "",
+    githubUsername: user?.profile?.githubUsername ?? user?.githubUsername ?? "",
+    avatar: user?.avatar ?? "",
+    registerNumber: user?.profile?.registerNumber ?? "",
+    department: user?.profile?.department ?? "",
+    batch: user?.profile?.batch ?? "",
+    currentSemester: user?.profile?.currentSemester ?? "",
+    facultyMentor: user?.profile?.facultyMentor ?? "",
+  }));
 
   const [preferences, setPreferences] = useState<{
     theme: "dark" | "light" | "system";
@@ -99,29 +103,34 @@ function SettingsPage() {
     resumePrivacy: boolean;
     dailyGoalProblems: number;
     hiddenModules: string[];
-  }>({
+  }>(() => ({
     theme:
-      typeof document !== "undefined" && document.documentElement.classList.contains("light")
+      user?.preferences?.theme ||
+      (typeof document !== "undefined" && document.documentElement.classList.contains("light")
         ? "light"
-        : "dark",
+        : "dark"),
     accentColor:
+      (user?.preferences?.accentColor as any) ||
       (typeof localStorage !== "undefined"
         ? (localStorage.getItem("c2c_accent") as any)
-        : null) || "indigo",
-    notifyOn: MODULES.map((m) => m.key),
-    emailDigest: "off",
-    aiDifficulty: "Intermediate",
-    preferredLanguage: "Python",
-    resumePrivacy: false,
-    dailyGoalProblems: 2,
-    hiddenModules: [],
-  });
+        : null) ||
+      "indigo",
+    notifyOn: user?.preferences?.notifyOn || MODULES.map((m) => m.key),
+    emailDigest: user?.preferences?.emailDigest || "off",
+    aiDifficulty: (user?.preferences?.aiDifficulty as any) || "Intermediate",
+    preferredLanguage: user?.preferences?.preferredLanguage || "Python",
+    resumePrivacy: user?.preferences?.resumePrivacy || false,
+    dailyGoalProblems: user?.preferences?.dailyGoalProblems || 2,
+    hiddenModules: user?.preferences?.hiddenModules || [],
+  }));
 
   // Fetch linked accounts
   useEffect(() => {
+    let isMounted = true;
     async function fetchProfiles() {
       try {
         const res = await getAllCodingProfiles();
+        if (!isMounted) return;
         const list = Array.isArray(res) ? res : (res as any)?.data || [];
         setLinkedProfiles(list);
       } catch (err) {
@@ -129,24 +138,32 @@ function SettingsPage() {
       }
     }
     fetchProfiles();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Load state from user object
+  // Sync state when user object updates
   useEffect(() => {
     if (user) {
-      setForm({
-        name: user.name ?? "",
-        bio: user.profile?.bio ?? "",
-        location: user.profile?.location ?? "",
-        targetRole: user.profile?.targetRole ?? user.targetRole ?? "",
-        githubUsername: user.profile?.githubUsername ?? user.githubUsername ?? "",
-        avatar: user.avatar ?? "",
-      });
+      setForm((prev) => ({
+        name: prev.name || user.name || "",
+        bio: prev.bio || user.profile?.bio || user.bio || "",
+        location: prev.location || user.profile?.location || "",
+        targetRole: prev.targetRole || user.profile?.targetRole || user.targetRole || "",
+        githubUsername: prev.githubUsername || user.profile?.githubUsername || user.githubUsername || "",
+        avatar: prev.avatar || user.avatar || "",
+        registerNumber: prev.registerNumber || user.profile?.registerNumber || "",
+        department: prev.department || user.profile?.department || "",
+        batch: prev.batch || user.profile?.batch || "",
+        currentSemester: prev.currentSemester || user.profile?.currentSemester || "",
+        facultyMentor: prev.facultyMentor || user.profile?.facultyMentor || "",
+      }));
       if (user.preferences) {
         setPreferences((prev) => {
           let resolvedTheme = prev.theme;
           if (typeof window !== "undefined" && !(window as any).__theme_initialized) {
-            resolvedTheme = user.preferences!.theme || "dark";
+            resolvedTheme = user.preferences!.theme || prev.theme || "dark";
             (window as any).__theme_initialized = true;
           }
           return {
@@ -163,7 +180,6 @@ function SettingsPage() {
         });
       }
     }
-    setLoading(false);
   }, [user]);
 
   // Apply theme & accent to document
@@ -219,6 +235,11 @@ function SettingsPage() {
       const trimmedRole = (form.targetRole || "").trim();
       const trimmedBio = (form.bio || "").trim();
       const trimmedLocation = (form.location || "").trim();
+      const trimmedRegNo = (form.registerNumber || "").trim();
+      const trimmedDept = (form.department || "").trim();
+      const trimmedBatch = (form.batch || "").trim();
+      const trimmedSem = (form.currentSemester || "").trim();
+      const trimmedMentor = (form.facultyMentor || "").trim();
 
       const payload: any = {
         name: trimmedName,
@@ -231,6 +252,11 @@ function SettingsPage() {
           githubUsername: trimmedGithub,
           bio: trimmedBio,
           location: trimmedLocation,
+          registerNumber: trimmedRegNo,
+          department: trimmedDept,
+          batch: trimmedBatch,
+          currentSemester: trimmedSem,
+          facultyMentor: trimmedMentor,
         },
       };
 
@@ -350,13 +376,6 @@ function SettingsPage() {
     }
   };
 
-  if (loading || isCheckingAuth) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-6 w-6 animate-spin text-muted-foreground border-2 border-slate-400/20 rounded-full border-t-[color:var(--color-primary)]" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-10">
@@ -459,6 +478,60 @@ function SettingsPage() {
                   className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   placeholder="username"
                 />
+              </div>
+
+              {/* Institutional & Academic Details (Synced with Super Dream Track) */}
+              <div className="pt-3 border-t border-border/50 dark:border-white/10 space-y-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-brand-400">
+                  College & Super Dream Track Profile
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium mb-1 text-foreground">Register Number</label>
+                    <input
+                      value={form.registerNumber}
+                      onChange={(e) => setForm({ ...form, registerNumber: e.target.value })}
+                      className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono"
+                      placeholder="e.g. 310622104001"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1 text-foreground">Department</label>
+                    <input
+                      value={form.department}
+                      onChange={(e) => setForm({ ...form, department: e.target.value })}
+                      className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      placeholder="e.g. Computer Science & Engineering"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1 text-foreground">Batch</label>
+                    <input
+                      value={form.batch}
+                      onChange={(e) => setForm({ ...form, batch: e.target.value })}
+                      className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      placeholder="e.g. 2022 - 2026"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1 text-foreground">Current Semester</label>
+                    <input
+                      value={form.currentSemester}
+                      onChange={(e) => setForm({ ...form, currentSemester: e.target.value })}
+                      className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      placeholder="e.g. Semester VIII"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-foreground">Faculty Mentor</label>
+                  <input
+                    value={form.facultyMentor}
+                    onChange={(e) => setForm({ ...form, facultyMentor: e.target.value })}
+                    className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    placeholder="e.g. Dr. Rajesh Kumar"
+                  />
+                </div>
               </div>
             </div>
           </GlassCard>

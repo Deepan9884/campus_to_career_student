@@ -8,6 +8,7 @@ interface SuperDreamIntroAnimationProps {
 
 export function SuperDreamIntroAnimation({ onComplete }: SuperDreamIntroAnimationProps) {
   const [progress, setProgress] = useState(0);
+  const completedRef = React.useRef(false);
 
   useEffect(() => {
     try {
@@ -22,20 +23,21 @@ export function SuperDreamIntroAnimation({ onComplete }: SuperDreamIntroAnimatio
     }
 
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            onComplete();
-          }, 250);
-          return 100;
-        }
-        return prev + 4;
-      });
+      setProgress((prev) => Math.min(prev + 4, 100));
     }, 45);
 
     return () => clearInterval(interval);
-  }, [onComplete]);
+  }, []);
+
+  useEffect(() => {
+    if (progress >= 100 && !completedRef.current) {
+      completedRef.current = true;
+      const timeout = setTimeout(() => {
+        onComplete();
+      }, 250);
+      return () => clearTimeout(timeout);
+    }
+  }, [progress, onComplete]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070B14]/95 backdrop-blur-2xl text-white overflow-hidden animate-in fade-in duration-300">

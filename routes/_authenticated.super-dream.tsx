@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { SuperDreamIntroAnimation } from "@/components/superdream/SuperDreamIntroAnimation";
 import { StudentProfileHeader } from "@/components/superdream/checklist/StudentProfileHeader";
@@ -27,15 +27,6 @@ import { SuperDreamCodingSection } from "@/components/superdream/SuperDreamCodin
 import { SuperDreamTestsSection } from "@/components/superdream/SuperDreamTestsSection";
 import { SuperDreamAnalysisSection } from "@/components/superdream/SuperDreamAnalysisSection";
 
-import {
-  Compass,
-  Brain,
-  Mic,
-  LayoutGrid,
-  Printer,
-  Layers,
-} from "lucide-react";
-
 export const Route = createFileRoute("/_authenticated/super-dream")({
   head: () => ({ meta: [{ title: "Super Dream Track — Campus to Career AI" }] }),
   component: SuperDreamPage,
@@ -49,9 +40,14 @@ function SuperDreamPage() {
     setActiveSectionId,
     showWelcomeAnimation,
     dismissWelcomeAnimation,
+    loadLiveSuperDreamState,
   } = useSuperDream();
 
   const [printModalOpen, setPrintModalOpen] = useState(false);
+
+  useEffect(() => {
+    loadLiveSuperDreamState();
+  }, [loadLiveSuperDreamState]);
 
   return (
     <div className="space-y-6 pb-12 max-w-7xl mx-auto">

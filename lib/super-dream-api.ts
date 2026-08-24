@@ -142,12 +142,12 @@ export interface SuperDreamAnalytics {
 }
 
 export const INITIAL_MENTOR_INFO = {
-  name: "Dr. Rajesh Kumar",
-  title: "Principal Software Architect & Ex-Google Staff Engineer",
-  company: "Super Dream Mentorship Board",
-  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-  email: "rajesh.kumar@superdream.mentors.ai",
-  officeHours: "Tuesdays & Thursdays, 6:00 PM - 8:00 PM IST",
+  name: "",
+  title: "",
+  company: "",
+  avatar: "",
+  email: "",
+  officeHours: "",
 };
 
 export const INITIAL_TRAVEL_MILESTONES: TravelMilestone[] = [
@@ -197,177 +197,11 @@ export const INITIAL_TRAVEL_MILESTONES: TravelMilestone[] = [
   },
 ];
 
-export const INITIAL_MENTOR_TASKS: MentorTask[] = [
-  {
-    id: "task-1",
-    title: "Implement Lock-Free Single-Producer Multi-Consumer Ring Buffer in C++ / Rust",
-    category: "Core Engineering",
-    phase: 1,
-    description: "Build a memory-efficient SPMC ring buffer with memory barriers and cache-line padding to avoid false sharing.",
-    assignedBy: "Dr. Rajesh Kumar",
-    assignedDate: new Date().toISOString().split("T")[0],
-    dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
-    priority: "High",
-    status: "pending",
-    deliverableLink: "",
-    submissionNote: "",
-  },
-  {
-    id: "task-2",
-    title: "Master Dynamic Programming on Trees and Bitmask Optimization",
-    category: "DSA",
-    phase: 1,
-    description: "Solve 15 Hard LeetCode/Codeforces problems focusing on rerooting DP, tree centroids, and TSP bitmasks.",
-    assignedBy: "Dr. Rajesh Kumar",
-    assignedDate: new Date().toISOString().split("T")[0],
-    dueDate: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
-    priority: "Urgent",
-    status: "pending",
-    deliverableLink: "",
-    submissionNote: "",
-  },
-  {
-    id: "task-3",
-    title: "Build Distributed Key-Value Store with Raft Consensus & WAL",
-    category: "System Design",
-    phase: 2,
-    description: "Implement leader election, log replication, and state machine snapshots. Handle split-brain scenarios.",
-    assignedBy: "Dr. Rajesh Kumar",
-    assignedDate: new Date().toISOString().split("T")[0],
-    dueDate: new Date(Date.now() + 21 * 86400000).toISOString().split("T")[0],
-    priority: "Urgent",
-    status: "pending",
-    deliverableLink: "",
-    submissionNote: "",
-  },
-  {
-    id: "task-4",
-    title: "Benchmark Distributed Rate Limiter with Redis Token Bucket & Lua Scripts",
-    category: "Project",
-    phase: 2,
-    description: "Design an atomic rate limiter handling 100k requests/sec across 4 region clusters without race conditions.",
-    assignedBy: "Dr. Rajesh Kumar",
-    assignedDate: new Date().toISOString().split("T")[0],
-    dueDate: new Date(Date.now() + 28 * 86400000).toISOString().split("T")[0],
-    priority: "High",
-    status: "pending",
-    deliverableLink: "",
-    submissionNote: "",
-  },
-];
+export const INITIAL_MENTOR_TASKS: MentorTask[] = [];
 
-export const INITIAL_SUPER_DREAM_COURSES: SuperDreamCourse[] = [
-  {
-    id: "course-1",
-    title: "Distributed Systems Architecture & Consensus Protocols",
-    provider: "MIT 6.824 / Super Dream Track",
-    instructor: "Prof. Robert Morris & Dr. Rajesh Kumar",
-    duration: "40 Hours • 12 Modules",
-    difficulty: "Master",
-    topics: ["Raft & Paxos", "MapReduce & GFS", "Fault-Tolerant State Machines", "Linearizability & CAP Theorem"],
-    description: "Rigorous deep dive into high-availability distributed systems, partition tolerance, and consensus algorithms required for L5+ engineering roles.",
-    status: "in_progress",
-  },
-  {
-    id: "course-2",
-    title: "Large Scale System Design & Micro-Frontends",
-    provider: "Stanford Online / FAANG Curriculum",
-    instructor: "Alex Xu & Martin Kleppmann",
-    duration: "32 Hours • 10 Modules",
-    difficulty: "Expert",
-    topics: ["Distributed Caching & Redis Sentinel", "Event Sourcing & CQRS", "Database Sharding & Consistent Hashing", "GraphQL Federation"],
-    description: "Design real-world systems capable of serving hundreds of millions of users with 99.999% uptime guarantees.",
-    status: "in_progress",
-  },
-  {
-    id: "course-3",
-    title: "Production LLM Engineering & Vector Search Systems",
-    provider: "DeepLearning.AI / Super Dream AI Lab",
-    instructor: "Andrew Ng & Harrison Chase",
-    duration: "28 Hours • 8 Modules",
-    difficulty: "Advanced",
-    topics: ["RAG Architecture", "Vector Embeddings & HNSW Indexing", "Fine-Tuning & Quantization (LoRA, QLoRA)", "Agentic Workflows & Tool Calling"],
-    description: "Architect, deploy, and benchmark enterprise GenAI pipelines with sub-500ms retrieval latencies and high precision.",
-    status: "in_progress",
-  },
-  {
-    id: "course-4",
-    title: "High-Frequency Algorithm Design & Advanced DP",
-    provider: "Super Dream Competitive Programming Institute",
-    instructor: "Errichto & Petr Mitrichev",
-    duration: "45 Hours • 15 Modules",
-    difficulty: "Master",
-    topics: ["Convex Hull Trick & Li Chao Tree", "Centroid Decomposition", "Suffix Automaton", "Max Flow Min Cut Variations"],
-    description: "Master algorithmic techniques that consistently crack the hardest coding rounds at top-tier financial and tech companies.",
-    status: "locked",
-  },
-];
+export const INITIAL_SUPER_DREAM_COURSES: SuperDreamCourse[] = [];
 
-export const INITIAL_MENTOR_ROADMAP: MentorRoadmapMilestone[] = [
-  {
-    id: "m-1",
-    title: "Mentor Selection: Low-Latency Systems & Concurrency",
-    curator: "Dr. Rajesh Kumar",
-    curatorTitle: "Principal Architect",
-    tag: "Core Foundations",
-    status: "in_progress",
-    description: "Mentor curated roadmap prioritizing thread-safe architectures and memory models over generic tutorials.",
-    topics: [
-      { id: "t-1", name: "Memory Barriers & CPU Cache Coherence (MESI Protocol)", estimatedHours: 6, completed: false, quizCompleted: false },
-      { id: "t-2", name: "Atomic Primitives & Lock-Free Data Structures", estimatedHours: 8, completed: false, quizCompleted: false },
-      { id: "t-3", name: "Linux epoll & High-Performance I/O Multiplexing", estimatedHours: 7, completed: false, quizCompleted: false },
-    ],
-    quiz: {
-      id: "quiz-m-1",
-      title: "Low-Latency & Memory Concurrency Benchmark Quiz",
-      questionsCount: 5,
-      timeLimitMinutes: 10,
-      passScore: 80,
-    },
-  },
-  {
-    id: "m-2",
-    title: "Mentor Selection: Distributed Storage & Consensus Protocols",
-    curator: "Dr. Rajesh Kumar",
-    curatorTitle: "Principal Architect",
-    tag: "Distributed Systems",
-    status: "in_progress",
-    description: "Hand-picked syllabus covering Raft replication, LSM-trees, and conflict-free replicated data types.",
-    topics: [
-      { id: "t-4", name: "Raft Leader Election & Log Compaction Algorithms", estimatedHours: 10, completed: true, quizCompleted: true, quizScore: 90 },
-      { id: "t-5", name: "Log-Structured Merge Trees (LSM) & SSTables in RocksDB", estimatedHours: 8, completed: false, quizCompleted: false },
-      { id: "t-6", name: "Vector Clocks & CRDTs for Eventual Consistency", estimatedHours: 6, completed: false, quizCompleted: false },
-    ],
-    quiz: {
-      id: "quiz-m-2",
-      title: "Raft & Distributed Storage Evaluation Quiz",
-      questionsCount: 5,
-      timeLimitMinutes: 10,
-      passScore: 80,
-    },
-  },
-  {
-    id: "m-3",
-    title: "Mentor Selection: Enterprise Scale Microservices & Observability",
-    curator: "Dr. Rajesh Kumar",
-    curatorTitle: "Principal Architect",
-    tag: "Architecture",
-    status: "locked",
-    description: "Curated modules for zero-trust microservice meshes, distributed tracing (OpenTelemetry), and circuit breakers.",
-    topics: [
-      { id: "t-7", name: "gRPC Protocol Buffers & Bi-Directional Streaming", estimatedHours: 8, completed: false, quizCompleted: false },
-      { id: "t-8", name: "Distributed Tracing, Context Propagation & Metrics", estimatedHours: 6, completed: false, quizCompleted: false },
-      { id: "t-9", name: "Circuit Breakers, Bulkheads & Graceful Degradation", estimatedHours: 5, completed: false, quizCompleted: false },
-    ],
-    quiz: {
-      id: "quiz-m-3",
-      title: "Microservices & Reliability Engineering Quiz",
-      questionsCount: 5,
-      timeLimitMinutes: 10,
-      passScore: 80,
-    },
-  },
-];
+export const INITIAL_MENTOR_ROADMAP: MentorRoadmapMilestone[] = [];
 
 export const INITIAL_SUPER_DREAM_TESTS: SuperDreamTest[] = [
   {
@@ -378,10 +212,8 @@ export const INITIAL_SUPER_DREAM_TESTS: SuperDreamTest[] = [
     durationMinutes: 45,
     questionsCount: 4,
     totalMarks: 100,
-    status: "completed",
-    highScore: 94,
-    attemptsCount: 2,
-    lastAttemptDate: "2026-08-16",
+    status: "not_started",
+    attemptsCount: 0,
     skillsEvaluated: ["Dynamic Programming", "Graph Theory", "Segment Trees", "Bitmasking"],
     passingScore: 75,
     questions: [
@@ -721,10 +553,10 @@ export const INITIAL_SUPER_DREAM_TESTS: SuperDreamTest[] = [
 export const INITIAL_SUPER_DREAM_ANALYTICS: SuperDreamAnalytics = {
   readinessIndex: 0,
   tier: "Not Evaluated",
-  targetPackage: "₹20+ LPA Target",
+  targetPackage: "",
   mentorRating: 0,
   verifiedCoursesCount: 0,
-  totalCoursesCount: 4,
+  totalCoursesCount: 0,
   travelMilestonesCompleted: 0,
   totalTravelMilestones: 4,
   testsCompletedCount: 0,
@@ -823,4 +655,59 @@ export interface CohortStudent {
 }
 
 export const INITIAL_COHORT_STUDENTS: CohortStudent[] = [];
+
+import { api } from "./api";
+
+/**
+ * Fetches the student's own Super Dream persistent state from MongoDB.
+ */
+export async function fetchMySuperDreamState(): Promise<{ superDream: any }> {
+  return api.get<{ superDream: any }>("/super-dream/my-state");
+}
+
+/**
+ * Synchronizes the student's Super Dream checklist, telemetry, and project state to MongoDB.
+ */
+export async function syncSuperDreamState(payload: {
+  checklist?: any;
+  codingPlatformsStats?: any;
+  csQuizAttempts?: any;
+  visitedCsCourses?: any;
+  allocatedProjects?: any;
+  allocatedAiProjects?: any;
+  courses?: any;
+  tests?: any;
+  mentorRoadmap?: any;
+  travelMilestones?: any;
+  newMovement?: {
+    actionType: string;
+    sectionId?: number;
+    title: string;
+    details?: string;
+    metadata?: any;
+  };
+}): Promise<{ superDream: any; message: string }> {
+  return api.put<{ superDream: any; message: string }>("/super-dream/sync", payload);
+}
+
+/**
+ * Explicitly logs a student movement event to the mentor live audit feed.
+ */
+export async function logSuperDreamAction(movement: {
+  actionType: string;
+  sectionId?: number;
+  title: string;
+  details?: string;
+  metadata?: any;
+}): Promise<{ movement: any; message: string }> {
+  return api.post<{ movement: any; message: string }>("/super-dream/movement", movement);
+}
+
+/**
+ * Deletes the entire Super Dream record from the backend database, forcing a fresh clean start.
+ */
+export async function resetSuperDreamState(): Promise<{ message: string; deleted: boolean }> {
+  return api.delete<{ message: string; deleted: boolean }>("/super-dream/reset");
+}
+
 

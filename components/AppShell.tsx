@@ -205,7 +205,9 @@ export function AppShell() {
 
   // Filter navigation modules according to user's sidebar visibility preferences
   const hiddenModules = user?.preferences?.hiddenModules || [];
-  const filteredNav = nav.filter((item) => !hiddenModules.includes(item.to));
+  const filteredNav = nav.filter(
+    (item) => item.to === "/dashboard" || item.to === "/settings" || !hiddenModules.includes(item.to)
+  );
 
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const earnedBadgeIdsRef = useRef<Set<string>>(new Set());

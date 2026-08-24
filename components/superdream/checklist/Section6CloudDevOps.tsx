@@ -95,7 +95,3 @@ export function Section6CloudDevOps() {
     </div>
   );
 }
-
-
-
-

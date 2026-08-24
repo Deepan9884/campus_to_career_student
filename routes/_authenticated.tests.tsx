@@ -1,17 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { TestArenaSection } from "@/components/tests/TestArenaSection";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/tests")({
-  head: () => ({
-    meta: [
-      {
-        title: "Proctored Online Coding Tests & Assessment Hub — Campus to Career",
-      },
-    ],
-  }),
-  component: TestsPage,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/super-dream",
+    });
+  },
+  component: () => null,
 });
-
-function TestsPage() {
-  return <TestArenaSection />;
-}

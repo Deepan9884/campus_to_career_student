@@ -445,7 +445,7 @@ export function Section3CodingDsa() {
                         <span>Fetching...</span>
                       </>
                     ) : (
-                      <span>Save &amp; Sync</span>
+                      <span>Save & Sync</span>
                     )}
                   </button>
                 </div>
@@ -884,7 +884,7 @@ export function Section3CodingDsa() {
         <div className="space-y-0.5">
           <h3 className="text-sm font-semibold text-[var(--foreground)] flex items-center gap-2 tracking-tight">
             <Target className="w-4 h-4 text-[var(--success)]" />
-            Section 3 Checklist Targets &amp; Telemetry Metrics
+            Section 3 Checklist Targets & Telemetry Metrics
           </h3>
           <p className="text-xs text-[var(--muted-foreground)]">
             Directly synced with your connected coding profiles. Manual adjustments are saved to your study plan.

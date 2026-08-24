@@ -114,8 +114,10 @@ export function SuperDreamLearningRoadmap() {
     setCalculatedScore(score);
     setQuizFinished(true);
 
-    const pendingTopic = activeQuizMilestone.topics.find((t) => !t.quizCompleted) || activeQuizMilestone.topics[0];
-    recordQuizScore(activeQuizMilestone.id, pendingTopic.id, score);
+    // Record quiz score for all topics within this curriculum milestone
+    activeQuizMilestone.topics.forEach((t) => {
+      recordQuizScore(activeQuizMilestone.id, t.id, score);
+    });
 
     if (score >= 80) {
       try {
@@ -160,19 +162,28 @@ export function SuperDreamLearningRoadmap() {
       </GlassCard>
 
       {/* Roadmap Modules */}
-      <div className="space-y-4">
-        {mentorRoadmap.map((milestone, idx) => {
-          const isDone = milestone.status === "completed";
-          const isLocked = milestone.status === "locked";
+      {mentorRoadmap.length === 0 ? (
+        <GlassCard className="p-12 text-center text-slate-400 space-y-3 border-slate-800 bg-slate-900/40">
+          <Map className="w-10 h-10 text-slate-500 mx-auto" />
+          <h3 className="text-base font-bold text-white">No Learning Modules Assigned Yet</h3>
+          <p className="text-xs max-w-md mx-auto">
+            Your faculty mentor will assign curated system architecture modules and milestones here.
+          </p>
+        </GlassCard>
+      ) : (
+        <div className="space-y-4">
+          {mentorRoadmap.map((milestone, idx) => {
+            const isDone = milestone.status === "completed";
+            const isLocked = milestone.status === "locked";
 
-          return (
-            <GlassCard
-              key={milestone.id}
-              className={cn(
-                "p-6 border-slate-800 bg-slate-900/70 space-y-4 transition card-hover-lift",
-                isDone && "border-emerald-500/40"
-              )}
-            >
+            return (
+              <GlassCard
+                key={milestone.id}
+                className={cn(
+                  "p-6 border-slate-800 bg-slate-900/70 space-y-4 transition card-hover-lift",
+                  isDone && "border-emerald-500/40"
+                )}
+              >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
                 <div>
                   <div className="flex items-center gap-2">
@@ -233,6 +244,7 @@ export function SuperDreamLearningRoadmap() {
           );
         })}
       </div>
+      )}
 
       {/* Quiz Modal */}
       {activeQuizMilestone && (

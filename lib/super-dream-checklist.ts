@@ -235,47 +235,120 @@ export function getReadinessTier(score: number): {
   };
 }
 
-export function calculateStudentChecklistScores(data: StudentChecklistData) {
+function safeRound(num: number, decimals = 0): number {
+  if (!Number.isFinite(num) || isNaN(num)) return 0;
+  const factor = Math.pow(10, decimals);
+  return Math.round(num * factor) / factor;
+}
+
+function safePercent(part: number, total: number): number {
+  if (!total || total <= 0 || !Number.isFinite(part) || !Number.isFinite(total)) return 0;
+  const pct = Math.round((part / total) * 100);
+  return Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
+}
+
+export function ensureValidChecklist(
+  data?: Partial<StudentChecklistData> | null,
+  fallbackStudentName = "Student"
+): StudentChecklistData {
+  const defaults = createDefaultChecklist(fallbackStudentName);
+  if (!data || typeof data !== "object") return defaults;
+
+  return {
+    profile: {
+      ...defaults.profile,
+      ...(data.profile || {}),
+    },
+    section1Programming:
+      Array.isArray(data.section1Programming) && data.section1Programming.length > 0
+        ? data.section1Programming
+        : defaults.section1Programming,
+    section2CsFundamentals:
+      Array.isArray(data.section2CsFundamentals) && data.section2CsFundamentals.length > 0
+        ? data.section2CsFundamentals
+        : defaults.section2CsFundamentals,
+    section3CodingDsa:
+      Array.isArray(data.section3CodingDsa) && data.section3CodingDsa.length > 0
+        ? data.section3CodingDsa
+        : defaults.section3CodingDsa,
+    section4SoftwareDev:
+      Array.isArray(data.section4SoftwareDev) && data.section4SoftwareDev.length > 0
+        ? data.section4SoftwareDev
+        : defaults.section4SoftwareDev,
+    section5AiDataScience:
+      Array.isArray(data.section5AiDataScience) && data.section5AiDataScience.length > 0
+        ? data.section5AiDataScience
+        : defaults.section5AiDataScience,
+    section6CloudDevOps:
+      Array.isArray(data.section6CloudDevOps) && data.section6CloudDevOps.length > 0
+        ? data.section6CloudDevOps
+        : defaults.section6CloudDevOps,
+    section7GithubPortfolio:
+      Array.isArray(data.section7GithubPortfolio) && data.section7GithubPortfolio.length > 0
+        ? data.section7GithubPortfolio
+        : defaults.section7GithubPortfolio,
+    section8Certifications:
+      Array.isArray(data.section8Certifications) && data.section8Certifications.length > 0
+        ? data.section8Certifications
+        : defaults.section8Certifications,
+    section9InterviewPrep:
+      Array.isArray(data.section9InterviewPrep) && data.section9InterviewPrep.length > 0
+        ? data.section9InterviewPrep
+        : defaults.section9InterviewPrep,
+    section10Evaluation: {
+      ...defaults.section10Evaluation,
+      ...(data.section10Evaluation || {}),
+    },
+    overrideScores: data.overrideScores || {},
+  };
+}
+
+export function calculateStudentChecklistScores(rawInput?: Partial<StudentChecklistData> | null) {
+  const data = ensureValidChecklist(rawInput);
+
   // 1. Programming Skills (15 max)
   const pSkills = data.section1Programming;
   const pMastered = pSkills.filter((s) => s.status === "Mastered").length;
   const pInProgress = pSkills.filter((s) => s.status === "In Progress").length;
-  const pScoreCalculated = Math.min(15, Math.round(((pMastered * 1 + pInProgress * 0.5) / pSkills.length) * 15 * 10) / 10);
+  const pScoreCalculated = Math.min(
+    15,
+    safeRound(((pMastered * 1 + pInProgress * 0.5) / Math.max(1, pSkills.length)) * 15, 1)
+  );
   const pScore = data.overrideScores?.["Programming Skills"] ?? pScoreCalculated;
 
   // 2. Core CS Subjects (15 max)
   const csSubjects = data.section2CsFundamentals;
   const totalRating = csSubjects.reduce((acc, curr) => acc + (curr.rating || 0), 0);
-  const maxPossibleRating = csSubjects.length * 5;
-  const csScoreCalculated = Math.min(15, Math.round((totalRating / maxPossibleRating) * 15 * 10) / 10);
+  const maxPossibleRating = Math.max(1, csSubjects.length * 5);
+  const csScoreCalculated = Math.min(15, safeRound((totalRating / maxPossibleRating) * 15, 1));
   const csScore = data.overrideScores?.["Core CS Subjects"] ?? csScoreCalculated;
 
   // 3. Coding & DSA (10 max)
   const dsa = data.section3CodingDsa;
-  const dsaRatios = dsa.map((item) => Math.min(1.2, item.current / (item.target || 1)));
-  const avgDsaRatio = dsaRatios.reduce((a, b) => a + b, 0) / dsa.length;
-  const dsaScoreCalculated = Math.min(10, Math.round(Math.min(1, avgDsaRatio) * 10 * 10) / 10);
+  const dsaRatios = dsa.map((item) => Math.min(1.2, item.current / Math.max(1, item.target || 1)));
+  const avgDsaRatio = dsaRatios.reduce((a, b) => a + b, 0) / Math.max(1, dsa.length);
+  const dsaScoreCalculated = Math.min(10, safeRound(Math.min(1, avgDsaRatio) * 10, 1));
   const dsaScore = data.overrideScores?.["Coding & DSA"] ?? dsaScoreCalculated;
 
   // 4. Software Development (10 max)
   const dev = data.section4SoftwareDev;
-  const devRatios = dev.map((item) => Math.min(1.2, item.current / (item.target || 1)));
-  const avgDevRatio = devRatios.reduce((a, b) => a + b, 0) / dev.length;
-  const devScoreCalculated = Math.min(10, Math.round(Math.min(1, avgDevRatio) * 10 * 10) / 10);
+  const devRatios = dev.map((item) => Math.min(1.2, item.current / Math.max(1, item.target || 1)));
+  const avgDevRatio = devRatios.reduce((a, b) => a + b, 0) / Math.max(1, dev.length);
+  const devScoreCalculated = Math.min(10, safeRound(Math.min(1, avgDevRatio) * 10, 1));
   const devScore = data.overrideScores?.["Software Development"] ?? devScoreCalculated;
 
   // 5. AI & Data Science (10 max)
   const ai = data.section5AiDataScience;
-  const aiRatios = ai.map((item) => Math.min(1.2, item.current / (item.target || 1)));
-  const avgAiRatio = aiRatios.reduce((a, b) => a + b, 0) / ai.length;
-  const aiScoreCalculated = Math.min(10, Math.round(Math.min(1, avgAiRatio) * 10 * 10) / 10);
+  const aiRatios = ai.map((item) => Math.min(1.2, item.current / Math.max(1, item.target || 1)));
+  const avgAiRatio = aiRatios.reduce((a, b) => a + b, 0) / Math.max(1, ai.length);
+  const aiScoreCalculated = Math.min(10, safeRound(Math.min(1, avgAiRatio) * 10, 1));
   const aiScore = data.overrideScores?.["AI & Data Science"] ?? aiScoreCalculated;
 
   // 6. Cloud & DevOps (10 max)
   const cloud = data.section6CloudDevOps;
-  const cloudRatios = cloud.map((item) => Math.min(1.2, item.current / (item.target || 1)));
-  const avgCloudRatio = cloudRatios.reduce((a, b) => a + b, 0) / cloud.length;
-  const cloudScoreCalculated = Math.min(10, Math.round(Math.min(1, avgCloudRatio) * 10 * 10) / 10);
+  const cloudRatios = cloud.map((item) => Math.min(1.2, item.current / Math.max(1, item.target || 1)));
+  const avgCloudRatio = cloudRatios.reduce((a, b) => a + b, 0) / Math.max(1, cloud.length);
+  const cloudScoreCalculated = Math.min(10, safeRound(Math.min(1, avgCloudRatio) * 10, 1));
   const cloudScore = data.overrideScores?.["Cloud & DevOps"] ?? cloudScoreCalculated;
 
   // 7. Projects & GitHub (10 max)
@@ -285,10 +358,10 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       return item.isCompleted || item.current >= 1 ? 1 : 0;
     }
     const targetVal = typeof item.target === "number" ? item.target : (item.targetValue || 1);
-    return Math.min(1.2, item.current / (targetVal || 1));
+    return Math.min(1.2, item.current / Math.max(1, targetVal || 1));
   });
-  const avgGhRatio = ghRatios.reduce((a, b) => a + b, 0) / (gh.length || 1);
-  const ghScoreCalculated = Math.min(10, Math.round(Math.min(1, avgGhRatio) * 10 * 10) / 10);
+  const avgGhRatio = ghRatios.reduce((a, b) => a + b, 0) / Math.max(1, gh.length);
+  const ghScoreCalculated = Math.min(10, safeRound(Math.min(1, avgGhRatio) * 10, 1));
   const ghScore = data.overrideScores?.["Projects & GitHub"] ?? ghScoreCalculated;
 
   // 8. Industry Certifications
@@ -296,14 +369,14 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
   const certsCompleted = certs.filter((c) => c.status === "Completed").length;
 
   // 9. Communication & Leadership (10 max)
-  const commCalculated = Math.min(10, Math.round((Math.min(1, (certsCompleted + pMastered) / 16) * 10) * 10) / 10);
+  const commCalculated = Math.min(10, safeRound(Math.min(1, (certsCompleted + pMastered) / 16) * 10, 1));
   const commScore = data.overrideScores?.["Communication & Leadership"] ?? commCalculated;
 
   // 10. Interview Readiness (10 max)
   const iv = data.section9InterviewPrep;
-  const ivRatios = iv.map((item) => Math.min(1.2, item.current / (item.target || 1)));
-  const avgIvRatio = ivRatios.reduce((a, b) => a + b, 0) / iv.length;
-  const ivScoreCalculated = Math.min(10, Math.round(Math.min(1, avgIvRatio) * 10 * 10) / 10);
+  const ivRatios = iv.map((item) => Math.min(1.2, item.current / Math.max(1, item.target || 1)));
+  const avgIvRatio = ivRatios.reduce((a, b) => a + b, 0) / Math.max(1, iv.length);
+  const ivScoreCalculated = Math.min(10, safeRound(Math.min(1, avgIvRatio) * 10, 1));
   const ivScore = data.overrideScores?.["Interview Readiness"] ?? ivScoreCalculated;
 
   const categoryScores: CategoryScoreItem[] = [
@@ -328,12 +401,12 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "1. Programming Languages",
       subtitle: "C, C++, Python, Java, JS, Go/Rust, SQL, OOP, Design Patterns",
       iconName: "Code",
-      readinessScore: Math.round((pScore / 15) * 100),
+      readinessScore: safePercent(pScore, 15),
       completedTasks: pMastered,
       totalTasks: pSkills.length,
-      completionPercent: Math.round((pMastered / pSkills.length) * 100),
+      completionPercent: safePercent(pMastered, pSkills.length),
       recommendedStatLabel: "Target Level Match",
-      recommendedStatValue: `${Math.round(((pMastered + pInProgress * 0.5) / pSkills.length) * 100)}%`,
+      recommendedStatValue: `${safePercent(pMastered + pInProgress * 0.5, pSkills.length)}%`,
       recommendedStatSub: "Advanced Mastery Ratio",
       statusColor: "#6366F1",
     },
@@ -342,12 +415,12 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "2. Computer Science Fundamentals",
       subtitle: "DS, Algorithms, OS, Networks, DBMS, Compilers, Distributed Systems",
       iconName: "Cpu",
-      readinessScore: Math.round((csScore / 15) * 100),
+      readinessScore: safePercent(csScore, 15),
       completedTasks: csSubjects.filter((s) => s.completed).length,
       totalTasks: csSubjects.length,
-      completionPercent: Math.round((csSubjects.filter((s) => s.completed).length / csSubjects.length) * 100),
+      completionPercent: safePercent(csSubjects.filter((s) => s.completed).length, csSubjects.length),
       recommendedStatLabel: "Average Rating",
-      recommendedStatValue: (totalRating / csSubjects.length).toFixed(1),
+      recommendedStatValue: (totalRating / Math.max(1, csSubjects.length)).toFixed(1),
       recommendedStatSub: "Out of 5.0 Star Scale",
       statusColor: "#3B82F6",
     },
@@ -356,12 +429,12 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "3. Coding & Problem Solving",
       subtitle: "LeetCode 900, HackerRank 450, Contests, DP, Trees, Graphs, Hard 110",
       iconName: "Binary",
-      readinessScore: Math.round((dsaScore / 10) * 100),
+      readinessScore: safePercent(dsaScore, 10),
       completedTasks: dsa.filter((d) => d.current >= d.target).length,
       totalTasks: dsa.length,
-      completionPercent: Math.round(Math.min(100, avgDsaRatio * 100)),
+      completionPercent: safePercent(avgDsaRatio * 100, 100),
       recommendedStatLabel: "LeetCode Contest Rating",
-      recommendedStatValue: dsa.find((d) => d.id === "dsa-10")?.current || 1845,
+      recommendedStatValue: dsa.find((d) => d.id === "dsa-10")?.current || 0,
       recommendedStatSub: "Target: 1800+ (Knight/Guardian)",
       statusColor: "#10B981",
     },
@@ -370,10 +443,10 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "4. Software Development",
       subtitle: "Full Stack, Backend, Cloud, Team Projects, 50 REST APIs, Docker, K8s",
       iconName: "Layers",
-      readinessScore: Math.round((devScore / 10) * 100),
+      readinessScore: safePercent(devScore, 10),
       completedTasks: dev.filter((d) => d.current >= d.target).length,
       totalTasks: dev.length,
-      completionPercent: Math.round(Math.min(100, avgDevRatio * 100)),
+      completionPercent: safePercent(avgDevRatio * 100, 100),
       recommendedStatLabel: "REST APIs & Microservices",
       recommendedStatValue: `${(dev.find((d) => d.id === "dev-8")?.current || 0) + (dev.find((d) => d.id === "dev-9")?.current || 0)}`,
       recommendedStatSub: "Shipped in Production",
@@ -384,10 +457,10 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "5. Artificial Intelligence & Data Science",
       subtitle: "ML, Deep Learning, CV, NLP, GenAI, AI Agents, RAG, Kaggle 20",
       iconName: "BrainCircuit",
-      readinessScore: Math.round((aiScore / 10) * 100),
+      readinessScore: safePercent(aiScore, 10),
       completedTasks: ai.filter((a) => a.current >= a.target).length,
       totalTasks: ai.length,
-      completionPercent: Math.round(Math.min(100, avgAiRatio * 100)),
+      completionPercent: safePercent(avgAiRatio * 100, 100),
       recommendedStatLabel: "GenAI & Agent Apps",
       recommendedStatValue: `${(ai.find((a) => a.id === "ai-5")?.current || 0) + (ai.find((a) => a.id === "ai-6")?.current || 0)}`,
       recommendedStatSub: "Deployed LLM Pipelines",
@@ -398,10 +471,10 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "6. Cloud & DevOps",
       subtitle: "AWS 25, Azure 20, GCP 15, Terraform 15, Monitoring 10, IaC 10",
       iconName: "Cloud",
-      readinessScore: Math.round((cloudScore / 10) * 100),
+      readinessScore: safePercent(cloudScore, 10),
       completedTasks: cloud.filter((c) => c.current >= c.target).length,
       totalTasks: cloud.length,
-      completionPercent: Math.round(Math.min(100, avgCloudRatio * 100)),
+      completionPercent: safePercent(avgCloudRatio * 100, 100),
       recommendedStatLabel: "Cloud Coverage",
       recommendedStatValue: `${(cloud.find((c) => c.id === "c-1")?.current || 0) + (cloud.find((c) => c.id === "c-2")?.current || 0) + (cloud.find((c) => c.id === "c-3")?.current || 0)} Services`,
       recommendedStatSub: "AWS / Azure / GCP",
@@ -412,7 +485,7 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "7. GitHub Portfolio",
       subtitle: "30 Repos, 3000+ Commits, 30 PRs, Open Source 15, 75 Stars, 60 Docs, Portfolio Completed",
       iconName: "Github",
-      readinessScore: Math.round((ghScore / 10) * 100),
+      readinessScore: safePercent(ghScore, 10),
       completedTasks: gh.filter((g) => {
         if (g.id === "gh-7" || g.activity === "Portfolio Website" || g.target === "Completed") {
           return g.isCompleted || g.current >= 1;
@@ -421,7 +494,7 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
         return g.current >= targetVal;
       }).length,
       totalTasks: gh.length,
-      completionPercent: Math.round(Math.min(100, avgGhRatio * 100)),
+      completionPercent: safePercent(avgGhRatio * 100, 100),
       recommendedStatLabel: "Total GitHub Commits",
       recommendedStatValue: `${gh.find((g) => g.id === "gh-2")?.current || 0}+`,
       recommendedStatSub: "Target: 3000+ Commits",
@@ -432,10 +505,10 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "8. Industry Certifications",
       subtitle: "Python, Java, AWS, Azure, Docker, K8s, TensorFlow, Oracle, Linux, SQL",
       iconName: "Award",
-      readinessScore: Math.round((certsCompleted / certs.length) * 100),
+      readinessScore: safePercent(certsCompleted, certs.length),
       completedTasks: certsCompleted,
       totalTasks: certs.length,
-      completionPercent: Math.round((certsCompleted / certs.length) * 100),
+      completionPercent: safePercent(certsCompleted, certs.length),
       recommendedStatLabel: "Verified Badges",
       recommendedStatValue: `${certs.filter((c) => c.verified).length} / ${certs.length}`,
       recommendedStatSub: "Cryptographically Verified",
@@ -446,10 +519,10 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
       title: "9. Interview Preparation",
       subtitle: "Mock Tech 40, HR 25, Aptitude 45, Resume Reviews 8, System Design 25",
       iconName: "Mic",
-      readinessScore: Math.round((ivScore / 10) * 100),
+      readinessScore: safePercent(ivScore, 10),
       completedTasks: iv.filter((i) => i.current >= i.target).length,
       totalTasks: iv.length,
-      completionPercent: Math.round(Math.min(100, avgIvRatio * 100)),
+      completionPercent: safePercent(avgIvRatio * 100, 100),
       recommendedStatLabel: "Mock Technical Rounds",
       recommendedStatValue: `${iv.find((i) => i.id === "iv-1")?.current || 0} / ${iv.find((i) => i.id === "iv-1")?.target || 40}`,
       recommendedStatSub: "FAANG Bar Raiser standard",
@@ -479,16 +552,16 @@ export function calculateStudentChecklistScores(data: StudentChecklistData) {
   };
 }
 
-export function createDefaultChecklist(studentName = "Student", regNo = "", dept = "Computer Science & Engineering"): StudentChecklistData {
+export function createDefaultChecklist(studentName = "Student", regNo = "", dept = ""): StudentChecklistData {
   return {
     profile: {
       id: "std-primary",
       name: studentName,
       registerNumber: regNo,
       department: dept,
-      batch: "2023 - 2027",
+      batch: "",
       facultyMentor: "",
-      currentSemester: "Semester 6",
+      currentSemester: "",
       targetRole: "",
       targetCompanyTier: "",
     },
