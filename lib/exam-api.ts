@@ -21,6 +21,12 @@ export interface StudentExamSummary {
   };
   isResultDisclosed: boolean;
   allowRetakes?: boolean;
+  isScheduled?: boolean;
+  scheduledStartTime?: string | null;
+  scheduledEndTime?: string | null;
+  status?: string;
+  isLockedBySchedule?: boolean;
+  isExamStopped?: boolean;
   hasAttempted: boolean;
   submissionStatus?: {
     isSubmitted: boolean;
@@ -130,6 +136,13 @@ export async function reportStudentExamBlocked(
 
 export async function getStudentExamBlockStatus(
   examId: string
-): Promise<{ isBlocked: boolean; unblockedAt?: string; status?: string; blockedReason?: string }> {
+): Promise<{
+  isBlocked: boolean;
+  unblockedAt?: string;
+  status?: string;
+  blockedReason?: string;
+  examStatus?: string;
+  isExamStopped?: boolean;
+}> {
   return api.get<any>(`/exams/student/${examId}/block-status`);
 }

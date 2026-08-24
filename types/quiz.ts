@@ -96,6 +96,7 @@ export interface RunCodePayload {
   code: string;
   language: string;
   testCases?: TestCase[];
+  customInput?: string;
   questionText?: string;
 }
 

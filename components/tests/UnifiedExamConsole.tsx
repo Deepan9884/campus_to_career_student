@@ -491,7 +491,10 @@ export function UnifiedExamConsole({
         setBlockedReason(reason);
         reportStudentExamBlocked(examData._id, {
           violationsCount: proctorState.violationCount || tabSwitchLimit,
-          violationDetails: proctorState.violationsHistory || [],
+          violationDetails:
+            proctorState.violationsHistory?.map((v: any) =>
+              typeof v === "string" ? v : `${v.type || v.violationType || "violation"} strike`
+            ) || [],
           reason,
         }).catch((err) => console.warn("Failed to report blocked exam:", err));
       }
@@ -519,6 +522,27 @@ export function UnifiedExamConsole({
 
     return () => clearInterval(checkInterval);
   }, [isCandidateBlocked, examData._id]);
+
+  // Live polling to detect if administrator stopped the assessment while candidate is taking it
+  useEffect(() => {
+    if (!hasStartedExam || isTestFinished || isSubmitting) return;
+
+    const stoppedCheckInterval = setInterval(async () => {
+      try {
+        const res = await getStudentExamBlockStatus(examData._id);
+        if (res && res.isExamStopped) {
+          toast.warning("Assessment concluded by administrator. Finalizing and grading responses...", {
+            duration: 8000,
+          });
+          handleFinalSubmit();
+        }
+      } catch (err) {
+        console.warn("Exam stopped check error:", err);
+      }
+    }, 6000);
+
+    return () => clearInterval(stoppedCheckInterval);
+  }, [hasStartedExam, isTestFinished, isSubmitting, examData._id, timeLeftSeconds, answers, executionResults]);
 
   const handleManualUnblockCheck = async () => {
     setIsCheckingUnblock(true);
@@ -1709,10 +1733,9 @@ export function UnifiedExamConsole({
 
         {/* CODING QUESTION WORKSPACE */}
         {currentQ?.type === "coding" && (
-          <ResizablePanelGroup direction="horizontal" className="flex-1">
+          <ResizablePanelGroup orientation="horizontal" className="flex-1">
             {/* Left: Problem Statement & Testcases */}
             <ResizablePanel
-              orientation="horizontal"
               defaultSize={45}
               minSize={30}
               className={`border-r flex flex-col ${
@@ -1802,14 +1825,13 @@ export function UnifiedExamConsole({
 
             {/* Right: Code Editor & Execution Runner with Vertical Resizability */}
             <ResizablePanel
-              orientation="horizontal"
               defaultSize={55}
               minSize={35}
               className={`flex flex-col h-full overflow-hidden ${
                 isLightMode ? "bg-slate-50" : "bg-[#0b1329]"
               }`}
             >
-              <ResizablePanelGroup direction="vertical" className="flex-1">
+              <ResizablePanelGroup orientation="vertical" className="flex-1">
                 {/* Top: Language Toolbar & Code Editor Space */}
                 <ResizablePanel
                   defaultSize={58}

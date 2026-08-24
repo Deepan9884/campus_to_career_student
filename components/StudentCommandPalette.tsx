@@ -125,7 +125,7 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
     {
       id: "nav-online-tests",
       title: "Proctored Online Coding Tests",
-      category: "superdream",
+      category: "navigation",
       icon: FileCode,
       badge: "Super Dream",
       keywords: ["exam", "test", "tests", "assessment", "proctor", "proctored", "mcq", "coding", "scorecard", "results", "arena"],

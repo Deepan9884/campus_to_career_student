@@ -157,6 +157,9 @@ export function TestArenaSection() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {availableExams.map((exam) => {
                   const hasAttempted = exam.hasAttempted;
+                  const isStopped = Boolean(exam.isExamStopped || exam.status === "stopped");
+                  const isLockedBySchedule = Boolean(exam.isLockedBySchedule);
+
                   return (
                     <div
                       key={exam._id}
@@ -170,15 +173,27 @@ export function TestArenaSection() {
                     >
                       <div className="space-y-4 relative z-10">
                         {/* Format & Status Badge */}
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
                           <span className="text-[11px] font-extrabold tracking-wider uppercase text-indigo-300 bg-indigo-500/15 px-3 py-1 rounded-full border border-indigo-400/30">
                             {exam.examType} Exam
                           </span>
 
-                          {hasAttempted && (
+                          {isStopped ? (
+                            <span className="text-[10px] font-extrabold text-rose-300 bg-rose-500/20 border border-rose-400/30 px-2.5 py-0.5 rounded-full">
+                              Concluded
+                            </span>
+                          ) : isLockedBySchedule ? (
+                            <span className="text-[10px] font-extrabold text-amber-300 bg-amber-500/20 border border-amber-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <Calendar className="w-3 h-3" /> Scheduled
+                            </span>
+                          ) : hasAttempted ? (
                             <span className="text-[10px] font-extrabold text-emerald-300 bg-emerald-500/15 border border-emerald-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                               Submitted
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                              Live
                             </span>
                           )}
                         </div>
@@ -192,6 +207,18 @@ export function TestArenaSection() {
                             {exam.description || "Official proctored examination authored by administration."}
                           </p>
                         </div>
+
+                        {/* Scheduled Timing Banner */}
+                        {exam.isScheduled && exam.scheduledStartTime && (
+                          <div className="p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-[11px] text-indigo-300 flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                            <span className="truncate">
+                              {isLockedBySchedule
+                                ? `Unlocks on ${new Date(exam.scheduledStartTime).toLocaleString()}`
+                                : `Window open until ${exam.scheduledEndTime ? new Date(exam.scheduledEndTime).toLocaleTimeString() : "Concluded"}`}
+                            </span>
+                          </div>
+                        )}
 
                         {/* Meta Tiles */}
                         <div className="grid grid-cols-2 gap-2 text-xs text-slate-200">
@@ -218,14 +245,30 @@ export function TestArenaSection() {
                       {/* Card Action */}
                       <div className="pt-4 border-t border-white/[0.1] flex items-center justify-between gap-2 relative z-10">
                         <span className="text-[11px] text-slate-400 font-medium">
-                          {hasAttempted
+                          {isStopped
+                            ? "Assessment Stopped"
+                            : isLockedBySchedule
+                            ? "Starts at Scheduled Time"
+                            : hasAttempted
                             ? exam.allowRetakes
                               ? "Attempt Recorded • Retakes Allowed"
                               : "Completed • Single Attempt"
                             : "Ready to Start"}
                         </span>
 
-                        {hasAttempted && !exam.allowRetakes ? (
+                        {isStopped ? (
+                          <div className="px-4 py-2 rounded-2xl text-xs font-bold bg-rose-950/60 border border-rose-800/60 text-rose-300 flex items-center gap-1.5 cursor-not-allowed">
+                            <span>Concluded</span>
+                          </div>
+                        ) : isLockedBySchedule ? (
+                          <div
+                            className="px-4 py-2 rounded-2xl text-xs font-bold bg-amber-950/40 border border-amber-500/30 text-amber-300 flex items-center gap-1.5 cursor-not-allowed"
+                            title={`Exam unlocks at ${new Date(exam.scheduledStartTime!).toLocaleString()}`}
+                          >
+                            <Lock className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Locked</span>
+                          </div>
+                        ) : hasAttempted && !exam.allowRetakes ? (
                           <div
                             className="px-4 py-2 rounded-2xl text-xs font-bold bg-slate-800/80 border border-slate-700 text-slate-400 flex items-center gap-1.5 cursor-not-allowed"
                             title="Retakes are disabled by administrator for this exam"

@@ -338,7 +338,7 @@ export function ProctoredCodingTestConsole({
     }
   }, []);
 
-  const isCopyPasteDisabled = Boolean(assessment.proctoringConfig?.copyPasteDisabled === true);
+  const isCopyPasteDisabled = Boolean((assessment as any).proctoringConfig?.copyPasteDisabled === true);
 
   // Proctoring session hook (enabled both in lobby and during active exam)
   const proctorState = useProctoringSession({
