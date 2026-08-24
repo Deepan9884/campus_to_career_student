@@ -108,25 +108,25 @@ export function analyzeEyeGaze(
     normHeadY = headCenterY / vh;
 
     // Check if candidate is too far away
-    if (bw < vw * 0.08 || bh < vh * 0.10) {
+    if (bw < vw * 0.06 || bh < vh * 0.08) {
       isFullFace = false;
       framingStatus = "face_too_far";
       framingWarning = "Face too far: Move closer to the webcam";
     }
     // Half-Face Cutoff: only triggers if head center is severely shifted off the frame edge
-    else if (normHeadX < 0.12) {
+    else if (normHeadX < 0.06) {
       isFullFace = false;
       framingStatus = "half_face_left_cutoff";
       framingWarning = "Half face detected: Center your face (cut off on left)";
-    } else if (normHeadX > 0.88) {
+    } else if (normHeadX > 0.94) {
       isFullFace = false;
       framingStatus = "half_face_right_cutoff";
       framingWarning = "Half face detected: Center your face (cut off on right)";
-    } else if (normHeadY < 0.03) {
+    } else if (normHeadY < 0.02) {
       isFullFace = false;
       framingStatus = "half_face_top_cutoff";
       framingWarning = "Partial face detected: Adjust camera down (head cut off at top)";
-    } else if (normHeadY > 0.88) {
+    } else if (normHeadY > 0.94) {
       isFullFace = false;
       framingStatus = "half_face_bottom_cutoff";
       framingWarning = "Partial face detected: Adjust camera up (head cut off at bottom)";
@@ -139,10 +139,10 @@ export function analyzeEyeGaze(
     sh = Math.min(vh - sy, headH);
   } else {
     // Default center-upper region
-    sx = vw * 0.20;
-    sy = vh * 0.06;
-    sw = vw * 0.60;
-    sh = vh * 0.50;
+    sx = vw * 0.15;
+    sy = vh * 0.05;
+    sw = vw * 0.70;
+    sh = vh * 0.55;
   }
 
   if (sw <= 15 || sh <= 15) return defaultResult;
@@ -155,8 +155,8 @@ export function analyzeEyeGaze(
   const totalPixels = canvas.width * canvas.height;
 
   // ── 2. Facial Landmark & Dual-Eye Presence Verification ───────────────────
-  const eyeBandTop = Math.floor(canvas.height * 0.16);
-  const eyeBandBottom = Math.floor(canvas.height * 0.62);
+  const eyeBandTop = Math.floor(canvas.height * 0.14);
+  const eyeBandBottom = Math.floor(canvas.height * 0.65);
   const halfWidth = Math.floor(canvas.width / 2);
 
   let totalLuma = 0;
@@ -177,7 +177,7 @@ export function analyzeEyeGaze(
   const lumaDynamicRange = maxLuma - minLuma;
 
   // A. Reject Uniform Crops (e.g. Plain Shirt, Chest, Wall)
-  if (lumaDynamicRange < 28) {
+  if (lumaDynamicRange < 22) {
     return {
       isLookingAway: false,
       direction: "center",
@@ -193,7 +193,7 @@ export function analyzeEyeGaze(
   }
 
   // B. Analyze Eye Sockets / Pupil Centroids & Eye Symmetry
-  const darkThreshold = Math.max(18, minLuma + (avgLuma - minLuma) * 0.38);
+  const darkThreshold = Math.max(16, minLuma + (avgLuma - minLuma) * 0.36);
 
   let leftEyeDarkPixels = 0;
   let rightEyeDarkPixels = 0;
@@ -219,8 +219,8 @@ export function analyzeEyeGaze(
     }
   }
 
-  // If no eye-socket features exist (e.g. collar of shirt or chest in frame)
-  if (totalDarkInEyeBand < 12) {
+  // If no eye-socket features exist
+  if (totalDarkInEyeBand < 8) {
     return {
       isLookingAway: false,
       direction: "center",
@@ -235,11 +235,11 @@ export function analyzeEyeGaze(
     };
   }
 
-  // C. Half-Face / Quarter-Face Occlusion Check (one eye visible, other completely obscured)
+  // C. Half-Face / Quarter-Face Occlusion Check (only trigger on severe occlusion)
   if (isFullFace) {
     const maxEye = Math.max(leftEyeDarkPixels, rightEyeDarkPixels);
     const minEye = Math.min(leftEyeDarkPixels, rightEyeDarkPixels);
-    if (maxEye >= 50 && minEye <= 2) {
+    if (maxEye >= 75 && minEye <= 0) {
       isFullFace = false;
       framingStatus = leftEyeDarkPixels < rightEyeDarkPixels ? "half_face_left_cutoff" : "half_face_right_cutoff";
       framingWarning = "Half/quarter face detected: Ensure both eyes and full face are visible";
@@ -256,15 +256,14 @@ export function analyzeEyeGaze(
   }
 
   // Horizontal Yaw:
-  // Balanced around center 0.5. Looking away left/right shifts yaw past 0.35.
+  // Balanced around center 0.5. Lenient scaling allows wide monitor and split-pane code reading.
   const eyePixelDiff = (rightEyeDarkPixels - leftEyeDarkPixels) / Math.max(1, totalDarkInEyeBand);
-  const headYaw = Math.max(-1, Math.min(1, eyePixelDiff * 1.3 + (normIrisX - 0.5) * 2.0));
+  const headYaw = Math.max(-1, Math.min(1, eyePixelDiff * 0.85 + (normIrisX - 0.5) * 1.3));
 
   // Vertical Pitch:
-  // Neutral eye horizon is at ~0.38 - 0.42.
-  // Looking at screen is normIrisY ~0.36 - 0.46 -> headPitch is between -0.15 and +0.22.
-  // Looking down at phone/desk shifts normIrisY > 0.50 -> headPitch > 0.32.
-  const headPitch = Math.max(-1, Math.min(1, (normIrisY - 0.39) * 3.0));
+  // Neutral eye horizon is at ~0.38 - 0.44.
+  // Relaxed vertical scaling ensures reading down on the screen or keyboard glances do NOT trigger false warnings.
+  const headPitch = Math.max(-1, Math.min(1, (normIrisY - 0.40) * 1.9));
 
   const eyeDisplacement = Math.sqrt(headYaw * headYaw + headPitch * headPitch);
 
@@ -272,26 +271,26 @@ export function analyzeEyeGaze(
   let direction: GazeDirection = "center";
   let description = "Looking at Screen";
 
-  // Downward look threshold: triggers when candidate looks down at lap/desk/phone
-  if (headPitch > 0.32) {
+  // Downward look threshold: only triggers when candidate clearly looks down at lap/phone (headPitch > 0.58)
+  if (headPitch > 0.58) {
     isLookingAway = true;
     direction = "down";
-    description = "Looking Down (Phone / Desk Notes Detected)";
+    description = "Looking Down (Off-Screen)";
   }
-  // Upward look threshold: looking up at ceiling/wall
-  else if (headPitch < -0.38) {
+  // Upward look threshold: looking up far off-screen (headPitch < -0.58)
+  else if (headPitch < -0.58) {
     isLookingAway = true;
     direction = "up";
     description = "Looking Up (Off-Screen)";
   }
-  // Left look threshold: looking away to the left
-  else if (headYaw < -0.36) {
+  // Left look threshold: looking away to the left (headYaw < -0.55)
+  else if (headYaw < -0.55) {
     isLookingAway = true;
     direction = "left";
     description = "Looking Away (Left)";
   }
-  // Right look threshold: looking away to the right
-  else if (headYaw > 0.36) {
+  // Right look threshold: looking away to the right (headYaw > 0.55)
+  else if (headYaw > 0.55) {
     isLookingAway = true;
     direction = "right";
     description = "Looking Away (Right)";

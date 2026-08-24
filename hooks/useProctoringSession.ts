@@ -851,10 +851,10 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
                         const isFaceMissing = gaze.framingStatus === "no_face_features";
                         const isPartialFace = !gaze.isFullFace && !isFaceMissing;
-                        const requiredStreak = 2; // 2 ticks (~1.2s) of continuous look-away confirmation
+                        const requiredStreak = 5; // 5 ticks (~3.0-3.5s) of continuous look-away confirmation
 
-                        // After 2 continuous look-away ticks (~1.2s) with 2.8s cooldown
-                        if (lookAwayStreak.current >= requiredStreak && now - lastGazeWarningTime.current > 2800) {
+                        // After 5 continuous look-away ticks (~3.0-3.5s) with 5.0s cooldown
+                        if (lookAwayStreak.current >= requiredStreak && now - lastGazeWarningTime.current > 5000) {
                           lastGazeWarningTime.current = now;
                           lookAwayStreak.current = 0;
 

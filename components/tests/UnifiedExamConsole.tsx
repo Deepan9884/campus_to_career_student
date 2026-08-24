@@ -698,6 +698,14 @@ export function UnifiedExamConsole({
 
   // Launch Proctored Exam (Enters Fullscreen & Initiates Anti-Cheat)
   const handleStartProctoredExam = async () => {
+    // Strict Camera & Eye-Proctoring Gate: If webcam is required, student cannot enter without active camera
+    if (isWebcamRequired && !proctorState.cameraReady) {
+      toast.error("Camera Access Required: You cannot enter this proctored examination without enabling your webcam.", {
+        duration: 6000,
+      });
+      return;
+    }
+
     try {
       if (document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen();
@@ -1307,11 +1315,15 @@ export function UnifiedExamConsole({
                   className="w-full btn-gradient py-4 rounded-2xl font-black text-sm text-white shadow-xl shadow-indigo-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="h-4 w-4 fill-current" />
-                  <span>Start Assessment Now</span>
+                  <span>
+                    {isWebcamRequired && !proctorState.cameraReady
+                      ? "Camera Authorization Required to Start"
+                      : "Start Assessment Now"}
+                  </span>
                 </button>
                 <p className={`text-[11px] text-center mt-2 ${isLightMode ? "text-slate-600 font-medium" : "text-slate-400"}`}>
                   {isWebcamRequired && !proctorState.cameraReady
-                    ? "Camera authorization is required before starting."
+                    ? "Camera permission must be allowed before you can enter the examination."
                     : isFullscreenEnforced
                     ? "Clicking will enter Fullscreen mode and initiate assessment security."
                     : "Clicking will launch the exam console directly."}

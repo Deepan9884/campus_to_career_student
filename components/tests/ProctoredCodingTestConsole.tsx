@@ -604,6 +604,14 @@ export function ProctoredCodingTestConsole({
 
   // Start Assessment from Lobby
   const handleEnterAndStartTest = async () => {
+    // Strict Camera & Eye-Proctoring Gate
+    if (!proctorState.cameraReady) {
+      toast.error("Camera Access Required: Please allow camera permissions and ensure your webcam is active before entering the test.", {
+        duration: 6000,
+      });
+      return;
+    }
+
     try {
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
@@ -1079,13 +1087,18 @@ export function ProctoredCodingTestConsole({
               <div className={`pt-4 border-t ${isLightMode ? "border-slate-200" : "border-white/[0.08]"} space-y-2`}>
                 <button
                   onClick={handleEnterAndStartTest}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600 hover:opacity-95 text-white font-extrabold text-sm transition shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-98 border border-white/20"
+                  disabled={!proctorState.cameraReady}
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600 hover:opacity-95 text-white font-extrabold text-sm transition shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-98 border border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="h-4 w-4 fill-current" />
-                  <span>Start Proctored Test Now</span>
+                  <span>
+                    {!proctorState.cameraReady ? "Camera Authorization Required to Start" : "Start Proctored Test Now"}
+                  </span>
                 </button>
                 <p className={`text-[10px] text-center ${isLightMode ? "text-slate-500" : "text-slate-400"}`}>
-                  Clicking will enter Fullscreen mode and initiate real-time AI proctoring.
+                  {!proctorState.cameraReady
+                    ? "Camera permission must be enabled before you can enter the test arena."
+                    : "Clicking will enter Fullscreen mode and initiate real-time AI proctoring."}
                 </p>
               </div>
             </div>
