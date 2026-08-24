@@ -74,7 +74,26 @@ const BLOCKED_STANDALONE_KEYS = new Set([
 const ALLOWED_EDITOR_CTRL_KEYS = new Set(["z", "Z", "y", "Y", "a", "A", "f", "F", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete"]);
 const ALLOWED_COPY_PASTE_KEYS = new Set(["c", "C", "v", "V", "x", "X", "Insert"]);
 
+// Whitelisted hardware brightness & display adjustment keys
+const ALLOWED_BRIGHTNESS_KEYS = new Set([
+  "BrightnessUp",
+  "BrightnessDown",
+  "BrightnessAuto",
+  "BrightnessMin",
+  "BrightnessMax",
+  "MonBrightnessUp",
+  "MonBrightnessDown",
+  "KbdBrightnessUp",
+  "KbdBrightnessDown",
+  "DisplayToggleIntExt",
+]);
+
 function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
+  // Always permit hardware brightness and display adjustment function keys
+  if (ALLOWED_BRIGHTNESS_KEYS.has(e.key) || ALLOWED_BRIGHTNESS_KEYS.has(e.code)) {
+    return false;
+  }
+
   const targetTag = (e.target as HTMLElement)?.tagName?.toUpperCase();
   const isInsideEditor = targetTag === "TEXTAREA" || targetTag === "INPUT";
 
