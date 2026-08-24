@@ -203,14 +203,87 @@ function handleCodeEditorKeyDown(
 }
 
 /**
- * Rich Formatted Problem Content renderer supporting code blocks & inline tokens
+ * Syntax colorizer helper for multi-language code preview overlay
+ */
+function highlightCodeTokens(code: string, language: string, isLight: boolean): string {
+  if (!code) return "";
+
+  const escapeHtml = (text: string) =>
+    text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const lines = code.split("\n");
+  const highlightedLines = lines.map((line) => {
+    const escaped = escapeHtml(line);
+
+    // Comment check
+    const isPySql = language === "python" || language === "sql";
+    const commentMarker = isPySql ? (language === "python" ? "#" : "--") : "//";
+    const commentIdx = escaped.indexOf(commentMarker);
+
+    if (commentIdx !== -1) {
+      const before = escaped.substring(0, commentIdx);
+      const comment = escaped.substring(commentIdx);
+      return (
+        colorizeStringTokens(before, language, isLight) +
+        `<span class="${isLight ? "text-slate-400 italic" : "text-slate-400/80 italic font-mono"}">${comment}</span>`
+      );
+    }
+
+    return colorizeStringTokens(escaped, language, isLight);
+  });
+
+  return highlightedLines.join("\n");
+}
+
+function colorizeStringTokens(str: string, language: string, isLight: boolean): string {
+  if (!str) return "";
+
+  // 1. Strings
+  str = str.replace(
+    /(".*?"|'.*?'|`.*?`)/g,
+    `<span class="${isLight ? "text-emerald-700 font-semibold" : "text-emerald-400 font-semibold"}">$1</span>`
+  );
+
+  // 2. Numbers & Booleans
+  str = str.replace(
+    /\b(\d+(\.\d+)?|true|false|True|False|null|None|undefined|NULL)\b/g,
+    `<span class="${isLight ? "text-amber-700 font-bold" : "text-amber-400 font-bold"}">$1</span>`
+  );
+
+  // 3. Keywords
+  const PYTHON_KW = "\\b(def|class|return|if|elif|else|for|while|in|is|not|and|or|import|from|as|try|except|finally|with|lambda|yield|pass|break|continue|global|raise|async|await|len|range|print|int|str|float|list|dict|set|tuple|self)\\b";
+  const JS_KW = "\\b(function|const|let|var|return|if|else|for|while|do|switch|case|break|continue|default|import|export|from|as|class|extends|new|this|super|typeof|instanceof|in|of|try|catch|finally|throw|async|await|yield|console|document|window)\\b";
+  const CPP_JAVA_KW = "\\b(public|private|protected|static|final|const|void|int|double|float|char|long|short|bool|boolean|class|struct|enum|interface|extends|implements|new|this|return|if|else|for|while|do|switch|case|break|continue|try|catch|throw|auto|include|vector|string|map|set|pair|stack|queue|std|cout|cin|endl)\\b";
+  const SQL_KW = "\\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|FULL|ON|GROUP|BY|HAVING|ORDER|ASC|DESC|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|DROP|ALTER|PRIMARY|KEY|FOREIGN|REFERENCES|AS|DISTINCT|UNION|ALL|EXISTS|BETWEEN|LIKE|IN|IS|NULL|NOT|AND|OR|COUNT|SUM|AVG|MIN|MAX)\\b";
+
+  let kwPattern = PYTHON_KW;
+  if (language === "javascript" || language === "typescript") kwPattern = JS_KW;
+  else if (language === "cpp" || language === "java") kwPattern = CPP_JAVA_KW;
+  else if (language === "sql") kwPattern = SQL_KW;
+
+  str = str.replace(
+    new RegExp(kwPattern, language === "sql" ? "gi" : "g"),
+    `<span class="${isLight ? "text-purple-700 font-extrabold" : "text-purple-400 font-extrabold"}">$1</span>`
+  );
+
+  // 4. Function invocations
+  str = str.replace(
+    /\b([a-zA-Z_]\w*)(?=\s*\()/g,
+    `<span class="${isLight ? "text-blue-700 font-bold" : "text-sky-300 font-bold"}">$1</span>`
+  );
+
+  return str;
+}
+
+/**
+ * Rich Formatted Problem Content renderer supporting code blocks, examples & inline tokens
  */
 function FormattedProblemContent({ text, isLightMode }: { text: string; isLightMode: boolean }) {
   if (!text) return null;
   const parts = text.split(/(```[\s\S]*?```)/g);
 
   return (
-    <div className="space-y-3 leading-relaxed">
+    <div className="space-y-3.5 leading-relaxed">
       {parts.map((part, idx) => {
         if (part.startsWith("```") && part.endsWith("```")) {
           const lines = part.slice(3, -3).trim().split("\n");
@@ -241,31 +314,92 @@ function FormattedProblemContent({ text, isLightMode }: { text: string; isLightM
           );
         }
 
+        const lines = part.split("\n");
         return (
-          <p
-            key={idx}
-            className={`text-xs md:text-sm whitespace-pre-line leading-relaxed font-normal ${
-              isLightMode ? "text-slate-800" : "text-slate-200"
-            }`}
-          >
-            {part.split(/(`[^`]+`)/g).map((sub, sIdx) => {
-              if (sub.startsWith("`") && sub.endsWith("`") && sub.length > 2) {
+          <div key={idx} className="space-y-2.5">
+            {lines.map((line, lIdx) => {
+              const trimmed = line.trim();
+              if (!trimmed) return <div key={lIdx} className="h-1" />;
+
+              if (trimmed.toLowerCase().startsWith("example") || trimmed.toLowerCase().startsWith("### example")) {
                 return (
-                  <code
-                    key={sIdx}
-                    className={`px-1.5 py-0.5 rounded font-mono text-xs font-semibold ${
-                      isLightMode
-                        ? "bg-indigo-50 text-indigo-700 border border-indigo-200/80"
-                        : "bg-indigo-500/10 text-indigo-300 border border-indigo-500/25"
-                    }`}
-                  >
-                    {sub.slice(1, -1)}
-                  </code>
+                  <div key={lIdx} className="pt-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-sm">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{trimmed.replace(/^#+\s*/, "")}</span>
+                    </div>
+                  </div>
                 );
               }
-              return sub;
+
+              if (trimmed.startsWith("Input:")) {
+                return (
+                  <div
+                    key={lIdx}
+                    className={`p-3 rounded-xl border font-mono text-xs font-semibold flex flex-col sm:flex-row sm:items-center gap-2 ${
+                      isLightMode
+                        ? "bg-slate-50 border-slate-200 text-slate-900"
+                        : "bg-slate-900/90 border-slate-800 text-slate-100"
+                    }`}
+                  >
+                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-indigo-500/15 text-indigo-500 border border-indigo-500/30 shrink-0">
+                      Input
+                    </span>
+                    <span className="break-all text-slate-700 dark:text-slate-200">
+                      {trimmed.replace(/^Input:\s*/, "")}
+                    </span>
+                  </div>
+                );
+              }
+
+              if (trimmed.startsWith("Output:")) {
+                return (
+                  <div
+                    key={lIdx}
+                    className={`p-3 rounded-xl border font-mono text-xs font-semibold flex flex-col sm:flex-row sm:items-center gap-2 ${
+                      isLightMode
+                        ? "bg-emerald-50/70 border-emerald-300 text-emerald-950"
+                        : "bg-emerald-950/30 border-emerald-500/30 text-emerald-300"
+                    }`}
+                  >
+                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
+                      Output
+                    </span>
+                    <span className="break-all font-bold text-emerald-800 dark:text-emerald-300">
+                      {trimmed.replace(/^Output:\s*/, "")}
+                    </span>
+                  </div>
+                );
+              }
+
+              return (
+                <p
+                  key={lIdx}
+                  className={`text-xs md:text-sm whitespace-pre-line leading-relaxed font-normal ${
+                    isLightMode ? "text-slate-800" : "text-slate-200"
+                  }`}
+                >
+                  {trimmed.split(/(`[^`]+`)/g).map((sub, sIdx) => {
+                    if (sub.startsWith("`") && sub.endsWith("`") && sub.length > 2) {
+                      return (
+                        <code
+                          key={sIdx}
+                          className={`px-1.5 py-0.5 rounded-lg font-mono text-xs font-bold border ${
+                            isLightMode
+                              ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                              : "bg-indigo-500/15 text-cyan-300 border-indigo-500/30"
+                          }`}
+                        >
+                          {sub.slice(1, -1)}
+                        </code>
+                      );
+                    }
+                    return sub;
+                  })}
+                </p>
+              );
             })}
-          </p>
+          </div>
         );
       })}
     </div>
@@ -1655,36 +1789,62 @@ export function ProctoredCodingTestConsole({
                 </div>
               </div>
 
-              {/* Code Editor Body */}
+              {/* Code Editor Body with Real-time Syntax Highlighting Layer */}
               <div
                 className={`flex-1 flex overflow-hidden relative font-mono ${
                   isLightMode ? "bg-[#fafcff]" : "bg-[#060b18]"
                 }`}
+                style={{ fontSize: `${editorFontSize}px` }}
               >
                 {/* Line Numbers */}
                 <div
                   className={`w-12 ${
                     isLightMode ? "bg-slate-50 border-slate-200 text-slate-400" : "bg-slate-950/80 border-white/[0.06] text-slate-500"
                   } border-r py-3 text-right pr-3 select-none text-xs space-y-1 font-mono shrink-0`}
+                  style={{ fontSize: `${editorFontSize - 1}px` }}
                 >
                   {codeLines.map((_, i) => (
-                    <div key={i} className="leading-6 font-mono">
+                    <div key={i} className="leading-6 font-mono font-bold">
                       {i + 1}
                     </div>
                   ))}
                 </div>
 
-                <textarea
-                  value={currentAnswer}
-                  onChange={(e) => handleAnswerUpdate(e.target.value)}
-                  onKeyDown={(e) => handleCodeEditorKeyDown(e, currentAnswer, handleAnswerUpdate)}
-                  placeholder={LANGUAGE_CONFIGS[selectedLang]?.placeholder || `// write your code here`}
-                  spellCheck={false}
-                  className={`flex-1 p-3 bg-transparent text-xs ${
-                    isLightMode ? "text-slate-900" : "text-slate-100"
-                  } resize-none focus:outline-none font-mono leading-6`}
-                  style={{ fontSize: `${editorFontSize}px` }}
-                />
+                {/* Editor Container with Syntax Layer & Textarea */}
+                <div className="flex-1 h-full relative overflow-hidden">
+                  {/* Background Syntax Highlight Layer */}
+                  <pre
+                    aria-hidden="true"
+                    className="absolute inset-0 p-3 font-mono leading-6 overflow-hidden pointer-events-none whitespace-pre select-none m-0"
+                    style={{ fontSize: `${editorFontSize}px` }}
+                    dangerouslySetInnerHTML={{
+                      __html: highlightCodeTokens(currentAnswer, selectedLang, isLightMode) + "\n",
+                    }}
+                  />
+
+                  {/* Interactive Textarea */}
+                  <textarea
+                    value={currentAnswer}
+                    onChange={(e) => handleAnswerUpdate(e.target.value)}
+                    onKeyDown={(e) => handleCodeEditorKeyDown(e, currentAnswer, handleAnswerUpdate)}
+                    onScroll={(e) => {
+                      const pre = e.currentTarget.previousElementSibling as HTMLPreElement | null;
+                      if (pre) {
+                        pre.scrollTop = e.currentTarget.scrollTop;
+                        pre.scrollLeft = e.currentTarget.scrollLeft;
+                      }
+                    }}
+                    placeholder={LANGUAGE_CONFIGS[selectedLang]?.placeholder || `// write your code here`}
+                    spellCheck={false}
+                    autoCapitalize="off"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    className={`absolute inset-0 w-full h-full p-3 font-mono leading-6 resize-none focus:outline-none bg-transparent whitespace-pre m-0 caret-blue-500 selection:bg-indigo-500/30 ${
+                      isLightMode ? "text-transparent placeholder:text-slate-400" : "text-transparent placeholder:text-slate-600"
+                    }`}
+                    style={{ fontSize: `${editorFontSize}px` }}
+                  />
+                </div>
               </div>
 
               {/* Bottom Drawer: Test Cases / Custom / Compiler Console */}

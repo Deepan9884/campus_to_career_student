@@ -107,7 +107,80 @@ const LANGUAGE_CONFIGS: Record<
 };
 
 /**
- * Helper to render inline markdown bold (**bold**) and inline code (`code`)
+ * Syntax colorizer helper for multi-language code preview overlay
+ */
+function highlightCodeTokens(code: string, language: string, isLight: boolean): string {
+  if (!code) return "";
+
+  const escapeHtml = (text: string) =>
+    text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const lines = code.split("\n");
+  const highlightedLines = lines.map((line) => {
+    const escaped = escapeHtml(line);
+
+    // Comment check
+    const isPySql = language === "python" || language === "sql";
+    const commentMarker = isPySql ? (language === "python" ? "#" : "--") : "//";
+    const commentIdx = escaped.indexOf(commentMarker);
+
+    if (commentIdx !== -1) {
+      const before = escaped.substring(0, commentIdx);
+      const comment = escaped.substring(commentIdx);
+      return (
+        colorizeStringTokens(before, language, isLight) +
+        `<span class="${isLight ? "text-slate-400 italic" : "text-slate-400/80 italic font-mono"}">${comment}</span>`
+      );
+    }
+
+    return colorizeStringTokens(escaped, language, isLight);
+  });
+
+  return highlightedLines.join("\n");
+}
+
+function colorizeStringTokens(str: string, language: string, isLight: boolean): string {
+  if (!str) return "";
+
+  // 1. Strings
+  str = str.replace(
+    /(".*?"|'.*?'|`.*?`)/g,
+    `<span class="${isLight ? "text-emerald-700 font-semibold" : "text-emerald-400 font-semibold"}">$1</span>`
+  );
+
+  // 2. Numbers & Booleans
+  str = str.replace(
+    /\b(\d+(\.\d+)?|true|false|True|False|null|None|undefined|NULL)\b/g,
+    `<span class="${isLight ? "text-amber-700 font-bold" : "text-amber-400 font-bold"}">$1</span>`
+  );
+
+  // 3. Keywords
+  const PYTHON_KW = "\\b(def|class|return|if|elif|else|for|while|in|is|not|and|or|import|from|as|try|except|finally|with|lambda|yield|pass|break|continue|global|raise|async|await|len|range|print|int|str|float|list|dict|set|tuple|self)\\b";
+  const JS_KW = "\\b(function|const|let|var|return|if|else|for|while|do|switch|case|break|continue|default|import|export|from|as|class|extends|new|this|super|typeof|instanceof|in|of|try|catch|finally|throw|async|await|yield|console|document|window)\\b";
+  const CPP_JAVA_KW = "\\b(public|private|protected|static|final|const|void|int|double|float|char|long|short|bool|boolean|class|struct|enum|interface|extends|implements|new|this|return|if|else|for|while|do|switch|case|break|continue|try|catch|throw|auto|include|vector|string|map|set|pair|stack|queue|std|cout|cin|endl)\\b";
+  const SQL_KW = "\\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|FULL|ON|GROUP|BY|HAVING|ORDER|ASC|DESC|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|DROP|ALTER|PRIMARY|KEY|FOREIGN|REFERENCES|AS|DISTINCT|UNION|ALL|EXISTS|BETWEEN|LIKE|IN|IS|NULL|NOT|AND|OR|COUNT|SUM|AVG|MIN|MAX)\\b";
+
+  let kwPattern = PYTHON_KW;
+  if (language === "javascript" || language === "typescript") kwPattern = JS_KW;
+  else if (language === "cpp" || language === "java") kwPattern = CPP_JAVA_KW;
+  else if (language === "sql") kwPattern = SQL_KW;
+
+  str = str.replace(
+    new RegExp(kwPattern, language === "sql" ? "gi" : "g"),
+    `<span class="${isLight ? "text-purple-700 font-extrabold" : "text-purple-400 font-extrabold"}">$1</span>`
+  );
+
+  // 4. Function invocations
+  str = str.replace(
+    /\b([a-zA-Z_]\w*)(?=\s*\()/g,
+    `<span class="${isLight ? "text-blue-700 font-bold" : "text-sky-300 font-bold"}">$1</span>`
+  );
+
+  return str;
+}
+
+/**
+ * Helper to render inline markdown bold (**bold**) and inline code (`code`) with glowing badges
  */
 function renderMarkdownInline(text: string, isLight: boolean) {
   if (!text) return null;
@@ -117,20 +190,23 @@ function renderMarkdownInline(text: string, isLight: boolean) {
       {tokens.map((tok, i) => {
         if (tok.startsWith("**") && tok.endsWith("**")) {
           return (
-            <strong key={i} className={`font-bold ${isLight ? "text-slate-900" : "text-white"}`}>
+            <strong key={i} className={`font-black ${isLight ? "text-slate-950 font-bold" : "text-white font-black"}`}>
               {tok.slice(2, -2)}
             </strong>
           );
         }
         if (tok.startsWith("`") && tok.endsWith("`")) {
+          const val = tok.slice(1, -1);
           return (
             <code
               key={i}
-              className={`font-mono text-xs px-1.5 py-0.5 rounded ${
-                isLight ? "bg-slate-100 text-indigo-800 border border-slate-200" : "bg-slate-800 text-indigo-300"
+              className={`font-mono text-xs px-2 py-0.5 rounded-lg border font-bold transition-all shadow-xs ${
+                isLight
+                  ? "bg-indigo-50/90 text-indigo-700 border-indigo-200"
+                  : "bg-indigo-500/15 text-cyan-300 border-indigo-500/30"
               }`}
             >
-              {tok.slice(1, -1)}
+              {val}
             </code>
           );
         }
@@ -192,10 +268,10 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
         // Parse paragraphs and structured example blocks
         const lines = part.split("\n");
         return (
-          <div key={idx} className="space-y-2 text-sm sm:text-base leading-relaxed">
+          <div key={idx} className="space-y-3 text-sm leading-relaxed">
             {lines.map((line, lIdx) => {
               const trimmed = line.trim();
-              if (!trimmed) return <div key={lIdx} className="h-1" />;
+              if (!trimmed) return <div key={lIdx} className="h-0.5" />;
 
               // Skip raw markdown tokens like ``` or ... or ---
               if (trimmed === "```" || trimmed === "..." || trimmed === "---" || /^`{3,}/.test(trimmed)) {
@@ -204,17 +280,13 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
 
               // Format Example headers: e.g. "Example 1:" or "### Example 1:"
               if (trimmed.toLowerCase().startsWith("example") || trimmed.toLowerCase().startsWith("### example")) {
+                const exTitle = trimmed.replace(/^#+\s*/, "");
                 return (
-                  <div key={lIdx} className="pt-2">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border ${
-                        isLight
-                          ? "bg-indigo-50 border-indigo-200 text-indigo-800"
-                          : "bg-indigo-500/20 border-indigo-500/30 text-indigo-300"
-                      }`}
-                    >
-                      {trimmed.replace(/^#+\s*/, "")}
-                    </span>
+                  <div key={lIdx} className="pt-3 pb-1">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-md shadow-indigo-500/20">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{exTitle}</span>
+                    </div>
                   </div>
                 );
               }
@@ -224,12 +296,18 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
                 return (
                   <div
                     key={lIdx}
-                    className={`p-3 rounded-xl border font-mono text-xs sm:text-sm font-semibold flex flex-col sm:flex-row sm:items-center gap-2 ${
-                      isLight ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-slate-900 border-slate-800 text-slate-100"
+                    className={`p-3.5 rounded-2xl border font-mono text-xs sm:text-[13px] font-semibold flex flex-col sm:flex-row sm:items-center gap-2.5 transition-all shadow-xs ${
+                      isLight
+                        ? "bg-slate-50/90 border-slate-200 text-slate-900"
+                        : "bg-slate-900/90 border-slate-800 text-slate-100"
                     }`}
                   >
-                    <span className="text-indigo-600 dark:text-indigo-400 font-bold shrink-0">Input:</span>
-                    <span className="break-all">{trimmed.replace(/^Input:\s*/, "")}</span>
+                    <span className="px-2.5 py-0.5 rounded-lg text-xs font-extrabold uppercase tracking-wide bg-indigo-500/15 text-indigo-500 border border-indigo-500/30 shrink-0">
+                      Input
+                    </span>
+                    <span className="break-all font-mono font-medium text-slate-800 dark:text-slate-200">
+                      {trimmed.replace(/^Input:\s*/, "")}
+                    </span>
                   </div>
                 );
               }
@@ -239,12 +317,18 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
                 return (
                   <div
                     key={lIdx}
-                    className={`p-3 rounded-xl border font-mono text-xs sm:text-sm font-semibold flex flex-col sm:flex-row sm:items-center gap-2 ${
-                      isLight ? "bg-emerald-50/60 border-emerald-300 text-emerald-950" : "bg-emerald-950/30 border-emerald-500/30 text-emerald-300"
+                    className={`p-3.5 rounded-2xl border font-mono text-xs sm:text-[13px] font-semibold flex flex-col sm:flex-row sm:items-center gap-2.5 transition-all shadow-xs ${
+                      isLight
+                        ? "bg-emerald-50/70 border-emerald-300 text-emerald-950"
+                        : "bg-emerald-950/30 border-emerald-500/30 text-emerald-300"
                     }`}
                   >
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold shrink-0">Output:</span>
-                    <span className="break-all">{trimmed.replace(/^Output:\s*/, "")}</span>
+                    <span className="px-2.5 py-0.5 rounded-lg text-xs font-extrabold uppercase tracking-wide bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
+                      Output
+                    </span>
+                    <span className="break-all font-mono font-bold text-emerald-800 dark:text-emerald-300">
+                      {trimmed.replace(/^Output:\s*/, "")}
+                    </span>
                   </div>
                 );
               }
@@ -254,12 +338,18 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
                 return (
                   <div
                     key={lIdx}
-                    className={`p-3 rounded-xl border text-xs sm:text-sm leading-relaxed ${
-                      isLight ? "bg-slate-100/90 border-slate-200 text-slate-800" : "bg-slate-900/60 border-slate-800 text-slate-300"
+                    className={`p-3.5 rounded-2xl border-l-4 text-xs sm:text-sm leading-relaxed transition-all ${
+                      isLight
+                        ? "bg-purple-50/70 border-purple-500 border-t border-r border-b border-t-purple-200 border-r-purple-200 border-b-purple-200 text-slate-800"
+                        : "bg-purple-950/20 border-purple-500 border-t border-r border-b border-t-slate-800 border-r-slate-800 border-b-slate-800 text-slate-300"
                     }`}
                   >
-                    <strong className="text-slate-900 dark:text-white mr-1.5 font-bold">Explanation:</strong>
-                    <span>{trimmed.replace(/^Explanation:\s*/, "")}</span>
+                    <strong className="text-purple-600 dark:text-purple-400 font-extrabold mr-1.5 flex items-center gap-1.5 mb-1">
+                      <HelpCircle className="w-3.5 h-3.5" /> Explanation
+                    </strong>
+                    <span className="text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
+                      {trimmed.replace(/^Explanation:\s*/, "")}
+                    </span>
                   </div>
                 );
               }
@@ -268,7 +358,7 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
               return (
                 <p
                   key={lIdx}
-                  className={`${isLight ? "text-slate-800 font-medium" : "text-slate-200"} leading-relaxed`}
+                  className={`${isLight ? "text-slate-800 font-normal" : "text-slate-300 font-normal"} leading-relaxed`}
                 >
                   {renderMarkdownInline(trimmed, isLight)}
                 </p>
@@ -282,7 +372,7 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
 }
 
 /**
- * Standard Professional Code Editor with line-numbers gutter and tab-indentation support
+ * Standard Professional Code Editor with syntax colors, line-numbers gutter, tab-indentation, and font-size controls
  */
 function CodeEditorWithGutter({
   code,
@@ -290,64 +380,187 @@ function CodeEditorWithGutter({
   language,
   isLight,
   placeholder,
+  fontSize = 13,
 }: {
   code: string;
   onChange: (val: string) => void;
   language: string;
   isLight: boolean;
   placeholder: string;
+  fontSize?: number;
 }) {
   const lineCount = Math.max(1, code.split("\n").length);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+  const [activeLine, setActiveLine] = useState(1);
 
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
     if (gutterRef.current) {
       gutterRef.current.scrollTop = e.currentTarget.scrollTop;
     }
+    if (preRef.current) {
+      preRef.current.scrollTop = e.currentTarget.scrollTop;
+      preRef.current.scrollLeft = e.currentTarget.scrollLeft;
+    }
+  };
+
+  const updateActiveLine = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    const target = e.currentTarget;
+    const cursor = target.selectionStart;
+    const textBefore = target.value.substring(0, cursor);
+    const line = textBefore.split("\n").length;
+    setActiveLine(line);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const target = e.currentTarget;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+
+    // 1. Tab Indentation: 2 spaces
     if (e.key === "Tab") {
       e.preventDefault();
-      const target = e.currentTarget;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
       const newCode = code.substring(0, start) + "  " + code.substring(end);
       onChange(newCode);
       setTimeout(() => {
         target.selectionStart = target.selectionEnd = start + 2;
+        updateActiveLine(e);
       }, 0);
+      return;
+    }
+
+    // 2. Auto-Indent on Enter
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const lineStart = code.lastIndexOf("\n", start - 1) + 1;
+      const currentLine = code.substring(lineStart, start);
+      const matchIndent = currentLine.match(/^\s*/);
+      let indent = matchIndent ? matchIndent[0] : "";
+
+      if (currentLine.trim().endsWith(":") || currentLine.trim().endsWith("{")) {
+        indent += "  ";
+      }
+
+      const newCode = code.substring(0, start) + "\n" + indent + code.substring(end);
+      onChange(newCode);
+      setTimeout(() => {
+        target.selectionStart = target.selectionEnd = start + 1 + indent.length;
+        updateActiveLine(e);
+      }, 0);
+      return;
+    }
+
+    // 3. Auto-Closing Pairs
+    const PAIRS: Record<string, string> = {
+      "(": ")",
+      "[": "]",
+      "{": "}",
+      '"': '"',
+      "'": "'",
+      "`": "`",
+    };
+
+    if (PAIRS[e.key]) {
+      const closing = PAIRS[e.key];
+      if (start !== end) {
+        e.preventDefault();
+        const selected = code.substring(start, end);
+        const newCode = code.substring(0, start) + e.key + selected + closing + code.substring(end);
+        onChange(newCode);
+        setTimeout(() => {
+          target.selectionStart = start + 1;
+          target.selectionEnd = end + 1;
+          updateActiveLine(e);
+        }, 0);
+        return;
+      }
+
+      if (code[start] === closing && e.key === closing) {
+        e.preventDefault();
+        target.selectionStart = target.selectionEnd = start + 1;
+        updateActiveLine(e);
+        return;
+      }
+
+      e.preventDefault();
+      const newCode = code.substring(0, start) + e.key + closing + code.substring(end);
+      onChange(newCode);
+      setTimeout(() => {
+        target.selectionStart = target.selectionEnd = start + 1;
+        updateActiveLine(e);
+      }, 0);
+      return;
     }
   };
 
+  const highlightedHtml = highlightCodeTokens(code, language, isLight);
+
   return (
-    <div className={`w-full h-full flex overflow-hidden ${isLight ? "bg-white text-slate-900" : "bg-[#0b1120] text-slate-100"}`}>
+    <div
+      className={`w-full h-full flex overflow-hidden relative font-mono ${
+        isLight ? "bg-[#fbfcfd] text-slate-900" : "bg-[#070b14] text-slate-100"
+      }`}
+      style={{ fontSize: `${fontSize}px` }}
+    >
       {/* Line Numbers Gutter */}
       <div
         ref={gutterRef}
-        className={`w-12 py-5 px-2 select-none overflow-hidden text-right font-mono text-xs sm:text-[13px] leading-6 shrink-0 border-r ${
-          isLight ? "bg-slate-50 border-slate-200 text-slate-400" : "bg-[#080d1a] border-slate-800 text-slate-600"
+        className={`w-12 py-4 px-2 select-none overflow-hidden text-right font-mono font-bold leading-6 shrink-0 border-r ${
+          isLight ? "bg-slate-100/70 border-slate-200 text-slate-400" : "bg-[#040810] border-slate-800 text-slate-600"
         }`}
+        style={{ fontSize: `${fontSize - 1}px` }}
       >
-        {Array.from({ length: lineCount }).map((_, i) => (
-          <div key={i}>{i + 1}</div>
-        ))}
+        {Array.from({ length: lineCount }).map((_, i) => {
+          const isCurr = activeLine === i + 1;
+          return (
+            <div
+              key={i}
+              className={`transition-colors ${
+                isCurr ? "text-indigo-600 dark:text-cyan-400 font-extrabold" : ""
+              }`}
+            >
+              {i + 1}
+            </div>
+          );
+        })}
       </div>
 
-      {/* Code Textarea */}
-      <textarea
-        ref={textareaRef}
-        value={code}
-        onChange={(e) => onChange(e.target.value)}
-        onScroll={handleScroll}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        spellCheck={false}
-        className={`flex-1 h-full p-5 font-mono text-xs sm:text-sm leading-6 focus:outline-none resize-none bg-transparent whitespace-pre ${
-          isLight ? "text-slate-900 placeholder:text-slate-400" : "text-slate-100 placeholder:text-slate-600"
-        }`}
-      />
+      {/* Code Area with Syntax Highlighting Overlay */}
+      <div className="flex-1 h-full relative overflow-hidden">
+        {/* Background Syntax Highlight Layer */}
+        <pre
+          ref={preRef}
+          aria-hidden="true"
+          className="absolute inset-0 p-4 font-mono leading-6 overflow-hidden pointer-events-none whitespace-pre select-none m-0"
+          style={{ fontSize: `${fontSize}px` }}
+          dangerouslySetInnerHTML={{ __html: highlightedHtml + "\n" }}
+        />
+
+        {/* Foreground Interactive Textarea */}
+        <textarea
+          ref={textareaRef}
+          value={code}
+          onChange={(e) => {
+            onChange(e.target.value);
+            updateActiveLine(e);
+          }}
+          onSelect={updateActiveLine}
+          onClick={updateActiveLine}
+          onKeyUp={updateActiveLine}
+          onScroll={handleScroll}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          spellCheck={false}
+          autoCapitalize="off"
+          autoComplete="off"
+          autoCorrect="off"
+          className={`absolute inset-0 w-full h-full p-4 font-mono leading-6 focus:outline-none resize-none bg-transparent whitespace-pre m-0 caret-indigo-600 dark:caret-cyan-400 selection:bg-indigo-500/30 selection:text-white ${
+            isLight ? "text-transparent placeholder:text-slate-400" : "text-transparent placeholder:text-slate-600"
+          }`}
+          style={{ fontSize: `${fontSize}px` }}
+        />
+      </div>
     </div>
   );
 }
@@ -420,6 +633,8 @@ export function UnifiedExamConsole({
   const [customInput, setCustomInput] = useState("");
   const [activeTab, setActiveTab] = useState<"testcases" | "console" | "custom">("testcases");
   const [selectedTestCaseIdx, setSelectedTestCaseIdx] = useState(0);
+  const [editorFontSize, setEditorFontSize] = useState<number>(13);
+  const [isCopiedCode, setIsCopiedCode] = useState(false);
 
   // Timer & Modals
   const totalDurationSeconds = (examData.durationMinutes || 60) * 60;
@@ -694,6 +909,33 @@ export function UnifiedExamConsole({
       },
     }));
     setAnswers((prev) => ({ ...prev, [currentQ.id]: newCode }));
+  };
+
+  const handleCopyCode = () => {
+    if (currentQ?.id) {
+      const code = getCodeForQuestion(currentQ.id, currentActiveLang, currentQ);
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        navigator.clipboard.writeText(code);
+        setIsCopiedCode(true);
+        toast.success("Code copied to clipboard!");
+        setTimeout(() => setIsCopiedCode(false), 2000);
+      }
+    }
+  };
+
+  const handleResetCode = () => {
+    if (currentQ?.id) {
+      const starter = getStarterForLang(currentActiveLang, currentQ);
+      setCodingCodeByLang((prev) => ({
+        ...prev,
+        [currentQ.id]: {
+          ...(prev[currentQ.id] || {}),
+          [currentActiveLang]: starter,
+        },
+      }));
+      setAnswers((prev) => ({ ...prev, [currentQ.id]: starter }));
+      toast.info("Code restored to default template.");
+    }
   };
 
   // Launch Proctored Exam (Enters Fullscreen & Initiates Anti-Cheat)
@@ -1760,39 +2002,51 @@ export function UnifiedExamConsole({
               <div
                 className={`p-4 sm:p-5 border-b flex items-center justify-between shrink-0 ${
                   isLightMode
-                    ? "bg-slate-50/80 border-slate-200"
-                    : "bg-slate-900/60 border-slate-800"
+                    ? "bg-slate-50/90 border-slate-200"
+                    : "bg-slate-900/80 border-slate-800"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <span
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
-                      isLightMode
-                        ? "bg-cyan-50 border-cyan-200 text-cyan-800"
-                        : "bg-cyan-500/20 border-cyan-500/30 text-cyan-300"
+                    className={`px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider border shadow-xs ${
+                      currentQ.difficulty?.toLowerCase() === "easy"
+                        ? isLightMode
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                          : "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                        : currentQ.difficulty?.toLowerCase() === "hard"
+                        ? isLightMode
+                          ? "bg-rose-50 text-rose-800 border-rose-300"
+                          : "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                        : isLightMode
+                        ? "bg-amber-50 text-amber-900 border-amber-300"
+                        : "bg-amber-500/20 text-amber-300 border-amber-500/30"
                     }`}
                   >
                     {currentQ.difficulty || "Medium"}
                   </span>
                   <h3 className="text-sm sm:text-base font-extrabold line-clamp-1">{currentQ.title}</h3>
                 </div>
-                <span
-                  className={`text-xs font-mono font-bold ${
-                    isLightMode ? "text-slate-600" : "text-slate-400"
-                  }`}
-                >
-                  Max: {currentQ.marks || 10} pts
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold border ${
+                      isLightMode
+                        ? "bg-indigo-50 border-indigo-200 text-indigo-800"
+                        : "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
+                    }`}
+                  >
+                    Score: {currentQ.marks || 10} pts
+                  </span>
+                </div>
               </div>
 
               {/* Problem Statement Body */}
               <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5">
-                {/* Primary Diagram Image (only if NOT already embedded in problemStatement) */}
+                {/* Primary Diagram Image */}
                 {currentQ.diagramUrl &&
                   !currentQ.problemStatement?.includes("![") &&
                   !currentQ.problemStatement?.includes(currentQ.diagramUrl) && (
                     <div
-                      className={`p-3 rounded-2xl border text-center transition shadow-xs ${
+                      className={`p-3.5 rounded-2xl border text-center transition shadow-xs ${
                         isLightMode ? "bg-white border-slate-200 shadow-sm" : "bg-slate-900/60 border-slate-800"
                       }`}
                     >
@@ -1814,18 +2068,21 @@ export function UnifiedExamConsole({
                 {/* Constraints Box */}
                 {currentQ.constraints && currentQ.constraints.length > 0 && (
                   <div
-                    className={`p-4 sm:p-5 rounded-2xl border space-y-2 ${
+                    className={`p-4 sm:p-5 rounded-2xl border space-y-2.5 shadow-xs ${
                       isLightMode
-                        ? "bg-slate-50/90 border-slate-200 text-slate-800"
-                        : "bg-slate-900/80 border-slate-800 text-slate-300"
+                        ? "bg-amber-50/60 border-amber-200 text-slate-800"
+                        : "bg-amber-950/20 border-amber-500/30 text-slate-200"
                     }`}
                   >
-                    <h5 className="font-bold text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                      Constraints & Limits
+                    <h5 className="font-black text-xs uppercase tracking-wider flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                      <SlidersHorizontal className="w-3.5 h-3.5" /> Constraints & Limits
                     </h5>
-                    <ul className="list-disc pl-5 space-y-1 font-mono text-xs sm:text-[13px] leading-relaxed">
+                    <ul className="space-y-1.5 font-mono text-xs sm:text-[13px] leading-relaxed">
                       {currentQ.constraints.map((c: string, idx: number) => (
-                        <li key={idx}>{c}</li>
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-amber-500 font-bold">•</span>
+                          <span>{renderMarkdownInline(c, isLightMode)}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -1850,37 +2107,92 @@ export function UnifiedExamConsole({
                   minSize={25}
                   className="flex flex-col overflow-hidden"
                 >
-                  {/* Language Toolbar */}
+                  {/* Language Toolbar & Quick Editor Actions */}
                   <div
-                    className={`h-11 px-4 border-b flex items-center justify-between shrink-0 ${
+                    className={`h-11 px-3 sm:px-4 border-b flex items-center justify-between shrink-0 ${
                       isLightMode
                         ? "bg-white border-slate-200 shadow-xs"
                         : "bg-slate-900 border-slate-800"
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <select
-                        value={currentActiveLang}
-                        onChange={(e) => handleLanguageChange(e.target.value)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold border focus:outline-none cursor-pointer ${
+                      {/* Language Selector */}
+                      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold ${
+                        isLightMode ? "bg-slate-100/90 border-slate-200 text-slate-900" : "bg-slate-950 border-slate-700 text-white"
+                      }`}>
+                        <Code2 className="w-3.5 h-3.5 text-indigo-500" />
+                        <select
+                          value={currentActiveLang}
+                          onChange={(e) => handleLanguageChange(e.target.value)}
+                          className="bg-transparent text-xs font-bold focus:outline-none cursor-pointer pr-1"
+                        >
+                          {Object.entries(LANGUAGE_CONFIGS).map(([k, v]) => (
+                            <option key={k} value={k} className="bg-slate-900 text-white">
+                              {v.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Font Size Zoom Controls */}
+                      <div className={`hidden sm:flex items-center rounded-xl border p-0.5 text-xs ${
+                        isLightMode ? "bg-slate-100 border-slate-200 text-slate-700" : "bg-slate-950 border-slate-800 text-slate-300"
+                      }`}>
+                        <button
+                          type="button"
+                          onClick={() => setEditorFontSize((prev) => Math.max(11, prev - 1))}
+                          className="px-2 py-0.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 font-bold transition"
+                          title="Decrease Editor Font Size"
+                        >
+                          A-
+                        </button>
+                        <span className="px-1.5 font-mono text-[10px] text-slate-400 font-bold">
+                          {editorFontSize}px
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setEditorFontSize((prev) => Math.min(18, prev + 1))}
+                          className="px-2 py-0.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 font-bold transition"
+                          title="Increase Editor Font Size"
+                        >
+                          A+
+                        </button>
+                      </div>
+
+                      {/* Copy Code */}
+                      <button
+                        type="button"
+                        onClick={handleCopyCode}
+                        className={`p-1.5 rounded-xl border transition ${
                           isLightMode
-                            ? "bg-slate-100 border-slate-300 text-slate-900"
-                            : "bg-slate-950 border-slate-700 text-white"
+                            ? "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-950 hover:bg-slate-200"
+                            : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
                         }`}
+                        title="Copy Code"
                       >
-                        {Object.entries(LANGUAGE_CONFIGS).map(([k, v]) => (
-                          <option key={k} value={k}>
-                            {v.label}
-                          </option>
-                        ))}
-                      </select>
+                        {isCopiedCode ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+
+                      {/* Reset Code */}
+                      <button
+                        type="button"
+                        onClick={handleResetCode}
+                        className={`p-1.5 rounded-xl border transition ${
+                          isLightMode
+                            ? "bg-slate-100 border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-slate-200"
+                            : "bg-slate-950 border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-800"
+                        }`}
+                        title="Reset to Starter Template"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
                     </div>
 
                     <button
                       type="button"
                       disabled={isRunningCode}
                       onClick={handleRunCode}
-                      className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition cursor-pointer disabled:opacity-50"
+                      className="btn-gradient px-4 py-1.5 rounded-xl text-white font-extrabold text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-indigo-500/20 transition cursor-pointer disabled:opacity-50"
                     >
                       {isRunningCode ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1899,6 +2211,7 @@ export function UnifiedExamConsole({
                       language={currentActiveLang}
                       isLight={isLightMode}
                       placeholder={LANGUAGE_CONFIGS[currentActiveLang]?.placeholder || "// Write your code here"}
+                      fontSize={editorFontSize}
                     />
                   </div>
                 </ResizablePanel>
@@ -1942,6 +2255,22 @@ export function UnifiedExamConsole({
                         }`}>
                           {((currentQ.testCases || []).filter((tc: any) => !tc.isHidden).length) || 2}
                         </span>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab("custom")}
+                        className={`py-2 px-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
+                          activeTab === "custom"
+                            ? isLightMode
+                              ? "border-indigo-600 text-indigo-700 font-extrabold"
+                              : "border-indigo-500 text-white font-extrabold"
+                            : isLightMode
+                            ? "border-transparent text-slate-500 hover:text-slate-900"
+                            : "border-transparent text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        <SlidersHorizontal className="h-3.5 w-3.5" />
+                        <span>Custom Input</span>
                       </button>
 
                       <button
@@ -2010,7 +2339,7 @@ export function UnifiedExamConsole({
                       </div>
                     ) : activeTab === "testcases" ? (
                       <div className="space-y-3.5">
-                        {/* Test Case Selection Pills (Only Sample Cases — Hidden Cases are strictly withheld) */}
+                        {/* Test Case Selection Pills */}
                         {(() => {
                           const sampleCases = (currentQ.testCases || []).filter((tc: any) => !tc.isHidden);
                           const testCasesList = sampleCases.length > 0
@@ -2167,6 +2496,50 @@ export function UnifiedExamConsole({
                             </>
                           );
                         })()}
+                      </div>
+                    ) : activeTab === "custom" ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className={`text-[11px] font-extrabold uppercase tracking-wider ${isLightMode ? "text-slate-700" : "text-slate-300"}`}>
+                            Custom Standard Input (stdin)
+                          </span>
+                          <button
+                            type="button"
+                            disabled={isRunningCode}
+                            onClick={handleRunCode}
+                            className="btn-gradient px-3 py-1 rounded-lg text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          >
+                            <Play className="w-3 h-3 fill-current" />
+                            <span>Evaluate Custom Input</span>
+                          </button>
+                        </div>
+                        <textarea
+                          value={customInput}
+                          onChange={(e) => setCustomInput(e.target.value)}
+                          placeholder="Enter your custom arguments or input lines here..."
+                          rows={3}
+                          className={`w-full p-3 rounded-xl border font-mono text-xs focus:outline-none resize-y ${
+                            isLightMode
+                              ? "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
+                              : "bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-600"
+                          }`}
+                        />
+                        {currentExec && (
+                          <div className="space-y-1.5 pt-2">
+                            <span className={`text-[11px] font-extrabold uppercase tracking-wider ${isLightMode ? "text-slate-700" : "text-slate-300"}`}>
+                              Execution Result:
+                            </span>
+                            <pre
+                              className={`p-3 rounded-xl border font-mono text-xs whitespace-pre-wrap ${
+                                isLightMode
+                                  ? "bg-slate-50 border-slate-200 text-slate-900"
+                                  : "bg-slate-900 border-slate-800 text-slate-100"
+                              }`}
+                            >
+                              {currentExec.stdout || currentExec.stderr || "(No output produced)"}
+                            </pre>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="space-y-2 font-mono">
