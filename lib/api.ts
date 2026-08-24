@@ -33,29 +33,60 @@ export class ApiError extends Error {
   }
 }
 
-let refreshing: Promise<void> | null = null;
-
-export async function tryRefresh(): Promise<void> {
-  if (refreshing) return refreshing;
-  refreshing = (async () => {
-    const res = await fetch(`${API_BASE}/auth/refresh`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (!res.ok) {
-      setAccessToken(null);
-      throw new ApiError(401, "Session expired");
-    }
-    const json = await res.json();
-    setAccessToken(json.data.accessToken);
-  })().finally(() => {
-    refreshing = null;
-  });
-  return refreshing;
+export interface RequestOptions extends RequestInit {
+  _retried?: boolean;
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+let refreshPromise: Promise<string | null> | null = null;
+const AUTH_EXEMPT_PATHS = ["/api/auth/refresh", "/api/auth/logout", "/auth/refresh", "/auth/logout"];
+
+export function isAuthExempt(url?: string): boolean {
+  if (!url) return false;
+  return AUTH_EXEMPT_PATHS.some((path) => url.includes(path));
+}
+
+export function getRefreshedToken(): Promise<string | null> {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
+        setAccessToken(null);
+        throw new ApiError(401, "Session expired");
+      }
+      const json = await res.json();
+      const token = json.data?.accessToken || null;
+      setAccessToken(token);
+      return token;
+    })().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
+export async function tryRefresh(): Promise<string | null> {
+  return getRefreshedToken();
+}
+
+export function clearSessionAndRedirect(): void {
+  setAccessToken(null);
+  if (typeof window !== "undefined") {
+    try {
+      import("@/stores").then(({ useAuth }) => {
+        useAuth.setState({ user: null, isAuthenticated: false });
+      }).catch(() => {});
+    } catch {}
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login";
+    }
+  }
+}
+
+async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = endpoint.startsWith("http") ? endpoint : `${API_BASE}${cleanEndpoint}`;
   const headers: Record<string, string> = {
@@ -73,19 +104,20 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   let res = await fetch(url, { ...options, headers, credentials: "include" });
 
-  if (res.status === 401 && !url.includes("/auth/refresh") && !url.includes("/auth/login")) {
+  if (isAuthExempt(url)) {
+    if (res.status === 401 && url.includes("/refresh")) {
+      clearSessionAndRedirect();
+    }
+  } else if (res.status === 401 && !options._retried) {
+    options._retried = true;
     try {
-      await tryRefresh();
-      const freshToken = getAccessToken();
-      if (freshToken) {
-        headers["Authorization"] = `Bearer ${freshToken}`;
+      const newToken = await getRefreshedToken();
+      if (newToken) {
+        headers["Authorization"] = `Bearer ${newToken}`;
       }
       res = await fetch(url, { ...options, headers, credentials: "include" });
     } catch {
-      if (!url.includes("/auth/me")) {
-        const { useAuth } = await import("@/stores");
-        useAuth.getState().logout();
-      }
+      clearSessionAndRedirect();
       throw new ApiError(401, "Session expired");
     }
   }
@@ -115,19 +147,19 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
-  get: <T>(endpoint: string, options?: RequestInit) => request<T>(endpoint, { ...options, method: "GET" }),
-  post: <T>(endpoint: string, body?: unknown, options?: RequestInit) =>
+  get: <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, { ...options, method: "GET" }),
+  post: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
     request<T>(endpoint, {
       ...options,
       method: "POST",
       body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     }),
-  patch: <T>(endpoint: string, body?: unknown, options?: RequestInit) =>
+  patch: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
     request<T>(endpoint, {
       ...options,
       method: "PATCH",
       body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     }),
-  delete: <T>(endpoint: string, options?: RequestInit) =>
+  delete: <T>(endpoint: string, options?: RequestOptions) =>
     request<T>(endpoint, { ...options, method: "DELETE" }),
 };
