@@ -10,7 +10,7 @@ export type ViolationType =
   | "keyboard_shortcut"
   | "eye_tracking_violation";
 
-export type ModuleType = "quiz" | "interview";
+export type ModuleType = "quiz" | "interview" | "exam";
 
 export interface ViolationResponse {
   violationCount: number;
