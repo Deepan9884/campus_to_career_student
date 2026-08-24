@@ -1,7 +1,19 @@
-// Client-side uses the Vite proxy (/api -> localhost:5000).
+function normalizeApiBase(rawUrl?: string): string {
+  if (!rawUrl || rawUrl === "/api") return "/api";
+  const trimmed = rawUrl.replace(/\/+$/, "");
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+}
+
+// Client-side uses the Vite proxy (/api -> localhost:5000) or VITE_API_URL.
 // Server-side (SSR / Nitro) must reach the backend directly.
 const isServer = typeof window === "undefined";
-const API_BASE = isServer ? "http://localhost:5000/api" : import.meta.env.VITE_API_URL || "/api";
+const API_BASE = isServer
+  ? normalizeApiBase(
+      typeof process !== "undefined" && (process.env.VITE_API_URL || process.env.API_URL)
+        ? (process.env.VITE_API_URL || process.env.API_URL)
+        : "http://localhost:5000/api"
+    )
+  : normalizeApiBase(import.meta.env.VITE_API_URL || "/api");
 
 let inMemoryAccessToken: string | null = null;
 
@@ -152,6 +164,12 @@ export const api = {
     request<T>(endpoint, {
       ...options,
       method: "POST",
+      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+    }),
+  put: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
+    request<T>(endpoint, {
+      ...options,
+      method: "PUT",
       body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     }),
   patch: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
