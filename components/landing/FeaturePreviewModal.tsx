@@ -69,7 +69,7 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#080D18]/80 backdrop-blur-md"
+            className="fixed inset-0 bg-slate-950/70 dark:bg-[#080D18]/80 backdrop-blur-md"
           />
 
           {/* Modal Container */}
@@ -78,44 +78,44 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto glass-strong rounded-3xl border border-[#2F4B6B]/80 p-6 md:p-8 text-[#F2F4F7] shadow-2xl bg-[#131B2E]"
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 dark:border-[#2F4B6B]/80 p-6 md:p-8 text-slate-900 dark:text-[#F2F4F7] shadow-2xl bg-white dark:bg-[#131B2E]"
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#93A0B5] hover:text-[#F2F4F7] transition-colors"
+              className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-600 dark:text-[#93A0B5] hover:text-slate-900 dark:hover:text-[#F2F4F7] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Modal Header */}
             <div className="flex items-center space-x-3 mb-6">
-              <span className="p-2.5 rounded-xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/25">
+              <span className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/25">
                 <Layers className="w-6 h-6" />
               </span>
               <div>
                 <div className="flex items-center space-x-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 text-xs font-bold uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/40 text-xs font-bold uppercase tracking-wider">
                     Interactive Live Preview
                   </span>
-                  <span className="text-xs text-[#93A0B5]">• V1.0 Launch Stage</span>
+                  <span className="text-xs text-slate-500 dark:text-[#93A0B5]">• V1.0 Launch Stage</span>
                 </div>
-                <h2 className="text-2xl font-bold text-gradient mt-1">{featureTitle}</h2>
-                <p className="text-sm text-[#93A0B5]">{featureSubtitle}</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-gradient mt-1">{featureTitle}</h2>
+                <p className="text-sm text-slate-600 dark:text-[#93A0B5]">{featureSubtitle}</p>
               </div>
             </div>
 
             {/* Content Body based on Feature ID */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
               {/* Feature Image Card */}
-              <div className="relative group overflow-hidden rounded-2xl border border-[#2F4B6B]/60 glass-strong shadow-xl">
+              <div className="relative group overflow-hidden rounded-2xl border border-slate-200 dark:border-[#2F4B6B]/60 shadow-xl bg-slate-900">
                 <img
                   src={imagePath}
                   alt={featureTitle}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0F1A]/90 via-transparent to-transparent flex items-end p-4">
-                  <div className="flex items-center space-x-2 text-xs font-medium text-indigo-400 bg-[#0A0F1A]/90 px-3 py-1.5 rounded-lg border border-indigo-500/30 backdrop-blur-md">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent dark:from-[#0A0F1A]/90 flex items-end p-4">
+                  <div className="flex items-center space-x-2 text-xs font-medium text-white bg-slate-900/80 px-3 py-1.5 rounded-lg border border-white/20 backdrop-blur-md">
                     <Activity className="w-4 h-4 animate-pulse text-indigo-400" />
                     <span>Gemini AI Engine Neural Render</span>
                   </div>
@@ -123,23 +123,23 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
               </div>
 
               {/* Interactive Sandbox Simulator */}
-              <div className="flex flex-col justify-between p-5 rounded-2xl bg-[#1B2740]/40 border border-[#2F4B6B]/60 glass-strong">
+              <div className="flex flex-col justify-between p-5 rounded-2xl bg-slate-50 dark:bg-[#1B2740]/40 border border-slate-200 dark:border-[#2F4B6B]/60 shadow-inner">
                 <div>
-                  <h3 className="text-lg font-bold text-[#F2F4F7] flex items-center space-x-2">
-                    <Terminal className="w-5 h-5 text-indigo-400" />
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-[#F2F4F7] flex items-center space-x-2">
+                    <Terminal className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     <span>Live Feature Sandbox</span>
                   </h3>
-                  <p className="text-xs text-[#93A0B5] mt-1">
+                  <p className="text-xs text-slate-500 dark:text-[#93A0B5] mt-1">
                     Try the interactive capabilities before launching your session.
                   </p>
 
                   {featureId === "coding" && (
                     <div className="mt-4 space-y-3">
-                      <div className="flex justify-between items-center text-xs text-[#93A0B5]">
-                        <span className="font-mono text-indigo-400 flex items-center gap-1">
+                      <div className="flex justify-between items-center text-xs text-slate-600 dark:text-[#93A0B5]">
+                        <span className="font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1 font-semibold">
                           <Code className="w-3.5 h-3.5" /> TwoSum.ts
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-[#4CAF7D]/20 text-[#4CAF7D] text-[11px] font-bold font-mono">
+                        <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-[#4CAF7D]/20 text-emerald-700 dark:text-[#4CAF7D] text-[11px] font-bold font-mono">
                           Code Score: {codeScore}/100
                         </span>
                       </div>
@@ -147,12 +147,12 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
                         value={demoCode}
                         onChange={(e) => setDemoCode(e.target.value)}
                         rows={6}
-                        className="w-full font-mono text-xs p-3 rounded-xl bg-[#0A0F1A] border border-[#2F4B6B] text-[#F2F4F7] focus:outline-none focus:border-indigo-500 resize-none"
+                        className="w-full font-mono text-xs p-3 rounded-xl bg-white dark:bg-[#0A0F1A] border border-slate-200 dark:border-[#2F4B6B] text-slate-900 dark:text-[#F2F4F7] focus:outline-none focus:border-indigo-500 resize-none shadow-sm"
                       />
                       <button
                         onClick={handleRunDemo}
                         disabled={isAnalyzing}
-                        className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg"
+                        className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg cursor-pointer"
                       >
                         {isAnalyzing ? (
                           <>
@@ -171,16 +171,16 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
 
                   {featureId === "resume" && (
                     <div className="mt-4 space-y-4">
-                      <div className="p-4 rounded-xl bg-[#0A0F1A]/80 border border-[#2F4B6B] text-center">
-                        <span className="text-xs text-[#93A0B5] uppercase tracking-widest font-semibold">
+                      <div className="p-4 rounded-xl bg-white dark:bg-[#0A0F1A]/80 border border-slate-200 dark:border-[#2F4B6B] text-center shadow-sm">
+                        <span className="text-xs text-slate-500 dark:text-[#93A0B5] uppercase tracking-widest font-semibold">
                           ATS Match Probability
                         </span>
-                        <div className="text-4xl font-extrabold text-gradient my-1 font-mono">
+                        <div className="text-4xl font-extrabold text-indigo-600 dark:text-gradient my-1 font-mono">
                           {atsScore}%
                         </div>
-                        <div className="w-full bg-[#1B2740] h-2 rounded-full overflow-hidden mt-2">
+                        <div className="w-full bg-slate-100 dark:bg-[#1B2740] h-2 rounded-full overflow-hidden mt-2">
                           <div
-                            className="bg-gradient-to-r from-[#2F4B6B] to-indigo-500 h-full transition-all duration-700"
+                            className="bg-gradient-to-r from-indigo-500 to-sky-500 h-full transition-all duration-700"
                             style={{ width: `${atsScore}%` }}
                           />
                         </div>
@@ -188,7 +188,7 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
                       <button
                         onClick={handleRunDemo}
                         disabled={isAnalyzing}
-                        className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg"
+                        className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg cursor-pointer"
                       >
                         {isAnalyzing ? (
                           <>
@@ -207,28 +207,28 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
 
                   {featureId !== "coding" && featureId !== "resume" && (
                     <div className="mt-4 space-y-3">
-                      <div className="p-3 rounded-xl bg-[#0A0F1A]/80 border border-[#2F4B6B] text-xs text-[#93A0B5] space-y-2">
-                        <div className="flex items-center justify-between font-semibold text-indigo-400">
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#0A0F1A]/80 border border-slate-200 dark:border-[#2F4B6B] text-xs text-slate-600 dark:text-[#93A0B5] space-y-2 shadow-sm">
+                        <div className="flex items-center justify-between font-semibold text-indigo-600 dark:text-indigo-400">
                           <span>Feature Capability</span>
                           <span>Status</span>
                         </div>
-                        <div className="flex items-center justify-between text-[#F2F4F7]">
+                        <div className="flex items-center justify-between text-slate-800 dark:text-[#F2F4F7]">
                           <span>AI Neural Processing</span>
-                          <span className="text-[#4CAF7D] font-bold font-mono">Active V1.0</span>
+                          <span className="text-emerald-600 dark:text-[#4CAF7D] font-bold font-mono">Active V1.0</span>
                         </div>
-                        <div className="flex items-center justify-between text-[#F2F4F7]">
+                        <div className="flex items-center justify-between text-slate-800 dark:text-[#F2F4F7]">
                           <span>Real-time Feedback Engine</span>
-                          <span className="text-[#4CAF7D] font-bold font-mono">Enabled</span>
+                          <span className="text-emerald-600 dark:text-[#4CAF7D] font-bold font-mono">Enabled</span>
                         </div>
-                        <div className="flex items-center justify-between text-[#F2F4F7]">
+                        <div className="flex items-center justify-between text-slate-800 dark:text-[#F2F4F7]">
                           <span>Student Career Analytics</span>
-                          <span className="text-indigo-400 font-bold font-mono">Synced</span>
+                          <span className="text-indigo-600 dark:text-indigo-400 font-bold font-mono">Synced</span>
                         </div>
                       </div>
                       <button
                         onClick={handleRunDemo}
                         disabled={isAnalyzing}
-                        className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg"
+                        className="w-full py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg cursor-pointer"
                       >
                         {isAnalyzing ? (
                           <>
@@ -246,12 +246,12 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
                   )}
                 </div>
 
-                <div className="pt-4 border-t border-[#2F4B6B]/60 mt-4 flex items-center justify-between text-xs text-[#93A0B5]">
+                <div className="pt-4 border-t border-slate-200 dark:border-[#2F4B6B]/60 mt-4 flex items-center justify-between text-xs text-slate-500 dark:text-[#93A0B5]">
                   <span className="flex items-center space-x-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#4CAF7D]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-[#4CAF7D]" />
                     <span>Included in Launch Edition</span>
                   </span>
-                  <span className="text-indigo-400 font-medium font-mono flex items-center space-x-1">
+                  <span className="text-indigo-600 dark:text-indigo-400 font-medium font-mono flex items-center space-x-1">
                     <Star className="w-3.5 h-3.5 fill-current" />
                     <span>4.9 / 5 Rating</span>
                   </span>
@@ -260,13 +260,13 @@ export const FeaturePreviewModal: React.FC<FeaturePreviewModalProps> = ({
             </div>
 
             {/* Modal Bottom Action Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#2F4B6B]/60">
-              <div className="text-xs text-[#93A0B5]">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-[#2F4B6B]/60">
+              <div className="text-xs text-slate-500 dark:text-[#93A0B5]">
                 Ready to experience the complete platform? Launch into your workspace now.
               </div>
               <button
                 onClick={handleLaunchApp}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl btn-gradient btn-gradient-hover font-bold text-sm flex items-center justify-center space-x-2 shadow-xl"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl btn-gradient btn-gradient-hover font-bold text-sm flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
               >
                 <span>{isAuthenticated ? "Go to Dashboard" : "Launch App & Login"}</span>
                 <ArrowRight className="w-4 h-4" />

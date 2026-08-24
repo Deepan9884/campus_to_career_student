@@ -25,6 +25,9 @@ import {
   Save,
   Trophy,
   Linkedin,
+  Sparkles,
+  Star,
+  Palette,
 } from "lucide-react";
 import { useAuth } from "@/stores";
 import { toast } from "sonner";
@@ -38,6 +41,8 @@ import {
   disable2FA,
 } from "@/lib/auth-api";
 import { getAllCodingProfiles } from "@/lib/coding-profiles-api";
+import { useAmbientLighting, AMBIENT_PRESETS } from "@/stores/ambientLightingStore";
+import { AmbientLightingCustomizer } from "@/components/AmbientLightingCustomizer";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Campus to Career AI" }] }),
@@ -67,6 +72,10 @@ function SettingsPage() {
   const [qrCode, setQrCode] = useState("");
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [is2FAModalOpen, setIs2FAModalOpen] = useState(false);
+
+  // Atmospheric Lighting state
+  const ambientSettings = useAmbientLighting();
+  const [studioOpen, setStudioOpen] = useState(false);
 
   // Linked profiles
   const [linkedProfiles, setLinkedProfiles] = useState<any[]>([]);
@@ -310,10 +319,11 @@ function SettingsPage() {
   };
 
   const toggleVisibility = async (moduleKey: string) => {
-    const isHidden = preferences.hiddenModules.includes(moduleKey);
+    const currentHidden = preferences.hiddenModules || [];
+    const isHidden = currentHidden.includes(moduleKey);
     const updatedHidden = isHidden
-      ? preferences.hiddenModules.filter((k) => k !== moduleKey)
-      : [...preferences.hiddenModules, moduleKey];
+      ? currentHidden.filter((k) => k !== moduleKey)
+      : [...currentHidden, moduleKey];
 
     const updatedPrefs = { ...preferences, hiddenModules: updatedHidden };
     setPreferences(updatedPrefs);
@@ -650,13 +660,80 @@ function SettingsPage() {
             </div>
           </GlassCard>
 
+          {/* Atmospheric Lighting & Interactive Stars */}
+          <GlassCard className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold flex items-center gap-2 text-lg text-foreground">
+                <Sparkles className="h-5 w-5 text-purple-400 animate-pulse" />
+                Background Lights &amp; Stars Studio
+              </h3>
+              <button
+                type="button"
+                onClick={() => setStudioOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Palette className="w-3.5 h-3.5" />
+                <span>Open Lighting Studio</span>
+              </button>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Customize ambient glowing orbs, atmospheric colors, and interactive twinkling constellation star field.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              {AMBIENT_PRESETS.slice(0, 4).map((p) => {
+                const isCurrent = ambientSettings.presetId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      ambientSettings.setPreset(p.id);
+                      toast.success(`Switched atmosphere to ${p.name}`);
+                    }}
+                    className={cn(
+                      "p-2.5 rounded-xl border text-left transition flex items-center gap-2.5 cursor-pointer",
+                      isCurrent
+                        ? "bg-white/15 border-purple-400 ring-2 ring-purple-500/30 font-semibold"
+                        : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/10 hover:bg-white/10 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span
+                      className="w-4 h-4 rounded-full shrink-0 shadow-sm border border-white/20"
+                      style={{ background: p.gradientPreview }}
+                    />
+                    <span className="text-xs truncate">{p.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-border dark:border-white/10 text-xs">
+              <span className="text-muted-foreground flex items-center gap-1.5">
+                <Star className="w-3.5 h-3.5 text-amber-300 fill-current" />
+                Interactive Stars: <strong className="text-foreground">{ambientSettings.starsEnabled ? "Enabled" : "Disabled"}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => setStudioOpen(true)}
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer underline"
+              >
+                Customize all 7 palettes &amp; physics →
+              </button>
+            </div>
+          </GlassCard>
+
+          {/* Studio Modal */}
+          <AmbientLightingCustomizer open={studioOpen} onClose={() => setStudioOpen(false)} />
+
           {/* Sidebar Modules */}
           <GlassCard>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold flex items-center gap-2 text-lg text-foreground">
                 <EyeOff className="h-5 w-5 text-cyan-500 dark:text-cyan-400" /> Sidebar Visibility
               </h3>
-              {preferences.hiddenModules.length > 0 && (
+              {(preferences.hiddenModules || []).length > 0 && (
                 <button
                   type="button"
                   onClick={showAllModules}
@@ -669,7 +746,7 @@ function SettingsPage() {
             <p className="text-sm text-muted-foreground mb-4">Toggle which modules appear in your sidebar navigation.</p>
             <div className="space-y-2">
               {MODULES.map((mod) => {
-                const isVisible = !preferences.hiddenModules.includes(mod.key);
+                const isVisible = !(preferences.hiddenModules || []).includes(mod.key);
                 return (
                   <label key={mod.key} className="flex items-center justify-between p-3 rounded-lg border border-border dark:border-white/5 hover:bg-muted/50 dark:hover:bg-white/5 cursor-pointer transition">
                     <div className="flex items-center gap-3">

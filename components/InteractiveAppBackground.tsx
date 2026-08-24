@@ -1,135 +1,110 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useAuth } from "@/stores";
+import React, { useEffect, useRef } from "react";
+import { useAmbientLighting, AMBIENT_PRESETS } from "@/stores/ambientLightingStore";
 
-interface Particle {
+interface Star {
   x: number;
   y: number;
+  originX: number;
+  originY: number;
+  size: number;
+  baseAlpha: number;
+  pulseSpeed: number;
+  pulsePhase: number;
   vx: number;
   vy: number;
-  radius: number;
   color: string;
-  alpha: number;
+}
+
+interface ShootingStar {
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  length: number;
+  speed: number;
+  opacity: number;
+  color: string;
+  size: number;
+}
+
+interface Ripple {
+  x: number;
+  y: number;
+  radius: number;
+  maxRadius: number;
+  opacity: number;
 }
 
 export const InteractiveAppBackground: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { user } = useAuth();
-  const [currentAccent, setCurrentAccent] = useState<string>("indigo");
+  const {
+    presetId,
+    intensity,
+    motionSpeed,
+    starsEnabled,
+    starDensity,
+    interactiveConstellations,
+    shootingStars: shootingStarsEnabled,
+    clickRipple,
+    customColors,
+  } = useAmbientLighting();
 
-  // Track active data-accent attribute or user preferences
-  useEffect(() => {
-    const updateAccent = () => {
-      const docAccent = document.documentElement.getAttribute("data-accent");
-      const savedAccent =
-        docAccent ||
-        user?.preferences?.accentColor ||
-        (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_accent") : null) ||
-        "indigo";
-      setCurrentAccent(savedAccent);
-    };
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: -1000, y: -1000, active: false });
+  const ripplesRef = useRef<Ripple[]>([]);
+  const shootingStarsRef = useRef<ShootingStar[]>([]);
+  const lastShootingStarTime = useRef<number>(Date.now());
 
-    updateAccent();
+  // Determine active color configuration
+  const activePreset = AMBIENT_PRESETS.find((p) => p.id === presetId) || AMBIENT_PRESETS[0];
 
-    // Observe changes to data-accent on <html>
-    const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.type === "attributes" && m.attributeName === "data-accent") {
-          updateAccent();
+  const orbColors =
+    presetId === "custom"
+      ? {
+          orb1: customColors.orb1,
+          orb2: customColors.orb2,
+          orb3: customColors.orb3,
+          starTint: customColors.starTint,
+          constellationLine: "rgba(167, 139, 250, 0.35)",
+          cursorGlow: "rgba(167, 139, 250, 0.25)",
         }
-      }
-    });
+      : activePreset.colors;
 
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-accent"] });
-    return () => observer.disconnect();
-  }, [user?.preferences?.accentColor]);
+  // Multiplier for glow opacity based on intensity setting
+  const intensityMultiplier = {
+    subtle: 0.55,
+    balanced: 1.0,
+    vivid: 1.45,
+    radiant: 1.9,
+  }[intensity];
 
-  // Orb and Particle palettes
-  const orbConfig = {
-    indigo: {
-      orb1: "from-indigo-600/20 via-purple-600/15 to-transparent",
-      orb2: "from-blue-600/20 via-sky-600/15 to-transparent",
-      grid: "rgba(99, 102, 241, 0.20)",
-      palette: [
-        "rgba(99, 102, 241, 0.70)",
-        "rgba(168, 85, 247, 0.60)",
-        "rgba(56, 189, 248, 0.55)",
-        "rgba(147, 160, 181, 0.45)",
-      ],
-    },
-    purple: {
-      orb1: "from-purple-600/25 via-fuchsia-600/20 to-transparent",
-      orb2: "from-pink-600/20 via-rose-600/15 to-transparent",
-      grid: "rgba(168, 85, 247, 0.20)",
-      palette: [
-        "rgba(147, 51, 234, 0.75)",
-        "rgba(192, 132, 252, 0.65)",
-        "rgba(236, 72, 153, 0.55)",
-        "rgba(168, 85, 247, 0.45)",
-      ],
-    },
-    emerald: {
-      orb1: "from-emerald-600/25 via-teal-600/20 to-transparent",
-      orb2: "from-teal-600/20 via-cyan-600/15 to-transparent",
-      grid: "rgba(16, 185, 129, 0.20)",
-      palette: [
-        "rgba(16, 185, 129, 0.75)",
-        "rgba(5, 150, 105, 0.65)",
-        "rgba(20, 184, 166, 0.55)",
-        "rgba(52, 211, 153, 0.45)",
-      ],
-    },
-    amber: {
-      orb1: "from-amber-600/25 via-orange-600/20 to-transparent",
-      orb2: "from-orange-600/20 via-yellow-600/15 to-transparent",
-      grid: "rgba(245, 158, 11, 0.20)",
-      palette: [
-        "rgba(245, 158, 11, 0.75)",
-        "rgba(217, 119, 6, 0.65)",
-        "rgba(251, 146, 60, 0.55)",
-        "rgba(252, 211, 77, 0.45)",
-      ],
-    },
-    cyan: {
-      orb1: "from-cyan-600/25 via-sky-600/20 to-transparent",
-      orb2: "from-sky-600/20 via-blue-600/15 to-transparent",
-      grid: "rgba(6, 182, 212, 0.20)",
-      palette: [
-        "rgba(6, 182, 212, 0.75)",
-        "rgba(56, 189, 248, 0.65)",
-        "rgba(14, 165, 233, 0.55)",
-        "rgba(125, 211, 252, 0.45)",
-      ],
-    },
-    rose: {
-      orb1: "from-rose-600/25 via-pink-600/20 to-transparent",
-      orb2: "from-pink-600/20 via-red-600/15 to-transparent",
-      grid: "rgba(225, 29, 72, 0.20)",
-      palette: [
-        "rgba(225, 29, 72, 0.75)",
-        "rgba(244, 63, 94, 0.65)",
-        "rgba(251, 113, 133, 0.55)",
-        "rgba(253, 164, 175, 0.45)",
-      ],
-    },
-  }[currentAccent] || {
-    orb1: "from-indigo-600/20 via-purple-600/15 to-transparent",
-    orb2: "from-blue-600/20 via-sky-600/15 to-transparent",
-    grid: "rgba(99, 102, 241, 0.20)",
-    palette: [
-      "rgba(99, 102, 241, 0.70)",
-      "rgba(168, 85, 247, 0.60)",
-      "rgba(56, 189, 248, 0.55)",
-      "rgba(147, 160, 181, 0.45)",
-    ],
-  };
+  // Motion speed duration in seconds
+  const animationDuration = {
+    static: "0s",
+    calm: "24s",
+    flow: "14s",
+    dynamic: "7s",
+  }[motionSpeed];
 
+  // Star density count
+  const starCount = {
+    low: 80,
+    medium: 155,
+    high: 250,
+  }[starDensity];
+
+  // ---------------------------------------------------------------------------
+  // Canvas Stars & Interactive Constellation Animation Loop
+  // ---------------------------------------------------------------------------
   useEffect(() => {
+    if (!starsEnabled) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animId: number;
+    let animationFrameId: number;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
@@ -141,152 +116,335 @@ export const InteractiveAppBackground: React.FC = () => {
 
     window.addEventListener("resize", handleResize);
 
-    // Generate sleek constellation particles matching current accent
-    const count = Math.min(36, Math.floor((width * height) / 38000));
-    const particles: Particle[] = [];
-    const coolPalette = orbConfig.palette;
+    // Initialize Stars
+    const starPalette = [
+      "#FFFFFF",
+      "#F8FAFC",
+      orbColors.starTint,
+      "#E2E8F0",
+      "#FEF3C7",
+      "#DDD6FE",
+    ];
 
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        radius: Math.random() * 1.8 + 1,
-        color: coolPalette[i % coolPalette.length],
-        alpha: Math.random() * 0.5 + 0.3,
+    const stars: Star[] = Array.from({ length: starCount }, () => {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      return {
+        x,
+        y,
+        originX: x,
+        originY: y,
+        size: Math.random() * 1.8 + 0.6,
+        baseAlpha: Math.random() * 0.6 + 0.35,
+        pulseSpeed: Math.random() * 0.03 + 0.012,
+        pulsePhase: Math.random() * Math.PI * 2,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: (Math.random() - 0.5) * 0.12,
+        color: starPalette[Math.floor(Math.random() * starPalette.length)],
+      };
+    });
+
+    // Spawn a shooting star
+    const spawnShootingStar = () => {
+      if (!shootingStarsEnabled) return;
+      const angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.3; // ~45 deg downward
+      const speed = Math.random() * 10 + 12;
+      shootingStarsRef.current.push({
+        x: Math.random() * width * 0.8 + width * 0.1,
+        y: Math.random() * (height * 0.4),
+        dx: Math.cos(angle) * speed,
+        dy: Math.sin(angle) * speed,
+        length: Math.random() * 70 + 50,
+        speed,
+        opacity: 1,
+        color: orbColors.starTint || "#FFFFFF",
+        size: Math.random() * 1.5 + 1.2,
       });
-    }
-
-    let mouseX = -2000;
-    let mouseY = -2000;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
     };
 
-    const handleMouseLeave = () => {
-      mouseX = -2000;
-      mouseY = -2000;
+    // Pointer move listener
+    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      mouseRef.current = { x: clientX, y: clientY, active: true };
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
+    const handlePointerLeave = () => {
+      mouseRef.current.active = false;
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      if (!clickRipple) return;
+      ripplesRef.current.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 0,
+        maxRadius: Math.min(width, height) * 0.28,
+        opacity: 0.65,
+      });
+    };
+
+    window.addEventListener("mousemove", handlePointerMove, { passive: true });
+    window.addEventListener("touchmove", handlePointerMove, { passive: true });
+    window.addEventListener("mouseleave", handlePointerLeave);
+    window.addEventListener("click", handleClick, { passive: true });
+
+    // Animation Loop
+    let time = 0;
 
     const render = () => {
+      time += 0.016;
       ctx.clearRect(0, 0, width, height);
-      const isLight = document.documentElement.classList.contains("light");
 
-      // 1. Draw Connection Lines between particles
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
+      // Periodically trigger a shooting star (every 4-7 seconds)
+      const now = Date.now();
+      if (shootingStarsEnabled && now - lastShootingStarTime.current > Math.random() * 3000 + 4000) {
+        spawnShootingStar();
+        lastShootingStarTime.current = now;
+      }
+
+      // 1. Draw Active Ripples
+      for (let i = ripplesRef.current.length - 1; i >= 0; i--) {
+        const ripple = ripplesRef.current[i];
+        ripple.radius += 4.5;
+        ripple.opacity -= 0.014;
+
+        if (ripple.opacity <= 0 || ripple.radius >= ripple.maxRadius) {
+          ripplesRef.current.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = orbColors.constellationLine || "rgba(167, 139, 250, 0.35)";
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = ripple.opacity;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 2. Draw Shooting Stars
+      for (let i = shootingStarsRef.current.length - 1; i >= 0; i--) {
+        const s = shootingStarsRef.current[i];
+        s.x += s.dx;
+        s.y += s.dy;
+        s.opacity -= 0.018;
+
+        if (s.opacity <= 0 || s.x > width + 100 || s.y > height + 100) {
+          shootingStarsRef.current.splice(i, 1);
+          continue;
+        }
+
+        const tailX = s.x - (s.dx / s.speed) * s.length;
+        const tailY = s.y - (s.dy / s.speed) * s.length;
+
+        const grad = ctx.createLinearGradient(tailX, tailY, s.x, s.y);
+        grad.addColorStop(0, "transparent");
+        grad.addColorStop(1, s.color);
+
+        ctx.save();
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = s.size;
+        ctx.globalAlpha = s.opacity;
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(s.x, s.y);
+        ctx.stroke();
+
+        // Glowing head
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size * 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      const mouse = mouseRef.current;
+      const connectionDist = 135;
+
+      // 3. Update & Draw Stars + Constellation Lines
+      for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
+
+        // Gentle natural drift
+        star.originX += star.vx;
+        star.originY += star.vy;
+
+        // Wrap around edges
+        if (star.originX < 0) star.originX = width;
+        if (star.originX > width) star.originX = 0;
+        if (star.originY < 0) star.originY = height;
+        if (star.originY > height) star.originY = 0;
+
+        // Cursor magnetic interaction
+        if (interactiveConstellations && mouse.active) {
+          const dx = mouse.x - star.originX;
+          const dy = mouse.y - star.originY;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 140) {
-            const lineAlpha = (1 - dist / 140) * (isLight ? 0.22 : 0.16);
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = isLight
-              ? `rgba(148, 163, 184, ${lineAlpha})`
-              : `rgba(47, 75, 107, ${lineAlpha})`;
+          if (dist < connectionDist) {
+            // Gentle gravitational pull
+            const force = (1 - dist / connectionDist) * 14;
+            star.x = star.originX + (dx / dist) * force;
+            star.y = star.originY + (dy / dist) * force;
+
+            // Draw line from mouse to star
+            const alpha = (1 - dist / connectionDist) * 0.45;
+            ctx.save();
+            ctx.strokeStyle = orbColors.constellationLine;
             ctx.lineWidth = 0.8;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.moveTo(mouse.x, mouse.y);
+            ctx.lineTo(star.x, star.y);
             ctx.stroke();
+            ctx.restore();
+          } else {
+            // Smoothly return to origin
+            star.x += (star.originX - star.x) * 0.08;
+            star.y += (star.originY - star.y) * 0.08;
+          }
+        } else {
+          star.x = star.originX;
+          star.y = star.originY;
+        }
+
+        // Connect nearby stars together
+        if (interactiveConstellations) {
+          for (let j = i + 1; j < stars.length; j++) {
+            const starB = stars[j];
+            const distBetween = Math.hypot(star.x - starB.x, star.y - starB.y);
+
+            if (distBetween < 80) {
+              const alpha = (1 - distBetween / 80) * 0.22;
+              ctx.save();
+              ctx.strokeStyle = orbColors.constellationLine;
+              ctx.lineWidth = 0.5;
+              ctx.globalAlpha = alpha;
+              ctx.beginPath();
+              ctx.moveTo(star.x, star.y);
+              ctx.lineTo(starB.x, starB.y);
+              ctx.stroke();
+              ctx.restore();
+            }
           }
         }
 
-        // 2. Interactive Magnetic Mouse Connection
-        const mdx = particles[i].x - mouseX;
-        const mdy = particles[i].y - mouseY;
-        const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+        // Calculate pulsing star twinkle brightness
+        const pulse = Math.sin(time * star.pulseSpeed * 60 + star.pulsePhase);
+        const currentAlpha = Math.max(0.15, Math.min(1, star.baseAlpha + pulse * 0.25));
 
-        if (mDist < 160) {
-          const mouseLineAlpha = (1 - mDist / 160) * 0.32;
+        // Draw Star Glow & Core
+        ctx.save();
+        ctx.globalAlpha = currentAlpha;
+        ctx.fillStyle = star.color;
+
+        // Subtle outer star halo
+        if (star.size > 1.4) {
           ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(mouseX, mouseY);
-          ctx.strokeStyle = isLight
-            ? `rgba(79, 70, 229, ${mouseLineAlpha})`
-            : particles[i].color;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-
-          // Gentle magnetic attraction towards cursor
-          particles[i].vx += (mouseX - particles[i].x) * 0.00008;
-          particles[i].vy += (mouseY - particles[i].y) * 0.00008;
+          ctx.arc(star.x, star.y, star.size * 2.2, 0, Math.PI * 2);
+          ctx.globalAlpha = currentAlpha * 0.25;
+          ctx.fill();
         }
 
-        // 3. Move Particles with Smooth Boundaries
-        particles[i].x += particles[i].vx;
-        particles[i].y += particles[i].vy;
-
-        // Dampen velocity to prevent runaways
-        particles[i].vx *= 0.992;
-        particles[i].vy *= 0.992;
-
-        // Wrap or bounce gently
-        if (particles[i].x < 0) particles[i].x = width;
-        if (particles[i].x > width) particles[i].x = 0;
-        if (particles[i].y < 0) particles[i].y = height;
-        if (particles[i].y > height) particles[i].y = 0;
-
-        // 4. Render Glowing Particle Nodes
+        // Core star
+        ctx.globalAlpha = currentAlpha;
         ctx.beginPath();
-        ctx.arc(particles[i].x, particles[i].y, particles[i].radius, 0, Math.PI * 2);
-        ctx.fillStyle = particles[i].color;
-        ctx.shadowColor = particles[i].color;
-        ctx.shadowBlur = 6;
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0;
+        ctx.restore();
       }
 
-      animId = requestAnimationFrame(render);
+      // Draw subtle ambient glow ring at mouse position
+      if (interactiveConstellations && mouse.active) {
+        ctx.save();
+        const radGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 80);
+        radGrad.addColorStop(0, orbColors.cursorGlow || "rgba(167, 139, 250, 0.2)");
+        radGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 80, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("mousemove", handlePointerMove);
+      window.removeEventListener("touchmove", handlePointerMove);
+      window.removeEventListener("mouseleave", handlePointerLeave);
+      window.removeEventListener("click", handleClick);
     };
-  }, [currentAccent]);
+  }, [
+    starsEnabled,
+    starDensity,
+    starCount,
+    interactiveConstellations,
+    shootingStarsEnabled,
+    clickRipple,
+    orbColors,
+  ]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-      {/* Dynamic Aurora Ambient Glowing Orbs */}
-      <div
-        className={`absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-gradient-to-br ${orbConfig.orb1} blur-[140px] animate-pulse pointer-events-none`}
-        style={{ animationDuration: "10s" }}
-      />
-      <div
-        className={`absolute top-1/3 -right-36 w-[550px] h-[550px] rounded-full bg-gradient-to-bl ${orbConfig.orb2} blur-[150px] animate-pulse pointer-events-none`}
-        style={{ animationDuration: "13s" }}
-      />
+      {/* 1. Interactive Star Field Canvas */}
+      {starsEnabled && (
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full pointer-events-none z-0"
+        />
+      )}
 
-      {/* Interactive Constellation Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-
-      {/* Cyber Grid with Soft Perspective */}
+      {/* 2. Soft Volumetric Atmospheric Glowing Orbs */}
       <div
-        className="absolute inset-0 opacity-[0.14] dark:block hidden transition-all duration-500"
+        className="absolute -top-32 -left-32 w-[650px] h-[650px] rounded-full blur-[160px] animate-aurora-pulse pointer-events-none transition-all duration-700"
         style={{
-          backgroundImage:
-            `linear-gradient(${orbConfig.grid} 1px, transparent 1px), linear-gradient(90deg, ${orbConfig.grid} 1px, transparent 1px)`,
-          backgroundSize: "44px 44px",
+          background: `radial-gradient(circle, ${orbColors.orb1} 0%, transparent 70%)`,
+          opacity: intensityMultiplier,
+          animationDuration,
+        }}
+      />
+      <div
+        className="absolute top-1/3 -right-36 w-[600px] h-[600px] rounded-full blur-[170px] animate-aurora-pulse pointer-events-none transition-all duration-700"
+        style={{
+          background: `radial-gradient(circle, ${orbColors.orb2} 0%, transparent 70%)`,
+          opacity: intensityMultiplier * 0.9,
+          animationDuration: motionSpeed === "static" ? "0s" : "18s",
+          animationDelay: "3s",
+        }}
+      />
+      <div
+        className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full blur-[150px] animate-aurora-pulse pointer-events-none transition-all duration-700"
+        style={{
+          background: `radial-gradient(circle, ${orbColors.orb3} 0%, transparent 70%)`,
+          opacity: intensityMultiplier * 0.85,
+          animationDuration: motionSpeed === "static" ? "0s" : "22s",
+          animationDelay: "6s",
         }}
       />
 
-      {/* Dark Vignette Mask */}
+      {/* 3. Soft Vignette — Dark Mode Deep Space Framing */}
       <div
         className="absolute inset-0 dark:block hidden"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 40%, transparent 40%, rgba(8,13,24,0.65) 80%, rgba(8,13,24,0.95) 100%)",
+            "radial-gradient(ellipse at 50% 40%, transparent 45%, rgba(12,9,26,0.45) 75%, rgba(10,8,22,0.85) 100%)",
+        }}
+      />
+
+      {/* 4. Soft Vignette — Light Mode Soft Pearl Glow */}
+      <div
+        className="absolute inset-0 block dark:hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 40%, transparent 50%, rgba(250,248,255,0.25) 85%)",
         }}
       />
     </div>

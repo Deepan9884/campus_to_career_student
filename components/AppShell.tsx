@@ -22,11 +22,27 @@ import {
   GraduationCap,
   HelpCircle,
   Search,
+  Crown,
+  Compass,
+  Code,
+  FileCode,
+  UserCheck,
+  Users,
+  Cpu,
+  Binary,
+  Layers,
+  BrainCircuit,
+  Cloud,
+  Award,
+  Brain,
+  Code2,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/stores";
+import { useSuperDream, type SuperDreamTab } from "@/stores/superDreamStore";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { StudentProductTour } from "@/components/StudentProductTour";
+import { SuperDreamTour } from "@/components/superdream/SuperDreamTour";
 import { StudentCommandPalette } from "@/components/StudentCommandPalette";
 import { useNotificationStream } from "@/hooks/useNotificationStream";
 import { cn } from "@/lib/utils";
@@ -36,6 +52,8 @@ import { getBadges } from "@/lib/badges-api";
 import type { BadgeId, EarnedBadge } from "@/types/badges";
 import { BrandLogo } from "@/components/BrandLogo";
 import { InteractiveAppBackground } from "@/components/InteractiveAppBackground";
+import { AmbientLightingCustomizer } from "@/components/AmbientLightingCustomizer";
+import { Sparkles } from "lucide-react";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -49,6 +67,34 @@ const nav = [
   { to: "/coding-platforms", label: "Coding Platforms", icon: BarChart3 },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/settings", label: "Settings", icon: Settings },
+];
+
+interface SuperDreamNavItem {
+  id: string;
+  tab: SuperDreamTab;
+  sectionId?: number;
+  label: string;
+  category: "core" | "sections" | "aux";
+  icon: any;
+}
+
+const superDreamNav: SuperDreamNavItem[] = [
+  // Primary Control & Brain
+  { id: "nav-track-road", tab: "track-road", sectionId: 0, label: "Track Road (Sec 0)", icon: Compass, category: "core" },
+  { id: "nav-tests", tab: "tests", label: "Proctored Coding Tests", icon: Code2, category: "core" },
+  { id: "nav-brain", tab: "skill-analyzer", label: "Skill Analyzer Brain", icon: Brain, category: "core" },
+
+  // All 10 Official Checklist Sections from PDF
+  { id: "nav-sec-1", tab: "track-road", sectionId: 1, label: "1. Programming Languages", icon: Code, category: "sections" },
+  { id: "nav-sec-2", tab: "track-road", sectionId: 2, label: "2. CS Fundamentals", icon: Cpu, category: "sections" },
+  { id: "nav-sec-3", tab: "track-road", sectionId: 3, label: "3. Coding & DSA", icon: Binary, category: "sections" },
+  { id: "nav-sec-4", tab: "track-road", sectionId: 4, label: "4. Software Development", icon: Layers, category: "sections" },
+  { id: "nav-sec-5", tab: "track-road", sectionId: 5, label: "5. AI & Data Science", icon: BrainCircuit, category: "sections" },
+  { id: "nav-sec-6", tab: "track-road", sectionId: 6, label: "6. Cloud & DevOps", icon: Cloud, category: "sections" },
+  { id: "nav-sec-7", tab: "track-road", sectionId: 7, label: "7. GitHub Portfolio", icon: Github, category: "sections" },
+  { id: "nav-sec-8", tab: "track-road", sectionId: 8, label: "8. Certifications", icon: Award, category: "sections" },
+  { id: "nav-sec-9", tab: "track-road", sectionId: 9, label: "9. Interview Preparation", icon: Mic, category: "sections" },
+  { id: "nav-sec-10", tab: "track-road", sectionId: 10, label: "10. Placement Readiness", icon: Crown, category: "sections" },
 ];
 
 const ALL_BADGE_IDS: BadgeId[] = [
@@ -68,12 +114,60 @@ export function AppShell() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const {
+    isSuperDreamMode,
+    enterSuperDreamMode,
+    exitSuperDreamMode,
+    activeTab,
+    setActiveTab,
+    activeSectionId,
+    setActiveSectionId,
+  } = useSuperDream();
+
+  const isSuperDreamActive = pathname.startsWith("/super-dream");
+
+  const handleEnterSuperDream = () => {
+    enterSuperDreamMode(true);
+    setActiveTab("track-road");
+    setActiveSectionId(0);
+    navigate({ to: "/super-dream" });
+    setMobileOpen(false);
+  };
+
+  const handleExitSuperDream = () => {
+    exitSuperDreamMode();
+    navigate({ to: "/dashboard" });
+    setMobileOpen(false);
+    toast.info("Returned to Standard Campus to Career Mode");
+  };
+
+  const handleSuperDreamNavClick = (tab: SuperDreamTab, sectionId?: number) => {
+    setActiveTab(tab);
+    if (sectionId !== undefined) {
+      setActiveSectionId(sectionId);
+    }
+    if (!pathname.startsWith("/super-dream")) {
+      navigate({ to: "/super-dream" });
+    }
+    setMobileOpen(false);
+  };
+
   const [showProductTour, setShowProductTour] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("cf-student-tour-done") !== "true";
     }
     return false;
   });
+  const [showSuperDreamTour, setShowSuperDreamTour] = useState(false);
+
+  const handleOpenTour = () => {
+    if (isSuperDreamActive) {
+      setShowSuperDreamTour(true);
+    } else {
+      setShowProductTour(true);
+    }
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("cf_sidebar_collapsed") === "true";
@@ -83,6 +177,7 @@ export function AppShell() {
 
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [ambientCustomizerOpen, setAmbientCustomizerOpen] = useState(false);
 
   // Global Cmd+K / Ctrl+K keyboard shortcut
   useEffect(() => {
@@ -108,8 +203,9 @@ export function AppShell() {
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationStream();
 
-  // Navigation stays constant throughout the application across all pages
-  const filteredNav = nav;
+  // Filter navigation modules according to user's sidebar visibility preferences
+  const hiddenModules = user?.preferences?.hiddenModules || [];
+  const filteredNav = nav.filter((item) => !hiddenModules.includes(item.to));
 
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const earnedBadgeIdsRef = useRef<Set<string>>(new Set());
@@ -138,7 +234,6 @@ export function AppShell() {
 
   useEffect(() => {
     // Notifications are pushed whenever the user completes a server action.
-    // When we receive a new notification, re-check badges and celebrate on newly earned ones.
     if (!user) return;
 
     const now = Date.now();
@@ -202,6 +297,12 @@ export function AppShell() {
         onClose={() => setCommandPaletteOpen(false)}
       />
 
+      {/* Atmospheric Lighting & Interactive Stars Studio */}
+      <AmbientLightingCustomizer
+        open={ambientCustomizerOpen}
+        onClose={() => setAmbientCustomizerOpen(false)}
+      />
+
       <OnboardingWizard
         open={showOnboardingWizard ? true : undefined}
         onClose={() => setShowOnboardingWizard(false)}
@@ -211,47 +312,153 @@ export function AppShell() {
         }}
       />
       <StudentProductTour open={showProductTour} onClose={() => setShowProductTour(false)} />
-      {/* Sidebar — Persistent & Constant on desktop/tablet */}
+      <SuperDreamTour open={showSuperDreamTour} onClose={() => setShowSuperDreamTour(false)} />
+
+      {/* Sidebar — Persistent on desktop/tablet */}
       <aside
         className={cn(
-          "hidden md:flex flex-col glass-strong m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] transition-all duration-300 shrink-0 z-40",
-          sidebarCollapsed ? "w-20 items-center px-3" : "w-64"
+          "hidden md:flex flex-col liquid-glass m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] transition-all duration-300 shrink-0 z-40",
+          sidebarCollapsed ? "w-20 items-center px-3" : "w-64",
         )}
       >
-        <div className="flex items-center justify-between w-full">
-          <Brand collapsed={sidebarCollapsed} />
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-foreground/70 hover:text-foreground transition shrink-0"
-            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </button>
-        </div>
+        {isSuperDreamActive ? (
+          /* Super Dream Sidebar Header */
+          <div className="w-full space-y-3">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2.5 py-1">
+                <div className="w-8 h-8 rounded-lg grid place-items-center text-xs font-bold shrink-0"
+                  style={{ background: "rgba(167,139,250,0.15)", border: "1px solid rgba(167,139,250,0.30)", color: "var(--primary)" }}>
+                  SD
+                </div>
+                {!sidebarCollapsed && (
+                  <div>
+                    <p className="text-xs font-semibold text-[var(--foreground)] tracking-tight">Super Dream</p>
+                    <p className="text-[10px] text-[var(--muted-foreground)]">Study Workspace</p>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={toggleSidebar}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition shrink-0"
+                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              </button>
+            </div>
 
-        <nav className="mt-6 flex-1 space-y-1 w-full overflow-y-auto">
-          {filteredNav.map((item) => (
-            <NavItem
-              key={item.to}
-              item={item}
-              active={pathname.startsWith(item.to)}
-              collapsed={sidebarCollapsed}
-            />
-          ))}
+            {/* Exit Button */}
+            <button
+              onClick={handleExitSuperDream}
+              title={sidebarCollapsed ? "Exit Workspace" : undefined}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-xl text-xs font-medium transition cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2" : "px-3 py-2"
+              )}
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "var(--muted-foreground)" }}
+            >
+              <LogOut className="h-3.5 w-3.5 shrink-0" />
+              {!sidebarCollapsed && <span>Exit Workspace</span>}
+            </button>
+          </div>
+        ) : (
+          /* Standard Sidebar Header */
+          <div className="flex items-center justify-between w-full">
+            <Brand collapsed={sidebarCollapsed} />
+            <button
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-foreground/70 hover:text-foreground transition shrink-0"
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </button>
+          </div>
+        )}
+
+        <nav className="mt-4 flex-1 space-y-1.5 w-full overflow-y-auto pr-1">
+          {isSuperDreamActive ? (
+            /* Super Dream Navigation Items with all 10 sections */
+            <>
+              {superDreamNav.map((item, idx) => {
+                const Icon = item.icon;
+                const isActive =
+                  pathname.startsWith("/super-dream") &&
+                  activeTab === item.tab &&
+                  (item.sectionId === undefined || activeSectionId === item.sectionId);
+
+                return (
+                  <React.Fragment key={item.id}>
+                    <button
+                      onClick={() => handleSuperDreamNavClick(item.tab, item.sectionId)}
+                      title={sidebarCollapsed ? item.label : undefined}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-xl text-sm transition-all text-left cursor-pointer",
+                        sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
+                      )}
+                      style={isActive ? {
+                        background: "rgba(167,139,250,0.18)",
+                        border: "1px solid rgba(167,139,250,0.30)",
+                        color: "var(--primary)",
+                        fontWeight: 600,
+                      } : {
+                        color: "var(--muted-foreground)",
+                      }}
+                      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+                      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = ""; }}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" style={{ color: isActive ? "var(--primary)" : "var(--muted-foreground)" }} />
+                      {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+            </>
+          ) : (
+            /* Standard Navigation + Clean Super Dream Entrance */
+            <>
+              <button
+                onClick={handleEnterSuperDream}
+                title={sidebarCollapsed ? "Super Dream Workspace" : undefined}
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-xl text-xs font-semibold btn-gradient btn-gradient-hover transition-all cursor-pointer mb-3",
+                  sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5"
+                )}
+              >
+                <Compass className="h-4 w-4 shrink-0" />
+                {!sidebarCollapsed && (
+                  <div className="flex items-center justify-between flex-1">
+                    <span className="font-semibold">Super Dream Workspace</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 font-semibold">PRO</span>
+                  </div>
+                )}
+              </button>
+
+              {filteredNav.map((item) => (
+                <NavItem
+                  key={item.to}
+                  item={item}
+                  active={pathname.startsWith(item.to)}
+                  collapsed={sidebarCollapsed}
+                />
+              ))}
+            </>
+          )}
         </nav>
 
         <div className="pt-4 border-t border-white/10 w-full space-y-1">
           <button
-            onClick={() => setShowProductTour(true)}
+            onClick={handleOpenTour}
             data-tour="app-tour-btn"
-            title={sidebarCollapsed ? "App Tour" : undefined}
+            title={sidebarCollapsed ? (isSuperDreamActive ? "Super Dream Tour" : "App Tour") : undefined}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl text-sm text-foreground hover:bg-white/10 hover:text-foreground transition",
-              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5"
+              "flex w-full items-center gap-3 rounded-xl text-sm transition cursor-pointer",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5",
+              isSuperDreamActive
+                ? "text-amber-300 hover:bg-amber-500/10 font-semibold"
+                : "text-foreground hover:bg-white/10 hover:text-foreground"
             )}
           >
-            <HelpCircle className="h-4 w-4 shrink-0" />
-            {!sidebarCollapsed && <span>App Tour</span>}
+            <HelpCircle className={cn("h-4 w-4 shrink-0", isSuperDreamActive ? "text-amber-400" : "text-foreground")} />
+            {!sidebarCollapsed && <span>{isSuperDreamActive ? "Super Dream Tour" : "App Tour"}</span>}
           </button>
 
           <button
@@ -277,7 +484,16 @@ export function AppShell() {
           />
           <aside className="absolute left-0 top-0 h-full w-72 glass-strong p-4 flex flex-col animate-in slide-in-from-left">
             <div className="flex items-center justify-between">
-              <Brand />
+              {isSuperDreamActive ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded bg-indigo-500/10 border border-indigo-500/20 grid place-items-center text-indigo-400 font-bold text-xs">
+                    SD
+                  </div>
+                  <span className="font-bold text-white text-sm">Super Dream Workspace</span>
+                </div>
+              ) : (
+                <Brand />
+              )}
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-2 rounded-lg hover:bg-white/10"
@@ -285,16 +501,76 @@ export function AppShell() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="mt-6 flex-1 space-y-1 overflow-y-auto">
-              {filteredNav.map((item) => (
-                <NavItem
-                  key={item.to}
-                  item={item}
-                  active={pathname === item.to}
-                  onClick={() => setMobileOpen(false)}
-                />
-              ))}
+
+            {isSuperDreamActive && (
+              <button
+                onClick={handleExitSuperDream}
+                className="mt-3 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800"
+              >
+                <LogOut className="h-4 w-4 text-slate-400" /> Exit Workspace
+              </button>
+            )}
+
+            <nav className="mt-4 flex-1 space-y-1 overflow-y-auto pr-1">
+              {isSuperDreamActive ? (
+                superDreamNav.map((item) => {
+                  const Icon = item.icon;
+                  const isActive =
+                    activeTab === item.tab &&
+                    (item.sectionId === undefined || activeSectionId === item.sectionId);
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSuperDreamNavClick(item.tab, item.sectionId)}
+                        className={cn(
+                          "flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm transition-all text-left cursor-pointer",
+                          isActive
+                            ? "bg-slate-800/90 text-sky-200 font-semibold shadow-sm border border-sky-500/30 ring-1 ring-sky-500/20"
+                            : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                        )}
+                      >
+                        <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-sky-300" : "text-slate-400")} />
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })
+              ) : (
+                <>
+                  <button
+                    onClick={handleEnterSuperDream}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 mb-2"
+                  >
+                    <Compass className="h-4 w-4 text-indigo-400" />
+                    <span>Super Dream Workspace</span>
+                  </button>
+
+                  {filteredNav.map((item) => (
+                    <NavItem
+                      key={item.to}
+                      item={item}
+                      active={pathname === item.to}
+                      onClick={() => setMobileOpen(false)}
+                    />
+                  ))}
+                </>
+              )}
             </nav>
+
+            <button
+              onClick={() => {
+                setMobileOpen(false);
+                handleOpenTour();
+              }}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition mb-1",
+                isSuperDreamActive ? "text-amber-300 hover:bg-amber-500/10 font-medium" : "hover:bg-white/10"
+              )}
+            >
+              <HelpCircle className={cn("h-4 w-4", isSuperDreamActive ? "text-amber-400" : "")} />
+              <span>{isSuperDreamActive ? "Super Dream Tour" : "App Tour"}</span>
+            </button>
+
             <button
               onClick={handleLogout}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm hover:bg-white/10"
@@ -307,7 +583,7 @@ export function AppShell() {
 
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-30 glass-strong m-3 ml-3 rounded-2xl px-4 py-3 flex items-center gap-3">
+        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-2xl border-b border-border px-4 lg:px-6 py-3.5 flex items-center gap-3 shadow-sm">
           <button
             onClick={() => {
               if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -316,7 +592,7 @@ export function AppShell() {
                 toggleSidebar();
               }
             }}
-            className="p-2 rounded-lg hover:bg-white/10 text-foreground transition"
+            className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition"
             aria-label="Toggle sidebar"
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
@@ -324,19 +600,21 @@ export function AppShell() {
           </button>
           <div className="min-w-0 flex-1 flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs text-muted-foreground">Welcome back</p>
-              <p className="text-sm font-semibold truncate">{user?.name ?? "Guest"}</p>
+              <p className="text-xs text-[var(--muted-foreground)]">Welcome back</p>
+              <p className="text-sm font-semibold truncate text-[var(--foreground)] font-[var(--font-display)]">{user?.name ?? "Guest"}</p>
             </div>
 
             {/* Quick Command Palette Button */}
             <button
               onClick={() => setCommandPaletteOpen(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl glass hover:bg-white/10 text-xs text-muted-foreground hover:text-foreground transition border border-border cursor-pointer shadow-sm"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition cursor-pointer"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}
               title="Search tools or switch theme (⌘K)"
             >
-              <Search className="h-3.5 w-3.5 text-indigo-500" />
+              <Search className="h-3.5 w-3.5" style={{ color: "var(--primary)" }} />
               <span className="font-medium">Search or jump to...</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono border border-border">⌘K</kbd>
+              <kbd className="px-1.5 py-0.5 rounded-full text-[10px] font-[var(--font-mono)]"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>⌘K</kbd>
             </button>
           </div>
           <NotificationBell
@@ -345,24 +623,33 @@ export function AppShell() {
             onMarkAsRead={markAsRead}
             onMarkAllAsRead={markAllAsRead}
           />
-          <Link to="/settings" className="p-2 rounded-lg hover:bg-white/10" aria-label="Settings">
+          <button
+            onClick={() => setAmbientCustomizerOpen(true)}
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--foreground)] hover:text-[var(--primary)] transition border border-white/10 relative group cursor-pointer"
+            title="Atmospheric Lighting & Stars Studio (Customize background)"
+            aria-label="Customize background lights & stars"
+          >
+            <Sparkles className="h-4.5 w-4.5 text-[var(--primary)] group-hover:rotate-12 transition-transform" />
+          </button>
+          <Link to="/settings" className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition" aria-label="Settings">
             <Settings className="h-5 w-5" />
           </Link>
           <button
             onClick={handleLogout}
             title="Sign out"
             aria-label="Sign out"
-            className="p-2 rounded-lg hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 transition-colors"
+            className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--accent)]/80 transition-colors"
           >
             <LogOut className="h-5 w-5" />
           </button>
           <Link to="/settings" className="flex items-center gap-2">
-            <div className="relative h-9 w-9 rounded-full ring-2 ring-white/20">
+            <div className="relative h-9 w-9 rounded-full" style={{ boxShadow: "0 0 0 2px rgba(167,139,250,0.35)" }}>
               {isCheckingAuth ? (
-                <div className="h-9 w-9 rounded-full bg-slate-700/50 animate-pulse" />
+                <div className="h-9 w-9 rounded-full animate-pulse" style={{ background: "rgba(167,139,250,0.15)" }} />
               ) : (
                 <>
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#6366F1] to-[#38BDF8] grid place-items-center text-xs font-bold text-white shadow-md shadow-indigo-500/20">
+                  <div className="h-9 w-9 rounded-full grid place-items-center text-xs font-bold text-white"
+                    style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)" }}>
                     {(user?.name ?? "G").charAt(0).toUpperCase()}
                   </div>
                   {user?.avatar && (
@@ -380,7 +667,7 @@ export function AppShell() {
             </div>
           </Link>
         </header>
-        <main className="flex-1 p-3 lg:p-6 pt-0">
+        <main className="flex-1 p-3 lg:p-6">
           <Outlet />
         </main>
       </div>
@@ -438,17 +725,17 @@ function NavItem({
     <Link
       to={item.to}
       onClick={onClick}
-      data-tour={`nav-${item.to.replace("/", "")}`}
+      data-tour={`nav-${String(item?.to || "").replace("/", "")}`}
       title={collapsed ? item.label : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-xl text-sm transition-all",
-        collapsed ? "justify-center p-2.5" : "px-3 py-2.5",
+        "flex items-center gap-3 rounded-2xl text-sm transition-all",
+        collapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
         active
           ? "btn-gradient text-white font-bold shadow-lg shadow-indigo-500/25 border border-white/20"
-          : "text-foreground/80 hover:bg-white/5 hover:text-foreground",
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white",
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      <Icon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-slate-500 dark:text-slate-400")} />
       {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
   );

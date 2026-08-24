@@ -16,12 +16,16 @@ import {
   Bell,
   Sun,
   Moon,
-  Sparkles,
   ArrowRight,
   Zap,
   Palette,
+  Code2,
+  Sparkles,
+  Star,
 } from "lucide-react";
 import { useAuth } from "@/stores";
+import { useSuperDream } from "@/stores/superDreamStore";
+import { useAmbientLighting, AMBIENT_PRESETS } from "@/stores/ambientLightingStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +47,8 @@ interface NavCommand {
 export function StudentCommandPalette({ open, onClose }: StudentCommandPaletteProps) {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
+  const { enterSuperDreamMode, setActiveTab } = useSuperDream();
+  const ambient = useAmbientLighting();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -112,6 +118,20 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       keywords: ["home", "main", "overview", "stats", "readiness"],
       action: () => {
         navigate({ to: "/dashboard" });
+        onClose();
+      },
+    },
+    {
+      id: "nav-tests",
+      title: "Proctored Coding Tests & Assessment Arena",
+      category: "navigation",
+      icon: Code2,
+      badge: "Super Dream",
+      keywords: ["test", "tests", "coding", "compiler", "assessment", "proctoring", "exam", "dsa", "faang", "super dream"],
+      action: () => {
+        enterSuperDreamMode(false);
+        setActiveTab("tests");
+        navigate({ to: "/super-dream" });
         onClose();
       },
     },
@@ -327,6 +347,34 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       badge: "Rose",
       keywords: ["accent", "color", "rose", "red", "pink"],
       action: () => handleSetAccent("rose", "Rose Bloom"),
+    },
+
+    // Atmospheric Background Lighting Presets
+    ...AMBIENT_PRESETS.map((p) => ({
+      id: `ambient-${p.id}`,
+      title: `Atmospheric Lights: ${p.name}`,
+      category: "appearance" as const,
+      icon: Sparkles,
+      badge: "Lighting",
+      keywords: ["background", "lights", "ambient", "aurora", "theme", "stars", p.name.toLowerCase()],
+      action: () => {
+        ambient.setPreset(p.id);
+        toast.success(`Atmospheric lights switched to ${p.name}!`);
+        onClose();
+      },
+    })),
+    {
+      id: "ambient-toggle-stars",
+      title: `Toggle Interactive Stars Background (${ambient.starsEnabled ? "Currently ON" : "Currently OFF"})`,
+      category: "appearance" as const,
+      icon: Star,
+      badge: "Stars",
+      keywords: ["stars", "particles", "background", "twinkle", "constellation", "space"],
+      action: () => {
+        ambient.setStarsEnabled(!ambient.starsEnabled);
+        toast.success(`Interactive Stars ${!ambient.starsEnabled ? "Enabled" : "Disabled"}`);
+        onClose();
+      },
     },
   ];
 

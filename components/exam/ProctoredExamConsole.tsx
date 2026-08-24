@@ -23,7 +23,6 @@ import {
   Sun,
   Moon,
   Type,
-  Sparkles,
   Flag,
   Grid,
   Check,
@@ -34,6 +33,7 @@ import {
   Eye,
   SlidersHorizontal,
   TrendingUp,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/stores";
@@ -62,89 +62,31 @@ interface ProctoredExamConsoleProps {
   onRetry?: () => void;
 }
 
-const LANGUAGE_TEMPLATES: Record<string, { label: string; ext: string; template: (title: string) => string }> = {
+const LANGUAGE_CONFIGS: Record<string, { label: string; ext: string; placeholder: string }> = {
   python: {
     label: "Python 3",
     ext: "py",
-    template: (title) =>
-`# Solution for: ${title}
-import sys
-
-def solve():
-    # Read input from standard input if required
-    # line = sys.stdin.read().strip()
-    
-    # Write your solution code here
-    pass
-
-if __name__ == '__main__':
-    solve()`,
+    placeholder: "# Write your Python solution here...",
   },
   javascript: {
     label: "JavaScript (Node.js)",
     ext: "js",
-    template: (title) =>
-`/**
- * Solution for: ${title}
- */
-const fs = require('fs');
-
-function solve() {
-    // Read input from standard input if required
-    // const input = fs.readFileSync(0, 'utf-8').trim();
-    
-    // Write your solution code here
-}
-
-solve();`,
+    placeholder: "// Write your JavaScript solution here...",
   },
   java: {
     label: "Java",
     ext: "java",
-    template: (title) =>
-`package solution;
-import java.util.*;
-import java.io.*;
-
-public class Solution {
-    // Solution for: ${title}
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        // Write your solution code here
-        
-    }
-}`,
+    placeholder: "// Write your Java solution here...\n// public class Solution {\n//     public static void main(String[] args) {\n//     }\n// }",
   },
   cpp: {
     label: "C++",
     ext: "cpp",
-    template: (title) =>
-`#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-
-using namespace std;
-
-int main() {
-    // Solution for: ${title}
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    
-    // Write your solution code here
-    
-    return 0;
-}`,
+    placeholder: "// Write your C++ solution here...\n// #include <iostream>\n// using namespace std;\n// int main() {\n//     return 0;\n// }",
   },
   sql: {
     label: "SQL",
     ext: "sql",
-    template: (title) =>
-`-- Query for: ${title}
-SELECT 
-    *
-FROM 
-    records;`,
+    placeholder: "-- Write your SQL query here...",
   },
 };
 
@@ -540,16 +482,6 @@ export function ProctoredExamConsole({
     return () => clearInterval(interval);
   }, [isTestFinished, result, isBlocked, currentSection]);
 
-  // Synchronize language when current question changes if question provides custom starter code
-  useEffect(() => {
-    if (currentQ?.starterCode && !answers[currentQ.questionId]) {
-      setAnswers((prev) => ({
-        ...prev,
-        [currentQ.questionId]: currentQ.starterCode || "",
-      }));
-    }
-  }, [currentIdx, currentQ]);
-
   // Keyboard shortcut listener for MCQs (1-4 or A-D)
   useEffect(() => {
     if (isBlocked || isTestFinished || result || submitting) return;
@@ -630,29 +562,31 @@ export function ProctoredExamConsole({
       delete next[currentQ.questionId];
       return next;
     });
-    toast.info("Answer cleared for current question");
+    setExecutionResult(null);
+    toast.info("Coding area cleared");
   };
 
-  const handleResetToTemplate = () => {
+  const handleClearCode = () => {
     if (!currentQ) return;
-    const starter =
-      currentQ.starterCode ||
-      LANGUAGE_TEMPLATES[selectedLang]?.template(currentQ?.questionText || "") ||
-      "";
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQ.questionId]: starter,
-    }));
-    toast.info(`Reset to starter ${LANGUAGE_TEMPLATES[selectedLang]?.label || selectedLang} code.`);
+    setAnswers((prev) => {
+      const next = { ...prev };
+      delete next[currentQ.questionId];
+      return next;
+    });
+    setExecutionResult(null);
+    toast.info("Coding area cleared");
   };
 
   // Run Code online compiler execution
   const handleRunCode = async (isCustom = false) => {
     if (!currentQ) return;
-    const activeCode =
-      currentAnswer ||
-      LANGUAGE_TEMPLATES[selectedLang]?.template(currentQ?.questionText || "") ||
-      "";
+    const activeCode = currentAnswer.trim();
+
+    if (!activeCode) {
+      toast.error("Please write your code in the editor before running test cases.");
+      return;
+    }
+
     setIsRunningCode(true);
 
     const testCasesToRun = isCustom
@@ -667,13 +601,26 @@ export function ProctoredExamConsole({
         questionText: currentQ.questionText || "",
       });
       setExecutionResult(res);
-      setActiveTab(isCustom ? "console" : "testcases");
-      if (res.success) {
-        toast.success(isCustom ? "Custom code executed successfully!" : "All test cases passed!");
-      } else if (res.stderr) {
-        toast.error("Code execution returned errors");
+
+      if (res.isCompilationError || res.compilationError) {
+        setActiveTab("console");
+        toast.error("Compilation Error: Please check compiler output");
+      } else if (isCustom) {
+        setActiveTab("console");
+        if (res.stderr) {
+          toast.warning("Custom run completed with errors");
+        } else {
+          toast.success("Custom run executed successfully!");
+        }
       } else {
-        toast.info("Test cases executed with results");
+        setActiveTab("testcases");
+        if (res.success) {
+          toast.success(`✓ All ${res.totalCount || testCasesToRun.length} test cases passed!`);
+        } else if (res.isRuntimeError) {
+          toast.error("Runtime Error occurred during test case execution");
+        } else {
+          toast.warning(`${res.passedCount ?? 0}/${res.totalCount ?? testCasesToRun.length} test cases passed`);
+        }
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to execute code");
@@ -711,12 +658,7 @@ export function ProctoredExamConsole({
     }
   };
 
-  const codeLines = (
-    currentAnswer ||
-    currentQ?.starterCode ||
-    LANGUAGE_TEMPLATES[selectedLang]?.template(currentQ?.questionText || "") ||
-    ""
-  ).split("\n");
+  const codeLines = (currentAnswer || "").split("\n");
 
   const answeredCount = Object.keys(answers).filter((k) => answers[k]?.trim().length > 0).length;
   const isCurrentQFlagged = flaggedQuestions.has(currentQ?.questionId);
@@ -1028,7 +970,7 @@ export function ProctoredExamConsole({
               }`}
               title="Jump to Section 3: Advanced Tough MCQs"
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <Zap className="h-3.5 w-3.5" />
               <span className="hidden md:inline">Sec 3:</span>
               <span>Tough MCQs ({section3Questions.length || 3})</span>
             </button>
@@ -1405,15 +1347,15 @@ export function ProctoredExamConsole({
                         } border-t-2 border-t-blue-500 border-x rounded-t-md text-xs font-semibold shadow-sm`}
                       >
                         <FileCode className="h-3.5 w-3.5 text-blue-400" />
-                        <span>Solution.{LANGUAGE_TEMPLATES[selectedLang]?.ext || "py"}</span>
+                        <span>Solution.{LANGUAGE_CONFIGS[selectedLang]?.ext || "py"}</span>
                       </div>
 
                       <button
-                        onClick={handleResetToTemplate}
-                        className="text-[11px] text-slate-400 hover:text-blue-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1"
-                        title="Reset code to starter boilerplate"
+                        onClick={handleClearCode}
+                        className="text-[11px] text-slate-400 hover:text-red-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1"
+                        title="Clear all code in editor"
                       >
-                        <RotateCcw className="h-3 w-3" /> Reset
+                        <Trash2 className="h-3 w-3" /> Clear Code
                       </button>
 
                       <button
@@ -1436,7 +1378,7 @@ export function ProctoredExamConsole({
                           isLightMode ? "bg-white border-slate-300 text-slate-800" : "bg-[#0b1329] border-slate-700 text-slate-200"
                         } border text-xs rounded-md px-2.5 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500`}
                       >
-                        {Object.entries(LANGUAGE_TEMPLATES).map(([key, config]) => (
+                        {Object.entries(LANGUAGE_CONFIGS).map(([key, config]) => (
                           <option key={key} value={key}>
                             {config.label}
                           </option>
@@ -1449,7 +1391,7 @@ export function ProctoredExamConsole({
                         className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition disabled:opacity-50"
                       >
                         {isRunningCode ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3 fill-current" />}
-                        <span>{isRunningCode ? "Executing..." : "Run Test Cases"}</span>
+                        <span>{isRunningCode ? "Compiling & Running..." : "Run Test Cases"}</span>
                       </button>
                     </div>
                   </div>
@@ -1479,7 +1421,7 @@ export function ProctoredExamConsole({
                       onChange={(e) => handleAnswerUpdate(e.target.value)}
                       onKeyDown={(e) => handleCodeEditorKeyDown(e, currentAnswer, handleAnswerUpdate)}
                       disabled={isBlocked || submitting}
-                      placeholder={`# Write your ${LANGUAGE_TEMPLATES[selectedLang]?.label || selectedLang} code here...`}
+                      placeholder={LANGUAGE_CONFIGS[selectedLang]?.placeholder || `// Write your ${LANGUAGE_CONFIGS[selectedLang]?.label || selectedLang} solution here...`}
                       spellCheck={false}
                       className={`flex-1 p-3 bg-transparent text-xs ${
                         isLightMode ? "text-slate-800" : "text-slate-100"
@@ -1492,7 +1434,7 @@ export function ProctoredExamConsole({
 
                   {/* Bottom Drawer: 3 Tabs (Test Cases, Custom Input Playground, Compiler Output) */}
                   <div
-                    className={`h-48 ${
+                    className={`h-52 ${
                       isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0e172e] border-slate-800"
                     } border-t flex flex-col shrink-0`}
                   >
@@ -1534,19 +1476,29 @@ export function ProctoredExamConsole({
                           }`}
                         >
                           <span>Compiler Output</span>
-                          {executionResult?.stderr && <span className="w-1.5 h-1.5 rounded-full bg-red-500" />}
+                          {(executionResult?.isCompilationError || executionResult?.compilationError || executionResult?.stderr) && (
+                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                          )}
                         </button>
                       </div>
 
                       {executionResult && (
                         <div className="flex items-center gap-2 text-[11px]">
-                          {executionResult.success ? (
-                            <span className="text-emerald-400 font-bold flex items-center gap-1">
-                              <CheckCircle2 className="h-3.5 w-3.5" /> All Tests Passed
+                          {executionResult.isCompilationError || executionResult.compilationError ? (
+                            <span className="text-red-400 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30">
+                              <AlertTriangle className="h-3.5 w-3.5 text-red-400" /> Compilation Error
+                            </span>
+                          ) : executionResult.isRuntimeError ? (
+                            <span className="text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                              <AlertTriangle className="h-3.5 w-3.5 text-amber-400" /> Runtime Error
+                            </span>
+                          ) : executionResult.success ? (
+                            <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> All Tests Passed ({executionResult.passedCount ?? (executionResult.testCaseResults?.length || 0)}/{executionResult.totalCount ?? (executionResult.testCaseResults?.length || 0)})
                             </span>
                           ) : (
-                            <span className="text-red-400 font-bold flex items-center gap-1">
-                              <XCircle className="h-3.5 w-3.5" /> Tests Failed
+                            <span className="text-red-400 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30">
+                              <XCircle className="h-3.5 w-3.5 text-red-400" /> {executionResult.passedCount ?? 0}/{executionResult.totalCount ?? (executionResult.testCaseResults?.length || 0)} Tests Passed
                             </span>
                           )}
                         </div>
@@ -1560,23 +1512,56 @@ export function ProctoredExamConsole({
                           isLightMode ? "bg-white text-slate-700" : "bg-[#080e1e]/60 text-slate-300"
                         } space-y-2`}
                       >
-                        {executionResult?.testCaseResults && executionResult.testCaseResults.length > 0 ? (
+                        {executionResult?.isCompilationError || executionResult?.compilationError ? (
+                          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-red-400 flex items-center gap-1.5 text-xs">
+                                <AlertTriangle className="h-4 w-4" /> Compilation / Syntax Error Detected
+                              </span>
+                              <button
+                                onClick={() => setActiveTab("console")}
+                                className="px-2.5 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] transition"
+                              >
+                                View Compiler Logs →
+                              </button>
+                            </div>
+                            <p className="text-slate-300 text-xs font-sans">
+                              Your code failed compilation or has syntax errors. Test cases could not be evaluated.
+                            </p>
+                            <pre className="p-2.5 bg-black/70 rounded-lg text-red-300 text-[11px] font-mono whitespace-pre-wrap max-h-24 overflow-y-auto border border-red-900/50">
+                              {executionResult.stderr || "SyntaxError: Check code syntax and indentation."}
+                            </pre>
+                          </div>
+                        ) : executionResult?.testCaseResults && executionResult.testCaseResults.length > 0 ? (
                           <div className="space-y-2">
-                            <div className="flex gap-2 border-b border-slate-800 pb-1.5">
+                            <div className="flex gap-2 border-b border-slate-800 pb-1.5 overflow-x-auto">
                               {executionResult.testCaseResults.map((tc, idx) => (
                                 <button
                                   key={idx}
                                   onClick={() => setSelectedTestCaseIdx(idx)}
-                                  className={`px-2.5 py-1 rounded text-[10px] font-bold flex items-center gap-1 transition ${
+                                  className={`px-2.5 py-1 rounded text-[10px] font-bold flex items-center gap-1.5 transition shrink-0 ${
                                     selectedTestCaseIdx === idx
                                       ? tc.passed
-                                        ? "bg-green-500/20 text-green-400 border border-green-500/40"
-                                        : "bg-red-500/20 text-red-400 border border-red-500/40"
-                                      : "bg-slate-800 text-slate-400"
+                                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-sm"
+                                        : tc.status === "Runtime Error" || tc.status === "Compilation Error"
+                                        ? "bg-amber-500/20 text-amber-400 border border-amber-500/50 shadow-sm"
+                                        : "bg-red-500/20 text-red-400 border border-red-500/50 shadow-sm"
+                                      : tc.passed
+                                      ? "bg-slate-800/80 text-emerald-400 hover:bg-slate-800"
+                                      : "bg-slate-800/80 text-slate-400 hover:bg-slate-800"
                                   }`}
                                 >
-                                  {tc.passed ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                                  Case {idx + 1}
+                                  {tc.passed ? (
+                                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                  ) : tc.status === "Runtime Error" || tc.status === "Compilation Error" ? (
+                                    <AlertTriangle className="h-3 w-3 text-amber-400" />
+                                  ) : (
+                                    <XCircle className="h-3 w-3 text-red-400" />
+                                  )}
+                                  <span>Case {idx + 1}</span>
+                                  <span className={`text-[9px] px-1 py-0.2 rounded font-mono ${tc.passed ? "bg-emerald-500/30 text-emerald-300" : "bg-red-500/30 text-red-300"}`}>
+                                    {tc.passed ? "PASSED" : tc.status || "FAILED"}
+                                  </span>
                                 </button>
                               ))}
                             </div>
@@ -1586,47 +1571,76 @@ export function ProctoredExamConsole({
                                 executionResult.testCaseResults[selectedTestCaseIdx] ||
                                 executionResult.testCaseResults[0];
                               return (
-                                <div className="space-y-1.5 pt-1">
-                                  <div className="flex justify-between items-center text-[10px] text-slate-400">
-                                    <span>
+                                <div className="space-y-2 pt-1">
+                                  <div className="flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800/60 pb-1">
+                                    <span className="flex items-center gap-1.5">
                                       Status:{" "}
-                                      <strong className={activeTC.passed ? "text-green-400" : "text-red-400"}>
-                                        {activeTC.passed ? "PASSED" : "FAILED"}
+                                      <strong
+                                        className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${
+                                          activeTC.passed
+                                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                            : activeTC.status === "Runtime Error"
+                                            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                                            : "bg-red-500/20 text-red-400 border border-red-500/30"
+                                        }`}
+                                      >
+                                        {activeTC.passed ? "PASSED" : activeTC.status || "FAILED"}
                                       </strong>
                                     </span>
-                                    <span>Time: {activeTC.executionTimeMs}ms</span>
+                                    <span>Execution Time: <strong className="text-slate-200">{activeTC.executionTimeMs}ms</strong></span>
                                   </div>
-                                  <div>
-                                    Input: <span className="text-blue-400 font-semibold">{activeTC.input || "(none)"}</span>
+
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                    <div className="p-2 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+                                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Input</div>
+                                      <pre className="text-blue-300 font-mono text-xs whitespace-pre-wrap max-h-16 overflow-y-auto">
+                                        {activeTC.input || "(no stdin input)"}
+                                      </pre>
+                                    </div>
+
+                                    <div className="p-2 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+                                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Expected Output</div>
+                                      <pre className="text-emerald-300 font-mono text-xs whitespace-pre-wrap max-h-16 overflow-y-auto">
+                                        {activeTC.expectedOutput || "(none)"}
+                                      </pre>
+                                    </div>
+
+                                    <div className="p-2 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+                                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Actual Output</div>
+                                      <pre
+                                        className={`font-mono text-xs whitespace-pre-wrap max-h-16 overflow-y-auto ${
+                                          activeTC.passed ? "text-emerald-300 font-semibold" : "text-red-300 font-semibold"
+                                        }`}
+                                      >
+                                        {activeTC.actualOutput || "(empty)"}
+                                      </pre>
+                                    </div>
                                   </div>
-                                  <div>
-                                    Expected:{" "}
-                                    <span className="text-emerald-400 font-semibold">{activeTC.expectedOutput || "(none)"}</span>
-                                  </div>
-                                  <div>
-                                    Actual Output:{" "}
-                                    <span className={activeTC.passed ? "text-green-400" : "text-red-400"}>
-                                      {activeTC.actualOutput || "(empty)"}
-                                    </span>
-                                  </div>
+
+                                  {activeTC.error && (
+                                    <div className="p-2 rounded-lg bg-red-950/40 border border-red-900/60 text-red-300 text-[11px] space-y-0.5">
+                                      <span className="text-[10px] font-bold text-red-400 uppercase">[Error Detail]</span>
+                                      <pre className="whitespace-pre-wrap max-h-16 overflow-y-auto font-mono text-red-300">{activeTC.error}</pre>
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })()}
                           </div>
                         ) : (
-                          <div className="text-slate-400 text-xs py-2">
+                          <div className="text-slate-400 text-xs py-2 space-y-1">
                             {currentQ?.testCases && currentQ.testCases.length > 0 ? (
-                              <div className="space-y-1">
-                                <div>
-                                  Ready to evaluate against{" "}
+                              <>
+                                <div className="text-slate-300">
+                                  This problem has{" "}
                                   <strong className="text-blue-400">{currentQ.testCases.length} sample test cases</strong>.
                                 </div>
-                                <div className="text-[11px] text-slate-500">
-                                  Click &quot;Run Test Cases&quot; above to compile and test your solution.
+                                <div className="text-[11px] text-slate-400">
+                                  Write your solution in the clean coding area above, then click &quot;Run Test Cases&quot; to test your code.
                                 </div>
-                              </div>
+                              </>
                             ) : (
-                              <div>Write your solution above and click &quot;Run Test Cases&quot; to test your code.</div>
+                              <div>Write your solution in the editor and click &quot;Run Test Cases&quot; to verify your code.</div>
                             )}
                           </div>
                         )}
@@ -1641,15 +1655,16 @@ export function ProctoredExamConsole({
                           <button
                             onClick={() => handleRunCode(true)}
                             disabled={isRunningCode}
-                            className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold transition flex items-center gap-1"
+                            className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold transition flex items-center gap-1 disabled:opacity-50"
                           >
-                            <Play className="h-2.5 w-2.5 fill-current" /> Run Custom Input
+                            {isRunningCode ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-2.5 w-2.5 fill-current" />}
+                            <span>Run Custom Input</span>
                           </button>
                         </div>
                         <textarea
                           value={customInputText}
                           onChange={(e) => setCustomInputText(e.target.value)}
-                          placeholder="Type sample input to feed into your program..."
+                          placeholder="Type sample input to feed into standard input..."
                           className="flex-1 p-2.5 bg-black/60 border border-slate-700 rounded-lg text-xs font-mono text-slate-200 resize-none focus:outline-none focus:border-blue-500"
                         />
                       </div>
@@ -1660,28 +1675,37 @@ export function ProctoredExamConsole({
                       <div
                         className={`flex-1 p-3 overflow-y-auto font-mono text-[11px] ${
                           isLightMode ? "bg-slate-900 text-slate-200" : "bg-black text-slate-200"
-                        } space-y-1`}
+                        } space-y-1.5`}
                       >
                         {executionResult ? (
                           <>
+                            {executionResult.isCompilationError || executionResult.compilationError ? (
+                              <div className="p-2 rounded bg-red-950/60 border border-red-800 space-y-1 mb-2">
+                                <span className="text-[10px] text-red-400 uppercase font-bold tracking-wider">[COMPILER ERROR]</span>
+                                <pre className="text-red-300 whitespace-pre-wrap text-xs">{executionResult.stderr}</pre>
+                              </div>
+                            ) : null}
+
                             {executionResult.stdout && (
                               <div className="space-y-0.5">
                                 <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">[STDOUT]</span>
-                                <pre className="text-emerald-400 whitespace-pre-wrap">{executionResult.stdout}</pre>
+                                <pre className="text-emerald-400 whitespace-pre-wrap p-2 bg-slate-950/80 rounded border border-slate-800">{executionResult.stdout}</pre>
                               </div>
                             )}
-                            {executionResult.stderr && (
+
+                            {executionResult.stderr && !executionResult.isCompilationError && !executionResult.compilationError && (
                               <div className="space-y-0.5 pt-1">
-                                <span className="text-[10px] text-red-400 uppercase font-bold tracking-wider">[STDERR]</span>
-                                <pre className="text-red-400 whitespace-pre-wrap">{executionResult.stderr}</pre>
+                                <span className="text-[10px] text-red-400 uppercase font-bold tracking-wider">[STDERR / RUNTIME ERROR]</span>
+                                <pre className="text-red-400 whitespace-pre-wrap p-2 bg-red-950/30 rounded border border-red-900/40">{executionResult.stderr}</pre>
                               </div>
                             )}
+
                             {!executionResult.stdout && !executionResult.stderr && (
-                              <span className="text-slate-500">Program executed with empty output.</span>
+                              <span className="text-slate-400">Program executed successfully with empty output.</span>
                             )}
                           </>
                         ) : (
-                          <span className="text-slate-500">No execution logs yet. Click &quot;Run Test Cases&quot; to test code.</span>
+                          <span className="text-slate-500">No compiler logs yet. Write code and click &quot;Run Test Cases&quot;.</span>
                         )}
                       </div>
                     )}

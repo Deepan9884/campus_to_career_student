@@ -185,7 +185,7 @@ const [analyzing, setAnalyzing] = useState(false);
       setUsername(data.github.login);
       if (data.user) {
         useAuth.setState((state) => ({
-          user: state.user ? { ...state.user, ...data.user, githubUsername: data.user.githubUsername } : data.user,
+          user: state.user ? { ...state.user, ...data.user, githubUsername: data.user.githubUsername } : (data.user as any),
         }));
       }
       await fetchRepos();

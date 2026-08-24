@@ -25,7 +25,6 @@ import {
   Smile,
   Globe,
   Code,
-  Sparkles,
   Lightbulb,
   Rocket,
   Users,
@@ -675,7 +674,7 @@ function LinkedInPostsPage() {
               LinkedIn Post Creator
             </h1>
             <p className="text-muted-foreground text-sm md:text-base max-w-2xl">
-              Select between your **Registered Events & Hackathons** or **GitHub Repositories** to craft high-converting, exhaustive LinkedIn achievement posts with photos.
+              Select between your <strong className="text-foreground font-semibold">Registered Events &amp; Hackathons</strong> or <strong className="text-foreground font-semibold">GitHub Repositories</strong> to craft high-converting, exhaustive LinkedIn achievement posts with photos.
             </p>
           </div>
 
@@ -784,7 +783,7 @@ function LinkedInPostsPage() {
                         const found = events.find((ev) => ev._id === e.target.value);
                         if (found) populateFromEvent(found);
                       }}
-                      className="w-full glass-input rounded-xl p-3 text-sm outline-none bg-slate-900/90 border border-indigo-500/30 focus:border-indigo-500"
+                      className="w-full glass-input rounded-xl p-3 text-sm outline-none bg-card text-foreground border border-indigo-500/30 focus:border-indigo-500"
                     >
                       <option value="">-- Select from your verified events --</option>
                       {events.map((ev) => (
@@ -825,7 +824,7 @@ function LinkedInPostsPage() {
                     <select
                       value={eventResult}
                       onChange={(e) => setEventResult(e.target.value)}
-                      className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-slate-900"
+                      className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-card text-foreground"
                     >
                       <option value="winner">Winner (1st Place)</option>
                       <option value="runner-up">Runner-up (2nd/3rd Place)</option>
@@ -846,13 +845,13 @@ function LinkedInPostsPage() {
                 </div>
 
                 {/* Team & Teammates Section */}
-                <div className="p-4 rounded-xl border border-indigo-500/25 bg-indigo-950/25 space-y-3.5">
+                <div className="p-4 rounded-2xl border border-indigo-500/20 bg-indigo-50/70 dark:bg-indigo-950/25 space-y-3.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
-                      <Users className="h-4 w-4 text-indigo-400" />
-                      Team & Teammates Information
+                    <label className="text-xs font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
+                      <Users className="h-4 w-4 text-indigo-500" />
+                      Team &amp; Teammates Information
                     </label>
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium border border-indigo-500/30">
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-500/25">
                       {eventTeamSize === 0
                         ? "Solo Project"
                         : `${eventTeamSize} Teammate${eventTeamSize > 1 ? "s" : ""}`}
@@ -891,7 +890,7 @@ function LinkedInPostsPage() {
                       <select
                         value={eventTeamSize}
                         onChange={(e) => handleTeamSizeChange(Number(e.target.value))}
-                        className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-slate-900"
+                        className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-card text-foreground"
                       >
                         <option value={0}>0 (Solo / Individual)</option>
                         <option value={1}>1 Teammate</option>
@@ -1029,7 +1028,7 @@ function LinkedInPostsPage() {
                         const found = githubHistory.find((a) => a._id === e.target.value);
                         if (found) populateFromGitHub(found);
                       }}
-                      className="w-full glass-input rounded-xl p-3 text-sm outline-none bg-slate-900/90 border border-blue-500/30 focus:border-blue-500"
+                      className="w-full glass-input rounded-xl p-3 text-sm outline-none bg-card text-foreground border border-blue-500/30 focus:border-blue-500"
                     >
                       <option value="">-- Choose an analyzed repository --</option>
                       {githubHistory.map((a) => (
@@ -1112,7 +1111,7 @@ function LinkedInPostsPage() {
                   <select
                     value={tone}
                     onChange={(e) => setTone(e.target.value as ToneType)}
-                    className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-slate-900"
+                    className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-card text-foreground"
                   >
                     <option value="exhaustive">Exhaustive Achievement Story (Story + Tech + Win)</option>
                     <option value="technical">Deep Technical & Architecture Breakdown</option>
@@ -1129,7 +1128,7 @@ function LinkedInPostsPage() {
                   <select
                     value={length}
                     onChange={(e) => setLength(e.target.value as LengthType)}
-                    className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-slate-900"
+                    className="w-full glass-input rounded-xl p-2.5 text-sm outline-none bg-card text-foreground"
                   >
                     <option value="exhaustive">Exhaustive Deep-Dive (Multi-paragraph)</option>
                     <option value="standard">Standard Structured (Hook + Bullets)</option>
@@ -1343,7 +1342,7 @@ function LinkedInPostsPage() {
             )}
 
             {/* Realistic LinkedIn Feed Mockup Card */}
-            <div className="rounded-3xl border border-white/15 bg-[#0b1120]/90 p-5 shadow-2xl space-y-4 backdrop-blur-2xl">
+            <div className="rounded-3xl border border-border/50 bg-card/95 dark:bg-[#0b1120]/90 p-5 shadow-2xl space-y-4 backdrop-blur-2xl text-foreground">
               {/* LinkedIn Post Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -1352,7 +1351,7 @@ function LinkedInPostsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold text-white hover:underline cursor-pointer">
+                      <p className="text-sm font-bold text-foreground hover:underline cursor-pointer">
                         {user?.name || "Student Developer"}
                       </p>
                       <span className="text-muted-foreground text-xs">• 1st</span>
@@ -1363,36 +1362,36 @@ function LinkedInPostsPage() {
                     <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
                       <span>Just now</span>
                       <span>•</span>
-                      <Globe className="h-3 w-3 text-slate-400" />
+                      <Globe className="h-3 w-3 text-muted-foreground" />
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <Linkedin className="h-5 w-5 text-blue-400" />
+                  <Linkedin className="h-5 w-5 text-blue-500" />
                 </div>
               </div>
 
               {/* Live Editor & Post Content */}
               <div className="space-y-2">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-1 border-b border-white/10">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-1 border-b border-border/40">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-white tracking-wide">Live Post Editor</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/25">
+                    <span className="text-xs font-bold text-foreground tracking-wide">Live Post Editor</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/25">
                       Editable
                     </span>
                   </div>
 
                   {/* Formatting Toolbar */}
-                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/90 border border-white/15 shadow-inner">
+                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/80 dark:bg-slate-900/90 border border-border/40 shadow-inner">
                     {/* Bold Button */}
                     <button
                       type="button"
                       onClick={handleInsertBold}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition shadow-sm border border-white/10"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-background hover:bg-muted text-foreground transition shadow-sm border border-border/50"
                       title="Convert selected text to Bold Unicode (𝗕)"
                     >
-                      <Bold className="h-3.5 w-3.5 text-blue-400" />
+                      <Bold className="h-3.5 w-3.5 text-blue-500" />
                       <span>Bold</span>
                     </button>
 
@@ -1400,14 +1399,14 @@ function LinkedInPostsPage() {
                     <button
                       type="button"
                       onClick={handleInsertBullet}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 text-slate-200 transition shadow-sm border border-white/10"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-background hover:bg-muted text-foreground transition shadow-sm border border-border/50"
                       title="Add bullet list point"
                     >
-                      <List className="h-3.5 w-3.5 text-emerald-400" />
+                      <List className="h-3.5 w-3.5 text-emerald-500" />
                       <span>Bullet</span>
                     </button>
 
-                    <div className="h-4 w-px bg-white/20 mx-0.5" />
+                    <div className="h-4 w-px bg-border mx-0.5" />
 
                     {/* Quick Symbols Toolbar */}
                     <div className="flex items-center gap-1">
@@ -1420,7 +1419,7 @@ function LinkedInPostsPage() {
                           key={item.char}
                           type="button"
                           onClick={() => handleInsertEmoji(item.char)}
-                          className="h-7 px-2 rounded-lg bg-white/5 hover:bg-white/20 text-xs font-mono text-slate-300 flex items-center justify-center transition border border-white/10"
+                          className="h-7 px-2 rounded-lg bg-background hover:bg-muted text-xs font-mono text-foreground flex items-center justify-center transition border border-border/40"
                           title={`Insert ${item.label}`}
                         >
                           {item.char}
@@ -1440,21 +1439,21 @@ function LinkedInPostsPage() {
                       ? "Generating super content with AI..."
                       : "Your LinkedIn post draft will appear here. You can freely edit before copying or sharing!"
                   }
-                  className="bg-transparent border border-white/5 text-xs md:text-sm text-slate-100 placeholder:text-muted-foreground p-3"
+                  className="bg-transparent border border-border/30 text-xs md:text-sm text-foreground placeholder:text-muted-foreground p-3"
                 />
 
                 {/* Character & Readability counter */}
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/30">
                   <span>
                     {activeDraftText.length} characters • {activeDraftText.split(/\s+/).filter(Boolean).length} words
                   </span>
-                  <span className="text-emerald-400 font-medium">Optimal LinkedIn Length</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Optimal LinkedIn Length</span>
                 </div>
               </div>
 
               {/* Attached Photo in LinkedIn Feed */}
               {attachedImagePreview && (
-                <div className="rounded-2xl overflow-hidden border border-white/10 bg-black">
+                <div className="rounded-2xl overflow-hidden border border-border/40 bg-muted/40">
                   <img
                     src={attachedImagePreview}
                     alt="Attached preview"
@@ -1462,8 +1461,6 @@ function LinkedInPostsPage() {
                   />
                 </div>
               )}
-
-
 
               {/* Action Buttons Toolbar */}
               <div className="grid grid-cols-2 gap-2 pt-2">
@@ -1473,8 +1470,8 @@ function LinkedInPostsPage() {
                   disabled={!activeDraftText}
                   className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
                     copySuccess === "all"
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                      : "bg-white/10 hover:bg-white/15 text-white border border-white/15"
+                      ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
+                      : "bg-muted hover:bg-muted/80 text-foreground border border-border/60"
                   }`}
                 >
                   <Copy className="h-4 w-4" />
@@ -1495,7 +1492,7 @@ function LinkedInPostsPage() {
                   type="button"
                   onClick={handleSaveDraft}
                   disabled={!activeDraftText}
-                  className="py-2 px-3 rounded-xl text-xs font-semibold glass hover:bg-white/10 text-muted-foreground hover:text-white transition flex items-center justify-center gap-1.5 col-span-2"
+                  className="py-2 px-3 rounded-xl text-xs font-semibold bg-muted hover:bg-muted/80 text-foreground hover:text-primary transition flex items-center justify-center gap-1.5 col-span-2 border border-border/40"
                 >
                   <Bookmark className="h-3.5 w-3.5" />
                   Save to My Drafts

@@ -24,6 +24,8 @@ interface QuizDialogProps {
   roadmapItemId?: string;
   subTopicName?: string;
   skillName?: string;
+  customQuiz?: QuizGenerationResult;
+  onCustomSubmit?: (answers: Record<string, string>) => Promise<QuizSubmissionResult>;
   onPassed?: () => void | Promise<void>;
 }
 
@@ -33,6 +35,8 @@ export function QuizDialog({
   roadmapItemId,
   subTopicName,
   skillName,
+  customQuiz,
+  onCustomSubmit,
   onPassed,
 }: QuizDialogProps) {
   const [phase, setPhase] = useState<"loading" | "ready" | "taking" | "submitting" | "error">("loading");
@@ -64,6 +68,11 @@ export function QuizDialog({
     async function loadQuiz() {
       setPhase("loading");
       setError(null);
+      if (customQuiz) {
+        setGen(customQuiz);
+        setPhase("ready");
+        return;
+      }
       try {
         const data = await generateQuiz({ roadmapItemId, subTopicName, skillName });
         if (!active) return;
@@ -82,12 +91,20 @@ export function QuizDialog({
       active = false;
       stopAllCameraStreams();
     };
-  }, [open, roadmapItemId, subTopicName, skillName]);
+  }, [open, roadmapItemId, subTopicName, skillName, customQuiz]);
 
   const handleSubmit = async (answers: Record<string, string>) => {
     if (!gen) return;
     setPhase("submitting");
     try {
+      if (onCustomSubmit) {
+        const res = await onCustomSubmit(answers);
+        setResult(res);
+        if (res.passed) {
+          onPassed?.();
+        }
+        return;
+      }
       const answersPayload = Object.entries(answers).map(([questionId, answerText]) => ({
         questionId,
         answerText,
@@ -107,6 +124,11 @@ export function QuizDialog({
     setResult(null);
     setIsQuizBlocked(false);
     setPhase("loading");
+    if (customQuiz) {
+      setGen(customQuiz);
+      setPhase("ready");
+      return;
+    }
     generateQuiz({ roadmapItemId, subTopicName, skillName })
       .then((data) => {
         setGen(data);
@@ -131,24 +153,24 @@ export function QuizDialog({
   // 1. Loading Phase Overlay
   if (phase === "loading" || (!gen && phase !== "error")) {
     return createPortal(
-      <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col items-center justify-center p-6 select-none font-sans">
-        <div className="max-w-md w-full bg-[#111c34] border border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-5">
-          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mx-auto text-blue-400">
+      <div className="fixed inset-0 z-[999999] bg-background text-foreground flex flex-col items-center justify-center p-6 select-none font-sans">
+        <div className="max-w-md w-full bg-popover border border-border rounded-3xl p-8 shadow-2xl text-center space-y-5">
+          <div className="w-16 h-16 rounded-2xl bg-chart-5/10 border border-chart-5/30 flex items-center justify-center mx-auto text-chart-5">
             <Brain className="h-8 w-8 animate-pulse" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-white">Initializing Assessment Environment</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="text-lg font-bold text-foreground">Initializing Assessment Environment</h3>
+            <p className="text-xs text-muted-foreground">
               Generating questions & activating AI proctoring for {subTopicName}...
             </p>
           </div>
-          <div className="flex items-center justify-center gap-2 text-xs text-blue-400 font-semibold pt-2">
+          <div className="flex items-center justify-center gap-2 text-xs text-chart-5 font-semibold pt-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Connecting Proctor Engine...</span>
           </div>
           <button
             onClick={handleClose}
-            className="text-xs text-slate-500 hover:text-slate-300 transition pt-2"
+            className="text-xs text-muted-foreground hover:text-foreground transition pt-2"
           >
             Cancel
           </button>
@@ -162,8 +184,8 @@ export function QuizDialog({
   if (phase === "ready" && gen) {
     return createPortal(
       <PreExamCheckIn
-        subTopicName={subTopicName}
-        skillName={skillName}
+        subTopicName={subTopicName || "Technical Assessment"}
+        skillName={skillName || "Core Competency"}
         onStart={() => {
           document.documentElement.requestFullscreen?.().catch(() => {});
           setPhase("taking");
@@ -177,23 +199,23 @@ export function QuizDialog({
   // 2. Error Phase
   if (phase === "error") {
     return createPortal(
-      <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col items-center justify-center p-6 select-none font-sans">
-        <div className="max-w-md w-full bg-[#111c34] border border-red-500/30 rounded-3xl p-8 shadow-2xl text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto text-red-400">
+      <div className="fixed inset-0 z-[999999] bg-background text-foreground flex flex-col items-center justify-center p-6 select-none font-sans">
+        <div className="max-w-md w-full bg-popover border border-destructive/30 rounded-3xl p-8 shadow-2xl text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-destructive/10 border border-destructive/30 flex items-center justify-center mx-auto text-destructive">
             <AlertTriangle className="h-8 w-8" />
           </div>
-          <h3 className="text-lg font-bold text-white">Assessment Generation Failed</h3>
-          <p className="text-xs text-slate-400">{error || "An unexpected error occurred while preparing your exam."}</p>
+          <h3 className="text-lg font-bold text-foreground">Assessment Generation Failed</h3>
+          <p className="text-xs text-muted-foreground">{error || "An unexpected error occurred while preparing your exam."}</p>
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleRetry}
-              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+              className="flex-1 bg-primary hover:brightness-110 text-primary-foreground py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
             >
               <RotateCcw className="h-3.5 w-3.5" /> Try Again
             </button>
             <button
               onClick={handleClose}
-              className="px-5 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold"
+              className="px-5 bg-[var(--glass-input-bg)] hover:brightness-110 text-foreground py-2.5 rounded-xl text-xs font-semibold"
             >
               Close
             </button>
@@ -210,8 +232,8 @@ export function QuizDialog({
   return createPortal(
     <ProctoredExamConsole
       quiz={gen}
-      subTopicName={subTopicName}
-      skillName={skillName}
+      subTopicName={subTopicName || "Technical Assessment"}
+      skillName={skillName || "Core Competency"}
       isBlocked={isQuizBlocked}
       onBlockStateChange={setIsQuizBlocked}
       onSubmit={handleSubmit}
@@ -353,22 +375,22 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[999999] bg-[#0b1120]/95 backdrop-blur-xl text-slate-100 flex flex-col items-center justify-center p-4 md:p-6 select-none overflow-y-auto font-sans">
-      <div className="max-w-3xl w-full bg-[#111c34] border border-slate-700/60 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-[999999] bg-background/95 backdrop-blur-xl text-foreground flex flex-col items-center justify-center p-4 md:p-6 select-none overflow-y-auto font-sans">
+      <div className="max-w-3xl w-full bg-popover border border-border rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
         {/* Header Title */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+            <div className="w-10 h-10 rounded-xl bg-chart-5/10 border border-chart-5/30 flex items-center justify-center text-chart-5 font-bold">
               <Shield className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Proctored Assessment Check-In</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="text-lg font-bold text-foreground">Proctored Assessment Check-In</h2>
+              <p className="text-xs text-muted-foreground">
                 {skillName} • {subTopicName}
               </p>
             </div>
           </div>
-          <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold rounded-full">
+          <span className="px-3 py-1 bg-chart-5/10 border border-chart-5/30 text-chart-5 text-xs font-semibold rounded-full">
             AI Monitored
           </span>
         </div>
@@ -378,18 +400,18 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
           {/* Left Column: Live AI Camera Preview */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-300">Live Camera & AI Feed</span>
+              <span className="text-xs font-semibold text-muted-foreground">Live Camera & AI Feed</span>
               <span
                 className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${
                   aiStatus === "ok"
-                    ? "bg-green-500/15 text-green-400 border border-green-500/30"
+                    ? "bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/30"
                     : aiStatus === "phone"
-                    ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                    ? "bg-destructive/15 text-destructive border border-destructive/30"
                     : aiStatus === "multi"
-                    ? "bg-orange-500/15 text-orange-400 border border-orange-500/30"
+                    ? "bg-[var(--destructive)]/15 text-[var(--destructive)] border border-[var(--destructive)]/30"
                     : aiStatus === "no_face"
-                    ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30"
-                    : "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                    ? "bg-[var(--warning)]/15 text-[var(--warning)] border border-[var(--warning)]/30"
+                    : "bg-chart-5/15 text-chart-5 border border-chart-5/30"
                 }`}
               >
                 <span
@@ -399,7 +421,7 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
                       : aiStatus === "phone"
                       ? "bg-red-400"
                       : aiStatus === "multi"
-                      ? "bg-orange-400"
+                      ? "bg-[var(--destructive)]"
                       : aiStatus === "no_face"
                       ? "bg-yellow-400"
                       : "bg-blue-400"
@@ -417,7 +439,7 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
               </span>
             </div>
 
-            <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-slate-950 border border-slate-700/80 shadow-inner flex items-center justify-center">
+            <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-popover border border-border shadow-inner flex items-center justify-center">
               {stream ? (
                 <video
                   ref={videoRef}
@@ -429,64 +451,64 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
                 />
               ) : cameraError ? (
                 <div className="p-4 text-center space-y-2">
-                  <Camera className="h-8 w-8 text-red-400 mx-auto" />
+                  <Camera className="h-8 w-8 text-destructive mx-auto" />
                   <p className="text-xs text-red-300">{cameraError}</p>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-xs text-slate-400">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
+                <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin text-chart-5" />
                   <span>Accessing camera...</span>
                 </div>
               )}
 
               {/* Status Banner inside Video */}
               {stream && (
-                <div className="absolute bottom-2 left-2 right-2 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] text-slate-300 flex items-center justify-between">
+                <div className="absolute bottom-2 left-2 right-2 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] text-muted-foreground flex items-center justify-between">
                   <span>Inference: COCO-SSD</span>
-                  <span className="truncate max-w-[140px] text-slate-400 font-mono">
+                  <span className="truncate max-w-[140px] text-muted-foreground font-mono">
                     {detectedSummary.length > 0 ? detectedSummary.slice(0, 2).join(", ") : "Scanning..."}
                   </span>
                 </div>
               )}
             </div>
 
-            <p className="text-[11px] text-slate-400 leading-relaxed">
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
               Ensure your face is well-lit and directly in front of the camera before starting.
             </p>
           </div>
 
           {/* Right Column: Rules Checklist & Terms */}
           <div className="space-y-3.5">
-            <span className="text-xs font-semibold text-slate-300">Exam Integrity Policy</span>
-            <div className="space-y-2.5 text-xs text-slate-300">
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+            <span className="text-xs font-semibold text-muted-foreground">Exam Integrity Policy</span>
+            <div className="space-y-2.5 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
+                <CheckCircle2 className="h-4 w-4 text-chart-5 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Full-Screen Lockdown:</strong> Leaving fullscreen records a strike and starts a 15-second timer to return or get blocked.
+                  <strong className="text-foreground">Full-Screen Lockdown:</strong> Leaving fullscreen records a strike and starts a 15-second timer to return or get blocked.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
+                <CheckCircle2 className="h-4 w-4 text-chart-5 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">No External Devices:</strong> AI camera continuously checks for phones.
+                  <strong className="text-foreground">No External Devices:</strong> AI camera continuously checks for phones.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
+                <CheckCircle2 className="h-4 w-4 text-chart-5 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Continuous Presence:</strong> Stay in front of the camera at all times.
+                  <strong className="text-foreground">Continuous Presence:</strong> Stay in front of the camera at all times.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
+                <CheckCircle2 className="h-4 w-4 text-chart-5 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Full Face & Eye Gaze:</strong> Full face must be visible (no half/quarter face or edge cutoffs) and eyes focused on screen (4 warnings = 1 strike).
+                  <strong className="text-foreground">Full Face & Eye Gaze:</strong> Full face must be visible (no half/quarter face or edge cutoffs) and eyes focused on screen (4 warnings = 1 strike).
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <CheckCircle2 className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--glass-input-bg)] border border-border">
+                <CheckCircle2 className="h-4 w-4 text-[var(--warning)] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">3-Strike Rule:</strong> 3 violations lock the exam and notify your mentor.
+                  <strong className="text-foreground">3-Strike Rule:</strong> 3 violations lock the exam and notify your mentor.
                 </span>
               </div>
             </div>
@@ -497,9 +519,9 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 accent-blue-600"
+                className="w-4 h-4 rounded border-border bg-[var(--glass-input-bg)] text-primary focus:ring-primary accent-primary"
               />
-              <span className="text-xs text-slate-300 font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 I agree to adhere to all exam integrity guidelines
               </span>
             </label>
@@ -507,10 +529,10 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t border-slate-800 pt-4">
+        <div className="flex items-center justify-between border-t border-border pt-4">
           <button
             onClick={onCancel}
-            className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+            className="px-5 py-2.5 rounded-xl bg-[var(--glass-input-bg)] hover:brightness-110 text-foreground text-xs font-semibold transition"
           >
             Cancel
           </button>
@@ -518,7 +540,7 @@ function PreExamCheckIn({ subTopicName, skillName, onStart, onCancel }: PreExamC
           <button
             onClick={onStart}
             disabled={!agreed || !stream}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/25 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white text-xs font-bold transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Maximize className="h-4 w-4" />
             Enter Fullscreen & Begin Assessment

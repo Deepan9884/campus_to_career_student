@@ -27,6 +27,8 @@ import { Route as AuthenticatedResumeRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedRoadmapRouteImport } from './routes/_authenticated.roadmap'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSkillsRouteImport } from './routes/_authenticated.skills'
+import { Route as AuthenticatedSuperDreamRouteImport } from './routes/_authenticated.super-dream'
+import { Route as AuthenticatedTestsRouteImport } from './routes/_authenticated.tests'
 import { Route as PortfolioUsernameRouteImport } from './routes/portfolio.$username'
 
 const IndexRoute = IndexRouteImport.update({
@@ -121,6 +123,16 @@ const AuthenticatedSkillsRoute = AuthenticatedSkillsRouteImport.update({
   path: '/skills',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSuperDreamRoute = AuthenticatedSuperDreamRouteImport.update({
+  id: '/super-dream',
+  path: '/super-dream',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTestsRoute = AuthenticatedTestsRouteImport.update({
+  id: '/tests',
+  path: '/tests',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const PortfolioUsernameRoute = PortfolioUsernameRouteImport.update({
   id: '/portfolio/$username',
   path: '/portfolio/$username',
@@ -145,6 +157,8 @@ export interface FileRoutesByFullPath {
   '/roadmap': typeof AuthenticatedRoadmapRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/skills': typeof AuthenticatedSkillsRoute
+  '/super-dream': typeof AuthenticatedSuperDreamRoute
+  '/tests': typeof AuthenticatedTestsRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
 }
 export interface FileRoutesByTo {
@@ -165,6 +179,8 @@ export interface FileRoutesByTo {
   '/roadmap': typeof AuthenticatedRoadmapRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/skills': typeof AuthenticatedSkillsRoute
+  '/super-dream': typeof AuthenticatedSuperDreamRoute
+  '/tests': typeof AuthenticatedTestsRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
 }
 export interface FileRoutesById {
@@ -187,6 +203,8 @@ export interface FileRoutesById {
   '/_authenticated/roadmap': typeof AuthenticatedRoadmapRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/skills': typeof AuthenticatedSkillsRoute
+  '/_authenticated/super-dream': typeof AuthenticatedSuperDreamRoute
+  '/_authenticated/tests': typeof AuthenticatedTestsRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
 }
 export interface FileRouteTypes {
@@ -209,6 +227,8 @@ export interface FileRouteTypes {
     | '/roadmap'
     | '/settings'
     | '/skills'
+    | '/super-dream'
+    | '/tests'
     | '/portfolio/$username'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -229,6 +249,8 @@ export interface FileRouteTypes {
     | '/roadmap'
     | '/settings'
     | '/skills'
+    | '/super-dream'
+    | '/tests'
     | '/portfolio/$username'
   id:
     | '__root__'
@@ -250,6 +272,8 @@ export interface FileRouteTypes {
     | '/_authenticated/roadmap'
     | '/_authenticated/settings'
     | '/_authenticated/skills'
+    | '/_authenticated/super-dream'
+    | '/_authenticated/tests'
     | '/portfolio/$username'
   fileRoutesById: FileRoutesById
 }
@@ -391,6 +415,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSkillsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/super-dream': {
+      id: '/_authenticated/super-dream'
+      path: '/super-dream'
+      fullPath: '/super-dream'
+      preLoaderRoute: typeof AuthenticatedSuperDreamRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tests': {
+      id: '/_authenticated/tests'
+      path: '/tests'
+      fullPath: '/tests'
+      preLoaderRoute: typeof AuthenticatedTestsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/portfolio/$username': {
       id: '/portfolio/$username'
       path: '/portfolio/$username'
@@ -414,6 +452,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRoadmapRoute: typeof AuthenticatedRoadmapRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSkillsRoute: typeof AuthenticatedSkillsRoute
+  AuthenticatedSuperDreamRoute: typeof AuthenticatedSuperDreamRoute
+  AuthenticatedTestsRoute: typeof AuthenticatedTestsRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -429,6 +469,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRoadmapRoute: AuthenticatedRoadmapRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSkillsRoute: AuthenticatedSkillsRoute,
+  AuthenticatedSuperDreamRoute: AuthenticatedSuperDreamRoute,
+  AuthenticatedTestsRoute: AuthenticatedTestsRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

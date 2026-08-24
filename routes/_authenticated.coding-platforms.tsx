@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { upsertCodingProfile, refreshCodingProfile, getProblemRecommendations, getAllCodingProfiles } from "@/lib/coding-profiles-api";
+import { useSuperDream } from "@/stores/superDreamStore";
 import { Target, Trophy, Flame } from "lucide-react";
 import { CodingPlatformAnalyticsCharts } from "@/components/CodingPlatformAnalyticsCharts";
 
@@ -154,7 +155,9 @@ function CodingPlatformsPage() {
 
         try {
             await upsertCodingProfile({ platform, profileUrl: url });
-            toast.success("Profile saved");
+            useSuperDream.getState().updateCodingPlatformUrl(platform, url);
+            useSuperDream.getState().fetchAndSyncCodingPlatform(platform, url);
+            toast.success("Profile saved & synced to Super Dream!");
             await handleRefresh(platform);
         } catch (err: any) {
             setErrors((e) => ({ ...e, [platform]: err?.message || "Failed to save profile" }));
