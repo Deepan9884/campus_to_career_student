@@ -15,6 +15,12 @@ export interface Notification {
 
 const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
+// Maximum reconnect attempts before we stop trying
+const MAX_RECONNECT_ATTEMPTS = 10;
+// Delay between retries (doubles each attempt, capped at 60s)
+const BASE_RETRY_DELAY_MS = 2000;
+const MAX_RETRY_DELAY_MS = 60_000;
+
 let esInstance: EventSource | null = null;
 let callbacks: ((notification: Notification) => void)[] = [];
 
@@ -35,6 +41,28 @@ function closeEventSource() {
   }
 }
 
+/**
+ * Try to obtain a fresh access token via silent refresh.
+ * Retries up to 3 times with a short delay to handle Render cold-starts
+ * (Render free tier can take 10-50s to wake up after inactivity).
+ */
+async function ensureValidToken(): Promise<string | null> {
+  let token = getAccessToken();
+  if (token) return token;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await tryRefresh();
+      token = getAccessToken();
+      if (token) return token;
+    } catch {
+      // wait a bit before retrying (cold-start forgiveness)
+      await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+    }
+  }
+  return null;
+}
+
 export function useNotificationSSE({
   onNotification,
 }: {
@@ -44,6 +72,7 @@ export function useNotificationSSE({
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const reconnectAttemptRef = useRef(0);
   const onNotificationRef = useRef(onNotification);
+  const isUnmountedRef = useRef(false);
 
   useEffect(() => {
     onNotificationRef.current = onNotification;
@@ -54,23 +83,26 @@ export function useNotificationSSE({
   }, []);
 
   const connectSSE = useCallback(async () => {
-    // Ensure we have a valid access token before attempting the ticket fetch.
-    // If the in-memory token is missing (e.g. page reload) try a silent refresh first.
-    let token = getAccessToken();
+    if (isUnmountedRef.current) return;
+
+    // Get or refresh the access token (handles Render cold-start delays)
+    const token = await ensureValidToken();
     if (!token) {
-      try {
-        await tryRefresh();
-        token = getAccessToken();
-      } catch {
-        // Refresh failed — user is not authenticated; stop the reconnect loop.
+      // Couldn't get a token after retries — schedule a retry with backoff
+      const attempt = reconnectAttemptRef.current;
+      if (attempt >= MAX_RECONNECT_ATTEMPTS) {
         reconnectAttemptRef.current = 0;
         return;
       }
-      if (!token) return;
+      const delay = Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS);
+      reconnectAttemptRef.current = attempt + 1;
+      reconnectTimeoutRef.current = setTimeout(connectSSE, delay);
+      return;
     }
 
     closeEventSource();
 
+    // Get a short-lived SSE ticket to avoid sending access token in URL query strings
     let streamParam = token;
     try {
       const ticketRes = await fetch(`${BASE_URL}/notifications/ticket`, {
@@ -79,30 +111,30 @@ export function useNotificationSSE({
       });
 
       if (ticketRes.status === 401) {
-        // Access token was expired — attempt a single silent refresh and retry.
+        // Token expired between ensureValidToken and ticket fetch — try one more refresh
         try {
           await tryRefresh();
           const freshToken = getAccessToken();
-          if (!freshToken) return;
-          token = freshToken;
+          if (!freshToken) throw new Error("No token after refresh");
           const retryRes = await fetch(`${BASE_URL}/notifications/ticket`, {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${freshToken}` },
           });
           if (retryRes.ok) {
             const retryJson = await retryRes.json();
-            if (retryJson.data?.ticket) {
-              streamParam = retryJson.data.ticket;
-            } else {
-              streamParam = token;
-            }
+            streamParam = retryJson.data?.ticket || freshToken;
           } else {
-            // Still failing after refresh — stop reconnect loop; session truly invalid.
-            reconnectAttemptRef.current = 0;
-            return;
+            // Ticket still failing — use fresh token directly as stream param
+            streamParam = freshToken;
           }
         } catch {
-          reconnectAttemptRef.current = 0;
+          // Both refresh + retry failed — schedule backoff reconnect
+          const attempt = reconnectAttemptRef.current;
+          if (attempt < MAX_RECONNECT_ATTEMPTS) {
+            const delay = Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS);
+            reconnectAttemptRef.current = attempt + 1;
+            reconnectTimeoutRef.current = setTimeout(connectSSE, delay);
+          }
           return;
         }
       } else if (ticketRes.ok) {
@@ -111,9 +143,12 @@ export function useNotificationSSE({
           streamParam = ticketJson.data.ticket;
         }
       }
+      // If ticket endpoint is down (network error), we still fall back to the access token
     } catch {
-      // Network error — fall back to access token; SSE will reconnect normally.
+      // Network error (Render cold-start, etc.) — fall back to access token
     }
+
+    if (isUnmountedRef.current) return;
 
     const es = new EventSource(
       `${BASE_URL}/notifications/stream?token=${encodeURIComponent(streamParam)}`,
@@ -129,37 +164,49 @@ export function useNotificationSSE({
       }
     });
 
+    es.onopen = () => {
+      // Successful connection — reset attempt counter
+      reconnectAttemptRef.current = 0;
+    };
+
     es.onerror = async () => {
       es.close();
       esInstance = null;
+
+      if (isUnmountedRef.current) return;
 
       // Before scheduling a reconnect, attempt a token refresh so we don't
       // hammer the server with repeated 401s if the access token expired.
       try {
         await tryRefresh();
       } catch {
-        // Refresh failed — user session is over; stop reconnect loop.
-        reconnectAttemptRef.current = 0;
-        return;
+        // Refresh failed — could be Render cold-start or session over
+        // Don't stop the loop — schedule a longer retry to let Render wake up
       }
 
-      if (!getAccessToken()) {
-        reconnectAttemptRef.current = 0;
-        return;
-      }
+      if (isUnmountedRef.current) return;
 
       const attempt = reconnectAttemptRef.current;
-      const delay = Math.min(1000 * 2 ** attempt, 30000);
+      if (attempt >= MAX_RECONNECT_ATTEMPTS) {
+        // Too many failures — reset and try again from scratch after a long delay
+        reconnectAttemptRef.current = 0;
+        reconnectTimeoutRef.current = setTimeout(connectSSE, 30_000);
+        return;
+      }
+
+      const delay = Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS);
       reconnectAttemptRef.current = attempt + 1;
       reconnectTimeoutRef.current = setTimeout(connectSSE, delay);
     };
   }, []);
 
   useEffect(() => {
+    isUnmountedRef.current = false;
     callbacks.push(handleNotificationEvent);
     rerender((n) => n + 1);
 
     return () => {
+      isUnmountedRef.current = true;
       callbacks = callbacks.filter((cb) => cb !== handleNotificationEvent);
       if (callbacks.length === 0) {
         closeEventSource();
@@ -170,8 +217,10 @@ export function useNotificationSSE({
   }, [handleNotificationEvent]);
 
   useEffect(() => {
+    isUnmountedRef.current = false;
     connectSSE();
     return () => {
+      isUnmountedRef.current = true;
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       closeEventSource();
       reconnectAttemptRef.current = 0;
