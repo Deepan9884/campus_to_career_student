@@ -16,6 +16,7 @@ export interface ProctoringSessionOptions {
   isStarted?: boolean;
   videoElement?: HTMLVideoElement | null;
   webcamRequired?: boolean;
+  aiFaceDetection?: boolean;
   fullscreenEnforced?: boolean;
   tabSwitchLimit?: number;
   copyPasteDisabled?: boolean;
@@ -156,6 +157,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     isStarted = false,
     videoElement,
     webcamRequired = true,
+    aiFaceDetection = true,
     fullscreenEnforced = true,
     tabSwitchLimit = 3,
     copyPasteDisabled = false,
@@ -237,12 +239,14 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   const isStartedRef = useRef(isStarted);
   isStartedRef.current = isStarted;
 
-  const startTimestampRef = useRef<number>(isStarted ? Date.now() : 0);
-  if (isStarted && startTimestampRef.current === 0) {
-    startTimestampRef.current = Date.now();
-  } else if (!isStarted && startTimestampRef.current !== 0) {
-    startTimestampRef.current = 0;
-  }
+  const startTimestampRef = useRef<number>(0);
+  useEffect(() => {
+    if (isStarted) {
+      startTimestampRef.current = Date.now();
+    } else {
+      startTimestampRef.current = 0;
+    }
+  }, [isStarted]);
 
   const isBlockedRef = useRef(false);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -281,15 +285,20 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       if ((isBlockedRef.current && !forceBlock) || !isStartedRef.current) return;
 
       const now = Date.now();
-      // 12-second initial entrance grace period to allow browser fullscreen transition, camera feed stabilization, and AI model warm-up
-      if (isStartedRef.current && (!startTimestampRef.current || now - startTimestampRef.current < 12000) && !forceBlock) {
+      // Brief 2-second warm-up after starting exam to allow fullscreen mode activation
+      if (
+        isStartedRef.current &&
+        startTimestampRef.current > 0 &&
+        now - startTimestampRef.current < 2000 &&
+        !forceBlock
+      ) {
         console.log(`[Proctoring] Suppressing initial entrance warm-up event: ${type}`);
         return;
       }
 
       const lastTime = lastViolationDispatchTime.current[type] || 0;
-      // 3s cooldown to prevent multiple stacked event triggers for one user gesture
-      if (now - lastTime < 3000 && !forceBlock) {
+      // 1.5s cooldown to prevent rapid multi-firing
+      if (now - lastTime < 1500 && !forceBlock) {
         return;
       }
       lastViolationDispatchTime.current[type] = now;
@@ -399,7 +408,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         // Re-entered fullscreen within grace period -> cancel countdown
         clearFullscreenCountdown();
       } else if (isStartedRef.current && !isBlockedRef.current) {
-        if (Date.now() - startTimestampRef.current < 5000) return;
         // Left fullscreen during active exam -> strike violation + start 15s timer
         sendViolation("fullscreen_exit");
         startFullscreenCountdown();
@@ -422,7 +430,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleVisibility() {
       if (document.hidden && isStartedRef.current && !isBlockedRef.current) {
-        if (Date.now() - startTimestampRef.current < 5000) return;
         sendViolation("tab_switch");
         if (fullscreenCountdownRef.current === null) {
           startFullscreenCountdown();
@@ -436,7 +443,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleWindowBlur() {
       if (isStartedRef.current && !isBlockedRef.current) {
-        if (Date.now() - startTimestampRef.current < 5000) return;
         sendViolation("tab_switch");
         if (fullscreenCountdownRef.current === null) {
           startFullscreenCountdown();

@@ -596,6 +596,7 @@ export function UnifiedExamConsole({
     isStarted: hasStartedExam,
     videoElement: isWebcamRequired ? videoElement : null,
     webcamRequired: isWebcamRequired,
+    aiFaceDetection: isAiFaceDetection,
     fullscreenEnforced: isFullscreenEnforced,
     tabSwitchLimit: tabSwitchLimit,
     copyPasteDisabled: isCopyPasteDisabled,
