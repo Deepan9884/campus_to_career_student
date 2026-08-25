@@ -1,4 +1,4 @@
-﻿import type React from "react";
+import type React from "react";
 
 const BRACKET_PAIRS: Record<string, string> = {
   "(": ")",
@@ -37,7 +37,10 @@ export function handleCodeTextareaKeyDown(
 ): boolean {
   const textarea = e.currentTarget;
   const { selectionStart, selectionEnd } = textarea;
-  const spaces = " ".repeat(tabSize);
+  // Explicitly allow native browser Undo (Ctrl+Z) and Redo (Ctrl+Y, Ctrl+Shift+Z)
+  if ((e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A"].includes(e.key)) {
+    return false;
+  }
 
   // 1. Standalone Tab (disallow bindings with Tab like Alt+Tab, Ctrl+Tab, Meta+Tab)
   if (e.key === "Tab") {

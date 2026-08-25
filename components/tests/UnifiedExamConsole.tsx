@@ -737,14 +737,20 @@ export function UnifiedExamConsole({
 
       // 3. Ctrl combinations (reload, tab switch, dev tools)
       if (e.ctrlKey || e.metaKey) {
-        // If copy paste is allowed, allow Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+A, Ctrl+Z, etc.
-        const isEditingKey = ["c", "C", "v", "V", "x", "X", "a", "A", "z", "Z", "y", "Y"].includes(e.key);
-        if (!isCopyPasteDisabled && isEditingKey) {
+        // ALWAYS allow Undo (Ctrl+Z), Redo (Ctrl+Y, Ctrl+Shift+Z), and Select All (Ctrl+A)
+        const isUndoRedo = ["z", "Z", "y", "Y", "a", "A"].includes(e.key);
+        if (isUndoRedo) {
+          return;
+        }
+
+        // If copy paste is allowed, allow Ctrl+C, Ctrl+V, Ctrl+X
+        const isCopyKey = ["c", "C", "v", "V", "x", "X"].includes(e.key);
+        if (!isCopyPasteDisabled && isCopyKey) {
           return;
         }
 
         const blocked = ["r", "R", "p", "P", "u", "U", "s", "S", "w", "W", "t", "T", "n", "N", "j", "J", "h", "H", "l", "L"];
-        if (blocked.includes(e.key) || e.shiftKey) {
+        if (blocked.includes(e.key) || (e.shiftKey && !isUndoRedo)) {
           e.preventDefault();
           e.stopPropagation();
           toast.warning("Restricted keyboard combination blocked.");

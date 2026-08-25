@@ -125,7 +125,12 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
   if (e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") return true;
   if (e.altKey || e.key === "Alt" || e.key === "AltGraph") return true;
 
-  // Inside editor, allow standard typing shortcuts like Undo/Redo/Select All
+  // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), and Select All (Ctrl+A)
+  if ((e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A"].includes(e.key)) {
+    return false;
+  }
+
+  // Inside editor, allow standard typing shortcuts
   if (isInsideEditor && e.ctrlKey && (ALLOWED_EDITOR_CTRL_KEYS.has(e.key) || (allowCopyPaste && ALLOWED_COPY_PASTE_KEYS.has(e.key)))) {
     return false;
   }
