@@ -28,9 +28,14 @@ export interface StudentExamSummary {
   isLockedBySchedule?: boolean;
   isExamStopped?: boolean;
   hasAttempted: boolean;
+  isStudentBlocked?: boolean;
+  isStudentInProgress?: boolean;
+  canStart?: boolean;
   submissionStatus?: {
     isSubmitted: boolean;
-    submittedAt: string;
+    isBlocked?: boolean;
+    isInProgress?: boolean;
+    submittedAt?: string;
     status: string;
   } | null;
 }

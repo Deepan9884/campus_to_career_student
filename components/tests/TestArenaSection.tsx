@@ -156,9 +156,11 @@ export function TestArenaSection() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {availableExams.map((exam) => {
-                  const hasAttempted = exam.hasAttempted;
-                  const isStopped = Boolean(exam.isExamStopped || exam.status === "stopped");
+                  const hasAttempted = Boolean(exam.hasAttempted);
+                  const isStopped = Boolean(exam.isExamStopped || exam.status === "stopped" || exam.status === "completed");
                   const isLockedBySchedule = Boolean(exam.isLockedBySchedule);
+                  const isBlocked = Boolean(exam.isStudentBlocked);
+                  const isInProgress = Boolean(exam.isStudentInProgress);
 
                   return (
                     <div
@@ -186,10 +188,18 @@ export function TestArenaSection() {
                             <span className="text-[10px] font-extrabold text-amber-300 bg-amber-500/20 border border-amber-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                               <Calendar className="w-3 h-3" /> Scheduled
                             </span>
+                          ) : isBlocked ? (
+                            <span className="text-[10px] font-extrabold text-rose-300 bg-rose-500/20 border border-rose-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <Lock className="w-3 h-3" /> Blocked
+                            </span>
                           ) : hasAttempted ? (
                             <span className="text-[10px] font-extrabold text-emerald-300 bg-emerald-500/15 border border-emerald-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                               Submitted
+                            </span>
+                          ) : isInProgress ? (
+                            <span className="text-[10px] font-extrabold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-amber-400" /> In Progress
                             </span>
                           ) : (
                             <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
@@ -246,13 +256,17 @@ export function TestArenaSection() {
                       <div className="pt-4 border-t border-white/[0.1] flex items-center justify-between gap-2 relative z-10">
                         <span className="text-[11px] text-slate-400 font-medium">
                           {isStopped
-                            ? "Assessment Stopped"
+                            ? "Assessment Concluded"
                             : isLockedBySchedule
                             ? "Starts at Scheduled Time"
+                            : isBlocked
+                            ? "Proctoring Locked"
                             : hasAttempted
                             ? exam.allowRetakes
                               ? "Attempt Recorded • Retakes Allowed"
-                              : "Completed • Single Attempt"
+                              : "Submitted • Single Attempt"
+                            : isInProgress
+                            ? "In Progress • Resumable"
                             : "Ready to Start"}
                         </span>
 
@@ -268,13 +282,22 @@ export function TestArenaSection() {
                             <Lock className="w-3.5 h-3.5 text-amber-400" />
                             <span>Locked</span>
                           </div>
+                        ) : isBlocked ? (
+                          <button
+                            onClick={() => handleStartExam(exam._id)}
+                            className="px-4 py-2 rounded-2xl text-xs font-bold bg-rose-900/60 hover:bg-rose-900/80 border border-rose-700 text-rose-200 flex items-center gap-1.5 cursor-pointer"
+                            title="Session locked due to proctoring strikes. Click to view status."
+                          >
+                            <Lock className="w-3.5 h-3.5 text-rose-400" />
+                            <span>Locked Details</span>
+                          </button>
                         ) : hasAttempted && !exam.allowRetakes ? (
                           <div
                             className="px-4 py-2 rounded-2xl text-xs font-bold bg-slate-800/80 border border-slate-700 text-slate-400 flex items-center gap-1.5 cursor-not-allowed"
-                            title="Retakes are disabled by administrator for this exam"
+                            title="Submitted successfully. Retakes are disabled by administrator."
                           >
                             <Check className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>Completed</span>
+                            <span>Submitted</span>
                           </div>
                         ) : (
                           <button
@@ -282,7 +305,13 @@ export function TestArenaSection() {
                             className="px-5 py-2.5 rounded-2xl text-xs font-black bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600 hover:from-indigo-400 hover:to-blue-400 text-white transition shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/20"
                           >
                             <Play className="w-3 h-3 fill-current" />
-                            <span>{hasAttempted ? "Retake Exam" : "Start Exam"}</span>
+                            <span>
+                              {hasAttempted
+                                ? "Retake Exam"
+                                : isInProgress
+                                ? "Resume Exam"
+                                : "Start Exam"}
+                            </span>
                           </button>
                         )}
                       </div>
