@@ -58,6 +58,36 @@ function RootComponent() {
   const { user, checkAuth } = useAuth();
   useEffect(() => {
     checkAuth();
+
+    // Auto-reload on stale asset chunk 404s after new Vercel deployments
+    const handlePreloadError = (event: Event) => {
+      event.preventDefault();
+      console.warn("New version detected, refreshing application assets...");
+      window.location.reload();
+    };
+
+    const handleGlobalError = (e: ErrorEvent) => {
+      const msg = e?.message || "";
+      if (
+        msg.includes("Failed to fetch dynamically imported module") ||
+        msg.includes("Importing a module script failed") ||
+        msg.includes("error loading dynamically imported module")
+      ) {
+        const lastReload = sessionStorage.getItem("c2c_chunk_reload");
+        const now = Date.now();
+        if (!lastReload || now - Number(lastReload) > 10000) {
+          sessionStorage.setItem("c2c_chunk_reload", String(now));
+          window.location.reload();
+        }
+      }
+    };
+
+    window.addEventListener("vite:preloadError", handlePreloadError);
+    window.addEventListener("error", handleGlobalError);
+    return () => {
+      window.removeEventListener("vite:preloadError", handlePreloadError);
+      window.removeEventListener("error", handleGlobalError);
+    };
   }, []);
 
   // Synchronize theme and accent with user preferences or localStorage
