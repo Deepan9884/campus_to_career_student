@@ -186,6 +186,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     noPersonStreak.current = 0;
     multiPersonStreak.current = 0;
     lookAwayStreak.current = 0;
+    startTimestampRef.current = Date.now();
     setState((prev) => ({
       ...prev,
       violationCount: 0,
@@ -231,6 +232,15 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   const isStartedRef = useRef(isStarted);
   isStartedRef.current = isStarted;
 
+  const startTimestampRef = useRef<number>(0);
+  useEffect(() => {
+    if (isStarted) {
+      startTimestampRef.current = Date.now();
+    } else {
+      startTimestampRef.current = 0;
+    }
+  }, [isStarted]);
+
   const isBlockedRef = useRef(false);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inferenceVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -268,9 +278,15 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       if ((isBlockedRef.current && !forceBlock) || !isStartedRef.current) return;
 
       const now = Date.now();
+      // 5-second initial entrance grace period to allow browser fullscreen transition & camera stabilization
+      if (isStartedRef.current && now - startTimestampRef.current < 5000 && !forceBlock) {
+        console.log(`[Proctoring] Suppressing initial entrance warm-up event: ${type}`);
+        return;
+      }
+
       const lastTime = lastViolationDispatchTime.current[type] || 0;
-      // 1.2s cooldown to prevent multiple stacked event triggers for one user gesture
-      if (now - lastTime < 1200 && !forceBlock) {
+      // 2.5s cooldown to prevent multiple stacked event triggers for one user gesture
+      if (now - lastTime < 2500 && !forceBlock) {
         return;
       }
       lastViolationDispatchTime.current[type] = now;
@@ -380,6 +396,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         // Re-entered fullscreen within grace period -> cancel countdown
         clearFullscreenCountdown();
       } else if (isStartedRef.current && !isBlockedRef.current) {
+        if (Date.now() - startTimestampRef.current < 5000) return;
         // Left fullscreen during active exam -> strike violation + start 15s timer
         sendViolation("fullscreen_exit");
         startFullscreenCountdown();
@@ -402,6 +419,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleVisibility() {
       if (document.hidden && isStartedRef.current && !isBlockedRef.current) {
+        if (Date.now() - startTimestampRef.current < 5000) return;
         sendViolation("tab_switch");
         if (fullscreenCountdownRef.current === null) {
           startFullscreenCountdown();
@@ -415,6 +433,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleWindowBlur() {
       if (isStartedRef.current && !isBlockedRef.current) {
+        if (Date.now() - startTimestampRef.current < 5000) return;
         sendViolation("tab_switch");
         if (fullscreenCountdownRef.current === null) {
           startFullscreenCountdown();
