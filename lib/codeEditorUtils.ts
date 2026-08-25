@@ -31,16 +31,29 @@ const CLOSING_CHARS = new Set([")", "]", "}", '"', "'", "`"]);
  */
 export function handleCodeTextareaKeyDown(
   e: React.KeyboardEvent<HTMLTextAreaElement>,
-  currentVal: string,
+  _propVal: string,
   onUpdate: (newVal: string) => void,
   tabSize = 2
 ): boolean {
   const textarea = e.currentTarget;
-  const { selectionStart, selectionEnd } = textarea;
+  // Always use the live textarea value from the DOM to avoid stale closure state in React
+  const currentVal = textarea.value;
+  const selectionStart = textarea.selectionStart ?? 0;
+  const selectionEnd = textarea.selectionEnd ?? 0;
+  const spaces = " ".repeat(tabSize);
+
   // Explicitly allow native browser Undo (Ctrl+Z) and Redo (Ctrl+Y, Ctrl+Shift+Z)
   if ((e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A"].includes(e.key)) {
     return false;
   }
+
+  // Helper to synchronously update textarea and notify React
+  const applyChange = (nextVal: string, newCursorPos: number) => {
+    textarea.value = nextVal;
+    textarea.selectionStart = newCursorPos;
+    textarea.selectionEnd = newCursorPos;
+    onUpdate(nextVal);
+  };
 
   // 1. Standalone Tab (disallow bindings with Tab like Alt+Tab, Ctrl+Tab, Meta+Tab)
   if (e.key === "Tab") {
@@ -74,24 +87,22 @@ export function handleCodeTextareaKeyDown(
         });
         const replaced = newLines.join("\n");
         const nextVal = currentVal.slice(0, startLineStart) + replaced + after;
+        textarea.value = nextVal;
+        textarea.selectionStart = Math.max(
+          startLineStart,
+          selectionStart - (lines[0].startsWith(" ") ? (lines[0].startsWith(spaces) ? tabSize : 1) : 0)
+        );
+        textarea.selectionEnd = Math.max(textarea.selectionStart, selectionEnd - removedCount);
         onUpdate(nextVal);
-        setTimeout(() => {
-          textarea.selectionStart = Math.max(
-            startLineStart,
-            selectionStart - (lines[0].startsWith(" ") ? (lines[0].startsWith(spaces) ? tabSize : 1) : 0)
-          );
-          textarea.selectionEnd = Math.max(textarea.selectionStart, selectionEnd - removedCount);
-        }, 0);
       } else {
         // Indent all lines
         const newLines = lines.map((line) => spaces + line);
         const replaced = newLines.join("\n");
         const nextVal = currentVal.slice(0, startLineStart) + replaced + after;
+        textarea.value = nextVal;
+        textarea.selectionStart = selectionStart + tabSize;
+        textarea.selectionEnd = selectionEnd + tabSize * lines.length;
         onUpdate(nextVal);
-        setTimeout(() => {
-          textarea.selectionStart = selectionStart + tabSize;
-          textarea.selectionEnd = selectionEnd + tabSize * lines.length;
-        }, 0);
       }
     } else {
       if (e.shiftKey) {
@@ -101,18 +112,12 @@ export function handleCodeTextareaKeyDown(
         const currentLine = currentVal.slice(lineStart);
         if (currentLine.startsWith(spaces)) {
           const nextVal = currentVal.slice(0, lineStart) + currentLine.slice(tabSize);
-          onUpdate(nextVal);
-          setTimeout(() => {
-            textarea.selectionStart = textarea.selectionEnd = Math.max(lineStart, selectionStart - tabSize);
-          }, 0);
+          applyChange(nextVal, Math.max(lineStart, selectionStart - tabSize));
         }
       } else {
         // Insert spaces at cursor
         const nextVal = currentVal.slice(0, selectionStart) + spaces + currentVal.slice(selectionEnd);
-        onUpdate(nextVal);
-        setTimeout(() => {
-          textarea.selectionStart = textarea.selectionEnd = selectionStart + tabSize;
-        }, 0);
+        applyChange(nextVal, selectionStart + tabSize);
       }
     }
     return true;
@@ -128,11 +133,10 @@ export function handleCodeTextareaKeyDown(
       e.preventDefault();
       const selected = currentVal.slice(selectionStart, selectionEnd);
       const nextVal = currentVal.slice(0, selectionStart) + opening + selected + closing + currentVal.slice(selectionEnd);
+      textarea.value = nextVal;
+      textarea.selectionStart = selectionStart + 1;
+      textarea.selectionEnd = selectionEnd + 1;
       onUpdate(nextVal);
-      setTimeout(() => {
-        textarea.selectionStart = selectionStart + 1;
-        textarea.selectionEnd = selectionEnd + 1;
-      }, 0);
       return true;
     }
 
@@ -146,10 +150,7 @@ export function handleCodeTextareaKeyDown(
     // Case C: Insert pair and place pointer right in the middle!
     e.preventDefault();
     const nextVal = currentVal.slice(0, selectionStart) + opening + closing + currentVal.slice(selectionEnd);
-    onUpdate(nextVal);
-    setTimeout(() => {
-      textarea.selectionStart = textarea.selectionEnd = selectionStart + 1;
-    }, 0);
+    applyChange(nextVal, selectionStart + 1);
     return true;
   }
 
@@ -182,10 +183,7 @@ export function handleCodeTextareaKeyDown(
       const innerIndent = leadingSpaces + spaces;
       const insertText = "\n" + innerIndent + "\n" + leadingSpaces;
       const nextVal = currentVal.slice(0, selectionStart) + insertText + currentVal.slice(selectionEnd);
-      onUpdate(nextVal);
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = selectionStart + 1 + innerIndent.length;
-      }, 0);
+      applyChange(nextVal, selectionStart + 1 + innerIndent.length);
       return true;
     }
 
@@ -194,10 +192,7 @@ export function handleCodeTextareaKeyDown(
     const extraIndent = /[:{[(]\s*$/.test(currentLine) ? spaces : "";
     const indentToAdd = "\n" + leadingSpaces + extraIndent;
     const nextVal = currentVal.slice(0, selectionStart) + indentToAdd + currentVal.slice(selectionEnd);
-    onUpdate(nextVal);
-    setTimeout(() => {
-      textarea.selectionStart = textarea.selectionEnd = selectionStart + indentToAdd.length;
-    }, 0);
+    applyChange(nextVal, selectionStart + indentToAdd.length);
     return true;
   }
 
@@ -215,10 +210,7 @@ export function handleCodeTextareaKeyDown(
     ) {
       e.preventDefault();
       const nextVal = currentVal.slice(0, selectionStart - 1) + currentVal.slice(selectionStart + 1);
-      onUpdate(nextVal);
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = selectionStart - 1;
-      }, 0);
+      applyChange(nextVal, selectionStart - 1);
       return true;
     }
   }
