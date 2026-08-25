@@ -109,6 +109,7 @@ const LANGUAGE_CONFIGS: Record<
 
 /**
  * Syntax colorizer helper for multi-language code preview overlay
+ * Uses a single-pass tokenizer to ensure typed numbers, strings, and keywords never corrupt HTML attributes.
  */
 function highlightCodeTokens(code: string, language: string, isLight: boolean): string {
   if (!code) return "";
@@ -116,46 +117,11 @@ function highlightCodeTokens(code: string, language: string, isLight: boolean): 
   const escapeHtml = (text: string) =>
     text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const lines = code.split("\n");
-  const highlightedLines = lines.map((line) => {
-    const escaped = escapeHtml(line);
+  const isPySql = language === "python" || language === "sql";
+  const commentPattern = isPySql
+    ? (language === "python" ? "(#.*$)" : "(--.*$)")
+    : "(//.*$)";
 
-    // Comment check
-    const isPySql = language === "python" || language === "sql";
-    const commentMarker = isPySql ? (language === "python" ? "#" : "--") : "//";
-    const commentIdx = escaped.indexOf(commentMarker);
-
-    if (commentIdx !== -1) {
-      const before = escaped.substring(0, commentIdx);
-      const comment = escaped.substring(commentIdx);
-      return (
-        colorizeStringTokens(before, language, isLight) +
-        `<span class="${isLight ? "text-slate-400 italic" : "text-slate-400/80 italic font-mono"}">${comment}</span>`
-      );
-    }
-
-    return colorizeStringTokens(escaped, language, isLight);
-  });
-
-  return highlightedLines.join("\n");
-}
-
-function colorizeStringTokens(str: string, language: string, isLight: boolean): string {
-  if (!str) return "";
-
-  // 1. Strings
-  str = str.replace(
-    /(".*?"|'.*?'|`.*?`)/g,
-    `<span class="${isLight ? "text-emerald-700 font-semibold" : "text-emerald-400 font-semibold"}">$1</span>`
-  );
-
-  // 2. Numbers & Booleans
-  str = str.replace(
-    /\b(\d+(\.\d+)?|true|false|True|False|null|None|undefined|NULL)\b/g,
-    `<span class="${isLight ? "text-amber-700 font-bold" : "text-amber-400 font-bold"}">$1</span>`
-  );
-
-  // 3. Keywords
   const PYTHON_KW = "\\b(def|class|return|if|elif|else|for|while|in|is|not|and|or|import|from|as|try|except|finally|with|lambda|yield|pass|break|continue|global|raise|async|await|len|range|print|int|str|float|list|dict|set|tuple|self)\\b";
   const JS_KW = "\\b(function|const|let|var|return|if|else|for|while|do|switch|case|break|continue|default|import|export|from|as|class|extends|new|this|super|typeof|instanceof|in|of|try|catch|finally|throw|async|await|yield|console|document|window)\\b";
   const CPP_JAVA_KW = "\\b(public|private|protected|static|final|const|void|int|double|float|char|long|short|bool|boolean|class|struct|enum|interface|extends|implements|new|this|return|if|else|for|while|do|switch|case|break|continue|try|catch|throw|auto|include|vector|string|map|set|pair|stack|queue|std|cout|cin|endl)\\b";
@@ -166,18 +132,66 @@ function colorizeStringTokens(str: string, language: string, isLight: boolean): 
   else if (language === "cpp" || language === "java") kwPattern = CPP_JAVA_KW;
   else if (language === "sql") kwPattern = SQL_KW;
 
-  str = str.replace(
-    new RegExp(kwPattern, language === "sql" ? "gi" : "g"),
-    `<span class="${isLight ? "text-purple-700 font-extrabold" : "text-purple-400 font-extrabold"}">$1</span>`
-  );
+  const lines = code.split("\n");
+  const highlightedLines = lines.map((line) => {
+    if (!line) return "";
 
-  // 4. Function invocations
-  str = str.replace(
-    /\b([a-zA-Z_]\w*)(?=\s*\()/g,
-    `<span class="${isLight ? "text-blue-700 font-bold" : "text-sky-300 font-bold"}">$1</span>`
-  );
+    const tokenRegex = new RegExp(
+      [
+        commentPattern,                                                             // group 1: comment
+        '(".*?"|\'.*?\'|`.*?`)',                                                   // group 2: string
+        '\\b(\\d+(?:\\.\\d+)?|true|false|True|False|null|None|undefined|NULL)\\b', // group 3: numbers / booleans / null
+        kwPattern,                                                                  // group 4: keywords
+        '\\b([a-zA-Z_]\\w*)(?=\\s*\\()',                                           // group 5: function calls
+      ].join("|"),
+      language === "sql" ? "gi" : "g"
+    );
 
-  return str;
+    let result = "";
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = tokenRegex.exec(line)) !== null) {
+      const textBefore = line.slice(lastIndex, match.index);
+      if (textBefore) {
+        result += escapeHtml(textBefore);
+      }
+
+      const matchedText = match[0];
+      const escapedMatched = escapeHtml(matchedText);
+
+      if (match[1]) {
+        // Comment
+        result += `<span class="${isLight ? "text-slate-400 italic" : "text-slate-500 italic font-mono"}">${escapedMatched}</span>`;
+        lastIndex = tokenRegex.lastIndex;
+        break; // Comment spans to end of line
+      } else if (match[2]) {
+        // String
+        result += `<span class="${isLight ? "text-emerald-700 font-semibold" : "text-emerald-400 font-semibold"}">${escapedMatched}</span>`;
+      } else if (match[3]) {
+        // Number / Boolean / Null
+        result += `<span class="${isLight ? "text-amber-700 font-bold" : "text-amber-400 font-bold"}">${escapedMatched}</span>`;
+      } else if (match[4]) {
+        // Keyword
+        result += `<span class="${isLight ? "text-purple-700 font-extrabold" : "text-purple-400 font-extrabold"}">${escapedMatched}</span>`;
+      } else if (match[5]) {
+        // Function call
+        result += `<span class="${isLight ? "text-blue-700 font-bold" : "text-sky-300 font-bold"}">${escapedMatched}</span>`;
+      } else {
+        result += escapedMatched;
+      }
+
+      lastIndex = tokenRegex.lastIndex;
+    }
+
+    if (lastIndex < line.length) {
+      result += escapeHtml(line.slice(lastIndex));
+    }
+
+    return result;
+  });
+
+  return highlightedLines.join("\n");
 }
 
 /**
