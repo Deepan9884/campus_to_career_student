@@ -133,11 +133,11 @@ export const useAuth = create<AuthState>()(
         set({ isCheckingAuth: true });
         try {
           if (!getAccessToken()) {
-            await tryRefresh().catch(() => {});
-          }
-          if (!getAccessToken()) {
-            set({ isCheckingAuth: false, isAuthenticated: false, user: null });
-            return;
+            const token = await tryRefresh().catch(() => null);
+            if (!token) {
+              set({ isCheckingAuth: false, isAuthenticated: false, user: null });
+              return;
+            }
           }
           const user = await api.get<User>("/auth/me");
           set({ user, isAuthenticated: true, isCheckingAuth: false });

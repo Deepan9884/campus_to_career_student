@@ -60,19 +60,24 @@ export function isAuthExempt(url?: string): boolean {
 export function getRefreshedToken(): Promise<string | null> {
   if (!refreshPromise) {
     refreshPromise = (async () => {
-      const res = await fetch(`${API_BASE}/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
+          setAccessToken(null);
+          return null;
+        }
+        const json = await res.json();
+        const token = json.data?.accessToken || null;
+        setAccessToken(token);
+        return token;
+      } catch {
         setAccessToken(null);
-        throw new ApiError(401, "Session expired");
+        return null;
       }
-      const json = await res.json();
-      const token = json.data?.accessToken || null;
-      setAccessToken(token);
-      return token;
     })().finally(() => {
       refreshPromise = null;
     });
@@ -92,7 +97,14 @@ export function clearSessionAndRedirect(): void {
         useAuth.setState({ user: null, isAuthenticated: false });
       }).catch(() => {});
     } catch {}
-    if (window.location.pathname !== "/login") {
+    const pathname = window.location.pathname;
+    if (
+      pathname !== "/login" &&
+      pathname !== "/register" &&
+      pathname !== "/forgot-password" &&
+      pathname !== "/reset-password" &&
+      !pathname.startsWith("/portfolio")
+    ) {
       window.location.href = "/login";
     }
   }
@@ -126,11 +138,12 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
       const newToken = await getRefreshedToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
+        res = await fetch(url, { ...options, headers, credentials: "include" });
+      } else {
+        clearSessionAndRedirect();
       }
-      res = await fetch(url, { ...options, headers, credentials: "include" });
     } catch {
       clearSessionAndRedirect();
-      throw new ApiError(401, "Session expired");
     }
   }
 
@@ -164,12 +177,6 @@ export const api = {
     request<T>(endpoint, {
       ...options,
       method: "POST",
-      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-    }),
-  put: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
-    request<T>(endpoint, {
-      ...options,
-      method: "PUT",
       body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     }),
   patch: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
