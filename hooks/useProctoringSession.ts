@@ -232,14 +232,12 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   const isStartedRef = useRef(isStarted);
   isStartedRef.current = isStarted;
 
-  const startTimestampRef = useRef<number>(0);
-  useEffect(() => {
-    if (isStarted) {
-      startTimestampRef.current = Date.now();
-    } else {
-      startTimestampRef.current = 0;
-    }
-  }, [isStarted]);
+  const startTimestampRef = useRef<number>(isStarted ? Date.now() : 0);
+  if (isStarted && startTimestampRef.current === 0) {
+    startTimestampRef.current = Date.now();
+  } else if (!isStarted && startTimestampRef.current !== 0) {
+    startTimestampRef.current = 0;
+  }
 
   const isBlockedRef = useRef(false);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -278,15 +276,15 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       if ((isBlockedRef.current && !forceBlock) || !isStartedRef.current) return;
 
       const now = Date.now();
-      // 5-second initial entrance grace period to allow browser fullscreen transition & camera stabilization
-      if (isStartedRef.current && now - startTimestampRef.current < 5000 && !forceBlock) {
+      // 12-second initial entrance grace period to allow browser fullscreen transition, camera feed stabilization, and AI model warm-up
+      if (isStartedRef.current && (!startTimestampRef.current || now - startTimestampRef.current < 12000) && !forceBlock) {
         console.log(`[Proctoring] Suppressing initial entrance warm-up event: ${type}`);
         return;
       }
 
       const lastTime = lastViolationDispatchTime.current[type] || 0;
-      // 2.5s cooldown to prevent multiple stacked event triggers for one user gesture
-      if (now - lastTime < 2500 && !forceBlock) {
+      // 3s cooldown to prevent multiple stacked event triggers for one user gesture
+      if (now - lastTime < 3000 && !forceBlock) {
         return;
       }
       lastViolationDispatchTime.current[type] = now;

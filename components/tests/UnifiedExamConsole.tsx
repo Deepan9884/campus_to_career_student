@@ -624,9 +624,9 @@ export function UnifiedExamConsole({
   );
   const [isCheckingUnblock, setIsCheckingUnblock] = useState(false);
 
-  // Synchronize when proctorState detects disqualification
+  // Synchronize when proctorState detects disqualification during active exam
   useEffect(() => {
-    if (proctorState.isBlocked || proctorState.violationCount >= tabSwitchLimit) {
+    if (hasStartedExam && (proctorState.isBlocked || proctorState.violationCount >= tabSwitchLimit)) {
       if (!isCandidateBlocked) {
         setIsCandidateBlocked(true);
         const reason = `Exceeded maximum anti-cheat violations limit (${tabSwitchLimit} strikes)`;
@@ -641,7 +641,7 @@ export function UnifiedExamConsole({
         }).catch((err) => console.warn("Failed to report blocked exam:", err));
       }
     }
-  }, [proctorState.isBlocked, proctorState.violationCount, tabSwitchLimit, isCandidateBlocked, examData._id]);
+  }, [hasStartedExam, proctorState.isBlocked, proctorState.violationCount, tabSwitchLimit, isCandidateBlocked, examData._id]);
 
   // Live polling for Mentor Unblock Authorization every 3 seconds while blocked
   useEffect(() => {
