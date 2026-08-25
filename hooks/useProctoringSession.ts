@@ -95,8 +95,10 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
     return false;
   }
 
-  const targetTag = (e.target as HTMLElement)?.tagName?.toUpperCase();
-  const isInsideEditor = targetTag === "TEXTAREA" || targetTag === "INPUT";
+  // NEVER block standalone modifier keys (Control, Shift, Alt, Meta by themselves)
+  if (e.key === "Control" || e.key === "Shift" || e.key === "Alt" || e.key === "Meta") {
+    return false;
+  }
 
   // Check PrintScreen
   if (e.key === "PrintScreen" || e.code === "PrintScreen" || e.keyCode === 44) return true;
@@ -107,13 +109,13 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
   }
 
   // DevTools inspection hotkeys (ALWAYS strictly blocked even inside code editor)
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c" || e.key === "K" || e.key === "k")) {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && ["I", "i", "J", "j", "C", "c", "K", "k"].includes(e.key)) {
     return true;
   }
   if ((e.ctrlKey || e.metaKey) && (e.key === "U" || e.key === "u")) {
     return true;
   }
-  if (e.altKey && (e.metaKey || e.ctrlKey) && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) {
+  if (e.altKey && (e.metaKey || e.ctrlKey) && ["I", "i", "J", "j", "C", "c"].includes(e.key)) {
     return true;
   }
 
@@ -122,26 +124,33 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
     return true;
   }
 
+  // Function keys F1-F12
+  if (/^F\d+$/.test(e.key)) {
+    return true;
+  }
+
+  // Standalone blocked system keys (excluding modifier keys)
   if (BLOCKED_STANDALONE_KEYS.has(e.key) || BLOCKED_STANDALONE_KEYS.has(e.code)) return true;
-  if (e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") return true;
-  if (e.altKey || e.key === "Alt" || e.key === "AltGraph") return true;
 
-  // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), and Select All (Ctrl+A)
-  if ((e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A"].includes(e.key)) {
+  // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), Select All (Ctrl+A), and Find (Ctrl+F)
+  if ((e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A", "f", "F"].includes(e.key)) {
     return false;
   }
 
-  // Inside editor, allow standard typing shortcuts
-  if (isInsideEditor && e.ctrlKey && (ALLOWED_EDITOR_CTRL_KEYS.has(e.key) || (allowCopyPaste && ALLOWED_COPY_PASTE_KEYS.has(e.key)))) {
-    return false;
-  }
-
+  // Allowed copy/paste keys if enabled
   if (allowCopyPaste && (e.ctrlKey || e.metaKey) && ALLOWED_COPY_PASTE_KEYS.has(e.key)) {
     return false;
   }
 
-  // Block all other dangerous Ctrl shortcuts (Ctrl+N, Ctrl+T, Ctrl+W, Ctrl+Shift+I, etc.)
-  if (e.ctrlKey || e.key === "Control") return true;
+  // Block specific dangerous browser navigation Ctrl combinations (reload, new tab, close, print, save, etc.)
+  const FORBIDDEN_CTRL_KEYS = new Set([
+    "r", "R", "w", "W", "t", "T", "n", "N", "p", "P", "s", "S", "d", "D", "h", "H", "j", "J", "l", "L", "o", "O", "e", "E", "g", "G", "b", "B", "q", "Q",
+  ]);
+
+  if ((e.ctrlKey || e.metaKey) && FORBIDDEN_CTRL_KEYS.has(e.key)) {
+    return true;
+  }
+
   return false;
 }
 

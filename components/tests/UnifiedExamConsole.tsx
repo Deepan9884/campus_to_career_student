@@ -720,6 +720,11 @@ export function UnifiedExamConsole({
     if (!hasStartedExam || isTestFinished || proctorState.isBlocked) return;
 
     const handleStrictKeyDown = (e: KeyboardEvent) => {
+      // 0. Never intercept standalone modifier keys
+      if (e.key === "Control" || e.key === "Shift" || e.key === "Alt") {
+        return;
+      }
+
       // 1. Function keys
       if (/^F\d+$/.test(e.key)) {
         e.preventDefault();
@@ -729,7 +734,7 @@ export function UnifiedExamConsole({
       }
 
       // 2. Alt/Meta keys
-      if (e.altKey || e.key === "Alt" || e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") {
+      if (e.key === "Meta" || e.key === "OS" || e.key === "Windows") {
         e.preventDefault();
         e.stopPropagation();
         toast.warning("System shortcut keys are restricted.");

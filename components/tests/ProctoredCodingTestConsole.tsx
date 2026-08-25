@@ -421,6 +421,11 @@ export function ProctoredCodingTestConsole({
     if (!hasStartedExam || isTestFinished || finalScoreResult || proctorState.isBlocked) return;
 
     const handleStrictKeyDown = (e: KeyboardEvent) => {
+      // 0. Never intercept standalone modifier keys
+      if (e.key === "Control" || e.key === "Shift" || e.key === "Alt") {
+        return;
+      }
+
       // 1. Function Keys (F1 - F12, F13 - F24)
       if (/^F\d+$/.test(e.key)) {
         e.preventDefault();
@@ -429,11 +434,11 @@ export function ProctoredCodingTestConsole({
         return;
       }
 
-      // 2. Alt combinations, Windows/Meta key
-      if (e.altKey || e.key === "Alt" || e.metaKey || e.key === "Meta" || e.key === "OS" || e.key === "Windows") {
+      // 2. Windows/Meta key
+      if (e.key === "Meta" || e.key === "OS" || e.key === "Windows") {
         e.preventDefault();
         e.stopPropagation();
-        toast.warning("System & Alt/Meta shortcut keys are restricted.");
+        toast.warning("System shortcut keys are restricted.");
         return;
       }
 
