@@ -1723,39 +1723,27 @@ export function ProctoredCodingTestConsole({
                   ))}
                 </div>
 
-                {/* Editor Container with Syntax Layer & Textarea */}
+                {/* Interactive Code Editor Container */}
                 <div className="flex-1 h-full relative overflow-hidden">
-                  {/* Background Syntax Highlight Layer */}
-                  <pre
-                    aria-hidden="true"
-                    className="absolute inset-0 p-3 font-mono leading-6 overflow-hidden pointer-events-none whitespace-pre select-none m-0"
-                    style={{ fontSize: `${editorFontSize}px` }}
-                    dangerouslySetInnerHTML={{
-                      __html: highlightCodeTokens(currentAnswer, selectedLang, isLightMode) + "\n",
-                    }}
-                  />
-
-                  {/* Interactive Textarea */}
                   <textarea
                     value={currentAnswer}
                     onChange={(e) => handleAnswerUpdate(e.target.value)}
                     onKeyDown={(e) => handleCodeEditorKeyDown(e, currentAnswer, handleAnswerUpdate)}
-                    onScroll={(e) => {
-                      const pre = e.currentTarget.previousElementSibling as HTMLPreElement | null;
-                      if (pre) {
-                        pre.scrollTop = e.currentTarget.scrollTop;
-                        pre.scrollLeft = e.currentTarget.scrollLeft;
-                      }
-                    }}
                     placeholder={LANGUAGE_CONFIGS[selectedLang]?.placeholder || `// write your code here`}
                     spellCheck={false}
                     autoCapitalize="off"
                     autoComplete="off"
                     autoCorrect="off"
-                    className={`absolute inset-0 w-full h-full p-3 font-mono leading-6 resize-none focus:outline-none bg-transparent whitespace-pre m-0 caret-blue-500 selection:bg-indigo-500/30 ${
-                      isLightMode ? "text-transparent placeholder:text-slate-400" : "text-transparent placeholder:text-slate-600"
+                    className={`w-full h-full p-3 font-mono font-medium leading-6 resize-none focus:outline-none whitespace-pre m-0 caret-blue-500 selection:bg-indigo-500/30 ${
+                      isLightMode
+                        ? "bg-[#fafcff] text-slate-900 placeholder:text-slate-400"
+                        : "bg-[#060b18] text-slate-100 placeholder:text-slate-600"
                     }`}
-                    style={{ fontSize: `${editorFontSize}px` }}
+                    style={{
+                      fontSize: `${editorFontSize}px`,
+                      tabSize: 4,
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+                    }}
                   />
                 </div>
               </div>

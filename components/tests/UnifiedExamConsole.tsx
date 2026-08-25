@@ -387,7 +387,7 @@ function FormattedProblemStatement({ text, isLight }: { text: string; isLight: b
 }
 
 /**
- * Standard Professional Code Editor with syntax colors, line-numbers gutter, tab-indentation, and font-size controls
+ * Standard Professional Code Editor with syntax font, line-numbers gutter, tab-indentation, and font-size controls
  */
 function CodeEditorWithGutter({
   code,
@@ -407,16 +407,11 @@ function CodeEditorWithGutter({
   const lineCount = Math.max(1, code.split("\n").length);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
-  const preRef = useRef<HTMLPreElement>(null);
   const [activeLine, setActiveLine] = useState(1);
 
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
     if (gutterRef.current) {
       gutterRef.current.scrollTop = e.currentTarget.scrollTop;
-    }
-    if (preRef.current) {
-      preRef.current.scrollTop = e.currentTarget.scrollTop;
-      preRef.current.scrollLeft = e.currentTarget.scrollLeft;
     }
   };
 
@@ -434,8 +429,6 @@ function CodeEditorWithGutter({
       setTimeout(() => updateActiveLine(e), 0);
     }
   };
-
-  const highlightedHtml = highlightCodeTokens(code, language, isLight);
 
   return (
     <div
@@ -458,7 +451,7 @@ function CodeEditorWithGutter({
             <div
               key={i}
               className={`transition-colors ${
-                isCurr ? "text-indigo-600 dark:text-cyan-400 font-extrabold" : ""
+                isCurr ? (isLight ? "text-indigo-600 font-extrabold" : "text-cyan-400 font-extrabold") : ""
               }`}
             >
               {i + 1}
@@ -467,18 +460,8 @@ function CodeEditorWithGutter({
         })}
       </div>
 
-      {/* Code Area with Syntax Highlighting Overlay */}
+      {/* Code Editor Interactive Textarea */}
       <div className="flex-1 h-full relative overflow-hidden">
-        {/* Background Syntax Highlight Layer */}
-        <pre
-          ref={preRef}
-          aria-hidden="true"
-          className="absolute inset-0 p-4 font-mono leading-6 overflow-hidden pointer-events-none whitespace-pre select-none m-0"
-          style={{ fontSize: `${fontSize}px` }}
-          dangerouslySetInnerHTML={{ __html: highlightedHtml + "\n" }}
-        />
-
-        {/* Foreground Interactive Textarea */}
         <textarea
           ref={textareaRef}
           value={code}
@@ -496,10 +479,16 @@ function CodeEditorWithGutter({
           autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
-          className={`absolute inset-0 w-full h-full p-4 font-mono leading-6 focus:outline-none resize-none bg-transparent whitespace-pre m-0 caret-indigo-600 dark:caret-cyan-400 selection:bg-indigo-500/30 selection:text-white ${
-            isLight ? "text-transparent placeholder:text-slate-400" : "text-transparent placeholder:text-slate-600"
+          className={`w-full h-full p-4 font-mono font-medium leading-6 focus:outline-none resize-none whitespace-pre m-0 caret-indigo-600 dark:caret-cyan-400 selection:bg-indigo-500/30 selection:text-white ${
+            isLight
+              ? "bg-[#fbfcfd] text-slate-900 placeholder:text-slate-400"
+              : "bg-[#070b14] text-slate-100 placeholder:text-slate-600"
           }`}
-          style={{ fontSize: `${fontSize}px` }}
+          style={{
+            fontSize: `${fontSize}px`,
+            tabSize: 2,
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+          }}
         />
       </div>
     </div>
