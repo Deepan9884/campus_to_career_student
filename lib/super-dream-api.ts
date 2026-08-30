@@ -199,7 +199,74 @@ export const INITIAL_TRAVEL_MILESTONES: TravelMilestone[] = [
 
 export const INITIAL_MENTOR_TASKS: MentorTask[] = [];
 
-export const INITIAL_SUPER_DREAM_COURSES: SuperDreamCourse[] = [];
+export const INITIAL_SUPER_DREAM_COURSES: SuperDreamCourse[] = [
+  {
+    id: "course-1",
+    title: "Distributed Systems Engineering & Consensus Protocols",
+    provider: "MIT 6.824 / Distributed Lab",
+    instructor: "Prof. Robert Morris",
+    duration: "12 Weeks • 48 Hours",
+    difficulty: "Master",
+    topics: ["Raft Consensus", "MapReduce", "Distributed Transactions", "Sharding & Fault Tolerance", "Paxos"],
+    description: "Rigorous systems engineering covering fault-tolerant consensus, primary-backup replication, and high-throughput key-value storage.",
+    status: "in_progress",
+  },
+  {
+    id: "course-2",
+    title: "AWS Certified Solutions Architect — Professional Track",
+    provider: "Amazon Web Services / AWS Training",
+    instructor: "AWS Certification Board",
+    duration: "10 Weeks • 40 Hours",
+    difficulty: "Expert",
+    topics: ["Multi-Region VPCs", "Serverless Architecture", "Auto-Scaling & EKS", "CloudFront / DynamoDB", "IAM Security"],
+    description: "Enterprise cloud architecture blueprinting for high-availability systems handling 100k+ requests/sec across AWS availability zones.",
+    status: "in_progress",
+  },
+  {
+    id: "course-3",
+    title: "Full Stack Deep Learning & Production GenAI Systems",
+    provider: "UC Berkeley / FSDL Labs",
+    instructor: "Dr. Sergey Levine & FSDL Team",
+    duration: "8 Weeks • 32 Hours",
+    difficulty: "Master",
+    topics: ["LLM Fine-Tuning", "RAG Pipelines", "Vector Databases", "Model Quantization", "AI Agent Tool Calling"],
+    description: "End-to-end deployment of generative AI pipelines, retrieval-augmented generation, latency optimization, and enterprise evaluation.",
+    status: "in_progress",
+  },
+  {
+    id: "course-4",
+    title: "Advanced Data Structures, Graph Theory & Competitive Algorithms",
+    provider: "Stanford Online / CS 166",
+    instructor: "Dr. Keith Schwarz",
+    duration: "10 Weeks • 36 Hours",
+    difficulty: "Master",
+    topics: ["Segment Trees", "Suffix Automata", "Heavy-Light Decomposition", "Eulerian Paths", "Tries & Bitmask DP"],
+    description: "Elite competitive programming algorithms required for FAANG OA1/OA2 coding rounds and international programming contests.",
+    status: "in_progress",
+  },
+  {
+    id: "course-5",
+    title: "Enterprise Microservices Architecture with Spring Boot & Kafka",
+    provider: "Coursera / VMware Tanzu",
+    instructor: "VMware Principal Engineers",
+    duration: "6 Weeks • 24 Hours",
+    difficulty: "Advanced",
+    topics: ["Event-Driven Architecture", "Apache Kafka", "CQRS & Event Sourcing", "Spring Cloud Gateway", "Docker / K8s"],
+    description: "Design and implement scalable event-driven microservices with distributed tracing, circuit breakers, and async message streaming.",
+    status: "in_progress",
+  },
+  {
+    id: "course-6",
+    title: "High Performance Databases & Query Optimization",
+    provider: "CMU 15-445 / Database Group",
+    instructor: "Prof. Andy Pavlo",
+    duration: "8 Weeks • 30 Hours",
+    difficulty: "Expert",
+    topics: ["B+ Trees & Buffer Pools", "Query Optimization", "Concurrency Control (MVCC)", "WAL Logging", "LSM Trees"],
+    description: "Internals of relational and modern distributed database engines, index tuning, locking strategies, and low-level disk I/O.",
+    status: "in_progress",
+  },
+];
 
 export const INITIAL_MENTOR_ROADMAP: MentorRoadmapMilestone[] = [];
 

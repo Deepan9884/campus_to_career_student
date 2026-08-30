@@ -38,6 +38,11 @@ interface Ripple {
 export const InteractiveAppBackground: React.FC = () => {
   const {
     presetId,
+    uiMode,
+    backgroundType,
+    solidBackgroundColor,
+    orbsEnabled,
+    backgroundOpacity,
     intensity,
     motionSpeed,
     starsEnabled,
@@ -53,6 +58,24 @@ export const InteractiveAppBackground: React.FC = () => {
   const ripplesRef = useRef<Ripple[]>([]);
   const shootingStarsRef = useRef<ShootingStar[]>([]);
   const lastShootingStarTime = useRef<number>(Date.now());
+
+  // Check if Light Mode is active on the root HTML
+  const [isLightMode, setIsLightMode] = React.useState<boolean>(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("light");
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsLightMode(document.documentElement.classList.contains("light"));
+    };
+    checkTheme();
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   // Determine active color configuration
   const activePreset = AMBIENT_PRESETS.find((p) => p.id === presetId) || AMBIENT_PRESETS[0];
@@ -71,10 +94,10 @@ export const InteractiveAppBackground: React.FC = () => {
 
   // Multiplier for glow opacity based on intensity setting
   const intensityMultiplier = {
-    subtle: 0.55,
-    balanced: 1.0,
-    vivid: 1.45,
-    radiant: 1.9,
+    subtle: 0.45,
+    balanced: 0.9,
+    vivid: 1.35,
+    radiant: 1.75,
   }[intensity];
 
   // Motion speed duration in seconds
@@ -87,16 +110,19 @@ export const InteractiveAppBackground: React.FC = () => {
 
   // Star density count
   const starCount = {
-    low: 80,
-    medium: 155,
-    high: 250,
+    low: 50,
+    medium: 110,
+    high: 190,
   }[starDensity];
+
+  const shouldRenderStars = starsEnabled && (backgroundType === "stars" || backgroundType === "full");
+  const shouldRenderOrbs = orbsEnabled && (backgroundType === "orbs" || backgroundType === "full");
 
   // ---------------------------------------------------------------------------
   // Canvas Stars & Interactive Constellation Animation Loop
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    if (!starsEnabled) return;
+    if (!shouldRenderStars) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -117,14 +143,24 @@ export const InteractiveAppBackground: React.FC = () => {
     window.addEventListener("resize", handleResize);
 
     // Initialize Stars
-    const starPalette = [
-      "#FFFFFF",
-      "#F8FAFC",
-      orbColors.starTint,
-      "#E2E8F0",
-      "#FEF3C7",
-      "#DDD6FE",
-    ];
+    const starPalette = isLightMode
+      ? [
+          "#6366F1", // Indigo
+          "#8B5CF6", // Purple
+          "#3B82F6", // Blue
+          "#06B6D4", // Cyan
+          "#10B981", // Emerald
+          "#EC4899", // Pink
+          "#F59E0B", // Amber
+        ]
+      : [
+          "#FFFFFF",
+          "#F8FAFC",
+          orbColors.starTint,
+          "#E2E8F0",
+          "#FEF3C7",
+          "#DDD6FE",
+        ];
 
     const stars: Star[] = Array.from({ length: starCount }, () => {
       const x = Math.random() * width;
@@ -134,12 +170,12 @@ export const InteractiveAppBackground: React.FC = () => {
         y,
         originX: x,
         originY: y,
-        size: Math.random() * 1.8 + 0.6,
-        baseAlpha: Math.random() * 0.6 + 0.35,
-        pulseSpeed: Math.random() * 0.03 + 0.012,
+        size: isLightMode ? Math.random() * 2.2 + 0.8 : Math.random() * 1.6 + 0.5,
+        baseAlpha: isLightMode ? Math.random() * 0.45 + 0.4 : Math.random() * 0.5 + 0.25,
+        pulseSpeed: Math.random() * 0.025 + 0.01,
         pulsePhase: Math.random() * Math.PI * 2,
-        vx: (Math.random() - 0.5) * 0.12,
-        vy: (Math.random() - 0.5) * 0.12,
+        vx: (Math.random() - 0.5) * 0.1,
+        vy: (Math.random() - 0.5) * 0.1,
         color: starPalette[Math.floor(Math.random() * starPalette.length)],
       };
     });
@@ -147,26 +183,27 @@ export const InteractiveAppBackground: React.FC = () => {
     // Spawn a shooting star
     const spawnShootingStar = () => {
       if (!shootingStarsEnabled) return;
-      const angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.3; // ~45 deg downward
-      const speed = Math.random() * 10 + 12;
+      const angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.3;
+      const speed = Math.random() * 6 + 7;
       shootingStarsRef.current.push({
-        x: Math.random() * width * 0.8 + width * 0.1,
+        x: Math.random() * (width * 0.8),
         y: Math.random() * (height * 0.4),
         dx: Math.cos(angle) * speed,
         dy: Math.sin(angle) * speed,
-        length: Math.random() * 70 + 50,
+        length: Math.random() * 90 + 60,
         speed,
-        opacity: 1,
-        color: orbColors.starTint || "#FFFFFF",
-        size: Math.random() * 1.5 + 1.2,
+        opacity: 0.9,
+        color: orbColors.starTint,
+        size: Math.random() * 1.5 + 1,
       });
     };
 
-    // Pointer move listener
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-      mouseRef.current = { x: clientX, y: clientY, active: true };
+      const clientX = "touches" in e ? e.touches[0]?.clientX : (e as MouseEvent).clientX;
+      const clientY = "touches" in e ? e.touches[0]?.clientY : (e as MouseEvent).clientY;
+      if (clientX !== undefined && clientY !== undefined) {
+        mouseRef.current = { x: clientX, y: clientY, active: true };
+      }
     };
 
     const handlePointerLeave = () => {
@@ -179,172 +216,156 @@ export const InteractiveAppBackground: React.FC = () => {
         x: e.clientX,
         y: e.clientY,
         radius: 0,
-        maxRadius: Math.min(width, height) * 0.28,
-        opacity: 0.65,
+        maxRadius: 180,
+        opacity: 0.6,
       });
     };
 
     window.addEventListener("mousemove", handlePointerMove, { passive: true });
     window.addEventListener("touchmove", handlePointerMove, { passive: true });
     window.addEventListener("mouseleave", handlePointerLeave);
-    window.addEventListener("click", handleClick, { passive: true });
+    window.addEventListener("click", handleClick);
 
-    // Animation Loop
-    let time = 0;
+    // Render loop
+    let lastTime = performance.now();
+    const render = (time: number) => {
+      const delta = (time - lastTime) / 1000;
+      lastTime = time;
 
-    const render = () => {
-      time += 0.016;
       ctx.clearRect(0, 0, width, height);
 
-      // Periodically trigger a shooting star (every 4-7 seconds)
-      const now = Date.now();
-      if (shootingStarsEnabled && now - lastShootingStarTime.current > Math.random() * 3000 + 4000) {
-        spawnShootingStar();
-        lastShootingStarTime.current = now;
-      }
-
-      // 1. Draw Active Ripples
-      for (let i = ripplesRef.current.length - 1; i >= 0; i--) {
-        const ripple = ripplesRef.current[i];
-        ripple.radius += 4.5;
-        ripple.opacity -= 0.014;
-
-        if (ripple.opacity <= 0 || ripple.radius >= ripple.maxRadius) {
-          ripplesRef.current.splice(i, 1);
-          continue;
-        }
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = orbColors.constellationLine || "rgba(167, 139, 250, 0.35)";
-        ctx.lineWidth = 1.2;
-        ctx.globalAlpha = ripple.opacity;
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      // 2. Draw Shooting Stars
-      for (let i = shootingStarsRef.current.length - 1; i >= 0; i--) {
-        const s = shootingStarsRef.current[i];
-        s.x += s.dx;
-        s.y += s.dy;
-        s.opacity -= 0.018;
-
-        if (s.opacity <= 0 || s.x > width + 100 || s.y > height + 100) {
-          shootingStarsRef.current.splice(i, 1);
-          continue;
-        }
-
-        const tailX = s.x - (s.dx / s.speed) * s.length;
-        const tailY = s.y - (s.dy / s.speed) * s.length;
-
-        const grad = ctx.createLinearGradient(tailX, tailY, s.x, s.y);
-        grad.addColorStop(0, "transparent");
-        grad.addColorStop(1, s.color);
-
-        ctx.save();
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = s.size;
-        ctx.globalAlpha = s.opacity;
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailY);
-        ctx.lineTo(s.x, s.y);
-        ctx.stroke();
-
-        // Glowing head
-        ctx.fillStyle = "#FFFFFF";
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.size * 1.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
       const mouse = mouseRef.current;
-      const connectionDist = 135;
 
-      // 3. Update & Draw Stars + Constellation Lines
-      for (let i = 0; i < stars.length; i++) {
-        const star = stars[i];
+      // Update & Draw Click Ripples
+      if (clickRipple && ripplesRef.current.length > 0) {
+        ripplesRef.current = ripplesRef.current.filter((r) => r.opacity > 0.01);
+        for (const ripple of ripplesRef.current) {
+          ripple.radius += (ripple.maxRadius - ripple.radius) * 0.08;
+          ripple.opacity *= 0.94;
 
-        // Gentle natural drift
-        star.originX += star.vx;
-        star.originY += star.vy;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = orbColors.cursorGlow || "rgba(167, 139, 250, 0.4)";
+          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = ripple.opacity;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
 
-        // Wrap around edges
-        if (star.originX < 0) star.originX = width;
-        if (star.originX > width) star.originX = 0;
-        if (star.originY < 0) star.originY = height;
-        if (star.originY > height) star.originY = 0;
+      // Update & Spawn Shooting Stars
+      if (shootingStarsEnabled) {
+        const now = Date.now();
+        if (now - lastShootingStarTime.current > 7000 + Math.random() * 5000) {
+          spawnShootingStar();
+          lastShootingStarTime.current = now;
+        }
 
-        // Cursor magnetic interaction
-        if (interactiveConstellations && mouse.active) {
-          const dx = mouse.x - star.originX;
-          const dy = mouse.y - star.originY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+        shootingStarsRef.current = shootingStarsRef.current.filter((s) => s.opacity > 0.02);
 
-          if (dist < connectionDist) {
-            // Gentle gravitational pull
-            const force = (1 - dist / connectionDist) * 14;
-            star.x = star.originX + (dx / dist) * force;
-            star.y = star.originY + (dy / dist) * force;
+        for (const star of shootingStarsRef.current) {
+          star.x += star.dx;
+          star.y += star.dy;
+          star.opacity *= 0.96;
 
-            // Draw line from mouse to star
-            const alpha = (1 - dist / connectionDist) * 0.45;
-            ctx.save();
-            ctx.strokeStyle = orbColors.constellationLine;
-            ctx.lineWidth = 0.8;
+          const tailX = star.x - (star.dx / star.speed) * star.length;
+          const tailY = star.y - (star.dy / star.speed) * star.length;
+
+          const gradient = ctx.createLinearGradient(tailX, tailY, star.x, star.y);
+          gradient.addColorStop(0, "transparent");
+          gradient.addColorStop(0.7, star.color);
+          gradient.addColorStop(1, "#FFFFFF");
+
+          ctx.save();
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = star.size;
+          ctx.lineCap = "round";
+          ctx.globalAlpha = star.opacity;
+          ctx.beginPath();
+          ctx.moveTo(tailX, tailY);
+          ctx.lineTo(star.x, star.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // Interactive Constellation Lines between nearby stars & mouse
+      if (interactiveConstellations && mouse.active) {
+        ctx.save();
+        ctx.strokeStyle = isLightMode
+          ? "rgba(99, 102, 241, 0.55)"
+          : (orbColors.constellationLine || "rgba(167, 139, 250, 0.3)");
+        ctx.lineWidth = isLightMode ? 1.2 : 0.75;
+
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+          const distToMouse = Math.hypot(s.x - mouse.x, s.y - mouse.y);
+          if (distToMouse < 130) {
+            const alpha = (1 - distToMouse / 130) * (isLightMode ? 0.65 : 0.45);
             ctx.globalAlpha = alpha;
             ctx.beginPath();
-            ctx.moveTo(mouse.x, mouse.y);
-            ctx.lineTo(star.x, star.y);
+            ctx.moveTo(s.x, s.y);
+            ctx.lineTo(mouse.x, mouse.y);
             ctx.stroke();
-            ctx.restore();
-          } else {
-            // Smoothly return to origin
-            star.x += (star.originX - star.x) * 0.08;
-            star.y += (star.originY - star.y) * 0.08;
-          }
-        } else {
-          star.x = star.originX;
-          star.y = star.originY;
-        }
 
-        // Connect nearby stars together
-        if (interactiveConstellations) {
-          for (let j = i + 1; j < stars.length; j++) {
-            const starB = stars[j];
-            const distBetween = Math.hypot(star.x - starB.x, star.y - starB.y);
-
-            if (distBetween < 80) {
-              const alpha = (1 - distBetween / 80) * 0.22;
-              ctx.save();
-              ctx.strokeStyle = orbColors.constellationLine;
-              ctx.lineWidth = 0.5;
-              ctx.globalAlpha = alpha;
-              ctx.beginPath();
-              ctx.moveTo(star.x, star.y);
-              ctx.lineTo(starB.x, starB.y);
-              ctx.stroke();
-              ctx.restore();
+            // Connect nearby stars with each other near the cursor
+            for (let j = i + 1; j < stars.length; j++) {
+              const s2 = stars[j];
+              const distBetween = Math.hypot(s.x - s2.x, s.y - s2.y);
+              if (distBetween < 80) {
+                ctx.globalAlpha = (1 - distBetween / 80) * (isLightMode ? 0.40 : 0.25);
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(s2.x, s2.y);
+                ctx.stroke();
+              }
             }
           }
         }
+        ctx.restore();
+      }
 
-        // Calculate pulsing star twinkle brightness
-        const pulse = Math.sin(time * star.pulseSpeed * 60 + star.pulsePhase);
-        const currentAlpha = Math.max(0.15, Math.min(1, star.baseAlpha + pulse * 0.25));
+      // Render & Twinkle Individual Stars
+      for (const star of stars) {
+        star.pulsePhase += star.pulseSpeed;
+        const twinkle = Math.sin(star.pulsePhase) * 0.35 + 0.65;
+        const currentAlpha = star.baseAlpha * twinkle;
 
-        // Draw Star Glow & Core
+        // Subtle gentle drift
+        star.x += star.vx;
+        star.y += star.vy;
+
+        // Mouse repelling physics
+        if (mouse.active) {
+          const dx = star.x - mouse.x;
+          const dy = star.y - mouse.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 90 && dist > 0) {
+            const force = (1 - dist / 90) * 1.5;
+            star.x += (dx / dist) * force;
+            star.y += (dy / dist) * force;
+          }
+        }
+
+        // Return gracefully to origin
+        star.x += (star.originX - star.x) * 0.01;
+        star.y += (star.originY - star.y) * 0.01;
+
+        // Wrap edges
+        if (star.x < 0) star.x = width;
+        if (star.x > width) star.x = 0;
+        if (star.y < 0) star.y = height;
+        if (star.y > height) star.y = 0;
+
         ctx.save();
-        ctx.globalAlpha = currentAlpha;
         ctx.fillStyle = star.color;
 
-        // Subtle outer star halo
-        if (star.size > 1.4) {
+        // Star glow aura
+        if (star.size > 1.2) {
+          ctx.globalAlpha = currentAlpha * 0.25;
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.size * 2.2, 0, Math.PI * 2);
-          ctx.globalAlpha = currentAlpha * 0.25;
           ctx.fill();
         }
 
@@ -359,12 +380,18 @@ export const InteractiveAppBackground: React.FC = () => {
       // Draw subtle ambient glow ring at mouse position
       if (interactiveConstellations && mouse.active) {
         ctx.save();
-        const radGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 80);
-        radGrad.addColorStop(0, orbColors.cursorGlow || "rgba(167, 139, 250, 0.2)");
-        radGrad.addColorStop(1, "transparent");
+        const radGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 75);
+        if (isLightMode) {
+          radGrad.addColorStop(0, "rgba(99, 102, 241, 0.35)");
+          radGrad.addColorStop(0.5, "rgba(168, 85, 247, 0.15)");
+          radGrad.addColorStop(1, "transparent");
+        } else {
+          radGrad.addColorStop(0, orbColors.cursorGlow || "rgba(167, 139, 250, 0.25)");
+          radGrad.addColorStop(1, "transparent");
+        }
         ctx.fillStyle = radGrad;
         ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 80, 0, Math.PI * 2);
+        ctx.arc(mouse.x, mouse.y, 75, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
@@ -383,19 +410,64 @@ export const InteractiveAppBackground: React.FC = () => {
       window.removeEventListener("click", handleClick);
     };
   }, [
-    starsEnabled,
+    shouldRenderStars,
     starDensity,
     starCount,
     interactiveConstellations,
     shootingStarsEnabled,
     clickRipple,
     orbColors,
+    isLightMode,
   ]);
 
+  // Helper to determine if a hex color is dark
+  const isColorDark = (hex: string) => {
+    if (!hex || !hex.startsWith("#")) return false;
+    const clean = hex.replace("#", "");
+    if (clean.length === 6) {
+      const r = parseInt(clean.substring(0, 2), 16);
+      const g = parseInt(clean.substring(2, 4), 16);
+      const b = parseInt(clean.substring(4, 6), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness < 128;
+    }
+    return false;
+  };
+
+  // If backgroundType is none, return null for absolute minimalism
+  if (backgroundType === "none" || uiMode === "minimal") {
+    return null;
+  }
+
+  // If solid background is selected
+  if (backgroundType === "solid") {
+    const resolvedColor = isLightMode
+      ? isColorDark(solidBackgroundColor)
+        ? "#FAF8FF"
+        : solidBackgroundColor
+      : !isColorDark(solidBackgroundColor)
+        ? "#0B0F19"
+        : solidBackgroundColor;
+
+    return (
+      <div
+        className="fixed inset-0 pointer-events-none z-0 transition-colors duration-500"
+        style={{ backgroundColor: resolvedColor }}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  const overallOpacity = (backgroundOpacity ?? 100) / 100;
+
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+    <div
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-opacity duration-300"
+      style={{ opacity: overallOpacity }}
+      aria-hidden="true"
+    >
       {/* 1. Interactive Star Field Canvas */}
-      {starsEnabled && (
+      {shouldRenderStars && (
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full pointer-events-none z-0"
@@ -403,32 +475,36 @@ export const InteractiveAppBackground: React.FC = () => {
       )}
 
       {/* 2. Soft Volumetric Atmospheric Glowing Orbs */}
-      <div
-        className="absolute -top-32 -left-32 w-[650px] h-[650px] rounded-full blur-[160px] animate-aurora-pulse pointer-events-none transition-all duration-700"
-        style={{
-          background: `radial-gradient(circle, ${orbColors.orb1} 0%, transparent 70%)`,
-          opacity: intensityMultiplier,
-          animationDuration,
-        }}
-      />
-      <div
-        className="absolute top-1/3 -right-36 w-[600px] h-[600px] rounded-full blur-[170px] animate-aurora-pulse pointer-events-none transition-all duration-700"
-        style={{
-          background: `radial-gradient(circle, ${orbColors.orb2} 0%, transparent 70%)`,
-          opacity: intensityMultiplier * 0.9,
-          animationDuration: motionSpeed === "static" ? "0s" : "18s",
-          animationDelay: "3s",
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full blur-[150px] animate-aurora-pulse pointer-events-none transition-all duration-700"
-        style={{
-          background: `radial-gradient(circle, ${orbColors.orb3} 0%, transparent 70%)`,
-          opacity: intensityMultiplier * 0.85,
-          animationDuration: motionSpeed === "static" ? "0s" : "22s",
-          animationDelay: "6s",
-        }}
-      />
+      {shouldRenderOrbs && (
+        <>
+          <div
+            className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full blur-[160px] animate-aurora-pulse pointer-events-none transition-all duration-700"
+            style={{
+              background: `radial-gradient(circle, ${orbColors.orb1} 0%, transparent 70%)`,
+              opacity: intensityMultiplier,
+              animationDuration,
+            }}
+          />
+          <div
+            className="absolute top-1/3 -right-36 w-[550px] h-[550px] rounded-full blur-[170px] animate-aurora-pulse pointer-events-none transition-all duration-700"
+            style={{
+              background: `radial-gradient(circle, ${orbColors.orb2} 0%, transparent 70%)`,
+              opacity: intensityMultiplier * 0.9,
+              animationDuration: motionSpeed === "static" ? "0s" : "18s",
+              animationDelay: "3s",
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-1/3 w-[480px] h-[480px] rounded-full blur-[150px] animate-aurora-pulse pointer-events-none transition-all duration-700"
+            style={{
+              background: `radial-gradient(circle, ${orbColors.orb3} 0%, transparent 70%)`,
+              opacity: intensityMultiplier * 0.85,
+              animationDuration: motionSpeed === "static" ? "0s" : "22s",
+              animationDelay: "6s",
+            }}
+          />
+        </>
+      )}
 
       {/* 3. Soft Vignette — Dark Mode Deep Space Framing */}
       <div

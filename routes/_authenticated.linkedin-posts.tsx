@@ -662,15 +662,15 @@ function LinkedInPostsPage() {
       {/* Header Banner */}
       <div
         data-tour="linkedin-generator-card"
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-purple-900/30 border border-blue-500/20 p-6 md:p-8 backdrop-blur-xl"
+        className="relative overflow-hidden rounded-3xl border border-border p-6 md:p-8 backdrop-blur-xl shadow-md dark:shadow-xl glass-strong"
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-semibold">
               <Linkedin className="h-3.5 w-3.5" />
               Recruiter-Ready Super Content Engine
             </div>
-            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight flex items-center gap-3">
+            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight flex items-center gap-3 text-foreground">
               LinkedIn Post Creator
             </h1>
             <p className="text-muted-foreground text-sm md:text-base max-w-2xl">
@@ -680,26 +680,26 @@ function LinkedInPostsPage() {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-3 shrink-0">
-            <div className="glass p-3.5 rounded-2xl border border-white/10 text-center min-w-[120px]">
+            <div className="p-3.5 rounded-2xl bg-muted/50 border border-border text-center min-w-[120px]">
               <p className="text-xs text-muted-foreground font-medium flex items-center justify-center gap-1">
-                <Trophy className="h-3.5 w-3.5 text-indigo-400" />
+                <Trophy className="h-3.5 w-3.5 text-primary" />
                 Events
               </p>
-              <p className="text-xl font-bold text-indigo-400 mt-0.5">{events.length}</p>
+              <p className="text-xl font-bold text-primary mt-0.5">{events.length}</p>
             </div>
-            <div className="glass p-3.5 rounded-2xl border border-white/10 text-center min-w-[120px]">
+            <div className="p-3.5 rounded-2xl bg-muted/50 border border-border text-center min-w-[120px]">
               <p className="text-xs text-muted-foreground font-medium flex items-center justify-center gap-1">
-                <Github className="h-3.5 w-3.5 text-blue-400" />
+                <Github className="h-3.5 w-3.5 text-primary" />
                 GitHub Repos
               </p>
-              <p className="text-xl font-bold text-blue-400 mt-0.5">{githubHistory.length}</p>
+              <p className="text-xl font-bold text-primary mt-0.5">{githubHistory.length}</p>
             </div>
           </div>
         </div>
 
         {/* Top Two Options Switcher */}
-        <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="inline-flex p-1.5 rounded-2xl glass border border-white/15 max-w-md w-full">
+        <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="inline-flex p-1.5 rounded-2xl bg-muted/60 border border-border max-w-md w-full">
             <button
               type="button"
               onClick={() => {
@@ -708,11 +708,11 @@ function LinkedInPostsPage() {
               }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition ${
                 sourceType === "event" && activeTab === "create"
-                  ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/25"
-                  : "text-muted-foreground hover:text-white"
+                  ? "btn-gradient text-white shadow-lg"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Trophy className="h-4 w-4 text-indigo-300" />
+              <Trophy className="h-4 w-4" />
               1. Events & Hackathons ({events.length})
             </button>
 
@@ -724,27 +724,29 @@ function LinkedInPostsPage() {
               }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition ${
                 sourceType === "github" && activeTab === "create"
-                  ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/25"
-                  : "text-muted-foreground hover:text-white"
+                  ? "btn-gradient text-white shadow-lg"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Github className="h-4 w-4 text-blue-300" />
+              <Github className="h-4 w-4" />
               2. GitHub Repositories ({githubHistory.length})
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab(activeTab === "drafts" ? "create" : "drafts")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition self-start sm:self-auto ${
-              activeTab === "drafts"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
-                : "glass hover:bg-white/10 text-muted-foreground hover:text-white border border-white/10"
-            }`}
-          >
-            <Bookmark className="h-4 w-4" />
-            Saved Drafts ({savedDrafts.length})
-          </button>
+          {savedDrafts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveTab(activeTab === "drafts" ? "create" : "drafts")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
+                activeTab === "drafts"
+                  ? "btn-gradient text-white"
+                  : "glass hover:bg-white/10 text-foreground"
+              }`}
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              <span>Saved Drafts ({savedDrafts.length})</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -756,17 +758,17 @@ function LinkedInPostsPage() {
             {/* OPTION 1: EVENTS & HACKATHONS FORM */}
             {sourceType === "event" && (
               <GlassCard className="p-6 space-y-4 border-indigo-500/20">
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <div className="h-8 w-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-500 dark:text-indigo-400">
                       <Trophy className="h-4 w-4" />
                     </div>
                     <div>
-                      <h2 className="text-base font-bold text-white">Event & Hackathon Achievement</h2>
+                      <h2 className="text-base font-bold text-foreground">Event &amp; Hackathon Achievement</h2>
                       <p className="text-xs text-muted-foreground">Auto-populate from your logged events or enter details</p>
                     </div>
                   </div>
-                  <span className="text-[11px] px-2.5 py-1 rounded-full font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                  <span className="text-[11px] px-2.5 py-1 rounded-full font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30">
                     Option 1 of 2
                   </span>
                 </div>
@@ -774,7 +776,7 @@ function LinkedInPostsPage() {
                 {/* Event Selector */}
                 {events.length > 0 && (
                   <div>
-                    <label className="block text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider mb-2">
                       Grab data from your logged event:
                     </label>
                     <select
@@ -797,7 +799,7 @@ function LinkedInPostsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium mb-1.5">Event / Hackathon Name</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Event / Hackathon Name</label>
                     <input
                       type="text"
                       value={eventName}
@@ -807,7 +809,7 @@ function LinkedInPostsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1.5">Organizer / College</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Organizer / College</label>
                     <input
                       type="text"
                       value={eventOrganizer}
@@ -820,7 +822,7 @@ function LinkedInPostsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium mb-1.5">Result / Placement</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Result / Placement</label>
                     <select
                       value={eventResult}
                       onChange={(e) => setEventResult(e.target.value)}
@@ -833,7 +835,7 @@ function LinkedInPostsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1.5">Prize / Recognition</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Prize / Recognition</label>
                     <input
                       type="text"
                       value={eventPrize}
@@ -845,10 +847,10 @@ function LinkedInPostsPage() {
                 </div>
 
                 {/* Team & Teammates Section */}
-                <div className="p-4 rounded-2xl border border-indigo-500/20 bg-indigo-50/70 dark:bg-indigo-950/25 space-y-3.5">
+                <div className="p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/60 dark:bg-indigo-950/25 space-y-3.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
-                      <Users className="h-4 w-4 text-indigo-500" />
+                      <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                       Team &amp; Teammates Information
                     </label>
                     <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-500/25">
@@ -905,10 +907,10 @@ function LinkedInPostsPage() {
 
                   {/* Teammate Names Dynamic Inputs */}
                   {eventTeamSize > 0 && (
-                    <div className="space-y-2.5 pt-3 border-t border-indigo-500/15">
+                    <div className="space-y-2.5 pt-3 border-t border-indigo-200 dark:border-indigo-500/15">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                          <label className="block text-[11px] text-indigo-300 font-semibold">
+                          <label className="block text-[11px] text-indigo-800 dark:text-indigo-300 font-semibold">
                             Teammate Names
                           </label>
                           <span className="text-[10px] text-muted-foreground">
@@ -919,7 +921,7 @@ function LinkedInPostsPage() {
                           type="button"
                           onClick={addTeammate}
                           title="Add another teammate"
-                          className="px-2.5 py-1 rounded-lg glass bg-indigo-500/20 hover:bg-indigo-600/40 text-indigo-300 hover:text-white border border-indigo-500/30 transition flex items-center gap-1.5 text-xs font-semibold shrink-0"
+                          className="px-2.5 py-1 rounded-lg glass bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-600/40 text-indigo-800 hover:text-indigo-950 dark:text-indigo-300 dark:hover:text-white border border-indigo-300 dark:border-indigo-500/30 transition flex items-center gap-1.5 text-xs font-semibold shrink-0"
                         >
                           <Plus className="h-3.5 w-3.5" />
                           Add Teammate
@@ -930,7 +932,7 @@ function LinkedInPostsPage() {
                         {teammateNames.map((name, idx) => (
                           <div key={idx} className="flex items-center gap-1.5">
                             <div className="relative flex-1">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-400 font-mono">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 font-mono">
                                 #{idx + 1}
                               </span>
                               <input
@@ -945,7 +947,7 @@ function LinkedInPostsPage() {
                               type="button"
                               onClick={() => removeTeammate(idx)}
                               title="Remove teammate"
-                              className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition shrink-0"
+                              className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-500 transition shrink-0"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -957,7 +959,7 @@ function LinkedInPostsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">Project Title & Problem Statement</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Project Title & Problem Statement</label>
                   <input
                     type="text"
                     value={eventProjectTitle}
@@ -974,7 +976,7 @@ function LinkedInPostsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">Tech Stack & Tools</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Tech Stack & Tools</label>
                   <input
                     type="text"
                     value={eventTechStack}
@@ -985,7 +987,7 @@ function LinkedInPostsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">
                     What did you build & what were the sleepless-night hurdles?
                   </label>
                   <AutoResizeTextarea
@@ -1001,17 +1003,17 @@ function LinkedInPostsPage() {
             {/* OPTION 2: GITHUB REPOSITORIES FORM */}
             {sourceType === "github" && (
               <GlassCard className="p-6 space-y-4 border-blue-500/20">
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                    <div className="h-8 w-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-500 dark:text-blue-400">
                       <Github className="h-4 w-4" />
                     </div>
                     <div>
-                      <h2 className="text-base font-bold text-white">GitHub Project & Codebase Showcase</h2>
+                      <h2 className="text-base font-bold text-foreground">GitHub Project &amp; Codebase Showcase</h2>
                       <p className="text-xs text-muted-foreground">Auto-populate from analyzed repositories</p>
                     </div>
                   </div>
-                  <span className="text-[11px] px-2.5 py-1 rounded-full font-bold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                  <span className="text-[11px] px-2.5 py-1 rounded-full font-bold bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30">
                     Option 2 of 2
                   </span>
                 </div>
@@ -1019,7 +1021,7 @@ function LinkedInPostsPage() {
                 {/* Repo Selector */}
                 {githubHistory.length > 0 && (
                   <div>
-                    <label className="block text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-2">
                       Pick from analyzed repositories:
                     </label>
                     <select
@@ -1042,7 +1044,7 @@ function LinkedInPostsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium mb-1.5">Repository Name (owner/repo)</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Repository Name (owner/repo)</label>
                     <input
                       type="text"
                       value={repoFullName}
@@ -1052,7 +1054,7 @@ function LinkedInPostsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1.5">Repository URL</label>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Repository URL</label>
                     <input
                       type="text"
                       value={repoUrl}
@@ -1064,7 +1066,7 @@ function LinkedInPostsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">Tech Stack & Frameworks</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Tech Stack & Frameworks</label>
                   <input
                     type="text"
                     value={repoTechStack}
@@ -1075,7 +1077,7 @@ function LinkedInPostsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">Project Overview & Architecture</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Project Overview & Architecture</label>
                   <AutoResizeTextarea
                     value={repoOverview}
                     onChange={(e) => setRepoOverview(e.target.value)}
@@ -1085,7 +1087,7 @@ function LinkedInPostsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">Resume Highlights & Performance Impact</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">Resume Highlights & Performance Impact</label>
                   <AutoResizeTextarea
                     value={repoResumeImpact}
                     onChange={(e) => setRepoResumeImpact(e.target.value)}
@@ -1139,7 +1141,7 @@ function LinkedInPostsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">
                     Extra Highlights to Emphasize (Optional)
                   </label>
                   <input
@@ -1151,7 +1153,7 @@ function LinkedInPostsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5">
                     People to Tag (Teammates / Mentors)
                   </label>
                   <input
@@ -1164,22 +1166,22 @@ function LinkedInPostsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-6 pt-2 border-t border-white/10">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium">
+              <div className="flex items-center gap-6 pt-2 border-t border-slate-200 dark:border-white/10">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800 dark:text-slate-200">
                   <input
                     type="checkbox"
                     checked={includeEmoji}
                     onChange={(e) => setIncludeEmoji(e.target.checked)}
-                    className="rounded border-white/20 accent-blue-600"
+                    className="rounded border-slate-300 dark:border-white/20 accent-blue-600"
                   />
                   Include Emojis
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-800 dark:text-slate-200">
                   <input
                     type="checkbox"
                     checked={includeHashtags}
                     onChange={(e) => setIncludeHashtags(e.target.checked)}
-                    className="rounded border-white/20 accent-blue-600"
+                    className="rounded border-slate-300 dark:border-white/20 accent-blue-600"
                   />
                   Trending Hashtags
                 </label>
@@ -1190,7 +1192,7 @@ function LinkedInPostsPage() {
             <GlassCard className="p-6 space-y-4">
               <h2 className="text-base font-bold flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2">
-                  <Upload className="h-4 w-4 text-blue-400" />
+                  <Upload className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                   Attach Photos & Social Share Cards
                 </span>
                 <span className="text-xs text-muted-foreground font-normal">Boosts impressions by 2.3x</span>
@@ -1198,21 +1200,21 @@ function LinkedInPostsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Upload Custom Photo */}
-                <div className="border-2 border-dashed border-white/15 rounded-2xl p-4 text-center hover:border-blue-500/50 transition">
+                <div className="border-2 border-dashed border-border dark:border-white/15 rounded-2xl p-4 text-center hover:border-blue-500/50 transition">
                   <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-xs font-semibold text-white">Upload Podium Photo / Screenshot</p>
+                  <p className="text-xs font-semibold text-foreground">Upload Podium Photo / Screenshot</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">PNG, JPG, WebP up to 5MB</p>
-                  <label className="mt-3 inline-block cursor-pointer px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 transition">
+                  <label className="mt-3 inline-block cursor-pointer px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/15 text-blue-600 dark:text-blue-400 hover:bg-blue-500/25 border border-blue-500/30 transition">
                     Browse File
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   </label>
                 </div>
 
                 {/* Generate AI Social Card */}
-                <div className="border border-white/10 glass rounded-2xl p-4 text-center flex flex-col justify-between items-center">
+                <div className="border border-border dark:border-white/10 bg-card dark:glass rounded-2xl p-4 text-center flex flex-col justify-between items-center shadow-xs">
                   <div>
-                    <Award className="h-6 w-6 mx-auto text-indigo-400 mb-2" />
-                    <p className="text-xs font-semibold text-white">Dynamic LinkedIn Graphic Card</p>
+                    <Award className="h-6 w-6 mx-auto text-indigo-500 dark:text-indigo-400 mb-2" />
+                    <p className="text-xs font-semibold text-foreground">Dynamic LinkedIn Graphic Card</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                       Auto-generate a 1200x630 branded achievement graphic
                     </p>
@@ -1221,7 +1223,7 @@ function LinkedInPostsPage() {
                     type="button"
                     onClick={generateSocialCard}
                     disabled={isGeneratingCard}
-                    className="mt-3 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-300 hover:from-indigo-500/30 hover:to-blue-500/30 border border-indigo-500/30 transition flex items-center gap-1.5"
+                    className="mt-3 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-700 dark:text-indigo-300 hover:from-indigo-500/30 hover:to-blue-500/30 border border-indigo-500/30 transition flex items-center gap-1.5 cursor-pointer"
                   >
                     {isGeneratingCard ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
                     <span>Generate Share Card</span>
@@ -1318,21 +1320,21 @@ function LinkedInPostsPage() {
           <div className="lg:col-span-5 space-y-6">
             {/* Dedicated Exhaustive Achievement Paragraph Callout */}
             {generatedResult?.achievementParagraph && (
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900/30 via-blue-900/20 to-purple-900/30 border border-indigo-500/30 p-5 backdrop-blur-xl">
+              <div className="relative overflow-hidden rounded-3xl border border-border p-5 backdrop-blur-xl shadow-md dark:shadow-xl glass-strong">
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider">
+                  <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-wider">
                     <Trophy className="h-4 w-4" />
                     Exhaustive Achievement Highlight
                   </div>
                   <button
                     onClick={() => handleCopy("para")}
-                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30 transition flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/15 text-primary hover:bg-primary/25 border border-primary/30 transition flex items-center gap-1"
                   >
                     <Copy className="h-3 w-3" />
                     {copySuccess === "para" ? "Copied!" : "Copy Paragraph"}
                   </button>
                 </div>
-                <p className="text-xs md:text-sm text-slate-200 leading-relaxed italic">
+                <p className="text-xs md:text-sm text-foreground/90 leading-relaxed italic">
                   "{generatedResult.achievementParagraph}"
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-2">
@@ -1342,7 +1344,7 @@ function LinkedInPostsPage() {
             )}
 
             {/* Realistic LinkedIn Feed Mockup Card */}
-            <div className="rounded-3xl border border-border/50 bg-card/95 dark:bg-[#0b1120]/90 p-5 shadow-2xl space-y-4 backdrop-blur-2xl text-foreground">
+            <div className="rounded-3xl border border-border p-5 shadow-2xl space-y-4 glass-strong text-foreground">
               {/* LinkedIn Post Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -1583,19 +1585,19 @@ function LinkedInPostsPage() {
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-white">{d.title}</h3>
-                    <p className="text-xs text-slate-300 line-clamp-4 leading-relaxed whitespace-pre-line bg-black/30 p-3 rounded-xl border border-white/5 font-sans">
+                    <h3 className="text-base font-bold text-foreground">{d.title}</h3>
+                    <p className="text-xs text-foreground/90 dark:text-slate-300 line-clamp-4 leading-relaxed whitespace-pre-line bg-muted/40 dark:bg-black/30 p-3 rounded-xl border border-border dark:border-white/5 font-sans">
                       {d.draft}
                     </p>
 
                     {d.achievementParagraph && (
-                      <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-xs italic">
+                      <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-200 text-xs italic">
                         "{d.achievementParagraph.slice(0, 150)}..."
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
+                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-border dark:border-white/10">
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -1603,7 +1605,7 @@ function LinkedInPostsPage() {
                           await navigator.clipboard.writeText(d.draft);
                           toast.success("Draft copied to clipboard");
                         }}
-                        className="px-3 py-1.5 rounded-xl text-xs font-semibold glass hover:bg-white/10 text-white flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-muted dark:glass hover:bg-muted/80 dark:hover:bg-white/10 text-foreground flex items-center gap-1.5 border border-border dark:border-white/10"
                       >
                         <Copy className="h-3.5 w-3.5" /> Copy
                       </button>

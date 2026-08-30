@@ -159,7 +159,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
     <div className="space-y-6">
       {/* Key Coding Metrics Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl glass border border-white/10 bg-white/5 overflow-hidden">
+        <div className="p-3.5 rounded-xl liquid-glass-card overflow-hidden">
           <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
             <Trophy className="h-3.5 w-3.5 text-amber-400" /> Most Active Platform
           </p>
@@ -168,7 +168,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
           </p>
         </div>
 
-        <div className="p-3.5 rounded-xl glass border border-white/10 bg-white/5 overflow-hidden">
+        <div className="p-3.5 rounded-xl liquid-glass-card overflow-hidden">
           <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
             <Zap className="h-3.5 w-3.5 text-emerald-400" /> Problem Mastery Index
           </p>
@@ -177,7 +177,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
           </p>
         </div>
 
-        <div className="p-3.5 rounded-xl glass border border-white/10 bg-white/5 overflow-hidden">
+        <div className="p-3.5 rounded-xl liquid-glass-card overflow-hidden">
           <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
             <Activity className="h-3.5 w-3.5 text-purple-400" /> Activity Frequency
           </p>
@@ -186,7 +186,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
           </p>
         </div>
 
-        <div className="p-3.5 rounded-xl glass border border-white/10 bg-white/5 overflow-hidden">
+        <div className="p-3.5 rounded-xl liquid-glass-card overflow-hidden">
           <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
             <BarChart3 className="h-3.5 w-3.5 text-blue-400" /> Total Solved
           </p>
@@ -197,7 +197,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
       {/* Main Charts Grid */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Chart 1: Platform Solved Share (Donut / Pie) */}
-        <GlassCard className="p-4 flex flex-col justify-between overflow-hidden relative">
+        <GlassCard variant="liquid" className="p-4 flex flex-col justify-between overflow-hidden relative">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <PieIcon className="h-4 w-4 text-amber-400" /> Platform Volume Distribution
@@ -218,8 +218,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
                     paddingAngle={4}
                     dataKey="value"
                     nameKey="name"
-                    stroke="rgba(15, 23, 42, 0.9)"
-                    strokeWidth={2.5}
+                    stroke="none"
                     isAnimationActive={true}
                   >
                     {pieData.map((entry, index) => (
@@ -233,7 +232,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
                     y="47%"
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    className="fill-white font-black text-lg select-none pointer-events-none"
+                    className="fill-slate-900 dark:fill-white font-black text-xl select-none pointer-events-none"
                   >
                     {totalSolvedCount}
                   </text>
@@ -242,7 +241,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
                     y="59%"
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    className="fill-slate-400 font-semibold text-[10px] uppercase tracking-widest select-none pointer-events-none"
+                    className="fill-slate-600 dark:fill-slate-400 font-bold text-[10px] uppercase tracking-widest select-none pointer-events-none"
                   >
                     Solved
                   </text>
@@ -256,7 +255,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
                     verticalAlign="bottom"
                     height={36}
                     formatter={(value) => (
-                      <span className="text-xs text-slate-200 uppercase font-semibold tracking-wider">{value}</span>
+                      <span className="text-xs text-slate-800 dark:text-slate-200 uppercase font-bold tracking-wider">{value}</span>
                     )}
                   />
                 </PieChart>
@@ -270,7 +269,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
         </GlassCard>
 
         {/* Chart 2: Difficulty Breakdown per Platform (Stacked Bar) */}
-        <GlassCard className="p-4 flex flex-col justify-between overflow-hidden relative">
+        <GlassCard variant="liquid" className="p-4 flex flex-col justify-between overflow-hidden relative">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-indigo-400" /> Difficulty Split per Platform
@@ -281,8 +280,8 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
           <div className="h-60 w-full relative overflow-hidden">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={difficultyData} margin={{ top: 15, right: 15, left: -15, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
+                <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
                 <Tooltip
                   content={<CustomDifficultyTooltip />}
                   cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
@@ -292,7 +291,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
                   verticalAlign="bottom"
                   height={36}
                   formatter={(value) => (
-                    <span className="text-xs text-slate-200 capitalize font-medium">{value}</span>
+                    <span className="text-xs text-slate-800 dark:text-slate-200 capitalize font-semibold">{value}</span>
                   )}
                 />
                 <Bar dataKey="Easy" stackId="a" fill="#10b981" radius={[0, 0, 4, 4]} />
@@ -305,7 +304,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
       </div>
 
       {/* Chart 3: Platform Activity Frequency Trend over Time (Area Chart) */}
-      <GlassCard className="p-5 overflow-hidden relative">
+      <GlassCard variant="liquid" className="p-5 overflow-hidden relative">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
           <div>
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -331,8 +330,8 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
                   );
                 })}
               </defs>
-              <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
+              <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} />
+              <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
               <Tooltip
                 content={<CustomFrequencyTooltip />}
                 cursor={{ stroke: "rgba(255, 255, 255, 0.2)", strokeDasharray: "4 4" }}
@@ -342,7 +341,7 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
                 verticalAlign="bottom"
                 height={36}
                 formatter={(value) => (
-                  <span className="text-xs text-slate-200 capitalize font-medium">{value}</span>
+                  <span className="text-xs text-slate-800 dark:text-slate-200 capitalize font-semibold">{value}</span>
                 )}
               />
               {platforms.map((p) => {

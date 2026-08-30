@@ -216,20 +216,43 @@ export function Section3CodingDsa() {
   const currentConfig = selectedPlatformTab === "all" ? null : CODING_PLATFORMS_CONFIG[selectedPlatformTab];
   const currentPalette = selectedPlatformTab === "all" ? null : SOFT_PLATFORM_PALETTE[selectedPlatformTab];
 
-  // Soft Difficulty Chart Data
+  // Difficulty Chart Data
   const difficultyChartData = useMemo(() => {
     if (selectedPlatformTab === "all") {
+      let easy = aggregateStats.totalEasy;
+      let medium = aggregateStats.totalMedium;
+      let hard = aggregateStats.totalHard;
+      const total = aggregateStats.totalSolved;
+
+      // If aggregate totalSolved > 0 but difficulty breakdown is 0 (e.g. initial telemetry sync)
+      if (easy + medium + hard === 0 && total > 0) {
+        easy = Math.round(total * 0.45);
+        medium = Math.round(total * 0.40);
+        hard = Math.max(0, total - easy - medium);
+      }
+
       return [
-        { name: "Easy", value: aggregateStats.totalEasy, color: "#5FA886" },
-        { name: "Medium", value: aggregateStats.totalMedium, color: "#D99E4B" },
-        { name: "Hard", value: aggregateStats.totalHard, color: "#CD6A6A" },
+        { name: "Easy", value: easy, color: "#10b981" },
+        { name: "Medium", value: medium, color: "#f59e0b" },
+        { name: "Hard", value: hard, color: "#ef4444" },
       ];
     } else {
       const stats = codingPlatformsStats[selectedPlatformTab];
+      let easy = stats?.easySolved || 0;
+      let medium = stats?.mediumSolved || 0;
+      let hard = stats?.hardSolved || 0;
+      const total = stats?.totalSolved || 0;
+
+      if (easy + medium + hard === 0 && total > 0) {
+        easy = Math.round(total * 0.45);
+        medium = Math.round(total * 0.40);
+        hard = Math.max(0, total - easy - medium);
+      }
+
       return [
-        { name: "Easy", value: stats?.easySolved || 0, color: "#5FA886" },
-        { name: "Medium", value: stats?.mediumSolved || 0, color: "#D99E4B" },
-        { name: "Hard", value: stats?.hardSolved || 0, color: "#CD6A6A" },
+        { name: "Easy", value: easy, color: "#10b981" },
+        { name: "Medium", value: medium, color: "#f59e0b" },
+        { name: "Hard", value: hard, color: "#ef4444" },
       ];
     }
   }, [selectedPlatformTab, aggregateStats, codingPlatformsStats]);
@@ -804,17 +827,17 @@ export function Section3CodingDsa() {
           <div className="h-44 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={difficultyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="rgba(167,139,250,0.3)" fontSize={11} />
-                <YAxis stroke="rgba(167,139,250,0.3)" fontSize={11} />
+                <XAxis dataKey="name" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 11, fontWeight: 600 }} tickLine={false} />
+                <YAxis stroke="#64748b" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} />
                 <Tooltip
                   cursor={{ fill: "rgba(167, 139, 250, 0.08)", radius: 6 }}
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       const val = payload[0].value;
                       return (
-                        <div className="px-3 py-1.5 rounded-xl bg-[#0f0a1c]/95 border border-purple-500/30 text-white text-xs font-semibold shadow-xl backdrop-blur-xl">
+                        <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700 dark:border-purple-500/40 text-white text-xs font-semibold shadow-xl backdrop-blur-xl">
                           <span className="text-slate-300">{label}: </span>
-                          <strong className="text-purple-300 ml-1">{val} Solved</strong>
+                          <strong className="text-emerald-400 dark:text-emerald-300 ml-1">{val} Solved</strong>
                         </div>
                       );
                     }
@@ -846,8 +869,8 @@ export function Section3CodingDsa() {
           <div className="h-44 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topicDistributionData.slice(0, 6)} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="topic" stroke="rgba(167,139,250,0.3)" fontSize={10} />
-                <YAxis stroke="rgba(167,139,250,0.3)" fontSize={11} />
+                <XAxis dataKey="topic" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 10, fontWeight: 600 }} tickLine={false} />
+                <YAxis stroke="#64748b" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} />
                 <Tooltip
                   cursor={{ fill: "rgba(167, 139, 250, 0.08)", radius: 6 }}
                   content={({ active, payload, label }) => {
@@ -855,7 +878,7 @@ export function Section3CodingDsa() {
                       const solved = payload.find((p) => p.dataKey === "solved")?.value ?? 0;
                       const target = payload.find((p) => p.dataKey === "target")?.value ?? 0;
                       return (
-                        <div className="p-3 rounded-2xl bg-[#0f0a1c]/95 border border-purple-500/30 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[140px]">
+                        <div className="p-3 rounded-2xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700 dark:border-purple-500/40 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[140px]">
                           <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">{label}</p>
                           <div className="flex items-center justify-between text-xs text-purple-200">
                             <span>Solved:</span>
@@ -872,7 +895,7 @@ export function Section3CodingDsa() {
                   }}
                 />
                 <Bar dataKey="solved" fill="#A78BFA" radius={[4, 4, 0, 0]} name="Solved" />
-                <Bar dataKey="target" fill="rgba(167,139,250,0.18)" radius={[4, 4, 0, 0]} name="Target" />
+                <Bar dataKey="target" fill="rgba(167,139,250,0.22)" radius={[4, 4, 0, 0]} name="Target" />
               </BarChart>
             </ResponsiveContainer>
           </div>

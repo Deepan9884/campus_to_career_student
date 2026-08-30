@@ -286,8 +286,8 @@ export const LandingPage: React.FC = () => {
       <div className="fixed bottom-0 right-1/4 w-[750px] h-[750px] bg-blue-200/25 dark:bg-[#38BDF8]/08 rounded-full blur-[220px] pointer-events-none -z-10" />
       <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-indigo-100/40 dark:bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
 
-      {/* ── SPACIOUS MODERN NAVBAR (STAYS CONSTANT THROUGHOUT) ── */}
-      <header className="sticky top-0 z-[10001] w-full bg-white/80 dark:bg-[#080D18]/90 border-b border-slate-200/80 dark:border-[#2F4B6B]/40 backdrop-blur-2xl px-4 sm:px-6 md:px-10 py-3.5 transition-all">
+      {/* ── SPACIOUS MODERN NAVBAR (APPEARS ONCE INTRO ANIMATION COMPLETES) ── */}
+      <header className={`sticky top-0 z-40 w-full bg-white/80 dark:bg-[#080D18]/90 border-b border-slate-200/80 dark:border-[#2F4B6B]/40 backdrop-blur-2xl px-4 sm:px-6 md:px-10 py-3.5 transition-all duration-500 ${showIntro ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left Brand */}
           <div className="flex items-center space-x-3 cursor-pointer shrink-0" onClick={() => scrollToSection("hero")}>

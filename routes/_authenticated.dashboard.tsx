@@ -298,7 +298,7 @@ function Dashboard() {
       )}
       {/* ── STATIC SUB-NAV CAPSULE ── */}
       <div className="flex justify-center w-full mb-2">
-        <div className="bg-card/95 dark:bg-[#080D18]/95 p-1 rounded-full border border-border dark:border-[#2F4B6B]/60 shadow-lg backdrop-blur-xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full px-1.5">
+        <div className="glass-strong p-1 rounded-full border border-border shadow-lg backdrop-blur-xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full px-1.5">
           {DASHBOARD_SECTIONS.map((sec) => {
             const Icon = sec.icon;
             const isActive = activeSection === sec.id;
@@ -309,10 +309,10 @@ function Dashboard() {
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap ${
                   isActive
                     ? "btn-gradient text-white font-bold shadow-md shadow-indigo-500/20 border border-white/20"
-                    : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
-                <Icon className={`w-3 h-3 ${isActive ? "text-white" : "text-indigo-500 dark:text-indigo-400"}`} />
+                <Icon className={`w-3 h-3 ${isActive ? "text-white" : "text-primary"}`} />
                 <span>{sec.label}</span>
               </button>
             );
@@ -322,10 +322,10 @@ function Dashboard() {
 
       {/* ── STUDENT WELCOME & READINESS OVERVIEW ── */}
       <div id="section-overview" className="scroll-mt-24" data-tour="readiness-card">
-        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-border dark:border-[#2F4B6B]/60 shadow-xl bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(27,39,64,0.92)_0%,rgba(17,24,39,0.98)_60%,rgba(8,13,24,1)_100%)]">
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-border shadow-xl glass-strong">
           <div className="relative z-10 grid lg:grid-cols-12 gap-6 items-center">
             {/* Left: Readiness Ring & Score */}
-            <div className="lg:col-span-4 flex flex-col sm:flex-row items-center gap-5 border-b lg:border-b-0 lg:border-r border-border dark:border-[#2F4B6B]/40 pb-6 lg:pb-0 lg:pr-6">
+            <div className="lg:col-span-4 flex flex-col sm:flex-row items-center gap-5 border-b lg:border-b-0 lg:border-r border-border pb-6 lg:pb-0 lg:pr-6">
               <div className="relative shrink-0">
                 <ScoreRing score={overallScore} label="Readiness" size={145} stroke={12} />
               </div>
@@ -338,7 +338,7 @@ function Dashboard() {
                   Placement Readiness
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Target: <span className="text-indigo-600 dark:text-indigo-400 font-bold">85%+ Ready</span>
+                  Target: <span className="text-primary font-bold">85%+ Ready</span>
                 </p>
                 {readiness?.lastUpdated && (
                   <p className="text-[10px] text-muted-foreground/80 flex items-center gap-1">
@@ -353,8 +353,8 @@ function Dashboard() {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Student Dashboard</span>
                 <span className="text-muted-foreground">•</span>
-                <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1">
-                  <Flame className="w-3.5 h-3.5 text-indigo-500" /> 3-Day Study Streak
+                <span className="text-xs text-primary font-semibold flex items-center gap-1">
+                  <Flame className="w-3.5 h-3.5 text-primary" /> 3-Day Study Streak
                 </span>
               </div>
 
@@ -372,7 +372,7 @@ function Dashboard() {
               </p>
 
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-[11px] font-medium text-foreground bg-muted dark:bg-[#131B2E] px-3 py-1 rounded-xl border border-border dark:border-[#2F4B6B]">
+                <span className="text-[11px] font-medium text-foreground bg-muted/70 px-3 py-1 rounded-xl border border-border">
                   Target Track: <strong className="text-foreground">{user?.profile?.targetRole || user?.targetRole || "Software Engineer"}</strong>
                 </span>
               </div>
@@ -381,41 +381,41 @@ function Dashboard() {
             {/* Right: Quick Action Buttons */}
             <div className="lg:col-span-3 flex flex-col gap-2">
               <span className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                <Zap className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" /> Quick Study Tools
+                <Zap className="w-3.5 h-3.5 text-primary" /> Quick Study Tools
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   to="/resume"
-                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border hover:border-primary/40 transition-all flex flex-col gap-1 group"
                 >
-                  <FileText className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <FileText className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-foreground">Resume</span>
                   <span className="text-[10px] text-muted-foreground">ATS Review</span>
                 </Link>
 
                 <Link
                   to="/interview"
-                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border hover:border-primary/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Mic className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <Mic className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-foreground">Interview</span>
                   <span className="text-[10px] text-muted-foreground">Voice Mock</span>
                 </Link>
 
                 <Link
                   to="/github"
-                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border hover:border-primary/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Github className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <Github className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-foreground">GitHub</span>
                   <span className="text-[10px] text-muted-foreground">Code Review</span>
                 </Link>
 
                 <Link
                   to="/roadmap"
-                  className="p-2.5 rounded-xl bg-muted/50 dark:bg-[#131B2E] hover:bg-muted dark:hover:bg-[#1B2740] border border-border dark:border-[#2F4B6B] hover:border-indigo-500/40 transition-all flex flex-col gap-1 group"
+                  className="p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border hover:border-primary/40 transition-all flex flex-col gap-1 group"
                 >
-                  <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <Map className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold text-foreground">Roadmap</span>
                   <span className="text-[10px] text-muted-foreground">Study Plan</span>
                 </Link>
@@ -441,10 +441,10 @@ function Dashboard() {
               <Link
                 key={card.title}
                 to={card.link}
-                className="group relative rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 block border border-border dark:border-[#2F4B6B]/60 hover:border-indigo-500/60 bg-card dark:bg-[#0F172A]/90 backdrop-blur-xl shadow-md hover:shadow-xl dark:shadow-xl dark:hover:shadow-2xl"
+                className="group relative rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 block border border-border hover:border-primary/60 glass shadow-md hover:shadow-xl"
               >
                 <div className="flex items-start justify-between">
-                  <div className="p-2.5 rounded-xl bg-muted dark:bg-[#1B2740] border border-border dark:border-[#2F4B6B]/60 text-indigo-600 dark:text-indigo-400 shadow-sm group-hover:border-indigo-500/40 transition-colors">
+                  <div className="p-2.5 rounded-xl bg-muted border border-border text-primary shadow-sm group-hover:border-primary/40 transition-colors">
                     <Icon className="w-4 h-4" />
                   </div>
                   <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${card.tagColor}`}>
@@ -463,7 +463,7 @@ function Dashboard() {
                   <p className="text-[11px] text-muted-foreground mt-1">{card.subtext}</p>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-border dark:border-[#2F4B6B]/40 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                <div className="mt-3 pt-2.5 border-t border-border flex items-center justify-between text-[11px] text-primary font-semibold">
                   <span>{card.action}</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -483,22 +483,22 @@ function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                    <TrendingUp className="w-4 h-4 text-primary" />
                     <span>Skill Progress Breakdown</span>
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Your scores across the 3 key hiring benchmarks</p>
                 </div>
-                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/25">
+                <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/25">
                   Updated Live
                 </span>
               </div>
 
               <div className="space-y-3">
                 {/* 1. Resume ATS Score */}
-                <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/75 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
+                      <div className="p-2 rounded-xl bg-primary/15 border border-primary/30 text-primary">
                         <FileText className="w-4 h-4" />
                       </div>
                       <div>
@@ -513,20 +513,20 @@ function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden border border-border dark:border-[#2F4B6B]/40">
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-border">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all duration-1000"
+                      className="h-full btn-gradient rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.resume || 0)}%` }}
                     />
                   </div>
                 </div>
 
                 {/* 2. Mock Interview Articulation */}
-                <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/75 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-indigo-500/10 dark:bg-[#2F4B6B]/30 border border-indigo-500/20 dark:border-[#2F4B6B]/60 text-indigo-600 dark:text-indigo-400">
-                        <Mic className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <div className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                        <Mic className="w-4 h-4 text-primary" />
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-foreground">Technical & Behavioral Vocal Articulation</h4>
@@ -535,24 +535,24 @@ function Dashboard() {
                     </div>
                     <div className="text-right">
                       <span className="text-base font-extrabold text-foreground">{readiness?.interview || 0}%</span>
-                      <span className="text-[10px] block text-indigo-600 dark:text-indigo-400 font-semibold">
+                      <span className="text-[10px] block text-primary font-semibold">
                         {(readiness?.interview || 0) >= 70 ? "Confident" : "Practice Needed"}
                       </span>
                     </div>
                   </div>
-                  <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden border border-border dark:border-[#2F4B6B]/40">
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-border">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-400 rounded-full transition-all duration-1000"
+                      className="h-full btn-gradient rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.interview || 0)}%` }}
                     />
                   </div>
                 </div>
 
                 {/* 3. Target Role Skill Coverage */}
-                <div className="p-4 rounded-2xl bg-muted/40 dark:bg-[#080D18]/75 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-emerald-500/10 dark:bg-[#2F4B6B]/30 border border-emerald-500/20 dark:border-[#2F4B6B]/60 text-emerald-600 dark:text-emerald-400">
+                      <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                         <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <div>
@@ -565,9 +565,9 @@ function Dashboard() {
                       <span className="text-[10px] block text-muted-foreground font-semibold">Target: 80%+</span>
                     </div>
                   </div>
-                  <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden border border-border dark:border-[#2F4B6B]/40">
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-border">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 rounded-full transition-all duration-1000"
+                      className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-1000"
                       style={{ width: `${Math.max(5, readiness?.skills || 0)}%` }}
                     />
                   </div>
@@ -582,7 +582,7 @@ function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                    <Layers className="w-4 h-4 text-primary" />
                     <span>Recommended Next Steps</span>
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Tasks tailored to help you pass campus screening</p>
@@ -590,7 +590,7 @@ function Dashboard() {
               </div>
 
               {recommendations.length === 0 ? (
-                <div className="p-6 text-center rounded-2xl bg-muted/40 dark:bg-[#080D18]/60 border border-border dark:border-[#2F4B6B]/40">
+                <div className="p-6 text-center rounded-2xl bg-muted/40 border border-border">
                   <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mx-auto mb-2" />
                   <p className="text-sm font-semibold text-foreground">All essential onboarding tasks completed!</p>
                   <p className="text-xs text-muted-foreground mt-1">Keep practicing mock questions and updating your projects to stay sharp.</p>
@@ -602,16 +602,16 @@ function Dashboard() {
                     return (
                       <div
                         key={rec.title}
-                        className="p-3.5 rounded-2xl bg-muted/40 dark:bg-[#080D18]/70 border border-border dark:border-[#2F4B6B]/50 hover:border-indigo-500/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                        className="p-3.5 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-xl bg-card dark:bg-[#1B2740] text-indigo-600 dark:text-indigo-400 shrink-0 border border-border dark:border-[#2F4B6B]/60 shadow-sm">
+                          <div className="p-2 rounded-xl bg-card text-primary shrink-0 border border-border shadow-sm">
                             <Icon className="w-4 h-4" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="text-xs font-bold text-foreground">{rec.title}</h4>
-                              <span className="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/20">
+                              <span className="text-[9px] font-semibold text-primary bg-primary/10 px-1.5 py-0.2 rounded border border-primary/20">
                                 {rec.badge}
                               </span>
                             </div>
@@ -644,15 +644,15 @@ function Dashboard() {
         <div className="lg:col-span-5 space-y-6">
           {/* Mentor Assigned Goals & Milestones */}
           {data?.mentorTasks && data.mentorTasks.length > 0 && (
-            <div className="rounded-3xl p-5 border border-indigo-500/40 shadow-xl relative overflow-hidden bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(99,102,241,0.2)_0%,rgba(17,24,39,0.95)_60%,rgba(8,13,24,1)_100%)] animate-in fade-in">
+            <div className="rounded-3xl p-5 border border-border shadow-xl relative overflow-hidden glass animate-in fade-in">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                  <div className="p-1.5 rounded-lg bg-primary/20 text-primary">
                     <ListTodo className="w-4 h-4" />
                   </div>
                   <h3 className="text-sm font-bold text-foreground">Assigned by Mentor</h3>
                 </div>
-                <span className="px-2 py-0.5 rounded-md bg-indigo-600/20 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-[10px] font-extrabold uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-md bg-primary/20 border border-primary/30 text-primary text-[10px] font-extrabold uppercase tracking-wider">
                   {data.mentorTasks.length} Goal{data.mentorTasks.length > 1 ? "s" : ""}
                 </span>
               </div>
@@ -661,11 +661,11 @@ function Dashboard() {
                 {data.mentorTasks.map((t) => (
                   <div
                     key={t._id}
-                    className="p-3.5 rounded-2xl bg-muted/40 dark:bg-[#080D18]/80 border border-border dark:border-[#2F4B6B]/60 space-y-2 hover:border-indigo-500/40 transition-colors"
+                    className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-2 hover:border-primary/40 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30">
+                        <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-primary/20 text-primary border border-primary/30">
                           {t.category}
                         </span>
                         {t.priority === "urgent" && (
@@ -703,21 +703,21 @@ function Dashboard() {
 
           {/* Today's Study Goal Card */}
           <div id="section-mission" className="scroll-mt-24">
-            <div className="rounded-3xl p-5 border border-indigo-500/40 shadow-xl relative overflow-hidden bg-card dark:bg-[#111827] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.18)_0%,rgba(17,24,39,0.95)_60%,rgba(8,13,24,1)_100%)]">
+            <div className="rounded-3xl p-5 border border-border shadow-xl relative overflow-hidden glass">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                  <div className="p-1.5 rounded-lg bg-primary/20 text-primary">
                     <Target className="w-4 h-4" />
                   </div>
                   <h3 className="text-sm font-bold text-foreground">Today's Study Goal</h3>
                 </div>
-                <span className="px-2 py-0.5 rounded-md bg-indigo-600 dark:bg-indigo-500 text-white text-[10px] font-extrabold flex items-center gap-1 shadow">
+                <span className="px-2 py-0.5 rounded-md btn-gradient text-white text-[10px] font-extrabold flex items-center gap-1 shadow">
                   <Flame className="w-3 h-3" /> Streak Active
                 </span>
               </div>
 
               <div className="space-y-3">
-                <div className="p-3.5 rounded-2xl bg-muted/40 dark:bg-[#080D18]/80 border border-border dark:border-[#2F4B6B]/60 space-y-1.5">
+                <div className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-1.5">
                   <div className="flex items-start justify-between">
                     <h4 className="text-xs font-bold text-foreground">{todayMission.title}</h4>
                     <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/30">
@@ -745,12 +745,12 @@ function Dashboard() {
                 <h3 className="text-sm font-bold text-foreground">Placement Readiness Checklist</h3>
                 <p className="text-[11px] text-muted-foreground">Core profile milestones for recruiters</p>
               </div>
-              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{profileProgress}% Complete</span>
+              <span className="text-xs font-bold text-primary">{profileProgress}% Complete</span>
             </div>
 
-            <div className="h-2 w-full bg-slate-200 dark:bg-[#1A2438] rounded-full overflow-hidden my-3 border border-border dark:border-[#2F4B6B]/40">
+            <div className="h-2 w-full bg-muted rounded-full overflow-hidden my-3 border border-border">
               <div
-                className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 transition-all duration-700"
+                className="h-full btn-gradient transition-all duration-700"
                 style={{ width: `${profileProgress}%` }}
               />
             </div>
@@ -760,7 +760,7 @@ function Dashboard() {
                 <Link
                   key={i}
                   to={check.link as any}
-                  className="flex items-center justify-between p-2 rounded-xl bg-muted/40 dark:bg-[#080D18]/60 hover:bg-muted dark:hover:bg-[#131B2E] border border-border dark:border-[#2F4B6B]/40 transition-colors text-xs"
+                  className="flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted border border-border transition-colors text-xs"
                 >
                   <div className="flex items-center gap-2.5">
                     {check.done ? (
@@ -785,10 +785,10 @@ function Dashboard() {
             <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                  <Trophy className="w-4 h-4 text-primary" />
                   <h3 className="text-sm font-bold text-foreground">Earned Badges & Trophies</h3>
                 </div>
-                <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
+                <span className="text-xs text-primary font-semibold">
                   {earnedBadgeIds.size} / 9 Earned
                 </span>
               </div>
@@ -796,11 +796,11 @@ function Dashboard() {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: "First Steps", label: "First Steps", icon: GraduationCap, color: "text-emerald-500 dark:text-emerald-400" },
-                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-indigo-500 dark:text-indigo-400" },
+                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-primary" },
                   { id: "Interview Warmup", label: "Voice Coach", icon: Mic, color: "text-sky-500 dark:text-sky-400" },
                   { id: "Code Explorer", label: "GitHub Scout", icon: Github, color: "text-purple-500 dark:text-purple-400" },
                   { id: "Gap Closer", label: "Skill Closer", icon: Target, color: "text-rose-500 dark:text-rose-400" },
-                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-indigo-500 dark:text-indigo-400" },
+                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-primary" },
                 ].map((badge) => {
                   const Icon = badge.icon;
                   const isEarned = earnedBadgeIds.has(badge.id);
@@ -809,11 +809,11 @@ function Dashboard() {
                       key={badge.id}
                       className={`p-2.5 rounded-xl flex flex-col items-center text-center transition-all border ${
                         isEarned
-                          ? "bg-gradient-to-br from-indigo-50 to-white dark:from-[#1B2740] dark:to-[#111827] border-indigo-500/50 shadow-sm"
-                          : "bg-muted/40 dark:bg-[#080D18]/50 border-border dark:border-[#2F4B6B]/30 opacity-40 grayscale"
+                          ? "bg-card border-primary/40 shadow-sm"
+                          : "bg-muted/40 border-border opacity-40 grayscale"
                       }`}
                     >
-                      <div className={`p-1.5 rounded-lg ${isEarned ? "bg-indigo-500/10 dark:bg-white/5" : "bg-transparent"}`}>
+                      <div className={`p-1.5 rounded-lg ${isEarned ? "bg-primary/10" : "bg-transparent"}`}>
                         <Icon className={`w-5 h-5 ${badge.color}`} />
                       </div>
                       <span className="text-[10px] font-bold text-foreground mt-1 line-clamp-1">{badge.label}</span>

@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { AiStatusBadge } from "@/components/ui/AiStatusBadge";
 
 interface Section10Props {
   onOpenPrintModal?: () => void;
@@ -208,9 +209,12 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
           <div className="panel-card rounded-3xl p-6 sm:p-7 border border-white/[0.20] shadow-[0_25px_80px_rgba(0,0,0,0.65)] relative overflow-hidden space-y-5">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold tracking-wide uppercase">
-                  <Crown className="w-3.5 h-3.5 text-[var(--warning)]" />
-                  <span>Official Placement Readiness Forecast</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold tracking-wide uppercase">
+                    <Crown className="w-3.5 h-3.5 text-[var(--warning)]" />
+                    <span>Official Placement Readiness Forecast</span>
+                  </div>
+                  <AiStatusBadge compact />
                 </div>
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--foreground)] tracking-tight">
                   {tier.tierName}{" "}

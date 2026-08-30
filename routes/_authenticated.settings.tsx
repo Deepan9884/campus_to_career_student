@@ -103,26 +103,24 @@ function SettingsPage() {
     resumePrivacy: boolean;
     dailyGoalProblems: number;
     hiddenModules: string[];
-  }>(() => ({
-    theme:
-      user?.preferences?.theme ||
-      (typeof document !== "undefined" && document.documentElement.classList.contains("light")
-        ? "light"
-        : "dark"),
-    accentColor:
-      (user?.preferences?.accentColor as any) ||
-      (typeof localStorage !== "undefined"
-        ? (localStorage.getItem("c2c_accent") as any)
-        : null) ||
-      "indigo",
-    notifyOn: user?.preferences?.notifyOn || MODULES.map((m) => m.key),
-    emailDigest: user?.preferences?.emailDigest || "off",
-    aiDifficulty: (user?.preferences?.aiDifficulty as any) || "Intermediate",
-    preferredLanguage: user?.preferences?.preferredLanguage || "Python",
-    resumePrivacy: user?.preferences?.resumePrivacy || false,
-    dailyGoalProblems: user?.preferences?.dailyGoalProblems || 2,
-    hiddenModules: user?.preferences?.hiddenModules || [],
-  }));
+  }>(() => {
+    const localTheme = typeof localStorage !== "undefined" ? localStorage.getItem("c2c_theme") : null;
+    const docTheme = typeof document !== "undefined" && document.documentElement.classList.contains("light") ? "light" : "dark";
+    const localAccent = typeof localStorage !== "undefined" ? localStorage.getItem("c2c_accent") : null;
+    const docAccent = typeof document !== "undefined" ? document.documentElement.getAttribute("data-accent") : null;
+
+    return {
+      theme: (localTheme as any) || (docTheme as any) || user?.preferences?.theme || "dark",
+      accentColor: (localAccent as any) || (docAccent as any) || (user?.preferences?.accentColor as any) || "indigo",
+      notifyOn: user?.preferences?.notifyOn || MODULES.map((m) => m.key),
+      emailDigest: user?.preferences?.emailDigest || "off",
+      aiDifficulty: (user?.preferences?.aiDifficulty as any) || "Intermediate",
+      preferredLanguage: user?.preferences?.preferredLanguage || "Python",
+      resumePrivacy: user?.preferences?.resumePrivacy || false,
+      dailyGoalProblems: user?.preferences?.dailyGoalProblems || 2,
+      hiddenModules: user?.preferences?.hiddenModules || [],
+    };
+  });
 
   // Fetch linked accounts
   useEffect(() => {
@@ -143,7 +141,7 @@ function SettingsPage() {
     };
   }, []);
 
-  // Sync state when user object updates
+  // Sync state when user object updates (preserves active session theme and accent)
   useEffect(() => {
     if (user) {
       setForm((prev) => ({
@@ -160,50 +158,65 @@ function SettingsPage() {
         facultyMentor: prev.facultyMentor || user.profile?.facultyMentor || "",
       }));
       if (user.preferences) {
-        setPreferences((prev) => {
-          let resolvedTheme = prev.theme;
-          if (typeof window !== "undefined" && !(window as any).__theme_initialized) {
-            resolvedTheme = user.preferences!.theme || prev.theme || "dark";
-            (window as any).__theme_initialized = true;
-          }
-          return {
-            theme: resolvedTheme as "dark" | "light" | "system",
-            accentColor: (user.preferences!.accentColor as any) || prev.accentColor || "indigo",
-            notifyOn: user.preferences!.notifyOn || prev.notifyOn,
-            emailDigest: user.preferences!.emailDigest || "off",
-            aiDifficulty: (user.preferences!.aiDifficulty as any) || "Intermediate",
-            preferredLanguage: user.preferences!.preferredLanguage || "Python",
-            resumePrivacy: user.preferences!.resumePrivacy || false,
-            dailyGoalProblems: user.preferences!.dailyGoalProblems || 2,
-            hiddenModules: user.preferences!.hiddenModules || [],
-          };
-        });
+        setPreferences((prev) => ({
+          ...prev,
+          notifyOn: user.preferences!.notifyOn || prev.notifyOn,
+          emailDigest: user.preferences!.emailDigest || prev.emailDigest || "off",
+          aiDifficulty: (user.preferences!.aiDifficulty as any) || prev.aiDifficulty || "Intermediate",
+          preferredLanguage: user.preferences!.preferredLanguage || prev.preferredLanguage || "Python",
+          resumePrivacy: user.preferences!.resumePrivacy !== undefined ? user.preferences!.resumePrivacy : prev.resumePrivacy,
+          dailyGoalProblems: user.preferences!.dailyGoalProblems || prev.dailyGoalProblems || 2,
+          hiddenModules: user.preferences!.hiddenModules || prev.hiddenModules || [],
+        }));
       }
     }
   }, [user]);
 
-  // Apply theme & accent to document
-  useEffect(() => {
-    const theme = preferences.theme;
-    const accent = preferences.accentColor || "indigo";
+  const handleThemeChange = (newTheme: "dark" | "light" | "system") => {
+    setPreferences((prev) => ({ ...prev, theme: newTheme }));
     const root = document.documentElement;
-
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem("c2c_theme", theme);
-      localStorage.setItem("c2c_accent", accent);
+      localStorage.setItem("c2c_theme", newTheme);
     }
-
-    root.setAttribute("data-accent", accent);
-
-    if (theme === "system") {
+    if (newTheme === "system") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       root.classList.toggle("dark", prefersDark);
       root.classList.toggle("light", !prefersDark);
     } else {
-      root.classList.toggle("dark", theme === "dark");
-      root.classList.toggle("light", theme === "light");
+      root.classList.toggle("dark", newTheme === "dark");
+      root.classList.toggle("light", newTheme === "light");
     }
-  }, [preferences.theme, preferences.accentColor]);
+    if (user) {
+      updateUser({
+        preferences: {
+          ...user.preferences,
+          theme: newTheme,
+          notifyOn: user.preferences?.notifyOn || [],
+        },
+      }).catch(() => {});
+    }
+    toast.success(`Theme set to ${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)}`);
+  };
+
+  const handleAccentChange = (newAccent: "indigo" | "purple" | "emerald" | "amber" | "cyan" | "rose", label: string) => {
+    setPreferences((prev) => ({ ...prev, accentColor: newAccent }));
+    const root = document.documentElement;
+    root.setAttribute("data-accent", newAccent);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("c2c_accent", newAccent);
+    }
+    if (user) {
+      updateUser({
+        preferences: {
+          ...user.preferences,
+          accentColor: newAccent,
+          theme: user.preferences?.theme || "dark",
+          notifyOn: user.preferences?.notifyOn || [],
+        },
+      }).catch(() => {});
+    }
+    toast.success(`Accent theme set to ${label}`);
+  };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -381,13 +394,13 @@ function SettingsPage() {
     <div className="space-y-6 max-w-5xl mx-auto pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-black dark:text-white">Settings</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage your account and preferences</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-xl font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20"
+          className="flex items-center justify-center gap-2 btn-gradient btn-gradient-hover text-white px-5 py-2.5 rounded-xl font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/25 cursor-pointer active:scale-98"
         >
           {saving ? (
             <div className="h-4 w-4 animate-spin border-2 border-white/20 border-t-white rounded-full" />
@@ -463,8 +476,12 @@ function SettingsPage() {
                 <label className="block text-sm font-medium mb-1 text-foreground">Bio</label>
                 <textarea
                   value={form.bio}
-                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                  className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 min-h-[80px]"
+                  onChange={(e) => {
+                    setForm({ ...form, bio: e.target.value });
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  className="w-full bg-muted/50 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 min-h-[80px] resize-none overflow-hidden"
                   placeholder="A short bio about yourself..."
                 />
               </div>
@@ -683,9 +700,9 @@ function SettingsPage() {
               ].map(({ id, icon: Icon, label }) => (
                 <button
                   key={id}
-                  onClick={() => setPreferences({ ...preferences, theme: id as any })}
+                  onClick={() => handleThemeChange(id as any)}
                   className={cn(
-                    "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all",
+                    "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all cursor-pointer",
                     preferences.theme === id
                       ? "bg-indigo-50 dark:bg-indigo-500/20 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold"
                       : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/5 hover:bg-muted dark:hover:bg-white/5 text-muted-foreground",
@@ -714,10 +731,7 @@ function SettingsPage() {
                   <button
                     key={swatch.id}
                     type="button"
-                    onClick={() => {
-                      setPreferences({ ...preferences, accentColor: swatch.id as any });
-                      toast.success(`Accent theme set to ${swatch.label}`);
-                    }}
+                    onClick={() => handleAccentChange(swatch.id as any, swatch.label)}
                     className={cn(
                       "px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border transition cursor-pointer",
                       (preferences.accentColor || "indigo") === swatch.id
@@ -733,72 +747,7 @@ function SettingsPage() {
             </div>
           </GlassCard>
 
-          {/* Atmospheric Lighting & Interactive Stars */}
-          <GlassCard className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold flex items-center gap-2 text-lg text-foreground">
-                <Sparkles className="h-5 w-5 text-purple-400 animate-pulse" />
-                Background Lights &amp; Stars Studio
-              </h3>
-              <button
-                type="button"
-                onClick={() => setStudioOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <Palette className="w-3.5 h-3.5" />
-                <span>Open Lighting Studio</span>
-              </button>
-            </div>
 
-            <p className="text-xs text-muted-foreground">
-              Customize ambient glowing orbs, atmospheric colors, and interactive twinkling constellation star field.
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-              {AMBIENT_PRESETS.slice(0, 4).map((p) => {
-                const isCurrent = ambientSettings.presetId === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => {
-                      ambientSettings.setPreset(p.id);
-                      toast.success(`Switched atmosphere to ${p.name}`);
-                    }}
-                    className={cn(
-                      "p-2.5 rounded-xl border text-left transition flex items-center gap-2.5 cursor-pointer",
-                      isCurrent
-                        ? "bg-white/15 border-purple-400 ring-2 ring-purple-500/30 font-semibold"
-                        : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/10 hover:bg-white/10 text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <span
-                      className="w-4 h-4 rounded-full shrink-0 shadow-sm border border-white/20"
-                      style={{ background: p.gradientPreview }}
-                    />
-                    <span className="text-xs truncate">{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-border dark:border-white/10 text-xs">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5 text-amber-300 fill-current" />
-                Interactive Stars: <strong className="text-foreground">{ambientSettings.starsEnabled ? "Enabled" : "Disabled"}</strong>
-              </span>
-              <button
-                type="button"
-                onClick={() => setStudioOpen(true)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer underline"
-              >
-                Customize all 7 palettes &amp; physics →
-              </button>
-            </div>
-          </GlassCard>
-
-          {/* Studio Modal */}
-          <AmbientLightingCustomizer open={studioOpen} onClose={() => setStudioOpen(false)} />
 
           {/* Sidebar Modules */}
           <GlassCard>

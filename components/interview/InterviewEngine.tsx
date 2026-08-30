@@ -194,14 +194,14 @@ export function InterviewEngine({
                 {onBackToPillars && (
                   <button
                     onClick={onBackToPillars}
-                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-muted-foreground hover:text-white border border-white/10 flex items-center gap-1.5 transition cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-semibold text-muted-foreground hover:text-foreground border border-slate-200 dark:border-white/10 flex items-center gap-1.5 transition cursor-pointer"
                     title="Return to Target Pillars"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Pillars</span>
                   </button>
                 )}
-                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                   {title || (session ? `${session.rounds.length}-Round` : "Custom") + " Mock Interview Engine"}
                 </h1>
               </div>
@@ -213,7 +213,7 @@ export function InterviewEngine({
             {onBackToPillars && (
               <button
                 onClick={onBackToPillars}
-                className="glass rounded-xl px-3.5 py-2 text-xs font-medium hover:bg-white/10 flex items-center gap-1.5 text-muted-foreground hover:text-white transition cursor-pointer self-start sm:self-auto"
+                className="glass rounded-xl px-3.5 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-white/10 flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition cursor-pointer self-start sm:self-auto"
               >
                 <ArrowLeft className="h-3.5 w-3.5" /> Back to Pillars
               </button>
@@ -221,12 +221,12 @@ export function InterviewEngine({
           </div>
 
           {isAutoStarting ? (
-            <div className="min-h-[380px] flex flex-col items-center justify-center text-center p-8 panel-card rounded-3xl border border-white/10 space-y-4 shadow-xl">
+            <div className="min-h-[380px] flex flex-col items-center justify-center text-center p-8 panel-card rounded-3xl border border-slate-200 dark:border-white/10 space-y-4 shadow-xl">
               <div className="w-16 h-16 rounded-2xl bg-[color:var(--color-primary)]/15 border border-[color:var(--color-primary)]/30 flex items-center justify-center text-[color:var(--color-primary)] shadow-lg animate-pulse">
                 <Sparkles className="w-8 h-8" />
               </div>
               <div className="space-y-1.5 max-w-md">
-                <h3 className="text-lg font-bold text-white tracking-tight">Initializing Interview Session</h3>
+                <h3 className="text-lg font-bold text-foreground tracking-tight">Initializing Interview Session</h3>
                 <p className="text-xs text-muted-foreground">
                   Generating calibrated AI questions, setting up real-time proctoring telemetry & speech engine...
                 </p>
@@ -238,7 +238,7 @@ export function InterviewEngine({
               {onBackToPillars && (
                 <button
                   onClick={onBackToPillars}
-                  className="mt-4 px-4 py-1.5 rounded-xl glass text-xs text-muted-foreground hover:text-white transition cursor-pointer"
+                  className="mt-4 px-4 py-1.5 rounded-xl glass text-xs text-muted-foreground hover:text-foreground transition cursor-pointer"
                 >
                   Cancel & Return to Pillars
                 </button>
@@ -347,11 +347,11 @@ function ResumeSelectorModule({
   };
 
   return (
-    <div className="mt-6 pt-4 border-t border-white/10 space-y-3">
+    <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/10 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-[color:var(--color-primary)]" />
-          <span className="text-xs font-semibold text-white">
+          <span className="text-xs font-semibold text-foreground">
             Resume & Project Intelligence (HR & Behavioral Round)
           </span>
         </div>
@@ -366,7 +366,7 @@ function ResumeSelectorModule({
           onClick={() => fileInputRef.current?.click()}
           className={`p-3 rounded-xl border border-dashed transition cursor-pointer flex flex-col items-center justify-center text-center gap-1.5 ${
             uploading
-              ? "bg-white/5 border-white/20 opacity-60"
+              ? "bg-slate-100 dark:bg-white/5 border-slate-300 dark:border-white/20 opacity-60"
               : "border-[color:var(--color-primary)]/40 hover:border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/5 hover:bg-[color:var(--color-primary)]/10"
           }`}
         >
@@ -382,7 +382,7 @@ function ResumeSelectorModule({
           ) : (
             <UploadCloud className="h-5 w-5 text-[color:var(--color-primary)]" />
           )}
-          <span className="text-xs font-semibold text-white">
+          <span className="text-xs font-semibold text-foreground">
             {uploading ? "Analyzing Resume..." : "Upload New Resume"}
           </span>
           <span className="text-[10px] text-muted-foreground">PDF or DOCX (Max 10MB)</span>
@@ -401,13 +401,13 @@ function ResumeSelectorModule({
               className={`p-3 rounded-xl border transition cursor-pointer flex flex-col justify-between ${
                 isSelected
                   ? "border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/15 shadow-[0_0_12px_rgba(99,102,241,0.2)]"
-                  : "border-white/10 glass hover:bg-white/10 opacity-70"
+                  : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10"
               }`}
             >
               <div className="flex items-start justify-between gap-1 mb-1">
                 <div className="flex items-center gap-1.5 truncate">
-                  <FileText className="h-3.5 w-3.5 text-blue-400 shrink-0" />
-                  <span className="text-xs font-medium text-white truncate max-w-[140px]">
+                  <FileText className="h-3.5 w-3.5 text-indigo-500 dark:text-blue-400 shrink-0" />
+                  <span className="text-xs font-medium text-foreground truncate max-w-[140px]">
                     {r.filename}
                   </span>
                 </div>
@@ -419,8 +419,8 @@ function ResumeSelectorModule({
               </div>
 
               <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-2">
-                <span>ATS: <strong className="text-emerald-400">{r.atsScore ? `${r.atsScore}%` : "Ready"}</strong></span>
-                <span className="truncate max-w-[90px]">{r.targetRole || "General"}</span>
+                <span>ATS: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{r.atsScore ? `${r.atsScore}%` : "Ready"}</strong></span>
+                <span className="truncate max-w-[90px] font-medium">{r.targetRole || "General"}</span>
               </div>
             </div>
           );
@@ -434,17 +434,17 @@ function ResumeSelectorModule({
           }}
           className={`p-3 rounded-xl border transition cursor-pointer flex flex-col justify-center text-center ${
             selectedResumeId === null
-              ? "border-amber-500/60 bg-amber-500/10 text-amber-300"
-              : "border-white/10 glass hover:bg-white/10 text-muted-foreground opacity-60"
+              ? "border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold"
+              : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-muted-foreground"
           }`}
         >
           <span className="text-xs font-semibold">General Behavioral Mode</span>
-          <span className="text-[10px] mt-0.5">Practice standard non-project questions</span>
+          <span className="text-[10px] mt-0.5 text-muted-foreground">Practice standard non-project questions</span>
         </div>
       </div>
 
       {selectedResumeName && selectedResumeId && (
-        <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl">
+        <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl">
           <Bot className="h-3.5 w-3.5 shrink-0" />
           <span>
             Attached: <strong>{selectedResumeName}</strong>. Gemini AI will evaluate your past projects and technical choices.
@@ -520,38 +520,31 @@ function SetupView({
     setSelectedRounds(new Set([allRoundKeys[0]]));
   }
 
-  async function handleStart() {
+  const handleStart = async () => {
     setLoading(true);
     try {
-      const res = await startInterview({
-        targetRole: targetRole || undefined,
+      const sess = await startInterview({
+        targetRole: targetRole.trim() || undefined,
         difficulty,
         questionCount,
-        resumeId: isResumePrivacy ? undefined : selectedResumeId || undefined,
-        selectedRounds: selectedRounds.size === allRoundKeys.length
-          ? undefined // all selected = don't send (backward compatible)
-          : (allRoundKeys.filter((k) => selectedRounds.has(k)) as Array<
-              "quiz" | "aptitude" | "core" | "technical" | "coding" | "hr"
-            >),
+        selectedRounds: Array.from(selectedRounds) as Array<
+          "quiz" | "aptitude" | "core" | "technical" | "coding" | "hr"
+        >,
+        resumeId: selectedResumeId || undefined,
       });
-      onStart(res);
-    } catch (err: unknown) {
-      const apiErr = err as { statusCode?: number; message?: string };
-      if (apiErr?.statusCode === 429) {
-        toast.error(apiErr.message || "Too many interview sessions started. Please try again later.");
-      } else {
-        toast.error(apiErr?.message || "Failed to start interview session. Please try again.");
-      }
+      onStart(sess);
+    } catch {
+      toast.error("Failed to initialize mock interview. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const roundCount = selectedRounds.size;
 
   return (
     <GlassCard variant="strong">
-      <h3 className="font-semibold mb-4 text-lg">Interview Setup</h3>
+      <h3 className="font-semibold mb-4 text-lg text-foreground">Interview Setup</h3>
       <div className="grid md:grid-cols-3 gap-4">
         <div className="relative z-20">
           <label className="text-xs text-muted-foreground mb-1.5 block">
@@ -564,15 +557,15 @@ function SetupView({
           <select
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value as "easy" | "medium" | "hard")}
-            className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
+            className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] bg-card text-foreground"
           >
-            <option value="easy" className="bg-slate-900">
+            <option value="easy">
               Easy
             </option>
-            <option value="medium" className="bg-slate-900">
+            <option value="medium">
               Medium
             </option>
-            <option value="hard" className="bg-slate-900">
+            <option value="hard">
               Hard
             </option>
           </select>
@@ -597,7 +590,7 @@ function SetupView({
       </div>
 
       {/* Round Selection */}
-      <div className="mt-6 pt-4 border-t border-white/10">
+      <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/10">
         <div className="flex items-center justify-between mb-3">
           <label className="text-xs text-muted-foreground font-medium">
             Select Rounds ({roundCount} of {allRoundKeys.length} selected)
@@ -611,7 +604,7 @@ function SetupView({
             >
               Select All
             </button>
-            <span className="text-white/20">|</span>
+            <span className="text-slate-300 dark:text-white/20">|</span>
             <button
               type="button"
               onClick={deselectAll}
@@ -639,7 +632,7 @@ function SetupView({
                 className={`glass rounded-xl p-3 text-xs text-left transition-all cursor-pointer border-2 ${
                   isSelected
                     ? "border-[color:var(--color-primary)] bg-[color:var(--color-primary)]/10 shadow-[0_0_12px_rgba(var(--color-primary-rgb,99,102,241),0.15)]"
-                    : "border-transparent opacity-40 hover:opacity-60"
+                    : "border-transparent opacity-50 hover:opacity-80"
                 } ${isLastSelected ? "cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -655,7 +648,7 @@ function SetupView({
                     className={`w-4 h-4 rounded-md border-2 flex items-center justify-center transition-all ${
                       isSelected
                         ? "bg-[color:var(--color-primary)] border-[color:var(--color-primary)]"
-                        : "border-white/30"
+                        : "border-slate-300 dark:border-white/30"
                     }`}
                   >
                     {isSelected && <Check className="h-3 w-3 text-white" />}
@@ -1990,7 +1983,7 @@ function HistorySection({
   return (
     <GlassCard>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-lg text-white">Interview History</h3>
+        <h3 className="font-semibold text-lg text-foreground">Interview History</h3>
         {pagination && (
           <span className="text-xs text-muted-foreground">
             {pagination.total} total sessions
@@ -2014,7 +2007,7 @@ function HistorySection({
               className="glass p-4 rounded-xl flex flex-wrap items-center justify-between gap-3 text-sm"
             >
               <div>
-                <p className="font-semibold text-white">{s.targetRole || "General Technical"}</p>
+                <p className="font-semibold text-foreground">{s.targetRole || "General Technical"}</p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(s.createdAt).toLocaleDateString(undefined, {
                     year: "numeric",
@@ -2029,7 +2022,7 @@ function HistorySection({
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <span className="text-xs text-muted-foreground block">Score</span>
-                  <span className="font-bold text-sm text-white">
+                  <span className="font-bold text-sm text-foreground">
                     {s.overallScore != null ? `${s.overallScore}%` : "—"}
                   </span>
                 </div>
@@ -2037,14 +2030,14 @@ function HistorySection({
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleViewDetail(s._id)}
-                    className="glass rounded-lg px-3 py-1.5 text-xs hover:bg-white/10 cursor-pointer text-slate-200"
+                    className="glass rounded-lg px-3 py-1.5 text-xs hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer text-slate-800 dark:text-slate-200"
                   >
                     View
                   </button>
                   <button
                     onClick={() => handleDelete(s._id)}
                     disabled={deletingId === s._id}
-                    className="glass rounded-lg p-1.5 text-xs text-red-400 hover:bg-red-500/10 disabled:opacity-50 cursor-pointer"
+                    className="glass rounded-lg p-1.5 text-xs text-red-500 hover:bg-red-500/10 disabled:opacity-50 cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

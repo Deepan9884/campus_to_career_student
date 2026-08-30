@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap } from "lucide-react";
 
@@ -24,6 +25,17 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [phase, setPhase] = useState<"rising" | "shimmer" | "opening" | "done">("rising");
   const [progress, setProgress] = useState(0);
+
+  // Lock body scroll while intro animation is running
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, []);
 
   // Background interactive/ambient particle & constellation canvas
   useEffect(() => {
@@ -157,7 +169,7 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
     };
   }, [duration, onComplete]);
 
-  return (
+  const content = (
     <AnimatePresence>
       {phase !== "done" && (
         <motion.div
@@ -169,7 +181,7 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
             transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
           }}
           exit={{ opacity: 0, transition: { duration: 0.5 } }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-[#050811] select-none"
+          className="fixed inset-0 w-screen h-screen z-[99999999] flex flex-col items-center justify-center overflow-hidden bg-[#050811] select-none"
         >
           {/* ── AMBIENT GLOWING NEBULAS (Clean, continuous depth) ── */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -420,4 +432,9 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
       )}
     </AnimatePresence>
   );
+
+  if (typeof document !== "undefined") {
+    return createPortal(content, document.body);
+  }
+  return content;
 };

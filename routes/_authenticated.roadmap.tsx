@@ -159,7 +159,7 @@ function RoadmapPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Learning Roadmap</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Learning Roadmap</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Generate a personalized learning path from your skill gap analysis.
         </p>
@@ -170,10 +170,10 @@ function RoadmapPage() {
         {selectedRoadmap && (
           <button
             onClick={() => setView("detail")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               view === "detail"
-                ? "btn-gradient text-white"
-                : "glass hover:bg-white/10"
+                ? "btn-gradient text-white shadow-md font-semibold"
+                : "glass hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-muted-foreground"
             }`}
           >
             Active Roadmap
@@ -181,20 +181,20 @@ function RoadmapPage() {
         )}
         <button
           onClick={() => setView("generate")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
             view === "generate"
-              ? "btn-gradient text-white"
-              : "glass hover:bg-white/10"
+              ? "btn-gradient text-white shadow-md font-semibold"
+              : "glass hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-muted-foreground"
           }`}
         >
           Generate New
         </button>
         <button
           onClick={() => setView("history")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
             view === "history"
-              ? "btn-gradient text-white"
-              : "glass hover:bg-white/10"
+              ? "btn-gradient text-white shadow-md font-semibold"
+              : "glass hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-muted-foreground"
           }`}
         >
           History
@@ -213,7 +213,7 @@ function RoadmapPage() {
       {/* Generate View */}
       {view === "generate" && (
         <GlassCard variant="strong">
-          <h2 className="text-lg font-bold mb-4">Generate Learning Roadmap</h2>
+          <h2 className="text-lg font-bold mb-4 text-foreground">Generate Learning Roadmap</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Select a completed skill gap analysis to generate a structured learning roadmap.
           </p>
@@ -224,16 +224,16 @@ function RoadmapPage() {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Gap Analysis</label>
-                <div className="w-full glass rounded-lg px-3 py-2 border border-white/10 focus-within:border-[color:var(--color-primary)]">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-muted-foreground mb-2">Gap Analysis</label>
+                <div className="w-full glass-input rounded-xl px-3 py-2 border border-slate-300 dark:border-white/10 focus-within:border-[color:var(--color-primary)]">
                   <select
                     value={selectedGapId}
                     onChange={(e) => setSelectedGapId(e.target.value)}
-                    className="w-full bg-transparent text-sm focus:outline-none cursor-pointer"
+                    className="w-full bg-card text-foreground text-sm focus:outline-none cursor-pointer"
                   >
-                    <option value="" className="bg-slate-850">Select a gap analysis...</option>
+                    <option value="" className="bg-card text-foreground">Select a gap analysis...</option>
                     {gapAnalyses.map((a) => (
-                      <option key={a._id} value={a._id} className="bg-slate-800">
+                      <option key={a._id} value={a._id} className="bg-card text-foreground">
                         {a.targetRole} — {a.matchPercentage}% match (
                         {new Date(a.createdAt).toLocaleDateString()})
                       </option>
@@ -429,24 +429,24 @@ function RoadmapDetail({
       <GlassCard variant="strong">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold">{roadmap.targetRole}</h2>
+            <h2 className="text-xl font-bold text-foreground">{roadmap.targetRole}</h2>
             <p className="text-sm text-muted-foreground mt-1">
               {roadmap.milestones.length} milestones •{" "}
               {new Date(roadmap.createdAt).toLocaleDateString()}
             </p>
           </div>
           <span
-            className={`text-xs px-3 py-1 rounded-full ${
+            className={`text-xs px-3 py-1 rounded-full font-semibold ${
               roadmap.status === "completed"
-                ? "bg-green-500/20 text-green-400"
-                : "bg-red-500/20 text-red-400"
+                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25"
+                : "bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/25"
             }`}
           >
             {roadmap.status}
           </span>
         </div>
         {roadmap.overallSummary && (
-          <p className="mt-4 text-sm text-muted-foreground whitespace-pre-wrap">
+          <p className="mt-4 text-sm text-slate-700 dark:text-muted-foreground whitespace-pre-wrap leading-relaxed">
             {roadmap.overallSummary}
           </p>
         )}
@@ -454,16 +454,20 @@ function RoadmapDetail({
         <div className="mt-4 flex items-center gap-2">
           <button
             onClick={() => setViewMode("list")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-              viewMode === "list" ? "bg-white/20 text-foreground" : "glass hover:bg-white/10 text-muted-foreground"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer ${
+              viewMode === "list"
+                ? "bg-slate-200 dark:bg-white/20 text-foreground font-bold shadow-xs"
+                : "glass hover:bg-slate-100 dark:hover:bg-white/10 text-muted-foreground"
             }`}
           >
             <List className="h-4 w-4" /> List
           </button>
           <button
             onClick={() => setViewMode("kanban")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-              viewMode === "kanban" ? "bg-white/20 text-foreground" : "glass hover:bg-white/10 text-muted-foreground"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer ${
+              viewMode === "kanban"
+                ? "bg-slate-200 dark:bg-white/20 text-foreground font-bold shadow-xs"
+                : "glass hover:bg-slate-100 dark:hover:bg-white/10 text-muted-foreground"
             }`}
           >
             <LayoutDashboard className="h-4 w-4" /> Kanban
@@ -471,25 +475,25 @@ function RoadmapDetail({
         </div>
 
         {totalSubTopics > 0 && (
-          <div className="mt-4 pt-3 border-t border-white/10">
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <BarChart3 className="h-3 w-3" />
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                <BarChart3 className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
                 Overall Progress
               </p>
               <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-[color:var(--color-success)]">{passedSubTopics}</span>
+                <span className="font-semibold text-emerald-600 dark:text-[color:var(--color-success)]">{passedSubTopics}</span>
                 {" / "}
                 {totalSubTopics} sub-topics passed
               </p>
             </div>
-            <div className="h-2.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="h-2.5 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden border border-slate-200 dark:border-transparent">
               <div
-                className="h-full bg-[color:var(--color-success)] transition-all duration-500"
+                className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
                 style={{ width: `${overallProgress}%` }}
               />
             </div>
-            <p className="text-[10px] text-muted-foreground mt-1 text-right">{overallProgress}%</p>
+            <p className="text-[10px] text-muted-foreground mt-1 text-right font-bold">{overallProgress}%</p>
           </div>
         )}
       </GlassCard>
@@ -497,9 +501,9 @@ function RoadmapDetail({
       {roadmap.status === "failed" && roadmap.errorMessage && (
         <GlassCard>
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-red-400">Generation Failed</p>
+              <p className="text-sm font-semibold text-red-600 dark:text-red-400">Generation Failed</p>
               <p className="text-xs text-muted-foreground mt-1">{roadmap.errorMessage}</p>
             </div>
           </div>
@@ -508,7 +512,7 @@ function RoadmapDetail({
 
       {roadmap.status === "completed" && viewMode === "list" && (
         <div className="relative pl-6">
-          <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500" />
+          <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-gradient-to-b from-indigo-500 to-pink-500" />
           <div className="space-y-4">
             {["beginner", "intermediate", "advanced", "uncategorized"]
               .map((diff) => {
@@ -522,14 +526,14 @@ function RoadmapDetail({
                   <div key={diff} className="mb-6">
                     <button 
                       onClick={() => setOpenFolders(prev => ({...prev, [diff]: !prev[diff]}))}
-                      className="w-full flex items-center justify-between p-4 mb-4 rounded-xl glass hover:bg-white/10 transition-colors text-left"
+                      className="w-full flex items-center justify-between p-4 mb-4 rounded-xl glass hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-left cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`h-2.5 w-2.5 rounded-full ${completedCount === folderMilestones.length ? 'bg-[color:var(--color-success)]' : 'bg-blue-500'}`} />
-                        <p className="text-sm font-bold tracking-wide">
+                        <div className={`h-2.5 w-2.5 rounded-full ${completedCount === folderMilestones.length ? 'bg-emerald-500' : 'bg-indigo-500'}`} />
+                        <p className="text-sm font-bold tracking-wide text-foreground">
                           {folderLabel}
                         </p>
-                        <span className="text-xs text-muted-foreground bg-black/20 px-2 py-1 rounded-md">
+                        <span className="text-xs font-semibold text-slate-700 dark:text-muted-foreground bg-slate-100 dark:bg-black/20 px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-transparent">
                           {completedCount}/{folderMilestones.length} complete
                         </span>
                       </div>
@@ -571,13 +575,13 @@ function RoadmapDetail({
               (m) => (subTopicStatusMap.get(m.subTopicId || "") || "not_started") === status
             );
             const statusTitle = status === "not_started" ? "To Do" : status === "in_progress" ? "In Progress" : "Done";
-            const statusColor = status === "passed" ? "bg-[color:var(--color-success)]" : status === "in_progress" ? "bg-[color:var(--color-warning)]" : "bg-slate-500";
+            const statusColor = status === "passed" ? "bg-emerald-500" : status === "in_progress" ? "bg-amber-500" : "bg-slate-400";
             return (
               <div key={status} className="glass p-4 rounded-xl flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                   <div className={`h-2.5 w-2.5 rounded-full ${statusColor}`} />
-                  <h3 className="font-bold">{statusTitle}</h3>
-                  <span className="text-xs text-muted-foreground ml-auto bg-black/20 px-2 py-0.5 rounded-full">
+                  <h3 className="font-bold text-foreground">{statusTitle}</h3>
+                  <span className="text-xs font-semibold text-muted-foreground ml-auto bg-slate-100 dark:bg-black/20 px-2 py-0.5 rounded-full">
                     {columnMilestones.length}
                   </span>
                 </div>
@@ -602,7 +606,7 @@ function RoadmapDetail({
                     );
                   })}
                   {columnMilestones.length === 0 && (
-                    <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-white/10 rounded-xl">
+                    <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-slate-300 dark:border-white/10 rounded-xl">
                       Empty
                     </div>
                   )}
@@ -647,9 +651,9 @@ function MilestoneCard({
   const humanize = (str: string) => str.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const statusColor =
     subTopicStatus === "passed"
-      ? "bg-[color:var(--color-success)]/20 text-[color:var(--color-success)]"
+      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25"
       : subTopicStatus === "in_progress"
-        ? "bg-[color:var(--color-warning)]/20 text-[color:var(--color-warning)]"
+        ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25"
         : null;
 
   const statusLabel =
@@ -662,19 +666,19 @@ function MilestoneCard({
   return (
     <div className="relative mb-4">
       <div
-        className={`absolute -left-6 top-5 h-4 w-4 rounded-full border-2 border-white/30 ${
-          milestone.importance === "core" ? "bg-blue-500" : "bg-slate-600"
+        className={`absolute -left-6 top-5 h-4 w-4 rounded-full border-2 border-slate-300 dark:border-white/30 ${
+          milestone.importance === "core" ? "bg-indigo-500" : "bg-slate-400"
         }`}
       />
       <GlassCard hover>
-        <button onClick={onToggle} className="w-full text-left">
+        <button onClick={onToggle} className="w-full text-left cursor-pointer">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="h-8 w-8 rounded-lg btn-gradient grid place-items-center text-xs font-bold shrink-0">
+              <div className="h-8 w-8 rounded-lg btn-gradient grid place-items-center text-xs font-bold text-white shrink-0">
                 {index + 1}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold truncate">{humanize(milestone.subTopicId)}</p>
+                <p className="font-semibold text-foreground truncate">{humanize(milestone.subTopicId)}</p>
                 <p className="text-xs text-muted-foreground truncate">
                   {milestone.skillName} • {milestone.estimatedTimeframe} • {milestone.resources.length} resources
                 </p>
@@ -682,35 +686,35 @@ function MilestoneCard({
             </div>
             <div className="flex items-center gap-2 shrink-0">
               {statusLabel && (
-                <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>
                   {statusLabel}
                 </span>
               )}
               <span
-                className={`text-xs px-2 py-0.5 rounded-full ${
+                className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                   milestone.importance === "core"
-                    ? "bg-blue-500/20 text-blue-400"
-                    : "bg-slate-500/20 text-muted-foreground"
+                    ? "bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/25"
+                    : "bg-slate-200 dark:bg-slate-500/20 text-slate-700 dark:text-muted-foreground"
                 }`}
               >
                 {milestone.importance}
               </span>
-              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
             </div>
           </div>
         </button>
         {isExpanded && (
-          <div className="mt-4 space-y-2 pt-4 border-t border-white/10">
+          <div className="mt-4 space-y-2 pt-4 border-t border-slate-200 dark:border-white/10">
             {milestone.resources.map((r) => (
               <a
                 key={r.name}
                 href={r.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 group"
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 group transition"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate group-hover:text-[color:var(--color-primary)]">
+                  <p className="text-sm font-medium truncate group-hover:text-[color:var(--color-primary)] text-foreground">
                     {r.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -722,7 +726,7 @@ function MilestoneCard({
             ))}
             <button
               onClick={(e) => { e.stopPropagation(); onQuiz(); }}
-              className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg btn-gradient text-sm font-medium"
+              className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg btn-gradient text-sm font-bold text-white cursor-pointer shadow-md shadow-indigo-500/20"
             >
               <Brain className="h-4 w-4" />
               Take Quiz

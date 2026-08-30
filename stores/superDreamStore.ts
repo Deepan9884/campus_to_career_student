@@ -103,6 +103,8 @@ interface SuperDreamState {
   dismissWelcomeAnimation: () => void;
   setActiveTab: (tab: SuperDreamTab) => void;
   setActiveSectionId: (sectionId: number) => void;
+  expandedBranch: string | null;
+  setExpandedBranch: (branch: string | null) => void;
 
   // Checklist Fine-grained Actions
   updateStudentProfile: (profile: Partial<StudentProfile>) => void;
@@ -254,6 +256,7 @@ export const useSuperDream = create<SuperDreamState>()(
       isSuperDreamMode: false,
       activeTab: "track-road",
       activeSectionId: 0, // default to Section 0 (Track Road)
+      expandedBranch: "coding",
       showWelcomeAnimation: false,
       hasSeenWelcomeIntro: false,
       isLiveSyncing: false,
@@ -298,6 +301,8 @@ export const useSuperDream = create<SuperDreamState>()(
               lastSyncedAt: new Date().toISOString(),
               isLiveSyncing: false,
             }));
+          } else {
+            set({ isLiveSyncing: false });
           }
         } catch {
           set({ isLiveSyncing: false });
@@ -307,12 +312,8 @@ export const useSuperDream = create<SuperDreamState>()(
       syncToBackend: async (newMovement) => {
         try {
           const state = get();
-          set({ isLiveSyncing: true });
           await syncSuperDreamState({
-            checklist: ensureValidChecklist(
-              state.studentChecklist,
-              state.studentChecklist?.profile?.name || "Student"
-            ),
+            checklist: state.studentChecklist,
             codingPlatformsStats: state.codingPlatformsStats,
             csQuizAttempts: state.csQuizAttempts,
             visitedCsCourses: state.visitedCsCourses,
@@ -322,26 +323,26 @@ export const useSuperDream = create<SuperDreamState>()(
             tests: state.tests,
             mentorRoadmap: state.mentorRoadmap,
             travelMilestones: state.travelMilestones,
-            newMovement,
           });
-          set({ lastSyncedAt: new Date().toISOString(), isLiveSyncing: false });
+          if (newMovement) {
+            await logSuperDreamAction(newMovement).catch(() => {});
+          }
+          set({ lastSyncedAt: new Date().toISOString() });
         } catch {
-          set({ isLiveSyncing: false });
+          // silent
         }
       },
 
-      enterSuperDreamMode: (triggerAnimation = true) => {
+      enterSuperDreamMode: (triggerAnimation = false) => {
+        const state = get();
         set({
           isSuperDreamMode: true,
-          showWelcomeAnimation: triggerAnimation,
+          showWelcomeAnimation: triggerAnimation && !state.hasSeenWelcomeIntro,
         });
       },
 
       exitSuperDreamMode: () => {
-        set({
-          isSuperDreamMode: false,
-          showWelcomeAnimation: false,
-        });
+        set({ isSuperDreamMode: false });
       },
 
       dismissWelcomeAnimation: () => {
@@ -357,6 +358,10 @@ export const useSuperDream = create<SuperDreamState>()(
 
       setActiveSectionId: (sectionId: number) => {
         set({ activeSectionId: sectionId, activeTab: "track-road" });
+      },
+
+      setExpandedBranch: (expandedBranch: string | null) => {
+        set({ expandedBranch });
       },
 
       // --- CHECKLIST ACTIONS ---

@@ -24,15 +24,27 @@ export function setAccessToken(token: string | null) {
       localStorage.removeItem("cf-token");
       if (token) {
         sessionStorage.setItem("cf_session_active", "1");
+        sessionStorage.setItem("cf_access_token", token);
       } else {
         sessionStorage.removeItem("cf_session_active");
+        sessionStorage.removeItem("cf_access_token");
       }
     } catch {}
   }
 }
 
 export function getAccessToken(): string | null {
-  return inMemoryAccessToken;
+  if (inMemoryAccessToken) return inMemoryAccessToken;
+  if (typeof window !== "undefined") {
+    try {
+      const stored = sessionStorage.getItem("cf_access_token");
+      if (stored) {
+        inMemoryAccessToken = stored;
+        return stored;
+      }
+    } catch {}
+  }
+  return null;
 }
 
 export class ApiError extends Error {
@@ -177,6 +189,12 @@ export const api = {
     request<T>(endpoint, {
       ...options,
       method: "POST",
+      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+    }),
+  put: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
+    request<T>(endpoint, {
+      ...options,
+      method: "PUT",
       body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     }),
   patch: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>

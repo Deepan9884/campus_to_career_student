@@ -13,7 +13,6 @@ import {
 import { CsFundamentalsQuizModal } from "./CsFundamentalsQuizModal";
 import {
   Cpu,
-  Star,
   CheckCircle2,
   BookOpen,
   Layers,
@@ -297,33 +296,6 @@ export function Section2CsFundamentals() {
                     <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">
                       {subj.description}
                     </p>
-
-                    {/* Knowledge Depth Star Selector */}
-                    <div className="flex items-center justify-between p-2.5 rounded-xl panel-slot border border-border/40">
-                      <span className="text-xs text-[var(--muted-foreground)] font-medium">Knowledge Depth:</span>
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            onClick={() => updateCsRating(subj.id, star, star >= 4)}
-                            className="p-0.5 text-slate-600 hover:text-[var(--warning)] transition cursor-pointer"
-                            title={`Rate ${star} / 5`}
-                          >
-                            <Star
-                              className={cn(
-                                "w-4 h-4 transition-colors",
-                                star <= rating
-                                  ? "text-[var(--warning)] fill-amber-400"
-                                  : "text-slate-700 dark:text-slate-800"
-                              )}
-                            />
-                          </button>
-                        ))}
-                        <span className="ml-1.5 text-xs font-bold text-[var(--warning)]">
-                          {rating}/5
-                        </span>
-                      </div>
-                    </div>
 
                     {/* Top Curated Courses Section — Clean & Spacious */}
                     <div className="space-y-2 pt-1">
@@ -645,33 +617,6 @@ export function Section2CsFundamentals() {
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--success)] bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
                         <CheckCircle2 className="w-3 h-3 text-[var(--success)]" /> Active
                       </span>
-                    </div>
-
-                    {/* 1-5 Star Rating */}
-                    <div className="flex items-center justify-between p-2.5 rounded-xl panel-slot border border-border/40">
-                      <span className="text-xs text-[var(--muted-foreground)] font-medium">Knowledge Depth:</span>
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            onClick={() => updateCsRating(item.id, star, star >= 4)}
-                            className="p-0.5 text-slate-600 hover:text-[var(--warning)] transition cursor-pointer"
-                            title={`Rate ${star} / 5`}
-                          >
-                            <Star
-                              className={cn(
-                                "w-4 h-4 transition-colors",
-                                star <= item.rating
-                                  ? "text-[var(--warning)] fill-amber-400"
-                                  : "text-slate-700 dark:text-slate-800"
-                              )}
-                            />
-                          </button>
-                        ))}
-                        <span className="ml-1.5 text-xs font-bold text-[var(--warning)]">
-                          {item.rating}/5
-                        </span>
-                      </div>
                     </div>
 
                     {/* Remarks */}

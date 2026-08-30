@@ -52,8 +52,13 @@ import { getBadges } from "@/lib/badges-api";
 import type { BadgeId, EarnedBadge } from "@/types/badges";
 import { BrandLogo } from "@/components/BrandLogo";
 import { InteractiveAppBackground } from "@/components/InteractiveAppBackground";
+
 import { AmbientLightingCustomizer } from "@/components/AmbientLightingCustomizer";
-import { Sparkles } from "lucide-react";
+import { useAmbientLighting } from "@/stores/ambientLightingStore";
+import { Sparkles, ChevronDown, ChevronUp, Sliders, Sun, Moon } from "lucide-react";
+import { SuperDreamSidebarAccordion } from "@/components/shell/SuperDreamSidebarAccordion";
+import { AppNavbarHeader } from "@/components/shell/AppNavbarHeader";
+import { NotificationBell } from "@/components/shell/NotificationBell";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -69,32 +74,85 @@ const nav = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
-interface SuperDreamNavItem {
+export interface SuperDreamSubItem {
   id: string;
   tab: SuperDreamTab;
   sectionId?: number;
   label: string;
-  category: "core" | "sections" | "aux";
+  badge?: string;
   icon: any;
 }
 
-const superDreamNav: SuperDreamNavItem[] = [
-  // Primary Control & Brain
-  { id: "nav-track-road", tab: "track-road", sectionId: 0, label: "Track Road (Sec 0)", icon: Compass, category: "core" },
-  { id: "nav-tests", tab: "tests", label: "Proctored Coding Tests", icon: Code2, category: "core" },
-  { id: "nav-brain", tab: "skill-analyzer", label: "Skill Analyzer Brain", icon: Brain, category: "core" },
+export interface SuperDreamBranch {
+  id: string;
+  title: string;
+  description: string;
+  icon: any;
+  color: string;
+  accentBg: string;
+  accentBorder: string;
+  items: SuperDreamSubItem[];
+}
 
-  // All 10 Official Checklist Sections from PDF
-  { id: "nav-sec-1", tab: "track-road", sectionId: 1, label: "1. Programming Languages", icon: Code, category: "sections" },
-  { id: "nav-sec-2", tab: "track-road", sectionId: 2, label: "2. CS Fundamentals", icon: Cpu, category: "sections" },
-  { id: "nav-sec-3", tab: "track-road", sectionId: 3, label: "3. Coding & DSA", icon: Binary, category: "sections" },
-  { id: "nav-sec-4", tab: "track-road", sectionId: 4, label: "4. Software Development", icon: Layers, category: "sections" },
-  { id: "nav-sec-5", tab: "track-road", sectionId: 5, label: "5. AI & Data Science", icon: BrainCircuit, category: "sections" },
-  { id: "nav-sec-6", tab: "track-road", sectionId: 6, label: "6. Cloud & DevOps", icon: Cloud, category: "sections" },
-  { id: "nav-sec-7", tab: "track-road", sectionId: 7, label: "7. GitHub Portfolio", icon: Github, category: "sections" },
-  { id: "nav-sec-8", tab: "track-road", sectionId: 8, label: "8. Certifications", icon: Award, category: "sections" },
-  { id: "nav-sec-9", tab: "track-road", sectionId: 9, label: "9. Interview Preparation", icon: Mic, category: "sections" },
-  { id: "nav-sec-10", tab: "track-road", sectionId: 10, label: "10. Placement Readiness", icon: Crown, category: "sections" },
+export const SUPER_DREAM_BRANCHES: SuperDreamBranch[] = [
+  {
+    id: "coding",
+    title: "Coding & DSA",
+    description: "Languages, Core CS & DSA Practice",
+    icon: Code2,
+    color: "text-emerald-600 dark:text-emerald-400",
+    accentBg: "rgba(16, 185, 129, 0.12)",
+    accentBorder: "rgba(16, 185, 129, 0.25)",
+    items: [
+      { id: "sec-1", tab: "track-road", sectionId: 1, label: "1. Languages", icon: Code },
+      { id: "sec-2", tab: "track-road", sectionId: 2, label: "2. CS Fundamentals", icon: Cpu },
+      { id: "sec-3", tab: "track-road", sectionId: 3, label: "3. Coding & DSA", icon: Binary },
+    ],
+  },
+  {
+    id: "certifications",
+    title: "Certifications & Learning",
+    description: "Industry certs, AI & Cloud roadmaps",
+    icon: Award,
+    color: "text-amber-600 dark:text-amber-400",
+    accentBg: "rgba(245, 158, 11, 0.12)",
+    accentBorder: "rgba(245, 158, 11, 0.25)",
+    items: [
+      { id: "sec-8", tab: "track-road", sectionId: 8, label: "8. Certifications", icon: Award },
+      { id: "sec-5", tab: "track-road", sectionId: 5, label: "5. AI & Data Science", icon: BrainCircuit },
+      { id: "sec-6", tab: "track-road", sectionId: 6, label: "6. Cloud & DevOps", icon: Cloud },
+      { id: "courses", tab: "courses", label: "Skill Courses", icon: GraduationCap },
+    ],
+  },
+  {
+    id: "portfolio",
+    title: "Projects & Portfolio",
+    description: "Fullstack apps, GitHub & Events",
+    icon: Layers,
+    color: "text-cyan-600 dark:text-cyan-400",
+    accentBg: "rgba(6, 182, 212, 0.12)",
+    accentBorder: "rgba(6, 182, 212, 0.25)",
+    items: [
+      { id: "sec-4", tab: "track-road", sectionId: 4, label: "4. Software Dev", icon: Layers },
+      { id: "sec-7", tab: "track-road", sectionId: 7, label: "7. GitHub Portfolio", icon: Github },
+      { id: "events", tab: "events", label: "Events & Proofs", icon: Trophy },
+    ],
+  },
+  {
+    id: "interview",
+    title: "Interview & Placement",
+    description: "Mocks, AI Brain & Final Readiness",
+    icon: Crown,
+    color: "text-purple-600 dark:text-purple-400",
+    accentBg: "rgba(167, 139, 250, 0.12)",
+    accentBorder: "rgba(167, 139, 250, 0.25)",
+    items: [
+      { id: "sec-9", tab: "track-road", sectionId: 9, label: "9. Interview Prep", icon: Mic },
+      { id: "sec-10", tab: "track-road", sectionId: 10, label: "10. Readiness Eval", icon: Crown },
+      { id: "brain", tab: "skill-analyzer", label: "Brain Analyzer", icon: Brain },
+      { id: "interview-hub", tab: "interview", label: "Interview Center", icon: UserCheck },
+    ],
+  },
 ];
 
 const ALL_BADGE_IDS: BadgeId[] = [
@@ -110,7 +168,7 @@ const ALL_BADGE_IDS: BadgeId[] = [
 ];
 
 export function AppShell() {
-  const { user, logout, isCheckingAuth } = useAuth();
+  const { user, logout, isCheckingAuth, updateUser } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -123,9 +181,36 @@ export function AppShell() {
     setActiveTab,
     activeSectionId,
     setActiveSectionId,
+    expandedBranch,
+    setExpandedBranch,
   } = useSuperDream();
 
+  const { glassPanelsEnabled } = useAmbientLighting();
+
+  // Sync data-glass on document root for full UI customizability
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-glass", glassPanelsEnabled ? "on" : "off");
+    }
+  }, [glassPanelsEnabled]);
+
   const isSuperDreamActive = pathname.startsWith("/super-dream");
+
+  // Auto-expand the active section's branch on mount or navigation
+  useEffect(() => {
+    if (!isSuperDreamActive) return;
+    for (const branch of SUPER_DREAM_BRANCHES) {
+      const hasActiveChild = branch.items.some(
+        (item) =>
+          item.tab === activeTab &&
+          (item.sectionId === undefined || activeSectionId === item.sectionId)
+      );
+      if (hasActiveChild && expandedBranch !== branch.id) {
+        setExpandedBranch(branch.id);
+        break;
+      }
+    }
+  }, [activeTab, activeSectionId, isSuperDreamActive]);
 
   const handleEnterSuperDream = () => {
     enterSuperDreamMode(true);
@@ -151,6 +236,10 @@ export function AppShell() {
       navigate({ to: "/super-dream" });
     }
     setMobileOpen(false);
+  };
+
+  const toggleBranch = (branchId: string) => {
+    setExpandedBranch(expandedBranch === branchId ? null : branchId);
   };
 
   const [showProductTour, setShowProductTour] = useState(() => {
@@ -179,6 +268,47 @@ export function AppShell() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [ambientCustomizerOpen, setAmbientCustomizerOpen] = useState(false);
 
+  // Synchronize Light/Dark Mode state
+  const [isLightMode, setIsLightMode] = useState<boolean>(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("light");
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsLightMode(document.documentElement.classList.contains("light"));
+    };
+    checkTheme();
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  const handleToggleTheme = () => {
+    const root = document.documentElement;
+    const isLight = root.classList.contains("light");
+    const nextTheme = isLight ? "dark" : "light";
+
+    root.classList.remove("light", "dark");
+    root.classList.add(nextTheme);
+    setIsLightMode(nextTheme === "light");
+    localStorage.setItem("c2c_theme", nextTheme);
+
+    if (user) {
+      updateUser({
+        preferences: {
+          ...user.preferences,
+          theme: nextTheme,
+          notifyOn: user.preferences?.notifyOn || [],
+        },
+      }).catch(() => {});
+    }
+
+    toast.success(`Switched to ${nextTheme === "light" ? "Light Mode ☀️" : "Dark Mode 🌙"}`);
+  };
+
   // Global Cmd+K / Ctrl+K keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -194,9 +324,9 @@ export function AppShell() {
   const toggleSidebar = () => {
     setSidebarCollapsed((prev) => {
       const next = !prev;
-      if (typeof window !== "undefined") {
+      try {
         localStorage.setItem("cf_sidebar_collapsed", String(next));
-      }
+      } catch {}
       return next;
     });
   };
@@ -293,6 +423,9 @@ export function AppShell() {
       {/* Interactive Constellation & Cyber Mesh Background Feature */}
       <InteractiveAppBackground />
 
+      {/* Dynamic Cursor Aura & Stardust Trail for Light & Dark Themes */}
+
+
       {/* Global Student Command Palette (Cmd+K) */}
       <StudentCommandPalette
         open={commandPaletteOpen}
@@ -320,7 +453,7 @@ export function AppShell() {
       <aside
         className={cn(
           "hidden md:flex flex-col liquid-glass m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] transition-all duration-300 shrink-0 z-40",
-          sidebarCollapsed ? "w-20 items-center px-3" : "w-64",
+          sidebarCollapsed ? "w-20 items-center px-3" : "w-72",
         )}
       >
         {isSuperDreamActive ? (
@@ -328,14 +461,21 @@ export function AppShell() {
           <div className="w-full space-y-3">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2.5 py-1">
-                <div className="w-8 h-8 rounded-lg grid place-items-center text-xs font-bold shrink-0"
-                  style={{ background: "rgba(167,139,250,0.15)", border: "1px solid rgba(167,139,250,0.30)", color: "var(--primary)" }}>
-                  SD
+                <div
+                  className="w-10 h-10 rounded-xl grid place-items-center shrink-0 shadow-sm"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(167,139,250,0.25) 0%, rgba(249,168,212,0.2) 100%)",
+                    border: "1px solid rgba(167,139,250,0.35)",
+                  }}
+                >
+                  <Crown className="w-5 h-5 text-[var(--primary)]" />
                 </div>
                 {!sidebarCollapsed && (
-                  <div>
-                    <p className="text-xs font-semibold text-[var(--foreground)] tracking-tight">Super Dream</p>
-                    <p className="text-[10px] text-[var(--muted-foreground)]">Study Workspace</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-extrabold tracking-wide text-[var(--foreground)] truncate">
+                      SUPER DREAM
+                    </p>
+                    <p className="text-xs text-[var(--muted-foreground)] truncate">Easwari Engineering</p>
                   </div>
                 )}
               </div>
@@ -344,7 +484,7 @@ export function AppShell() {
                 className="p-1.5 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition shrink-0"
                 title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                {sidebarCollapsed ? <ChevronRight className="h-4.5 w-4.5" /> : <ChevronLeft className="h-4.5 w-4.5" />}
               </button>
             </div>
 
@@ -353,19 +493,19 @@ export function AppShell() {
               onClick={handleExitSuperDream}
               title={sidebarCollapsed ? "Exit Workspace" : undefined}
               className={cn(
-                "flex w-full items-center gap-2 rounded-xl text-xs font-medium transition cursor-pointer",
-                sidebarCollapsed ? "justify-center p-2" : "px-3 py-2"
+                "flex w-full items-center gap-2.5 rounded-xl text-[13px] font-semibold transition cursor-pointer",
+                sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5"
               )}
               style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "var(--muted-foreground)" }}
             >
-              <LogOut className="h-3.5 w-3.5 shrink-0" />
+              <LogOut className="h-4 w-4 shrink-0" />
               {!sidebarCollapsed && <span>Exit Workspace</span>}
             </button>
           </div>
         ) : (
           /* Standard Sidebar Header */
           <div className="flex items-center justify-between w-full">
-            <Brand collapsed={sidebarCollapsed} />
+            <BrandLogo collapsed={sidebarCollapsed} />
             <button
               onClick={toggleSidebar}
               className="p-1.5 rounded-lg hover:bg-white/10 text-foreground/70 hover:text-foreground transition shrink-0"
@@ -376,44 +516,17 @@ export function AppShell() {
           </div>
         )}
 
-        <nav className="mt-4 flex-1 space-y-1.5 w-full overflow-y-auto pr-1">
+        <nav className="mt-4 flex-1 space-y-2 w-full overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {isSuperDreamActive ? (
-            /* Super Dream Navigation Items with all 10 sections */
-            <>
-              {superDreamNav.map((item, idx) => {
-                const Icon = item.icon;
-                const isActive =
-                  pathname.startsWith("/super-dream") &&
-                  activeTab === item.tab &&
-                  (item.sectionId === undefined || activeSectionId === item.sectionId);
-
-                return (
-                  <React.Fragment key={item.id}>
-                    <button
-                      onClick={() => handleSuperDreamNavClick(item.tab, item.sectionId)}
-                      title={sidebarCollapsed ? item.label : undefined}
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-xl text-sm transition-all text-left cursor-pointer",
-                        sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
-                      )}
-                      style={isActive ? {
-                        background: "rgba(167,139,250,0.18)",
-                        border: "1px solid rgba(167,139,250,0.30)",
-                        color: "var(--primary)",
-                        fontWeight: 600,
-                      } : {
-                        color: "var(--muted-foreground)",
-                      }}
-                      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
-                      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = ""; }}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" style={{ color: isActive ? "var(--primary)" : "var(--muted-foreground)" }} />
-                      {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
-                    </button>
-                  </React.Fragment>
-                );
-              })}
-            </>
+            /* Super Dream Reorganized 4-Branch Progressive Navigation */
+            <SuperDreamSidebarAccordion
+              sidebarCollapsed={sidebarCollapsed}
+              activeTab={activeTab}
+              activeSectionId={activeSectionId}
+              expandedBranch={expandedBranch}
+              toggleBranch={toggleBranch}
+              onNavigate={handleSuperDreamNavClick}
+            />
           ) : (
             /* Standard Navigation + Clean Super Dream Entrance */
             <>
@@ -421,45 +534,69 @@ export function AppShell() {
                 onClick={handleEnterSuperDream}
                 title={sidebarCollapsed ? "Super Dream Workspace" : undefined}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-xl text-xs font-semibold btn-gradient btn-gradient-hover transition-all cursor-pointer mb-3",
-                  sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5"
+                  "flex w-full items-center gap-3 rounded-xl text-[13.5px] font-bold btn-gradient btn-gradient-hover transition-all cursor-pointer mb-3",
+                  sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5"
                 )}
               >
-                <Compass className="h-4 w-4 shrink-0" />
+                <Compass className="h-4.5 w-4.5 shrink-0" />
                 {!sidebarCollapsed && (
                   <div className="flex items-center justify-between flex-1">
-                    <span className="font-semibold">Super Dream Workspace</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 font-semibold">PRO</span>
+                    <span className="font-bold">Super Dream Workspace</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-bold">PRO</span>
                   </div>
                 )}
               </button>
-
-              {filteredNav.map((item) => (
-                <NavItem
-                  key={item.to}
-                  item={item}
-                  active={pathname.startsWith(item.to)}
-                  collapsed={sidebarCollapsed}
-                />
-              ))}
+              {filteredNav.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname.startsWith(item.to);
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-xl text-sm transition-all cursor-pointer",
+                      sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
+                      isActive
+                        ? "bg-indigo-50 dark:bg-white/10 text-indigo-700 dark:text-[var(--foreground)] font-bold border border-indigo-200/80 dark:border-transparent shadow-xs"
+                        : "text-slate-600 dark:text-[var(--muted-foreground)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-[var(--foreground)]"
+                    )}
+                  >
+                    <Icon className="h-4.5 w-4.5 shrink-0" />
+                    {!sidebarCollapsed && <span>{item.label}</span>}
+                  </Link>
+                );
+              })}
             </>
           )}
         </nav>
 
-        <div className="pt-4 border-t border-white/10 w-full space-y-1">
+        <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 w-full space-y-1.5">
+          {/* Atmosphere Studio Trigger */}
+          <button
+            onClick={() => setAmbientCustomizerOpen(true)}
+            title={sidebarCollapsed ? "Atmosphere Studio" : undefined}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-xl text-[13px] font-semibold transition cursor-pointer text-slate-600 dark:text-[var(--muted-foreground)] hover:bg-black/5 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
+            )}
+          >
+            <Sliders className="h-4 w-4 shrink-0 text-[var(--primary)]" />
+            {!sidebarCollapsed && <span>UI & Atmosphere Studio</span>}
+          </button>
+
           <button
             onClick={handleOpenTour}
             data-tour="app-tour-btn"
             title={sidebarCollapsed ? (isSuperDreamActive ? "Super Dream Tour" : "App Tour") : undefined}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl text-sm transition cursor-pointer",
-              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5",
+              "flex w-full items-center gap-3 rounded-xl text-[13.5px] transition cursor-pointer",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
               isSuperDreamActive
-                ? "text-amber-300 hover:bg-amber-500/10 font-semibold"
-                : "text-foreground hover:bg-white/10 hover:text-foreground"
+                ? "text-amber-500 dark:text-amber-300 hover:bg-amber-500/10 font-bold"
+                : "text-slate-700 dark:text-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-foreground font-semibold"
             )}
           >
-            <HelpCircle className={cn("h-4 w-4 shrink-0", isSuperDreamActive ? "text-amber-400" : "text-foreground")} />
+            <HelpCircle className={cn("h-4.5 w-4.5 shrink-0", isSuperDreamActive ? "text-amber-500 dark:text-amber-400" : "text-slate-700 dark:text-foreground")} />
             {!sidebarCollapsed && <span>{isSuperDreamActive ? "Super Dream Tour" : "App Tour"}</span>}
           </button>
 
@@ -467,11 +604,11 @@ export function AppShell() {
             onClick={handleLogout}
             title={sidebarCollapsed ? "Sign out" : undefined}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl text-sm text-foreground hover:bg-white/10 hover:text-foreground transition",
-              sidebarCollapsed ? "justify-center p-2.5" : "px-3 py-2.5"
+              "flex w-full items-center gap-3 rounded-xl text-[13.5px] font-semibold text-slate-700 dark:text-foreground hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5"
             )}
           >
-            <LogOut className="h-4 w-4 shrink-0" />
+            <LogOut className="h-4.5 w-4.5 shrink-0" />
             {!sidebarCollapsed && <span>Sign out</span>}
           </button>
         </div>
@@ -513,48 +650,49 @@ export function AppShell() {
               </button>
             )}
 
-            <nav className="mt-4 flex-1 space-y-1 overflow-y-auto pr-1">
+            <nav className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1">
               {isSuperDreamActive ? (
-                superDreamNav.map((item) => {
-                  const Icon = item.icon;
-                  const isActive =
-                    activeTab === item.tab &&
-                    (item.sectionId === undefined || activeSectionId === item.sectionId);
-
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleSuperDreamNavClick(item.tab, item.sectionId)}
-                        className={cn(
-                          "flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm transition-all text-left cursor-pointer",
-                          isActive
-                            ? "bg-slate-800/90 text-sky-200 font-semibold shadow-sm border border-sky-500/30 ring-1 ring-sky-500/20"
-                            : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-                        )}
-                      >
-                        <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-sky-300" : "text-slate-400")} />
-                        <span className="truncate">{item.label}</span>
-                      </button>
-                    );
-                  })
+                <SuperDreamSidebarAccordion
+                  sidebarCollapsed={false}
+                  activeTab={activeTab}
+                  activeSectionId={activeSectionId}
+                  expandedBranch={expandedBranch}
+                  toggleBranch={toggleBranch}
+                  onNavigate={(tab, secId) => {
+                    setMobileOpen(false);
+                    handleSuperDreamNavClick(tab, secId);
+                  }}
+                />
               ) : (
                 <>
                   <button
                     onClick={handleEnterSuperDream}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 mb-2"
+                    className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13.5px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 mb-2"
                   >
-                    <Compass className="h-4 w-4 text-indigo-400" />
+                    <Compass className="h-4.5 w-4.5 text-indigo-400" />
                     <span>Super Dream Workspace</span>
                   </button>
 
-                  {filteredNav.map((item) => (
-                    <NavItem
-                      key={item.to}
-                      item={item}
-                      active={pathname === item.to}
-                      onClick={() => setMobileOpen(false)}
-                    />
-                  ))}
+                  {filteredNav.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname.startsWith(item.to);
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm transition cursor-pointer",
+                          isActive
+                            ? "bg-white/10 text-[var(--foreground)] font-semibold"
+                            : "text-[var(--muted-foreground)] hover:bg-white/5"
+                        )}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
                 </>
               )}
             </nav>
@@ -585,90 +723,23 @@ export function AppShell() {
 
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-2xl border-b border-border px-4 lg:px-6 py-3.5 flex items-center gap-3 shadow-sm">
-          <button
-            onClick={() => {
-              if (typeof window !== "undefined" && window.innerWidth < 768) {
-                setMobileOpen(!mobileOpen);
-              } else {
-                toggleSidebar();
-              }
-            }}
-            className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition"
-            aria-label="Toggle sidebar"
-            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <div className="min-w-0 flex-1 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs text-[var(--muted-foreground)]">Welcome back</p>
-              <p className="text-sm font-semibold truncate text-[var(--foreground)] font-[var(--font-display)]">{user?.name ?? "Guest"}</p>
-            </div>
-
-            {/* Quick Command Palette Button */}
-            <button
-              onClick={() => setCommandPaletteOpen(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}
-              title="Search tools or switch theme (⌘K)"
-            >
-              <Search className="h-3.5 w-3.5" style={{ color: "var(--primary)" }} />
-              <span className="font-medium">Search or jump to...</span>
-              <kbd className="px-1.5 py-0.5 rounded-full text-[10px] font-[var(--font-mono)]"
-                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>⌘K</kbd>
-            </button>
-          </div>
-          <NotificationBell
-            notifications={notifications}
-            unreadCount={unreadCount}
-            onMarkAsRead={markAsRead}
-            onMarkAllAsRead={markAllAsRead}
-          />
-          <button
-            onClick={() => setAmbientCustomizerOpen(true)}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--foreground)] hover:text-[var(--primary)] transition border border-white/10 relative group cursor-pointer"
-            title="Atmospheric Lighting & Stars Studio (Customize background)"
-            aria-label="Customize background lights & stars"
-          >
-            <Sparkles className="h-4.5 w-4.5 text-[var(--primary)] group-hover:rotate-12 transition-transform" />
-          </button>
-          <Link to="/settings" className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition" aria-label="Settings">
-            <Settings className="h-5 w-5" />
-          </Link>
-          <button
-            onClick={handleLogout}
-            title="Sign out"
-            aria-label="Sign out"
-            className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--accent)]/80 transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
-          <Link to="/settings" className="flex items-center gap-2">
-            <div className="relative h-9 w-9 rounded-full" style={{ boxShadow: "0 0 0 2px rgba(167,139,250,0.35)" }}>
-              {isCheckingAuth ? (
-                <div className="h-9 w-9 rounded-full animate-pulse" style={{ background: "rgba(167,139,250,0.15)" }} />
-              ) : (
-                <>
-                  <div className="h-9 w-9 rounded-full grid place-items-center text-xs font-bold text-white"
-                    style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)" }}>
-                    {(user?.name ?? "G").charAt(0).toUpperCase()}
-                  </div>
-                  {user?.avatar && (
-                    <img
-                      src={user.avatar}
-                      alt=""
-                      className="absolute inset-0 h-9 w-9 rounded-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  )}
-                </>
-              )}
-            </div>
-          </Link>
-        </header>
+        <AppNavbarHeader
+          user={user}
+          isCheckingAuth={isCheckingAuth}
+          isLightMode={isLightMode}
+          sidebarCollapsed={sidebarCollapsed}
+          mobileOpen={mobileOpen}
+          onToggleMobileOpen={() => setMobileOpen(!mobileOpen)}
+          onToggleSidebar={toggleSidebar}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          onToggleTheme={handleToggleTheme}
+          onOpenAmbientCustomizer={() => setAmbientCustomizerOpen(true)}
+          onLogout={handleLogout}
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+        />
         <main className="flex-1 p-3 lg:p-6">
           <Outlet />
         </main>
@@ -743,116 +814,4 @@ function NavItem({
   );
 }
 
-function NotificationBell({
-  notifications,
-  unreadCount,
-  onMarkAsRead,
-  onMarkAllAsRead,
-}: {
-  notifications: { _id: string; title: string; message: string; read: boolean; createdAt: string; type: string }[];
-  unreadCount: number;
-  onMarkAsRead: (id: string) => void;
-  onMarkAllAsRead: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  function relativeTime(dateStr: string) {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    return `${days}d ago`;
-  }
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-lg hover:bg-white/10"
-        aria-label="Notifications"
-      >
-        <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[color:var(--color-destructive)] text-[10px] font-bold text-white grid place-items-center px-1">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 max-h-[28rem] overflow-hidden rounded-xl bg-slate-900/95 dark:bg-slate-950/98 backdrop-blur-2xl border border-white/15 shadow-2xl z-50 flex flex-col text-slate-100">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
-            <p className="text-sm font-semibold">Notifications</p>
-            {unreadCount > 0 && (
-              <button
-                onClick={onMarkAllAsRead}
-                className="text-xs text-[color:var(--color-primary)] hover:underline flex items-center gap-1"
-              >
-                <CheckCheck className="h-3 w-3" /> Mark all read
-              </button>
-            )}
-          </div>
-
-          <div className="overflow-y-auto flex-1">
-            {(!notifications || notifications.length === 0) ? (
-              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                <BellOff className="h-8 w-8 mb-2 opacity-50" />
-                <p className="text-sm">No notifications yet</p>
-              </div>
-            ) : (
-              <ul>
-                {(notifications || []).map((n) => (
-                  <li key={n._id}>
-                    <button
-                      onClick={() => {
-                        if (!n.read) onMarkAsRead(n._id);
-                        setOpen(false);
-                      }}
-                      className={cn(
-                        "w-full text-left px-4 py-3 hover:bg-white/10 transition flex gap-3 border-b border-white/5 last:border-0",
-                        !n.read ? "bg-white/10" : "bg-transparent",
-                      )}
-                    >
-                      {!n.read && (
-                        <span className="mt-1.5 h-2 w-2 rounded-full bg-[color:var(--color-primary)] shrink-0" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className={cn("text-sm", !n.read ? "font-semibold text-white" : "text-slate-200")}>
-                          {n.title}
-                        </p>
-                        <p className="text-xs text-slate-300 truncate mt-0.5">{n.message}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">{relativeTime(n.createdAt)}</p>
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="border-t border-white/10 px-4 py-2.5">
-            <Link
-              to="/notifications"
-              onClick={() => setOpen(false)}
-              className="text-xs text-[color:var(--color-primary)] hover:underline block text-center"
-            >
-              View all notifications
-            </Link>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}

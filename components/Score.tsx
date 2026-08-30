@@ -27,17 +27,17 @@ export function ScoreRing({
   stroke?: number;
   label?: string;
 }) {
+  const safeScore = Math.max(0, Math.min(100, Math.round(score || 0)));
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const strokeColor =
-    score >= 70
-      ? "#4CAF7D"
-      : score >= 40
-        ? "#6366F1"
-        : "#E5484D";
+
+  // Proportional dynamic typography scaling
+  const valueFontSize = Math.max(16, Math.round(size * (label ? 0.26 : 0.32)));
+  const percentFontSize = Math.max(10, Math.round(valueFontSize * 0.48));
+  const labelFontSize = Math.max(9, Math.min(12, Math.round(size * 0.11)));
 
   return (
-    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id={`g-ember-${size}`} x1="0" y1="0" x2="1" y2="1">
@@ -58,23 +58,38 @@ export function ScoreRing({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={score >= 70 ? "#4CAF7D" : score < 40 ? "#E5484D" : `url(#g-ember-${size})`}
+          stroke={safeScore >= 70 ? "#4CAF7D" : safeScore < 40 ? "#E5484D" : `url(#g-ember-${size})`}
           strokeWidth={stroke}
           fill="none"
           strokeLinecap="round"
           strokeDasharray={c}
           style={{
-            strokeDashoffset: c - (c * score) / 100,
+            strokeDashoffset: c - (c * safeScore) / 100,
             transition: "stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)",
           }}
         />
       </svg>
-      <div className="absolute text-center">
-        <div className="text-4xl font-extrabold text-foreground tabular-nums tracking-tight">
-          <AnimatedCounter value={score} />
-          <span className="text-base text-muted-foreground font-semibold ml-0.5">%</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-1 pointer-events-none select-none">
+        <div
+          className="font-extrabold text-foreground tabular-nums tracking-tight flex items-baseline justify-center leading-none"
+          style={{ fontSize: `${valueFontSize}px` }}
+        >
+          <AnimatedCounter value={safeScore} />
+          <span
+            className="text-muted-foreground font-semibold ml-0.5"
+            style={{ fontSize: `${percentFontSize}px` }}
+          >
+            %
+          </span>
         </div>
-        {label && <div className="text-xs text-muted-foreground mt-1 font-medium">{label}</div>}
+        {label && (
+          <div
+            className="text-muted-foreground font-semibold tracking-normal mt-0.5 leading-tight truncate max-w-[85%]"
+            style={{ fontSize: `${labelFontSize}px` }}
+          >
+            {label}
+          </div>
+        )}
       </div>
     </div>
   );

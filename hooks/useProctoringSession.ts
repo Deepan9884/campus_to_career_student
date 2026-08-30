@@ -95,16 +95,34 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
     return false;
   }
 
-  // NEVER block standalone modifier keys (Control, Shift, Alt, Meta by themselves)
-  if (e.key === "Control" || e.key === "Shift" || e.key === "Alt" || e.key === "Meta") {
-    return false;
+  // Strictly block Windows / Meta key press and any OS combination (Win, Win+G, Win+Alt+R, Win+Shift+S, Win+Tab, etc.)
+  const isMetaOrWinKey =
+    e.key === "Meta" ||
+    e.key === "OS" ||
+    e.key === "Windows" ||
+    e.code === "MetaLeft" ||
+    e.code === "MetaRight" ||
+    e.code === "OSLeft" ||
+    e.code === "OSRight" ||
+    e.metaKey;
+
+  if (isMetaOrWinKey) {
+    return true;
   }
 
-  // Check PrintScreen
-  if (e.key === "PrintScreen" || e.code === "PrintScreen" || e.keyCode === 44) return true;
+  // Windows Game Bar & screen recording hotkeys (Win+G, Win+Alt+R, Win+Alt+G, Alt+G, Ctrl+Alt+G)
+  if (
+    (e.metaKey || (e.altKey && (e.ctrlKey || e.shiftKey || e.metaKey))) &&
+    (e.key === "g" || e.key === "G" || e.code === "KeyG" || e.key === "r" || e.key === "R" || e.code === "KeyR")
+  ) {
+    return true;
+  }
+
+  // Check PrintScreen & Screenshot shortcuts
+  if (e.key === "PrintScreen" || e.code === "PrintScreen" || e.keyCode === 44 || e.key === "Snapshot") return true;
 
   // Screenshot hotkeys: Win+Shift+S, Cmd+Shift+3/4/5, Ctrl+Shift+S
-  if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "S" || e.key === "s" || e.key === "3" || e.key === "4" || e.key === "5")) {
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "S" || e.key === "s" || e.key === "3" || e.key === "4" || e.key === "5" || e.code === "KeyS")) {
     return true;
   }
 
@@ -115,7 +133,7 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
   if ((e.ctrlKey || e.metaKey) && (e.key === "U" || e.key === "u")) {
     return true;
   }
-  if (e.altKey && (e.metaKey || e.ctrlKey) && ["I", "i", "J", "j", "C", "c"].includes(e.key)) {
+  if (e.altKey && (e.metaKey || e.ctrlKey) && ["I", "i", "J", "j", "C", "c", "R", "r", "G", "g"].includes(e.key)) {
     return true;
   }
 
@@ -124,27 +142,38 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
     return true;
   }
 
-  // Function keys F1-F12
-  if (/^F\d+$/.test(e.key)) {
+  // Block Alt combinations (Alt+Tab, Alt+F4, Alt+Space, Alt+Enter, Alt+Esc, Alt+Letter)
+  if (e.altKey && (e.key === "F4" || e.key === "Space" || e.key === "Escape" || e.key === "Enter" || /^[a-zA-Z0-9]$/.test(e.key))) {
+    return true;
+  }
+
+  // Function keys F1-F24
+  if (/^F\d+$/.test(e.key) || /^F\d+$/.test(e.code)) {
     return true;
   }
 
   // Standalone blocked system keys (excluding modifier keys)
   if (BLOCKED_STANDALONE_KEYS.has(e.key) || BLOCKED_STANDALONE_KEYS.has(e.code)) return true;
 
-  // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), Select All (Ctrl+A), and Find (Ctrl+F)
-  if ((e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A", "f", "F"].includes(e.key)) {
+  // ContextMenu key
+  if (e.key === "ContextMenu" || e.code === "ContextMenu") return true;
+
+  const target = e.target as HTMLElement | null;
+  const isInsideTextInput = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable || target.closest(".monaco-editor"));
+
+  // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), Select All (Ctrl+A), and Find (Ctrl+F) ONLY inside active code/text inputs
+  if (isInsideTextInput && (e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A", "f", "F"].includes(e.key)) {
     return false;
   }
 
-  // Allowed copy/paste keys if enabled
-  if (allowCopyPaste && (e.ctrlKey || e.metaKey) && ALLOWED_COPY_PASTE_KEYS.has(e.key)) {
+  // Allowed copy/paste keys if enabled AND inside text editor
+  if (allowCopyPaste && isInsideTextInput && (e.ctrlKey || e.metaKey) && ALLOWED_COPY_PASTE_KEYS.has(e.key)) {
     return false;
   }
 
   // Block specific dangerous browser navigation Ctrl combinations (reload, new tab, close, print, save, etc.)
   const FORBIDDEN_CTRL_KEYS = new Set([
-    "r", "R", "w", "W", "t", "T", "n", "N", "p", "P", "s", "S", "d", "D", "h", "H", "j", "J", "l", "L", "o", "O", "e", "E", "g", "G", "b", "B", "q", "Q",
+    "r", "R", "w", "W", "t", "T", "n", "N", "p", "P", "s", "S", "d", "D", "h", "H", "j", "J", "l", "L", "o", "O", "e", "E", "g", "G", "b", "B", "q", "Q", "k", "K", "m", "M",
   ]);
 
   if ((e.ctrlKey || e.metaKey) && FORBIDDEN_CTRL_KEYS.has(e.key)) {
@@ -402,11 +431,64 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     }, 1000);
   }, [handleFullscreenTimeout]);
 
-  // ── 1. Fullscreen Tracking & 15-Second Grace Countdown ────────────────────
+  // ── 1. Fullscreen Tracking, System Keyboard Lock & 15-Second Grace Countdown ────
   useEffect(() => {
     if (!enabled) {
       clearFullscreenCountdown();
       return;
+    }
+
+    async function requestSystemKeyboardLock() {
+      if (typeof navigator !== "undefined" && "keyboard" in navigator && (navigator as any).keyboard?.lock) {
+        try {
+          if (document.fullscreenElement) {
+            await (navigator as any).keyboard.lock([
+              "Escape",
+              "MetaLeft",
+              "MetaRight",
+              "KeyG",
+              "KeyR",
+              "KeyS",
+              "KeyD",
+              "KeyE",
+              "KeyX",
+              "KeyC",
+              "KeyV",
+              "KeyU",
+              "KeyP",
+              "Tab",
+              "AltLeft",
+              "AltRight",
+              "ContextMenu",
+              "PrintScreen",
+              "F1",
+              "F2",
+              "F3",
+              "F4",
+              "F5",
+              "F6",
+              "F7",
+              "F8",
+              "F9",
+              "F10",
+              "F11",
+              "F12",
+            ]);
+          }
+        } catch {
+          try {
+            await (navigator as any).keyboard.lock();
+          } catch {}
+        }
+      }
+    }
+
+    function releaseSystemKeyboardLock() {
+      if (typeof navigator !== "undefined" && "keyboard" in navigator && (navigator as any).keyboard?.unlock) {
+        try {
+          (navigator as any).keyboard.unlock();
+        } catch {}
+      }
     }
 
     function handleFSChange() {
@@ -414,10 +496,12 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       setState((prev) => ({ ...prev, isFullscreen: isFS }));
 
       if (isFS) {
-        // Re-entered fullscreen within grace period -> cancel countdown
+        // Re-entered fullscreen within grace period -> cancel countdown and lock system keys
         clearFullscreenCountdown();
+        requestSystemKeyboardLock();
       } else if (isStartedRef.current && !isBlockedRef.current) {
-        // Left fullscreen during active exam -> strike violation + start 15s timer
+        // Left fullscreen during active exam -> strike violation + start 15s timer + unlock
+        releaseSystemKeyboardLock();
         sendViolation("fullscreen_exit");
         startFullscreenCountdown();
       }
@@ -426,10 +510,14 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     document.addEventListener("fullscreenchange", handleFSChange);
     const initialFS = Boolean(document.fullscreenElement);
     setState((prev) => ({ ...prev, isFullscreen: initialFS }));
+    if (initialFS) {
+      requestSystemKeyboardLock();
+    }
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFSChange);
       clearFullscreenCountdown();
+      releaseSystemKeyboardLock();
     };
   }, [enabled, sendViolation, startFullscreenCountdown, clearFullscreenCountdown]);
 
@@ -505,7 +593,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
       const isPrintScreen = e.key === "PrintScreen" || e.code === "PrintScreen" || e.keyCode === 44;
       const isScreenshotCombo =
-        ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "S" || e.key === "s" || e.key === "3" || e.key === "4" || e.key === "5")) ||
+        ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "S" || e.key === "s" || e.key === "3" || e.key === "4" || e.key === "5" || e.code === "KeyS")) ||
         (e.altKey && isPrintScreen) ||
         (e.ctrlKey && isPrintScreen);
 
@@ -518,6 +606,49 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         toast.error("Screenshot Blocked: Screenshots and screen captures are strictly prohibited during the assessment.", {
           id: `proctor-screenshot-${Date.now()}`,
           duration: 5000,
+        });
+        sendViolation("keyboard_shortcut");
+        return;
+      }
+
+      const target = e.target as HTMLElement | null;
+      const isInsideTextInput = Boolean(
+        target &&
+          (target.tagName === "INPUT" ||
+            target.tagName === "TEXTAREA" ||
+            target.isContentEditable ||
+            target.closest(".monaco-editor"))
+      );
+
+      // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), Select All (Ctrl+A), and Find (Ctrl+F) inside active code/text inputs
+      if (
+        isInsideTextInput &&
+        (e.ctrlKey || e.metaKey) &&
+        ["z", "Z", "y", "Y", "a", "A", "f", "F"].includes(e.key)
+      ) {
+        return; // Allow!
+      }
+
+      // Check Windows / Meta keys and OS combinations (Win, Win+G, Win+Alt+R, etc.)
+      const isMetaOrWinKey =
+        e.key === "Meta" ||
+        e.key === "OS" ||
+        e.key === "Windows" ||
+        e.code === "MetaLeft" ||
+        e.code === "MetaRight" ||
+        e.code === "OSLeft" ||
+        e.code === "OSRight" ||
+        (!isInsideTextInput && e.metaKey);
+
+      if (isMetaOrWinKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        wipeClipboard();
+        playClipboardAlertTone();
+        toast.error("System Shortcut Blocked: Windows key, Game Bar (Win+G), and OS shortcuts are disabled during proctored exams.", {
+          id: `proctor-winkey-${Date.now()}`,
+          duration: 4000,
         });
         sendViolation("keyboard_shortcut");
         return;
@@ -570,6 +701,23 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         return;
       }
 
+      const isMetaOrWinKey =
+        e.key === "Meta" ||
+        e.key === "OS" ||
+        e.key === "Windows" ||
+        e.code === "MetaLeft" ||
+        e.code === "MetaRight" ||
+        e.code === "OSLeft" ||
+        e.code === "OSRight" ||
+        e.metaKey;
+
+      if (isMetaOrWinKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return;
+      }
+
       if (isBlockedShortcut(e, !copyPasteDisabled)) {
         e.preventDefault();
         e.stopPropagation();
@@ -611,13 +759,24 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       }
     }
 
+    function handleSelectStart(e: Event) {
+      if (!isStartedRef.current) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.closest(".proctor-question-protected") || (copyPasteDisabled && !target.closest("input") && !target.closest("textarea") && !target.closest(".monaco-editor")))) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+
     if (copyPasteDisabled) {
       window.addEventListener("focus", handleWindowFocus);
     }
-    window.addEventListener("keydown", handleKeyDown, { capture: true });
-    window.addEventListener("keyup", handleKeyUp, { capture: true });
-    document.addEventListener("keydown", handleKeyDown, { capture: true });
-    document.addEventListener("keyup", handleKeyUp, { capture: true });
+    window.addEventListener("keydown", handleKeyDown, { capture: true, passive: false });
+    window.addEventListener("keyup", handleKeyUp, { capture: true, passive: false });
+    document.addEventListener("keydown", handleKeyDown, { capture: true, passive: false });
+    document.addEventListener("keyup", handleKeyUp, { capture: true, passive: false });
+    document.addEventListener("selectstart", handleSelectStart, { capture: true, passive: false });
+
     if (copyPasteDisabled) {
       window.addEventListener("contextmenu", handleContextMenu, { capture: true });
       document.addEventListener("contextmenu", handleContextMenu, { capture: true });
@@ -629,15 +788,16 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     return () => {
       window.removeEventListener("focus", handleWindowFocus);
-      window.removeEventListener("keydown", handleKeyDown, { capture: true });
-      window.removeEventListener("keyup", handleKeyUp, { capture: true });
-      document.removeEventListener("keydown", handleKeyDown, { capture: true });
-      document.removeEventListener("keyup", handleKeyUp, { capture: true });
+      window.removeEventListener("keydown", handleKeyDown, { capture: true } as any);
+      window.removeEventListener("keyup", handleKeyUp, { capture: true } as any);
+      document.removeEventListener("keydown", handleKeyDown, { capture: true } as any);
+      document.removeEventListener("keyup", handleKeyUp, { capture: true } as any);
+      document.removeEventListener("selectstart", handleSelectStart, { capture: true } as any);
       window.removeEventListener("contextmenu", handleContextMenu);
       document.removeEventListener("contextmenu", handleContextMenu);
-      document.removeEventListener("copy", handleClipboard, { capture: true });
-      document.removeEventListener("cut", handleClipboard, { capture: true });
-      document.removeEventListener("paste", handleClipboard, { capture: true });
+      document.removeEventListener("copy", handleClipboard, { capture: true } as any);
+      document.removeEventListener("cut", handleClipboard, { capture: true } as any);
+      document.removeEventListener("paste", handleClipboard, { capture: true } as any);
     };
   }, [enabled, isStarted, copyPasteDisabled, sendViolation]);
 

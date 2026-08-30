@@ -1015,7 +1015,12 @@ export function ProctoredExamConsole({
               <div
                 className={`h-full ${
                   isLightMode ? "bg-white border-slate-200" : "bg-[#0f172a] border-slate-800"
-                } flex flex-col overflow-hidden`}
+                } flex flex-col overflow-hidden select-none proctor-question-protected`}
+                onCopy={(e: React.ClipboardEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); }}
+                onCut={(e: React.ClipboardEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); }}
+                onPaste={(e: React.ClipboardEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); }}
+                onContextMenu={(e: React.MouseEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); }}
+                onDragStart={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); }}
               >
                 {/* Question Title Header Bar */}
                 <div

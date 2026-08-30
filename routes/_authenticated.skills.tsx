@@ -257,7 +257,7 @@ function SkillsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Skill Gap & Growth Strategy</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Skill Gap & Growth Strategy</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Persistent AI skill gap analysis & real-time career growth tracking across all platform activities.
         </p>
@@ -265,13 +265,13 @@ function SkillsPage() {
 
       {/* Live Strategy & Overall Growth Header */}
       {growthMetrics && (
-        <GlassCard className="p-6 border-indigo-500/20 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+        <GlassCard variant="liquid" className="p-6 relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
             <div className="flex items-center gap-5">
               <ScoreRing score={growthMetrics.overallReadinessPct} size={90} stroke={8} label="Readiness" />
               <div>
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-indigo-400" />
+                  <Zap className="h-4 w-4 text-primary" />
                   <h2 className="text-xl font-bold text-foreground">Live Growth & Career Readiness</h2>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 max-w-lg">
@@ -282,23 +282,23 @@ function SkillsPage() {
 
             {/* Quick Metrics Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
-              <div className="p-3 rounded-xl glass border border-white/10 text-center">
-                <FileText className="h-4 w-4 mx-auto text-blue-400 mb-1" />
+              <div className="p-3 rounded-xl liquid-glass-card text-center shadow-xs">
+                <FileText className="h-4 w-4 mx-auto text-blue-500 dark:text-blue-400 mb-1" />
                 <p className="text-xs text-muted-foreground">ATS Resume</p>
                 <p className="text-sm font-bold text-foreground">{growthMetrics.resumeScore}%</p>
               </div>
-              <div className="p-3 rounded-xl glass border border-white/10 text-center">
-                <Mic className="h-4 w-4 mx-auto text-purple-400 mb-1" />
+              <div className="p-3 rounded-xl liquid-glass-card text-center shadow-xs">
+                <Mic className="h-4 w-4 mx-auto text-purple-500 dark:text-purple-400 mb-1" />
                 <p className="text-xs text-muted-foreground">Mock Interview</p>
                 <p className="text-sm font-bold text-foreground">{growthMetrics.avgInterviewScore}%</p>
               </div>
-              <div className="p-3 rounded-xl glass border border-white/10 text-center">
-                <Code2 className="h-4 w-4 mx-auto text-emerald-400 mb-1" />
+              <div className="p-3 rounded-xl liquid-glass-card text-center shadow-xs">
+                <Code2 className="h-4 w-4 mx-auto text-emerald-500 dark:text-emerald-400 mb-1" />
                 <p className="text-xs text-muted-foreground">Coding Solved</p>
                 <p className="text-sm font-bold text-foreground">{growthMetrics.totalProblemsSolved}</p>
               </div>
-              <div className="p-3 rounded-xl glass border border-white/10 text-center">
-                <Award className="h-4 w-4 mx-auto text-amber-400 mb-1" />
+              <div className="p-3 rounded-xl liquid-glass-card text-center shadow-xs">
+                <Award className="h-4 w-4 mx-auto text-amber-500 dark:text-amber-400 mb-1" />
                 <p className="text-xs text-muted-foreground">Verified Proofs</p>
                 <p className="text-sm font-bold text-foreground">{growthMetrics.verifiedEventsCount}</p>
               </div>
@@ -307,17 +307,17 @@ function SkillsPage() {
 
           {/* Live Strategy Recommendations */}
           {growthMetrics.liveStrategy.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-white/10">
+            <div className="mt-6 pt-4 border-t border-border dark:border-white/10 relative z-10">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Zap className="h-3.5 w-3.5 text-amber-400" /> Real-time Live Strategy & Growth Guidance
+                <Zap className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" /> Real-time Live Strategy & Growth Guidance
               </p>
               <div className="grid md:grid-cols-3 gap-3">
                 {growthMetrics.liveStrategy.map((strat, i) => (
-                  <div key={i} className="p-3.5 rounded-xl glass border border-white/10 flex flex-col justify-between hover:bg-white/10 transition">
+                  <div key={i} className="p-3.5 rounded-xl liquid-glass-card flex flex-col justify-between hover:bg-muted dark:hover:bg-white/10 transition shadow-xs card-hover-lift">
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-semibold text-foreground">{strat.title}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">{strat.impact}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">{strat.impact}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">{strat.description}</p>
                     </div>
@@ -329,15 +329,15 @@ function SkillsPage() {
 
           {/* Live Coding Platform Analysis Sub-section */}
           {growthMetrics.codingPlatformAnalysis && (
-            <div className="mt-6 pt-5 border-t border-white/10">
+            <div className="mt-6 pt-5 border-t border-border dark:border-white/10 relative z-10">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-emerald-400" />
+                  <BarChart3 className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                   <h3 className="text-sm font-bold text-foreground">Live Coding Platform Analysis & Frequency Charts</h3>
                 </div>
                 <Link
                   to="/coding-platforms"
-                  className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium"
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium"
                 >
                   Manage Profiles <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
@@ -350,12 +350,12 @@ function SkillsPage() {
                     {growthMetrics.codingPlatformAnalysis.platforms.map((p) => (
                       <div
                         key={p.platform}
-                        className="p-3.5 rounded-xl glass border border-white/10 flex flex-col justify-between hover:bg-white/10 transition"
+                        className="p-3.5 rounded-xl liquid-glass-card flex flex-col justify-between hover:bg-muted dark:hover:bg-white/10 transition shadow-xs card-hover-lift"
                       >
                         <div>
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold capitalize text-foreground flex items-center gap-1.5">
-                              <Code2 className="h-3.5 w-3.5 text-emerald-400" />
+                              <Code2 className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
                               {p.platform}
                             </span>
                             <span className="text-[10px] text-muted-foreground truncate max-w-[100px]">
@@ -369,14 +369,14 @@ function SkillsPage() {
                           </div>
 
                           {(p.easySolved !== undefined || p.mediumSolved !== undefined || p.hardSolved !== undefined) && (
-                            <div className="mt-2 grid grid-cols-3 gap-1 text-[10px] text-center pt-2 border-t border-white/5">
-                              <div className="bg-emerald-500/10 text-emerald-400 rounded py-0.5 font-medium">
+                            <div className="mt-2 grid grid-cols-3 gap-1 text-[10px] text-center pt-2 border-t border-border/50 dark:border-white/5">
+                              <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded py-0.5 font-bold">
                                 E: {p.easySolved || 0}
                               </div>
-                              <div className="bg-amber-500/10 text-amber-400 rounded py-0.5 font-medium">
+                              <div className="bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded py-0.5 font-bold">
                                 M: {p.mediumSolved || 0}
                               </div>
-                              <div className="bg-rose-500/10 text-rose-400 rounded py-0.5 font-medium">
+                              <div className="bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded py-0.5 font-bold">
                                 H: {p.hardSolved || 0}
                               </div>
                             </div>
@@ -387,7 +387,7 @@ function SkillsPage() {
                           href={p.profileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-3 text-[11px] text-indigo-400 hover:underline flex items-center gap-1 font-medium"
+                          className="mt-3 text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium"
                         >
                           View Profile <ChevronRight className="h-3 w-3" />
                         </a>
@@ -402,16 +402,16 @@ function SkillsPage() {
                   />
 
                   {/* Summary Bar & Recommendation */}
-                  <div className="p-3.5 rounded-xl glass border border-white/10 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="p-3.5 rounded-xl liquid-glass-card flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                       <div className="flex gap-2 text-xs">
-                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-semibold">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold">
                           Easy: {growthMetrics.codingPlatformAnalysis.totalEasySolved}
                         </span>
-                        <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-semibold">
+                        <span className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold">
                           Medium: {growthMetrics.codingPlatformAnalysis.totalMediumSolved}
                         </span>
-                        <span className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 font-semibold">
+                        <span className="px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-300 font-bold">
                           Hard: {growthMetrics.codingPlatformAnalysis.totalHardSolved}
                         </span>
                       </div>
@@ -422,7 +422,7 @@ function SkillsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-4 rounded-xl glass border border-white/10 text-center flex flex-col items-center justify-center py-6">
+                <div className="p-4 rounded-xl liquid-glass-card text-center flex flex-col items-center justify-center py-6 shadow-xs">
                   <Code2 className="h-8 w-8 text-muted-foreground/50 mb-2" />
                   <p className="text-sm font-medium text-foreground">No Coding Profiles Connected</p>
                   <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-3">
@@ -444,7 +444,7 @@ function SkillsPage() {
       <div className="grid lg:grid-cols-[1fr_2fr] gap-6">
         <div className="space-y-6 relative z-10">
           <GlassCard className="relative z-30" data-tour="skill-growth-card">
-            <h3 className="font-semibold mb-3">Your Current Skills</h3>
+            <h3 className="font-semibold mb-3 text-foreground">Your Current Skills</h3>
             {loadingSkills ? (
               <div className="flex justify-center py-6">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -454,10 +454,10 @@ function SkillsPage() {
                 {skills.map((s) => (
                   <span
                     key={s._id}
-                    className="text-xs px-3 py-1.5 rounded-full glass flex items-center gap-1.5"
+                    className="text-xs px-3 py-1.5 rounded-full glass flex items-center gap-1.5 text-foreground font-medium"
                   >
                     {s.name}
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-muted-foreground">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-muted-foreground">
                       {s.level}
                     </span>
                     <button
@@ -470,7 +470,7 @@ function SkillsPage() {
                     >
                       Verify
                     </button>
-                    <button onClick={() => setDeleteSkillId(s._id)} className="hover:text-red-400">
+                    <button onClick={() => setDeleteSkillId(s._id)} className="hover:text-red-500">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -491,24 +491,24 @@ function SkillsPage() {
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value as typeof level)}
-                className="glass-input rounded-xl px-2 py-2 text-xs outline-none"
+                className="glass-input rounded-xl px-2 py-2 text-xs outline-none bg-card text-foreground"
               >
-                <option value="beginner" className="bg-slate-900">
+                <option value="beginner">
                   Beginner
                 </option>
-                <option value="intermediate" className="bg-slate-900">
+                <option value="intermediate">
                   Intermediate
                 </option>
-                <option value="advanced" className="bg-slate-900">
+                <option value="advanced">
                   Advanced
                 </option>
-                <option value="expert" className="bg-slate-900">
+                <option value="expert">
                   Expert
                 </option>
               </select>
               <button
                 onClick={handleAddSkill}
-                className="btn-gradient btn-gradient-hover rounded-xl px-3"
+                className="btn-gradient btn-gradient-hover rounded-xl px-3 text-white shadow-sm"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -516,7 +516,7 @@ function SkillsPage() {
           </GlassCard>
 
           <GlassCard className="relative z-20">
-            <h3 className="font-semibold mb-3">Target Role</h3>
+            <h3 className="font-semibold mb-3 text-foreground">Target Role</h3>
             <TargetRoleSelect
               value={targetRole}
               onChange={(v) => {
@@ -527,7 +527,7 @@ function SkillsPage() {
             <button
               onClick={handleAnalyze}
               disabled={analyzing || !targetRole || skills.length === 0}
-              className="w-full mt-4 btn-gradient btn-gradient-hover rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
+              className="w-full mt-4 btn-gradient btn-gradient-hover rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-md disabled:opacity-50 cursor-pointer"
             >
               {analyzing ? <Loader2 className="h-4 w-4 animate-spin inline mr-2" /> : null}
               {analyzing ? "Analyzing..." : "Analyze Gap"}
@@ -539,8 +539,8 @@ function SkillsPage() {
 
           <GlassCard className="relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold flex items-center gap-2">
-                <Lightbulb className="h-4 w-4" /> Suggestions
+              <h3 className="font-semibold flex items-center gap-2 text-foreground">
+                <Lightbulb className="h-4 w-4 text-amber-500 dark:text-amber-400" /> Suggestions
               </h3>
               <button
                 onClick={handleGetSuggestions}
@@ -678,7 +678,7 @@ function SkillsPage() {
               <GlassCard variant="strong">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-xl font-semibold">{analysis.targetRole}</h3>
+                    <h3 className="text-xl font-bold text-foreground">{analysis.targetRole}</h3>
                     <p className="text-xs text-muted-foreground mt-1">
                       {analysis.matchPercentage}% core skills matched
                     </p>
@@ -687,7 +687,7 @@ function SkillsPage() {
                     <ScoreRing score={analysis.matchPercentage} size={100} stroke={10} />
                     <button
                       onClick={() => setDeleteId(analysis._id)}
-                      className="p-2 text-muted-foreground hover:text-red-400 transition"
+                      className="p-2 text-muted-foreground hover:text-red-500 transition"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -695,13 +695,13 @@ function SkillsPage() {
                 </div>
 
                 {analysis.matchedSkills.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-white/10">
-                    <p className="text-xs text-muted-foreground mb-2">Matched Skills</p>
-                    <div className="flex flex-wrap gap-1">
+                  <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10">
+                    <p className="text-xs text-muted-foreground mb-2 font-semibold">Matched Skills</p>
+                    <div className="flex flex-wrap gap-1.5">
                       {analysis.matchedSkills.map((s) => (
                         <span
                           key={s}
-                          className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-300"
+                          className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 font-medium"
                         >
                           {s}
                         </span>
@@ -711,13 +711,13 @@ function SkillsPage() {
                 )}
 
                 {coreGaps.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-white/10 space-y-3">
                     <p className="text-xs text-destructive mb-2 font-semibold">Core Gaps</p>
                     {coreGaps.map((g) => (
                       <div key={g.skillName} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium text-foreground">{g.skillName}</p>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/20 text-destructive">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/20 text-destructive font-bold">
                             core
                           </span>
                         </div>
@@ -728,13 +728,13 @@ function SkillsPage() {
                 )}
 
                 {niceGaps.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-white/10 space-y-3">
-                    <p className="text-xs text-[var(--warning)] mb-2 font-semibold">Nice-to-have Gaps</p>
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-white/10 space-y-3">
+                    <p className="text-xs text-amber-600 dark:text-[var(--warning)] mb-2 font-semibold">Nice-to-have Gaps</p>
                     {niceGaps.map((g) => (
                       <div key={g.skillName} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium text-foreground">{g.skillName}</p>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--warning)]/20 text-[var(--warning)]">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-[var(--warning)] font-semibold">
                             nice-to-have
                           </span>
                         </div>
@@ -745,13 +745,13 @@ function SkillsPage() {
                 )}
 
                 {analysis.recommendations && analysis.recommendations.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-white/10">
-                    <p className="text-xs text-muted-foreground mb-2">Recommendations</p>
-                    <ul className="space-y-1">
+                  <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10">
+                    <p className="text-xs text-muted-foreground mb-2 font-semibold">Recommendations</p>
+                    <ul className="space-y-1.5">
                       {analysis.recommendations.map((r, i) => (
-                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <TrendingUp className="h-3 w-3 mt-1 shrink-0 text-[color:var(--color-primary)]" />
-                          {r}
+                        <li key={i} className="text-sm text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                          <TrendingUp className="h-3.5 w-3.5 mt-1 shrink-0 text-[color:var(--color-primary)]" />
+                          <span>{r}</span>
                         </li>
                       ))}
                     </ul>

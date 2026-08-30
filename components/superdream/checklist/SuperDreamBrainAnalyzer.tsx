@@ -215,66 +215,66 @@ export function SuperDreamBrainAnalyzer() {
     {
       label: "Placement Score",
       icon: Crown,
-      iconColor: "#FDE68A",
-      bg: "rgba(253,230,138,0.10)",
-      border: "rgba(253,230,138,0.22)",
+      iconColor: "#D97706",
+      bg: "rgba(245,158,11,0.12)",
+      border: "rgba(245,158,11,0.28)",
       value: (
         <>
-          <span className="text-3xl font-mono font-bold" style={{ color: "#FDE68A" }}>
+          <span className="text-3xl font-mono font-black text-amber-600 dark:text-amber-400">
             {totalObtained}
           </span>
-          <span className="text-xs text-[var(--muted-foreground)] font-mono ml-1">/ 100</span>
+          <span className="text-xs text-slate-600 dark:text-slate-400 font-mono ml-1">/ 100</span>
         </>
       ),
       sub: tier.packageRange,
-      subColor: "#FDE68A",
+      subColor: "#D97706",
     },
     {
       label: "Overall Readiness",
       icon: Activity,
-      iconColor: "#7DD3FC",
-      bg: "rgba(125,211,252,0.08)",
-      border: "rgba(125,211,252,0.20)",
+      iconColor: "#0284C7",
+      bg: "rgba(14,165,233,0.12)",
+      border: "rgba(14,165,233,0.28)",
       value: (
-        <span className="text-3xl font-mono font-bold text-[var(--foreground)]">
+        <span className="text-3xl font-mono font-black text-sky-600 dark:text-sky-400">
           {Math.round(summaries.reduce((a, s) => a + s.readinessScore, 0) / 10)}%
         </span>
       ),
       sub: "10-Axis Aggregate",
-      subColor: "#86EFAC",
+      subColor: "#0284C7",
     },
     {
       label: "Tasks Completed",
       icon: CheckCircle2,
-      iconColor: "#86EFAC",
-      bg: "rgba(134,239,172,0.08)",
-      border: "rgba(134,239,172,0.20)",
+      iconColor: "#059669",
+      bg: "rgba(16,185,129,0.12)",
+      border: "rgba(16,185,129,0.28)",
       value: (
         <>
-          <span className="text-3xl font-mono font-bold" style={{ color: "#86EFAC" }}>
+          <span className="text-3xl font-mono font-black text-emerald-600 dark:text-emerald-400">
             {completedCount}
           </span>
-          <span className="text-xs text-[var(--muted-foreground)] font-mono ml-1">
+          <span className="text-xs text-slate-600 dark:text-slate-400 font-mono ml-1">
             / {completedCount + inProgressCount + pendingCount}
           </span>
         </>
       ),
       sub: `${inProgressCount} in review queue`,
-      subColor: "var(--muted-foreground)",
+      subColor: "#059669",
     },
     {
       label: "Target Level Tier",
       icon: Award,
-      iconColor: "#C4B5FD",
-      bg: "rgba(196,181,253,0.08)",
-      border: "rgba(196,181,253,0.20)",
+      iconColor: "#7C3AED",
+      bg: "rgba(139,92,246,0.12)",
+      border: "rgba(139,92,246,0.28)",
       value: (
-        <p className="text-sm font-semibold text-[var(--foreground)] leading-tight pt-0.5">
+        <p className="text-sm font-bold text-purple-700 dark:text-purple-300 leading-tight pt-0.5">
           {tier.tierName}
         </p>
       ),
       sub: "Campus Placement Protocol",
-      subColor: "#C4B5FD",
+      subColor: "#7C3AED",
     },
   ];
 

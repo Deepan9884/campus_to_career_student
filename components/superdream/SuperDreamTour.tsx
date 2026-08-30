@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   ShieldCheck,
   Zap,
-  Target,
   Award,
 } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -48,13 +47,13 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-amber-400",
     accentGradient: "from-amber-500/20 via-indigo-500/20 to-amber-500/10",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
-          The <strong className="text-white font-bold">Super Dream Track</strong> is an elite preparation ecosystem designed for high-tier recruitment drives (Google, Microsoft, Amazon, Uber, and top-tier startups).
+          The <strong className="text-white font-bold">Super Dream Track</strong> is an elite preparation ecosystem designed for high-tier recruitment drives (Google, Microsoft, Amazon, Uber, and top-tier product startups).
         </p>
-        <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-transparent border border-amber-500/30 text-xs text-amber-200 flex items-start gap-2.5">
-          <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-          <span>
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs sm:text-sm text-amber-200 flex items-start gap-3">
+          <Zap className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">
             Everything here is organized into 7 specialized modules reviewed by industry mentors and verified with cryptographic proof scanning.
           </span>
         </div>
@@ -71,25 +70,25 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-cyan-400",
     accentGradient: "from-cyan-500/20 via-indigo-500/20 to-transparent",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
-          Navigate through <strong className="text-white">4 structured trajectory phases</strong>: from Low-Level Fundamentals to High-Concurrency Distributed Architecture.
+          Navigate through <strong className="text-white font-bold">4 structured trajectory phases</strong>: from Low-Level Fundamentals to High-Concurrency Distributed Architecture.
         </p>
-        <ul className="space-y-2 text-xs">
-          <li className="flex items-start gap-2">
-            <div className="p-0.5 rounded bg-cyan-500/20 text-cyan-300 shrink-0 mt-0.5">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+        <ul className="space-y-2.5 text-xs sm:text-sm">
+          <li className="flex items-start gap-2.5">
+            <div className="p-1 rounded-lg bg-cyan-500/20 text-cyan-300 shrink-0 mt-0.5">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
-            <span>
-              <strong className="text-white">Mentor Directives:</strong> Follow precise guidelines and office hours from your principal architect mentor.
+            <span className="text-slate-200">
+              <strong className="text-white font-bold">Mentor Directives:</strong> Follow precise guidelines and office hours from your principal architect mentor.
             </span>
           </li>
-          <li className="flex items-start gap-2">
-            <div className="p-0.5 rounded bg-cyan-500/20 text-cyan-300 shrink-0 mt-0.5">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+          <li className="flex items-start gap-2.5">
+            <div className="p-1 rounded-lg bg-cyan-500/20 text-cyan-300 shrink-0 mt-0.5">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
-            <span>
-              <strong className="text-white">Deliverable Submissions:</strong> Submit repository links and architecture notes directly for mentor evaluations.
+            <span className="text-slate-200">
+              <strong className="text-white font-bold">Deliverable Submissions:</strong> Submit repository links and architecture notes directly for mentor evaluations.
             </span>
           </li>
         </ul>
@@ -106,16 +105,16 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-emerald-400",
     accentGradient: "from-emerald-500/20 via-teal-500/20 to-transparent",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
           Complete high-yield system design and algorithm curriculums from Stanford, MIT, and Linux Foundation.
         </p>
-        <div className="p-3.5 rounded-xl bg-slate-950 border border-emerald-500/30 space-y-1.5 text-xs">
-          <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+        <div className="p-4 rounded-2xl bg-[#070b16] border border-emerald-500/30 space-y-2 text-xs sm:text-sm">
+          <div className="flex items-center gap-2 text-emerald-400 font-bold">
             <ShieldCheck className="w-4 h-4" /> AI Verification Protocol:
           </div>
           <p className="text-slate-300 leading-relaxed">
-            Upload your completion certificate URL or PDF. The neural scanner verifies your name, issuer cryptographic ID, and checks syllabus coverage before granting verified status.
+            Upload your completion certificate URL or PDF. The neural scanner verifies your name, issuer cryptographic ID, and syllabus coverage before granting verified status.
           </p>
         </div>
       </div>
@@ -131,18 +130,18 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-amber-400",
     accentGradient: "from-amber-500/20 via-orange-500/20 to-transparent",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
           Log your hackathon participations, competitive podiums, and CTF challenges with complete recruiter verification.
         </p>
-        <ul className="space-y-2 text-xs">
-          <li className="flex items-start gap-2">
-            <span className="text-amber-400 font-bold">✓</span>
-            <span><strong className="text-white">AI Description Generator:</strong> Generate crisp, technical STAR project descriptions from your tech stack.</span>
+        <ul className="space-y-2.5 text-xs sm:text-sm">
+          <li className="flex items-start gap-2.5">
+            <span className="text-amber-400 font-bold mt-0.5">✓</span>
+            <span className="text-slate-200"><strong className="text-white font-bold">AI Description Generator:</strong> Generate crisp, technical STAR project descriptions from your tech stack.</span>
           </li>
-          <li className="flex items-start gap-2">
-            <span className="text-amber-400 font-bold">✓</span>
-            <span><strong className="text-white">Certificate Viewer:</strong> Attach and view proof documents directly inside the interactive modal.</span>
+          <li className="flex items-start gap-2.5">
+            <span className="text-amber-400 font-bold mt-0.5">✓</span>
+            <span className="text-slate-200"><strong className="text-white font-bold">Certificate Viewer:</strong> Attach and view proof documents directly inside the interactive modal.</span>
           </li>
         </ul>
       </div>
@@ -158,12 +157,12 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-purple-400",
     accentGradient: "from-purple-500/20 via-indigo-500/20 to-transparent",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
           A dedicated syllabus hand-selected by industry mentors rather than algorithmic guesses, covering cache coherence, lock-free memory, and Raft consensus.
         </p>
-        <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200 flex items-center gap-2">
-          <Award className="w-4 h-4 text-purple-400 shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/25 text-xs sm:text-sm text-purple-200 flex items-center gap-2.5">
+          <Award className="w-5 h-5 text-purple-400 shrink-0" />
           <span>Includes timed topic quizzes with comprehensive explanations and an 80% passing mark.</span>
         </div>
       </div>
@@ -179,11 +178,11 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-sky-400",
     accentGradient: "from-sky-500/20 via-indigo-500/20 to-transparent",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
           Connect your competitive programming handles to track real-time telemetry across Easy, Medium, and FAANG Hard tiers.
         </p>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
           Provides curated high-yield problem recommendations tailored for Super Dream placement interviews.
         </p>
       </div>
@@ -199,16 +198,16 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-rose-400",
     accentGradient: "from-rose-500/20 via-amber-500/20 to-transparent",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
           Test your dynamic programming, concurrency, and architecture speed under realistic exam conditions.
         </p>
-        <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-200">
-          <span className="p-2 rounded-lg bg-slate-950 border border-white/10 flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-rose-400" /> Proctored Timer
+        <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm font-semibold text-slate-100">
+          <span className="p-3 rounded-xl bg-[#070b16] border border-white/10 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-rose-400" /> Proctored Timer
           </span>
-          <span className="p-2 rounded-lg bg-slate-950 border border-white/10 flex items-center gap-1.5">
-            <BarChart3 className="w-3.5 h-3.5 text-amber-400" /> Instant Scorecards
+          <span className="p-3 rounded-xl bg-[#070b16] border border-white/10 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-amber-400" /> Instant Scorecards
           </span>
         </div>
       </div>
@@ -224,13 +223,13 @@ const SUPER_DREAM_TOUR_STEPS: SuperDreamTourStep[] = [
     iconColor: "text-indigo-400",
     accentGradient: "from-indigo-500/20 via-purple-500/20 to-transparent",
     content: (
-      <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+      <div className="space-y-3.5 text-sm text-slate-200">
         <p className="leading-relaxed">
-          Comprehensive telemetry highlighting your <strong className="text-white">Readiness Index (88/100)</strong>, Radar evaluation against FAANG benchmarks, and one-click Placement Dossier export for recruiters.
+          Comprehensive telemetry highlighting your <strong className="text-white font-bold">Readiness Index (88/100)</strong>, Radar evaluation against FAANG benchmarks, and one-click Placement Dossier export for recruiters.
         </p>
-        <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-xs text-indigo-300 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>You are ready to begin your Super Dream preparation!</span>
+        <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-xs sm:text-sm text-indigo-300 flex items-center gap-2.5">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="font-semibold">You are ready to begin your Super Dream preparation!</span>
         </div>
       </div>
     ),
@@ -285,44 +284,47 @@ export function SuperDreamTour({ open, onClose }: SuperDreamTourProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-      <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-amber-500/40 p-6 shadow-2xl space-y-5 text-white relative">
+      <div className="w-full max-w-lg rounded-3xl bg-[#0b1222] border border-amber-500/40 p-6 sm:p-7 shadow-2xl space-y-5 text-slate-100 relative overflow-hidden ring-1 ring-amber-500/20">
+        {/* Subtle Ambient Glow */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
+          className="absolute top-5 right-5 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer border border-white/5"
           title="Close Tour"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {/* Header */}
-        <div className="flex items-start gap-3.5 pr-8">
-          <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-white/10 grid place-items-center shrink-0 shadow-lg shadow-indigo-950/50">
+        <div className="flex items-start gap-4 pr-10">
+          <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-slate-900 to-[#070b16] border border-amber-500/30 grid place-items-center shrink-0 shadow-lg shadow-black/50">
             <Icon className={cn("w-6 h-6", stepData.iconColor)} />
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
                 {stepData.badge}
               </span>
-              <span className="text-xs text-slate-400 font-mono">
+              <span className="text-xs text-slate-400 font-mono font-medium">
                 Step {stepData.step} of {SUPER_DREAM_TOUR_STEPS.length}
               </span>
             </div>
-            <h3 className="text-lg font-bold text-white tracking-tight">{stepData.title}</h3>
-            <p className="text-xs text-slate-400">{stepData.subtitle}</p>
+            <h3 className="text-xl font-bold text-white tracking-tight">{stepData.title}</h3>
+            <p className="text-xs sm:text-sm text-slate-300 font-medium">{stepData.subtitle}</p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="py-2">{stepData.content}</div>
+        <div className="py-1 min-h-[110px] flex flex-col justify-center">{stepData.content}</div>
 
         {/* Footer Navigation */}
         <div className="flex items-center justify-between pt-4 border-t border-white/10">
           <button
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-white transition font-medium"
+            className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors font-medium px-2 py-1 rounded-lg hover:bg-white/5 cursor-pointer"
           >
             Skip Tour
           </button>
@@ -334,10 +336,10 @@ export function SuperDreamTour({ open, onClose }: SuperDreamTourProps) {
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-300",
                   idx === currentStepIndex
-                    ? "w-5 bg-amber-400"
+                    ? "w-6 bg-amber-400 shadow-sm shadow-amber-400/50"
                     : idx < currentStepIndex
-                    ? "w-1.5 bg-indigo-500"
-                    : "w-1.5 bg-slate-800"
+                    ? "w-2 bg-amber-500/50"
+                    : "w-2 bg-slate-700"
                 )}
               />
             ))}
@@ -347,7 +349,7 @@ export function SuperDreamTour({ open, onClose }: SuperDreamTourProps) {
             <button
               disabled={currentStepIndex === 0}
               onClick={handlePrev}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 transition cursor-pointer"
+              className="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 disabled:opacity-25 disabled:cursor-not-allowed transition cursor-pointer"
               title="Previous Step"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -355,7 +357,7 @@ export function SuperDreamTour({ open, onClose }: SuperDreamTourProps) {
 
             <button
               onClick={handleNext}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 via-indigo-600 to-amber-500 hover:opacity-95 text-white transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-500 hover:bg-amber-400 active:scale-98 text-slate-950 transition-all flex items-center gap-1.5 shadow-lg shadow-amber-500/25 cursor-pointer"
             >
               {currentStepIndex === SUPER_DREAM_TOUR_STEPS.length - 1 ? (
                 <span>Finish Tour</span>
@@ -372,3 +374,4 @@ export function SuperDreamTour({ open, onClose }: SuperDreamTourProps) {
     </div>
   );
 }
+

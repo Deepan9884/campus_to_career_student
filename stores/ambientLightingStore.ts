@@ -14,6 +14,8 @@ export type AmbientPresetId =
 export type LightIntensity = "subtle" | "balanced" | "vivid" | "radiant";
 export type MotionSpeed = "static" | "calm" | "flow" | "dynamic";
 export type StarDensity = "low" | "medium" | "high";
+export type UiMode = "minimal" | "immersive" | "custom";
+export type BackgroundType = "none" | "solid" | "stars" | "orbs" | "full";
 
 export interface AmbientPreset {
   id: AmbientPresetId;
@@ -139,8 +141,36 @@ export const AMBIENT_PRESETS: AmbientPreset[] = [
   },
 ];
 
+export const SOLID_BACKGROUND_PALETTE = [
+  // Dark Solid Canvas
+  { label: "Deep Obsidian", color: "#0B0F19", text: "text-white", theme: "dark", accent: "carbon", preset: "cosmic-violet" },
+  { label: "Pure Carbon", color: "#05070B", text: "text-white", theme: "dark", accent: "carbon", preset: "cosmic-violet" },
+  { label: "Midnight Slate", color: "#0F172A", text: "text-white", theme: "dark", accent: "cyan", preset: "cyber-cyan" },
+  { label: "Dark Zinc", color: "#18181B", text: "text-white", theme: "dark", accent: "zinc", preset: "cosmic-violet" },
+  { label: "Rich Navy", color: "#0A1128", text: "text-white", theme: "dark", accent: "cyan", preset: "cyber-cyan" },
+  { label: "Charcoal Black", color: "#121212", text: "text-white", theme: "dark", accent: "charcoal", preset: "cosmic-violet" },
+  { label: "Deep Violet", color: "#130E26", text: "text-white", theme: "dark", accent: "purple", preset: "cosmic-violet" },
+  { label: "Dark Forest", color: "#061A14", text: "text-white", theme: "dark", accent: "emerald", preset: "aurora-emerald" },
+  // Light Solid Canvas
+  { label: "Pure White", color: "#FFFFFF", text: "text-slate-900", theme: "light", accent: "indigo", preset: "cosmic-violet" },
+  { label: "Soft Pearl", color: "#FAF8FF", text: "text-slate-900", theme: "light", accent: "indigo", preset: "cosmic-violet" },
+  { label: "Clean Alabaster", color: "#F8FAFC", text: "text-slate-900", theme: "light", accent: "cyan", preset: "cyber-cyan" },
+  { label: "Warm Linen", color: "#FDFBF7", text: "text-slate-900", theme: "light", accent: "amber", preset: "sunset-amber" },
+  { label: "Lavender Mist", color: "#F5F3FF", text: "text-slate-900", theme: "light", accent: "purple", preset: "cosmic-violet" },
+  { label: "Ice Blue Tint", color: "#F0F9FF", text: "text-slate-900", theme: "light", accent: "cyan", preset: "cyber-cyan" },
+  { label: "Mint Cream", color: "#F0FDF4", text: "text-slate-900", theme: "light", accent: "emerald", preset: "aurora-emerald" },
+  { label: "Rose Quartz", color: "#FFF1F2", text: "text-slate-900", theme: "light", accent: "rose", preset: "sakura-rose" },
+];
+
 interface AmbientLightingState {
+  // Preset & Color state
   presetId: AmbientPresetId;
+  uiMode: UiMode;
+  backgroundType: BackgroundType;
+  glassPanelsEnabled: boolean;
+  solidBackgroundColor: string;
+  orbsEnabled: boolean;
+  backgroundOpacity: number;
   intensity: LightIntensity;
   motionSpeed: MotionSpeed;
   starsEnabled: boolean;
@@ -156,6 +186,12 @@ interface AmbientLightingState {
   };
 
   // Actions
+  setUiMode: (uiMode: UiMode) => void;
+  setBackgroundType: (backgroundType: BackgroundType) => void;
+  setGlassPanelsEnabled: (enabled: boolean) => void;
+  setSolidBackgroundColor: (color: string, customAccent?: string) => void;
+  setOrbsEnabled: (enabled: boolean) => void;
+  setBackgroundOpacity: (opacity: number) => void;
   setPreset: (presetId: AmbientPresetId) => void;
   setIntensity: (intensity: LightIntensity) => void;
   setMotionSpeed: (speed: MotionSpeed) => void;
@@ -172,12 +208,18 @@ export const useAmbientLighting = create<AmbientLightingState>()(
   persist(
     (set) => ({
       presetId: "cosmic-violet",
-      intensity: "vivid",
+      uiMode: "immersive",
+      backgroundType: "full",
+      glassPanelsEnabled: true,
+      solidBackgroundColor: "#0B0F19",
+      orbsEnabled: true,
+      backgroundOpacity: 100,
+      intensity: "balanced",
       motionSpeed: "flow",
       starsEnabled: true,
       starDensity: "medium",
       interactiveConstellations: true,
-      shootingStars: true,
+      shootingStars: false,
       clickRipple: true,
       customColors: {
         orb1: "#8B5CF6",
@@ -185,6 +227,76 @@ export const useAmbientLighting = create<AmbientLightingState>()(
         orb3: "#6366F1",
         starTint: "#C4B5FD",
       },
+
+      setUiMode: (uiMode) => {
+        if (uiMode === "minimal") {
+          set({
+            uiMode: "minimal",
+            glassPanelsEnabled: false,
+          });
+          if (typeof document !== "undefined") {
+            document.documentElement.setAttribute("data-glass", "off");
+          }
+        } else if (uiMode === "immersive") {
+          set({
+            uiMode: "immersive",
+            glassPanelsEnabled: true,
+          });
+          if (typeof document !== "undefined") {
+            document.documentElement.setAttribute("data-glass", "on");
+          }
+        } else {
+          set({ uiMode: "custom" });
+        }
+      },
+
+      setBackgroundType: (backgroundType) => {
+        set((state) => ({
+          backgroundType,
+          uiMode: "custom",
+          starsEnabled: backgroundType === "stars" || backgroundType === "full",
+          orbsEnabled: backgroundType === "orbs" || backgroundType === "full",
+        }));
+      },
+
+      setGlassPanelsEnabled: (enabled) => {
+        set({ glassPanelsEnabled: enabled, uiMode: "custom" });
+        if (typeof document !== "undefined") {
+          document.documentElement.setAttribute("data-glass", enabled ? "on" : "off");
+        }
+      },
+
+      setSolidBackgroundColor: (color, customAccent) => {
+        const found = SOLID_BACKGROUND_PALETTE.find((s) => s.color.toLowerCase() === color.toLowerCase());
+        const targetAccent = customAccent || found?.accent;
+        const targetPreset = (found as any)?.preset as AmbientPresetId | undefined;
+
+        if (targetAccent && typeof document !== "undefined") {
+          document.documentElement.setAttribute("data-accent", targetAccent);
+          try {
+            localStorage.setItem("c2c_accent", targetAccent);
+          } catch {}
+        }
+
+        set((state) => ({
+          solidBackgroundColor: color,
+          backgroundType: "solid",
+          uiMode: state.uiMode === "minimal" ? "minimal" : state.uiMode,
+          presetId: targetPreset || state.presetId,
+        }));
+      },
+
+      setOrbsEnabled: (enabled) => {
+        set((state) => ({
+          orbsEnabled: enabled,
+          uiMode: "custom",
+          backgroundType: enabled
+            ? (state.starsEnabled ? "full" : "orbs")
+            : (state.starsEnabled ? "stars" : (state.backgroundType === "solid" ? "solid" : "none")),
+        }));
+      },
+
+      setBackgroundOpacity: (backgroundOpacity) => set({ backgroundOpacity }),
 
       setPreset: (presetId) => {
         const found = AMBIENT_PRESETS.find((p) => p.id === presetId);
@@ -199,7 +311,14 @@ export const useAmbientLighting = create<AmbientLightingState>()(
 
       setIntensity: (intensity) => set({ intensity }),
       setMotionSpeed: (motionSpeed) => set({ motionSpeed }),
-      setStarsEnabled: (starsEnabled) => set({ starsEnabled }),
+      setStarsEnabled: (starsEnabled) =>
+        set((state) => ({
+          starsEnabled,
+          uiMode: "custom",
+          backgroundType: starsEnabled
+            ? (state.orbsEnabled ? "full" : "stars")
+            : (state.orbsEnabled ? "orbs" : (state.backgroundType === "solid" ? "solid" : "none")),
+        })),
       setStarDensity: (starDensity) => set({ starDensity }),
       setInteractiveConstellations: (interactiveConstellations) =>
         set({ interactiveConstellations }),
@@ -214,18 +333,25 @@ export const useAmbientLighting = create<AmbientLightingState>()(
       resetDefaults: () => {
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-accent", "indigo");
+          document.documentElement.setAttribute("data-glass", "on");
           try {
             localStorage.setItem("c2c_accent", "indigo");
           } catch {}
         }
         set({
           presetId: "cosmic-violet",
-          intensity: "vivid",
+          uiMode: "immersive",
+          backgroundType: "full",
+          glassPanelsEnabled: true,
+          solidBackgroundColor: "#0B0F19",
+          orbsEnabled: true,
+          backgroundOpacity: 100,
+          intensity: "balanced",
           motionSpeed: "flow",
           starsEnabled: true,
           starDensity: "medium",
           interactiveConstellations: true,
-          shootingStars: true,
+          shootingStars: false,
           clickRipple: true,
           customColors: {
             orb1: "#8B5CF6",
@@ -237,7 +363,7 @@ export const useAmbientLighting = create<AmbientLightingState>()(
       },
     }),
     {
-      name: "c2c_ambient_lighting_v1",
+      name: "c2c_ambient_lighting_v2",
     }
   )
 );

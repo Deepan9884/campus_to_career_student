@@ -224,7 +224,7 @@ function CodingPlatformsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+                <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-foreground">
                     <Target className="h-7 w-7 text-[color:var(--color-primary)]" />
                     Coding Dashboard & Platform Telemetry
                 </h1>
@@ -245,8 +245,10 @@ function CodingPlatformsPage() {
                             key={p.key}
                             onClick={() => setActive(p.key)}
                             className={cn(
-                                "text-xs px-3 py-2 rounded-xl glass hover:bg-white/10 transition flex items-center gap-2",
-                                active === p.key ? "btn-gradient text-white" : "text-muted-foreground"
+                                "text-xs px-3 py-2 rounded-xl transition flex items-center gap-2 cursor-pointer font-medium",
+                                active === p.key
+                                    ? "btn-gradient text-white shadow-md font-semibold"
+                                    : "glass hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-muted-foreground"
                             )}
                         >
                             {p.icon}
@@ -260,7 +262,7 @@ function CodingPlatformsPage() {
                 {/* Left: profile + refresh */}
                 <div className="space-y-6">
                     <GlassCard>
-                        <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <h3 className="font-semibold mb-3 flex items-center gap-2 text-foreground">
                             {activePlatformMeta.icon}
                             {activePlatformMeta.label} Profile
                         </h3>
@@ -268,7 +270,7 @@ function CodingPlatformsPage() {
                             Paste the profile URL. Username will be extracted server-side.
                         </p>
 
-                        <label className="text-xs text-muted-foreground mb-1.5 block">Profile URL</label>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-muted-foreground mb-1.5 block">Profile URL</label>
                         <div className="flex gap-2">
                             <input
                                 value={profileUrls[active]}
@@ -280,14 +282,14 @@ function CodingPlatformsPage() {
                             />
                             <button
                                 onClick={() => handleSubmitUrl(active)}
-                                className="btn-gradient btn-gradient-hover rounded-xl px-4 text-sm font-semibold"
+                                className="btn-gradient btn-gradient-hover rounded-xl px-4 text-sm font-semibold text-white shadow-md cursor-pointer"
                             >
                                 Save
                             </button>
                         </div>
 
                         {errors[active] && (
-                            <div className="mt-3 flex items-start gap-2 text-sm text-red-300">
+                            <div className="mt-3 flex items-start gap-2 text-sm text-red-500 dark:text-red-300">
                                 <AlertTriangle className="h-4 w-4 mt-0.5" />
                                 <span>{errors[active]}</span>
                             </div>
@@ -297,7 +299,7 @@ function CodingPlatformsPage() {
                             <button
                                 onClick={() => handleRefresh(active)}
                                 disabled={Boolean(loading[active])}
-                                className="glass rounded-xl px-4 py-2 text-sm hover:bg-white/10 disabled:opacity-50 flex items-center gap-2"
+                                className="glass rounded-xl px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                             >
                                 {loading[active] ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -312,7 +314,7 @@ function CodingPlatformsPage() {
                                     setProfileUrls((s) => ({ ...s, [active]: "" }));
                                     toast.success("Cleared");
                                 }}
-                                className="glass rounded-xl px-4 py-2 text-sm hover:bg-white/10 flex items-center gap-2"
+                                className="glass rounded-xl px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 flex items-center gap-2 cursor-pointer"
                             >
                                 Clear
                             </button>
@@ -320,11 +322,11 @@ function CodingPlatformsPage() {
                     </GlassCard>
 
                     <GlassCard>
-                        <h3 className="font-semibold mb-3">Connected Stats</h3>
+                        <h3 className="font-semibold mb-3 text-foreground">Connected Stats</h3>
                         {statsByPlatform[active] ? (
                             <div className="space-y-3">
                                 <StatRow label="Solved" value={statsByPlatform[active]?.solved ?? "—"} />
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-muted-foreground font-semibold">
                                     Difficulty breakdown:
                                 </div>
                                 {statsByPlatform[active]?.byDifficulty ? (
@@ -332,7 +334,7 @@ function CodingPlatformsPage() {
                                         {Object.entries(statsByPlatform[active]!.byDifficulty!).map(([k, v]) => (
                                             <li key={k} className="flex items-center justify-between">
                                                 <span className="text-muted-foreground">{k}</span>
-                                                <span className="font-medium">{v}</span>
+                                                <span className="font-bold text-foreground">{v}</span>
                                             </li>
                                         ))}
                                     </ul>
@@ -351,7 +353,7 @@ function CodingPlatformsPage() {
                 {/* Right: recommendations */}
                 <div className="space-y-6">
                     <GlassCard>
-                        <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <h3 className="font-semibold mb-3 flex items-center gap-2 text-foreground">
                             <BookOpen className="h-4 w-4 text-[color:var(--color-primary)]" />
                             Recommended Problems
                         </h3>
@@ -370,13 +372,13 @@ function CodingPlatformsPage() {
                                     key={`${r.url}-${idx}`}
                                     className={cn(
                                         "glass rounded-xl p-3 flex items-start justify-between gap-3 transition",
-                                        idx === 0 ? "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10" : "hover:bg-white/5"
+                                        idx === 0 ? "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10" : "hover:bg-slate-100 dark:hover:bg-white/5"
                                     )}
                                 >
                                     <div className="min-w-0">
                                         <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 flex-wrap">
-                                            {idx === 0 && <Flame className="h-3 w-3 text-amber-400" />}
-                                            {idx === 0 ? <span className="text-amber-400 font-medium">Daily Challenge • {r.topic}</span> : <span>{r.topic}</span>}
+                                            {idx === 0 && <Flame className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />}
+                                            {idx === 0 ? <span className="text-amber-600 dark:text-amber-400 font-semibold">Daily Challenge • {r.topic}</span> : <span>{r.topic}</span>}
                                             {r.difficulty && (
                                                 <span className={cn(
                                                     "px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none",
@@ -417,7 +419,7 @@ function CodingPlatformsPage() {
                     </GlassCard>
 
                     <GlassCard variant="strong">
-                        <p className="text-sm font-semibold mb-2">Note</p>
+                        <p className="text-sm font-semibold mb-2 text-foreground">Note</p>
                         <p className="text-xs text-muted-foreground">
                             This page includes the UX/tabs layout now. Backend endpoints for coding
                             stats + caching + recommendations will replace the placeholder UI.
@@ -433,7 +435,7 @@ function StatRow({ label, value }: { label: string; value: string | number }) {
     return (
         <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">{label}</span>
-            <span className="font-semibold">{value}</span>
+            <span className="font-bold text-foreground">{value}</span>
         </div>
     );
 }

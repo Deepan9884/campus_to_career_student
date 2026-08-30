@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { uploadResume, getResumeHistory, getResumeById, deleteResume, improveBulletPoint } from "@/lib/resume-api";
+import { AiStatusBadge } from "@/components/ui/AiStatusBadge";
 import type { Resume, Pagination } from "@/types/resume";
 
 function ImprovementItem({ imp, role }: { imp: string; role?: string }) {
@@ -373,14 +374,14 @@ export function ResumeAnalyzerView({
             {onBackToPillars && (
               <button
                 onClick={onBackToPillars}
-                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-muted-foreground hover:text-white border border-white/10 flex items-center gap-1.5 transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-muted-foreground hover:text-foreground border border-border flex items-center gap-1.5 transition cursor-pointer"
                 title="Return to Target Pillars"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Pillars</span>
               </button>
             )}
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">{title}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
           </div>
           <p className="text-muted-foreground text-sm">
             {subtitle}
@@ -391,7 +392,7 @@ export function ResumeAnalyzerView({
           {onBackToPillars && (
             <button
               onClick={onBackToPillars}
-              className="glass rounded-xl px-3.5 py-2 text-xs font-medium hover:bg-white/10 flex items-center gap-1.5 text-muted-foreground hover:text-white transition cursor-pointer"
+              className="glass rounded-xl px-3.5 py-2 text-xs font-medium hover:bg-muted flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back to Pillars
             </button>
@@ -400,7 +401,7 @@ export function ResumeAnalyzerView({
           {hasActiveAnalysis && (
             <button
               onClick={resetUpload}
-              className="self-start md:self-auto glass rounded-xl px-4 py-2 text-xs font-medium hover:bg-white/10 flex items-center gap-2 transition cursor-pointer"
+              className="self-start md:self-auto glass rounded-xl px-4 py-2 text-xs font-medium hover:bg-muted flex items-center gap-2 transition cursor-pointer"
             >
               <RefreshCw className="h-3.5 w-3.5 text-indigo-400" /> New Analysis
             </button>
@@ -425,19 +426,19 @@ export function ResumeAnalyzerView({
             <GlassCard data-tour="resume-upload-zone" className="relative overflow-visible">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h3 className="text-lg font-bold flex items-center gap-2 text-white">
-                    <Upload className="h-5 w-5 text-indigo-400" /> Upload Resume for AI Analysis
+                  <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
+                    <Upload className="h-5 w-5 text-indigo-500 dark:text-indigo-400" /> Upload Resume for AI Analysis
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
                     Upload your resume in PDF or DOCX format for real-time ATS scoring, keyword detection, and AI bullet optimization.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs flex items-center gap-1.5 font-medium">
-                    <FileText className="h-3 w-3 text-indigo-400" /> Instant ATS Score
+                  <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs flex items-center gap-1.5 font-medium">
+                    <FileText className="h-3 w-3 text-indigo-500 dark:text-indigo-400" /> Instant ATS Score
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs flex items-center gap-1.5 font-medium">
-                    <Target className="h-3 w-3 text-blue-400" /> Keyword Gap Detection
+                  <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-xs flex items-center gap-1.5 font-medium">
+                    <Target className="h-3 w-3 text-blue-500 dark:text-blue-400" /> Keyword Gap Detection
                   </span>
                 </div>
               </div>
@@ -459,14 +460,14 @@ export function ResumeAnalyzerView({
                 className={`cursor-pointer border-2 border-dashed rounded-2xl p-10 md:p-12 text-center transition-all duration-300 ${
                   dragging
                     ? "border-indigo-500 bg-indigo-500/10 scale-[0.99]"
-                    : "border-white/15 hover:border-indigo-400/50 hover:bg-white/[0.02]"
+                    : "border-slate-300 dark:border-white/15 hover:border-indigo-500 dark:hover:border-indigo-400/50 hover:bg-slate-50 dark:hover:bg-white/[0.02]"
                 }`}
               >
-                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4 text-indigo-400 group-hover:scale-105 transition">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition">
                   <Upload className="h-7 w-7" />
                 </div>
-                <h4 className="text-base font-semibold text-white">
-                  Drag & drop your resume here, or <span className="text-indigo-400 underline underline-offset-4">browse files</span>
+                <h4 className="text-base font-semibold text-foreground">
+                  Drag & drop your resume here, or <span className="text-indigo-600 dark:text-indigo-400 underline underline-offset-4">browse files</span>
                 </h4>
                 <p className="text-xs text-muted-foreground mt-2">
                   Supports PDF and DOCX files up to 5MB.
@@ -481,8 +482,8 @@ export function ResumeAnalyzerView({
               </div>
 
               {/* Optional Target Role */}
-              <div className="mt-5 max-w-md relative z-30">
-                <label className="text-xs font-medium text-muted-foreground block mb-1.5">
+              <div className="mt-5 max-w-md relative z-20">
+                <label className="text-xs font-medium text-slate-700 dark:text-muted-foreground block mb-1.5">
                   Target Role (Optional — helps tailor ATS keywords to your dream position)
                 </label>
                 <TargetRoleSelect
@@ -494,7 +495,7 @@ export function ResumeAnalyzerView({
 
               {mode === "failed" && (
                 <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
-                  <p className="text-xs text-red-300">{errorMsg}</p>
+                  <p className="text-xs text-red-600 dark:text-red-300">{errorMsg}</p>
                   <button
                     onClick={resetUpload}
                     className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition cursor-pointer"
@@ -509,12 +510,12 @@ export function ResumeAnalyzerView({
             <div className="grid lg:grid-cols-2 gap-6 items-start">
               {/* Left Column: Upload History */}
               <GlassCard className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/5">
                   <div>
-                    <h3 className="font-bold text-sm flex items-center gap-2 text-white">
-                      <FileText className="h-4 w-4 text-indigo-400" /> Upload History
+                    <h3 className="font-bold text-sm flex items-center gap-2 text-foreground">
+                      <FileText className="h-4 w-4 text-indigo-500 dark:text-indigo-400" /> Upload History
                       {history.length > 0 && (
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20">
                           {pagination ? pagination.total : history.length}
                         </span>
                       )}
@@ -539,15 +540,15 @@ export function ResumeAnalyzerView({
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2.5">
                         <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30">
-                          <TrendingUp className="h-4 w-4 text-indigo-400" />
+                          <TrendingUp className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-sm text-white">Score History & Trend</h3>
+                          <h3 className="font-bold text-sm text-foreground">Score History & Trend</h3>
                           <p className="text-[11px] text-muted-foreground">Your ATS score progression over time</p>
                         </div>
                       </div>
                       {chartData.length >= 2 && (
-                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
                           {chartData[chartData.length - 1].score > chartData[0].score ? "Improving" : "Track Progress"}
                         </span>
@@ -558,10 +559,10 @@ export function ResumeAnalyzerView({
                       <div className="h-44 grid place-items-center text-center py-2">
                         <div className="space-y-2">
                           <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
-                            <TrendingUp className="h-6 w-6 text-indigo-400/60" />
+                            <TrendingUp className="h-6 w-6 text-indigo-500 dark:text-indigo-400/60" />
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-slate-300">Not enough data yet</p>
+                            <p className="text-xs font-medium text-slate-800 dark:text-slate-300">Not enough data yet</p>
                             <p className="text-[11px] text-muted-foreground mt-0.5">
                               Upload more resumes to see your score trend unfold
                             </p>
@@ -571,25 +572,25 @@ export function ResumeAnalyzerView({
                     ) : (
                       <>
                         <div className="flex gap-2 mb-4">
-                          <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                          <div className="flex-1 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] text-center">
                             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Highest</p>
-                            <p className="text-lg font-bold text-emerald-400">{Math.max(...chartData.map(d => d.score))}%</p>
+                            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{Math.max(...chartData.map(d => d.score))}%</p>
                           </div>
-                          <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                          <div className="flex-1 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] text-center">
                             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Latest</p>
-                            <p className="text-lg font-bold text-indigo-400">{chartData[chartData.length - 1].score}%</p>
+                            <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{chartData[chartData.length - 1].score}%</p>
                           </div>
-                          <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                          <div className="flex-1 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] text-center">
                             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Average</p>
-                            <p className="text-lg font-bold text-cyan-400">{Math.round(chartData.reduce((a, d) => a + d.score, 0) / chartData.length)}%</p>
+                            <p className="text-lg font-bold text-cyan-600 dark:text-cyan-400">{Math.round(chartData.reduce((a, d) => a + d.score, 0) / chartData.length)}%</p>
                           </div>
                         </div>
 
                         <div className="h-44 -mx-2">
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData}>
-                              <XAxis dataKey="date" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                              <YAxis stroke="#475569" fontSize={11} domain={[0, 100]} tickLine={false} axisLine={false} />
+                              <XAxis dataKey="date" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                              <YAxis stroke="#64748B" fontSize={11} domain={[0, 100]} tickLine={false} axisLine={false} />
                               <Tooltip
                                 contentStyle={{
                                   background: "rgba(15,23,42,0.95)",
@@ -625,23 +626,23 @@ export function ResumeAnalyzerView({
                       <div className="relative z-10 space-y-3.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <Target className="h-4 w-4 text-indigo-400" />
-                            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Latest Resume Spotlight</h4>
+                            <Target className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+                            <h4 className="font-bold text-xs uppercase tracking-wider text-foreground">Latest Resume Spotlight</h4>
                           </div>
                           {latest.inferredTargetRole && (
-                            <span className="text-[10px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 truncate max-w-[150px]">
+                            <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 truncate max-w-[150px]">
                               {latest.inferredTargetRole}
                             </span>
                           )}
                         </div>
 
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] gap-3">
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] gap-3">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 shrink-0">
+                            <div className="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 shrink-0">
                               <FileText className="h-5 w-5" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-white truncate">{latest.filename}</p>
+                              <p className="text-xs font-semibold text-foreground truncate">{latest.filename}</p>
                               <p className="text-[10px] text-muted-foreground">
                                 Scored on {new Date(latest.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                               </p>
@@ -649,17 +650,17 @@ export function ResumeAnalyzerView({
                           </div>
 
                           <div className="text-right shrink-0">
-                            <span className="text-lg font-extrabold text-white">
+                            <span className="text-lg font-extrabold text-foreground">
                               {latest.status === "completed" ? `${latest.atsScore}%` : latest.status}
                             </span>
-                            <span className="text-[9px] block text-emerald-400 font-bold uppercase tracking-wider">
+                            <span className="text-[9px] block text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
                               {(latest.atsScore ?? 0) >= 75 ? "Placement Ready" : "Review Ready"}
                             </span>
                           </div>
                         </div>
 
                         {latest.summary && (
-                          <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed pl-1">
+                          <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed pl-1">
                             "{latest.summary}"
                           </p>
                         )}
@@ -681,8 +682,8 @@ export function ResumeAnalyzerView({
                   <div className="relative z-10 space-y-3">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-purple-400" />
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Next Prep Steps</h4>
+                        <Zap className="h-4 w-4 text-purple-500 dark:text-purple-400" />
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-foreground">Next Prep Steps</h4>
                       </div>
                       <span className="text-[10px] text-muted-foreground">Placement Suite</span>
                     </div>
@@ -690,25 +691,25 @@ export function ResumeAnalyzerView({
                     <div className="grid sm:grid-cols-2 gap-2.5">
                       <Link
                         to="/interview"
-                        className="p-3 rounded-xl bg-muted/40 hover:bg-muted/70 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] border border-border dark:border-white/[0.08] transition-all group flex flex-col gap-1"
+                        className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] transition-all group flex flex-col gap-1"
                       >
                         <div className="flex items-center justify-between">
-                          <Mic className="h-4 w-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                          <Mic className="h-4 w-4 text-cyan-500 dark:text-cyan-400 group-hover:scale-110 transition-transform" />
                           <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                         </div>
-                        <span className="text-xs font-semibold text-white mt-1">Mock Interview</span>
+                        <span className="text-xs font-semibold text-foreground mt-1">Mock Interview</span>
                         <span className="text-[10px] text-muted-foreground">Practice STAR answers out loud</span>
                       </Link>
 
                       <Link
                         to="/skills"
-                        className="p-3 rounded-xl bg-muted/40 hover:bg-muted/70 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] border border-border dark:border-white/[0.08] transition-all group flex flex-col gap-1"
+                        className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] transition-all group flex flex-col gap-1"
                       >
                         <div className="flex items-center justify-between">
-                          <Target className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                          <Target className="h-4 w-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
                           <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                         </div>
-                        <span className="text-xs font-semibold text-white mt-1">Skill Benchmarks</span>
+                        <span className="text-xs font-semibold text-foreground mt-1">Skill Benchmarks</span>
                         <span className="text-[10px] text-muted-foreground">Target missing recruiter keywords</span>
                       </Link>
                     </div>
@@ -733,10 +734,10 @@ export function ResumeAnalyzerView({
               {/* Left Column: Upload & History Sidebar */}
               <GlassCard data-tour="resume-upload-zone" className="space-y-5">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-sm text-white">Upload Resume</h3>
+                  <h3 className="font-semibold text-sm text-foreground">Upload Resume</h3>
                   <button
                     onClick={resetUpload}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1 cursor-pointer"
+                    className="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1 cursor-pointer"
                   >
                     <RefreshCw className="h-3 w-3" /> New
                   </button>
@@ -744,8 +745,8 @@ export function ResumeAnalyzerView({
 
                 {mode === "uploading" ? (
                   <div className="border-2 border-dashed rounded-xl p-6 text-center border-indigo-500/30 bg-indigo-500/5">
-                    <RefreshCw className="h-7 w-7 mx-auto text-indigo-400 animate-spin" />
-                    <p className="text-xs mt-3 font-medium text-indigo-200">Analyzing resume...</p>
+                    <RefreshCw className="h-7 w-7 mx-auto text-indigo-500 dark:text-indigo-400 animate-spin" />
+                    <p className="text-xs mt-3 font-medium text-indigo-700 dark:text-indigo-200">Analyzing resume...</p>
                   </div>
                 ) : (
                   <>
@@ -763,11 +764,11 @@ export function ResumeAnalyzerView({
                         if (f) handleFile(f);
                       }}
                       className={`cursor-pointer border-2 border-dashed rounded-xl p-5 text-center transition ${
-                        dragging ? "border-indigo-500 bg-white/5" : "border-white/15 hover:border-white/25"
+                        dragging ? "border-indigo-500 bg-indigo-50 dark:bg-white/5" : "border-slate-300 dark:border-white/15 hover:border-indigo-500"
                       }`}
                     >
                       <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
-                      <p className="text-xs mt-2 font-medium text-white">Upload another resume</p>
+                      <p className="text-xs mt-2 font-medium text-foreground">Upload another resume</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">PDF or DOCX, max 5MB</p>
                       <input
                         ref={inputRef}
@@ -778,7 +779,7 @@ export function ResumeAnalyzerView({
                       />
                     </div>
 
-                    <div className="relative z-30">
+                    <div className="relative z-20">
                       <TargetRoleSelect
                         value={targetRole}
                         onChange={setTargetRole}
@@ -789,18 +790,18 @@ export function ResumeAnalyzerView({
                 )}
 
                 {file && mode !== "uploading" && (
-                  <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2 text-xs">
-                    <FileText className="h-4 w-4 text-indigo-400 shrink-0" />
-                    <span className="truncate flex-1 font-medium text-slate-200">{file.name}</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center gap-2 text-xs">
+                    <FileText className="h-4 w-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                    <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">{file.name}</span>
                   </div>
                 )}
 
                 {mode === "failed" && (
                   <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30">
-                    <p className="text-xs text-red-300">{errorMsg}</p>
+                    <p className="text-xs text-red-600 dark:text-red-300">{errorMsg}</p>
                     <button
                       onClick={resetUpload}
-                      className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition cursor-pointer"
+                      className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 transition cursor-pointer"
                     >
                       Try again
                     </button>
@@ -808,7 +809,7 @@ export function ResumeAnalyzerView({
                 )}
 
                 {/* History in sidebar */}
-                <div className="pt-2 border-t border-white/10">
+                <div className="pt-2 border-t border-slate-200 dark:border-white/10">
                   <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
                     Upload History
                   </h4>
@@ -824,13 +825,23 @@ export function ResumeAnalyzerView({
               >
                 <GlassCard variant="strong" className="relative overflow-hidden">
                   {/* Top header bar in results card */}
-                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-white/10">
+                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-200 dark:border-white/10">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
                         <FileText className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-bold text-base leading-tight text-white">ATS Analysis & Feedback</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-base leading-tight text-foreground">ATS Analysis & Feedback</h3>
+                          {display && (
+                            <AiStatusBadge
+                              aiProvider={(display as any).aiProvider}
+                              isFallback={(display as any).isFallback}
+                              model={(display as any).model}
+                              compact
+                            />
+                          )}
+                        </div>
                         {display?.filename && (
                           <p className="text-xs text-muted-foreground truncate max-w-xs md:max-w-md mt-0.5">
                             {display.filename}
@@ -840,7 +851,7 @@ export function ResumeAnalyzerView({
                     </div>
                     <button
                       onClick={resetUpload}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition shrink-0 cursor-pointer"
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-white/10 transition shrink-0 cursor-pointer"
                       title="Close analysis"
                     >
                       <X className="h-4 w-4" />
@@ -858,19 +869,19 @@ export function ResumeAnalyzerView({
                         <div className="relative w-16 h-16 mx-auto">
                           <div className="absolute inset-0 rounded-full border-2 border-indigo-500/30 animate-ping" />
                           <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/40 flex items-center justify-center">
-                            <RefreshCw className="h-7 w-7 text-indigo-400 animate-spin" />
+                            <RefreshCw className="h-7 w-7 text-indigo-500 dark:text-indigo-400 animate-spin" />
                           </div>
                         </div>
                         <div>
-                          <h4 className="text-base font-semibold text-white">Analyzing Your Resume</h4>
+                          <h4 className="text-base font-semibold text-foreground">Analyzing Your Resume</h4>
                           <p className="text-xs text-muted-foreground mt-1">
                             Extracting text structure, computing ATS compatibility, and generating tailored AI feedback...
                           </p>
                         </div>
                         <div className="flex justify-center gap-2 pt-2 text-[11px] text-muted-foreground/70">
-                          <span className="px-2 py-1 rounded bg-white/5 border border-white/10">1. Text Parsing</span>
-                          <span className="px-2 py-1 rounded bg-white/5 border border-white/10">2. Keyword Audit</span>
-                          <span className="px-2 py-1 rounded bg-white/5 border border-white/10">3. AI Polish</span>
+                          <span className="px-2 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">1. Text Parsing</span>
+                          <span className="px-2 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">2. Keyword Audit</span>
+                          <span className="px-2 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">3. AI Polish</span>
                         </div>
                       </div>
                     </motion.div>
@@ -903,7 +914,7 @@ export function ResumeAnalyzerView({
                                 <div>
                                   <p
                                     className={`text-sm font-semibold ${
-                                      isPositive ? "text-green-400" : "text-red-400"
+                                      isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                                     }`}
                                   >
                                     {isPositive ? "Improvement Detected!" : "Score Dropped"}
@@ -914,7 +925,7 @@ export function ResumeAnalyzerView({
                                 </div>
                                 <div
                                   className={`text-xl font-bold flex items-center ${
-                                    isPositive ? "text-green-400" : "text-red-400"
+                                    isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                                   }`}
                                 >
                                   {isPositive ? "+" : ""}
@@ -934,14 +945,14 @@ export function ResumeAnalyzerView({
                           {/* Matched keywords */}
                           {display.keywordBreakdown?.matched && display.keywordBreakdown.matched.length > 0 && (
                             <div>
-                              <h4 className="text-xs uppercase tracking-wider text-green-400 mb-2 font-semibold">
+                              <h4 className="text-xs uppercase tracking-wider text-green-600 dark:text-green-400 mb-2 font-semibold">
                                 Keywords Found ({display.keywordBreakdown.matched.length})
                               </h4>
                               <div className="flex flex-wrap gap-1.5">
                                 {display.keywordBreakdown.matched.map((k, i) => (
                                   <span
                                     key={i}
-                                    className="text-xs px-2.5 py-1 rounded-full bg-green-500/15 text-green-300 border border-green-500/30"
+                                    className="text-xs px-2.5 py-1 rounded-full bg-green-500/15 text-green-700 dark:text-green-300 border border-green-500/30 font-medium"
                                   >
                                     {k}
                                   </span>
@@ -953,14 +964,14 @@ export function ResumeAnalyzerView({
                           {/* Missing keywords */}
                           {display.keywordBreakdown?.missing && display.keywordBreakdown.missing.length > 0 && (
                             <div>
-                              <h4 className="text-xs uppercase tracking-wider text-red-400 mb-2 font-semibold">
+                              <h4 className="text-xs uppercase tracking-wider text-red-600 dark:text-red-400 mb-2 font-semibold">
                                 Missing Keywords ({display.keywordBreakdown.missing.length})
                               </h4>
                               <div className="flex flex-wrap gap-1.5">
                                 {display.keywordBreakdown.missing.map((k, i) => (
                                   <span
                                     key={i}
-                                    className="text-xs px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30"
+                                    className="text-xs px-2.5 py-1 rounded-full bg-red-500/15 text-red-700 dark:text-red-300 border border-red-500/30 font-medium"
                                   >
                                     {k}
                                   </span>
@@ -973,27 +984,27 @@ export function ResumeAnalyzerView({
 
                       {/* Summary */}
                       {display.summary && (
-                        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10">
                           <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5 font-semibold">
                             Analysis Summary
                           </h4>
-                          <p className="text-sm text-slate-300 leading-relaxed">{display.summary}</p>
+                          <p className="text-sm text-slate-800 dark:text-slate-300 leading-relaxed">{display.summary}</p>
                         </div>
                       )}
 
                       {/* Strengths */}
                       {display.strengths && display.strengths.length > 0 && (
                         <div>
-                          <h4 className="text-sm font-semibold mb-2.5 flex items-center gap-1.5 text-white">
-                            <CheckCircle2 className="h-4 w-4 text-green-400" /> Key Strengths
+                          <h4 className="text-sm font-semibold mb-2.5 flex items-center gap-1.5 text-foreground">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400" /> Key Strengths
                           </h4>
                           <ul className="space-y-2">
                             {display.strengths.map((s, i) => (
                               <li
                                 key={i}
-                                className="flex items-start gap-2.5 text-sm text-slate-300 p-2.5 rounded-lg bg-white/[0.02] border border-white/5"
+                                className="flex items-start gap-2.5 text-sm text-slate-800 dark:text-slate-300 p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5"
                               >
-                                <CheckCircle2 className="h-4 w-4 text-green-400 mt-0.5 shrink-0" />
+                                <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 mt-0.5 shrink-0" />
                                 <span>{s}</span>
                               </li>
                             ))}
@@ -1004,8 +1015,8 @@ export function ResumeAnalyzerView({
                       {/* Improvements */}
                       {display.improvements && display.improvements.length > 0 && (
                         <div>
-                          <h4 className="text-sm font-semibold mb-2.5 flex items-center gap-1.5 text-white">
-                            <Target className="h-4 w-4 text-yellow-400" /> Actionable Improvements
+                          <h4 className="text-sm font-semibold mb-2.5 flex items-center gap-1.5 text-foreground">
+                            <Target className="h-4 w-4 text-amber-500 dark:text-yellow-400" /> Actionable Improvements
                           </h4>
                           <ul className="space-y-2.5">
                             {display.improvements.map((imp, i) => (
@@ -1021,23 +1032,23 @@ export function ResumeAnalyzerView({
 
                       {/* Inferred / target role */}
                       {display.inferredTargetRole && (
-                        <p className="text-xs text-muted-foreground pt-2 border-t border-white/5">
+                        <p className="text-xs text-muted-foreground pt-2 border-t border-slate-200 dark:border-white/5">
                           Target / Detected Role:{" "}
-                          <span className="font-medium text-slate-200">{display.inferredTargetRole}</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200">{display.inferredTargetRole}</span>
                         </p>
                       )}
                     </motion.div>
                   ) : display && display.status === "failed" ? (
                     <div className="h-72 grid place-items-center text-center p-6">
                       <div>
-                        <AlertTriangle className="h-10 w-10 mx-auto text-red-400" />
-                        <p className="mt-3 text-sm text-red-300">
+                        <AlertTriangle className="h-10 w-10 mx-auto text-red-500 dark:text-red-400" />
+                        <p className="mt-3 text-sm text-red-600 dark:text-red-300">
                           {display.errorMessage || "Analysis failed"}
                         </p>
                         {display._id && (
                           <button
                             onClick={() => viewResume(display._id)}
-                            className="mt-4 text-xs px-4 py-2 rounded-xl glass hover:bg-white/10 transition cursor-pointer"
+                            className="mt-4 text-xs px-4 py-2 rounded-xl glass hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
                           >
                             View details
                           </button>
@@ -1047,17 +1058,17 @@ export function ResumeAnalyzerView({
                   ) : viewingId && !viewingAnalysis ? (
                     <div className="space-y-6 animate-pulse p-4">
                       <div className="flex gap-6 items-start">
-                        <div className="h-24 w-24 rounded-full bg-white/5 border border-white/10 shrink-0" />
+                        <div className="h-24 w-24 rounded-full bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 shrink-0" />
                         <div className="flex-1 space-y-2">
-                          <div className="h-4 w-32 bg-white/5 border border-white/10 rounded" />
-                          <div className="h-6 w-full bg-white/5 border border-white/10 rounded" />
-                          <div className="h-6 w-3/4 bg-white/5 border border-white/10 rounded" />
+                          <div className="h-4 w-32 bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded" />
+                          <div className="h-6 w-full bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded" />
+                          <div className="h-6 w-3/4 bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded" />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <div className="h-4 w-full bg-white/5 border border-white/10 rounded" />
-                        <div className="h-4 w-5/6 bg-white/5 border border-white/10 rounded" />
-                        <div className="h-4 w-4/6 bg-white/5 border border-white/10 rounded" />
+                        <div className="h-4 w-full bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded" />
+                        <div className="h-4 w-5/6 bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded" />
+                        <div className="h-4 w-4/6 bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded" />
                       </div>
                     </div>
                   ) : null}
@@ -1076,15 +1087,15 @@ export function ResumeAnalyzerView({
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30">
-                        <TrendingUp className="h-4 w-4 text-indigo-400" />
+                        <TrendingUp className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-sm text-white">Score History & Trend</h3>
+                        <h3 className="font-bold text-sm text-foreground">Score History & Trend</h3>
                         <p className="text-[11px] text-muted-foreground">Your ATS score progression over time</p>
                       </div>
                     </div>
                     {chartData.length >= 2 && (
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold flex items-center gap-1">
+                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
                         {chartData[chartData.length - 1].score > chartData[0].score ? "Improving" : "Track Progress"}
                       </span>
@@ -1095,10 +1106,10 @@ export function ResumeAnalyzerView({
                     <div className="h-48 grid place-items-center text-center">
                       <div className="space-y-3">
                         <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
-                          <TrendingUp className="h-7 w-7 text-indigo-400/60" />
+                          <TrendingUp className="h-7 w-7 text-indigo-500 dark:text-indigo-400/60" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-300">Not enough data yet</p>
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-300">Not enough data yet</p>
                           <p className="text-xs text-muted-foreground mt-1">
                             Upload more resumes to see your score trend unfold
                           </p>
@@ -1108,25 +1119,25 @@ export function ResumeAnalyzerView({
                   ) : (
                     <>
                       <div className="flex gap-2 mb-4">
-                        <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                        <div className="flex-1 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] text-center">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Highest</p>
-                          <p className="text-lg font-bold text-emerald-400">{Math.max(...chartData.map(d => d.score))}%</p>
+                          <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{Math.max(...chartData.map(d => d.score))}%</p>
                         </div>
-                        <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                        <div className="flex-1 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] text-center">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Latest</p>
-                          <p className="text-lg font-bold text-indigo-400">{chartData[chartData.length - 1].score}%</p>
+                          <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{chartData[chartData.length - 1].score}%</p>
                         </div>
-                        <div className="flex-1 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                        <div className="flex-1 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] text-center">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Average</p>
-                          <p className="text-lg font-bold text-cyan-400">{Math.round(chartData.reduce((a, d) => a + d.score, 0) / chartData.length)}%</p>
+                          <p className="text-lg font-bold text-cyan-600 dark:text-cyan-400">{Math.round(chartData.reduce((a, d) => a + d.score, 0) / chartData.length)}%</p>
                         </div>
                       </div>
 
                       <div className="h-48 -mx-2">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={chartData}>
-                            <XAxis dataKey="date" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#475569" fontSize={11} domain={[0, 100]} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="date" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#64748B" fontSize={11} domain={[0, 100]} tickLine={false} axisLine={false} />
                             <Tooltip
                               contentStyle={{
                                 background: "rgba(15,23,42,0.95)",
@@ -1161,10 +1172,10 @@ export function ResumeAnalyzerView({
                 <div className="relative z-10">
                   <div className="flex items-center gap-2.5 mb-5">
                     <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30">
-                      <Zap className="h-4 w-4 text-purple-400" />
+                      <Zap className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-white">Quick Actions</h3>
+                      <h3 className="font-bold text-sm text-foreground">Quick Actions</h3>
                       <p className="text-[11px] text-muted-foreground">Continue improving your resume</p>
                     </div>
                   </div>
@@ -1175,13 +1186,13 @@ export function ResumeAnalyzerView({
                       className="w-full group p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/25 hover:border-indigo-500/50 hover:from-indigo-500/15 hover:to-purple-500/15 transition-all duration-300 flex items-center gap-3 cursor-pointer"
                     >
                       <div className="p-2.5 rounded-xl bg-indigo-500/20 border border-indigo-500/30 group-hover:bg-indigo-500/30 transition-colors shrink-0">
-                        <RefreshCw className="h-4 w-4 text-indigo-400 group-hover:animate-spin" />
+                        <RefreshCw className="h-4 w-4 text-indigo-500 dark:text-indigo-400 group-hover:animate-spin" />
                       </div>
                       <div className="text-left flex-1">
-                        <p className="text-sm font-semibold text-white">New Analysis</p>
+                        <p className="text-sm font-semibold text-foreground">New Analysis</p>
                         <p className="text-[11px] text-muted-foreground">Upload a revised resume to compare scores</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-indigo-400 group-hover:translate-x-1 transition-all shrink-0" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-indigo-500 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition-all shrink-0" />
                     </button>
 
                     <Link
@@ -1189,13 +1200,13 @@ export function ResumeAnalyzerView({
                       className="w-full group p-4 rounded-2xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 hover:border-cyan-500/40 hover:from-cyan-500/15 hover:to-blue-500/15 transition-all duration-300 flex items-center gap-3"
                     >
                       <div className="p-2.5 rounded-xl bg-cyan-500/20 border border-cyan-500/30 group-hover:bg-cyan-500/30 transition-colors shrink-0">
-                        <Mic className="h-4 w-4 text-cyan-400" />
+                        <Mic className="h-4 w-4 text-cyan-500 dark:text-cyan-400" />
                       </div>
                       <div className="text-left flex-1">
-                        <p className="text-sm font-semibold text-white">Practice Interview</p>
+                        <p className="text-sm font-semibold text-foreground">Practice Interview</p>
                         <p className="text-[11px] text-muted-foreground">Test your resume talking points with AI</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-cyan-400 group-hover:translate-x-1 transition-all shrink-0" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-cyan-500 dark:group-hover:text-cyan-400 group-hover:translate-x-1 transition-all shrink-0" />
                     </Link>
 
                     <Link
@@ -1203,13 +1214,13 @@ export function ResumeAnalyzerView({
                       className="w-full group p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 hover:border-emerald-500/40 hover:from-emerald-500/15 hover:to-teal-500/15 transition-all duration-300 flex items-center gap-3"
                     >
                       <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 group-hover:bg-emerald-500/30 transition-colors shrink-0">
-                        <Target className="h-4 w-4 text-emerald-400" />
+                        <Target className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                       </div>
                       <div className="text-left flex-1">
-                        <p className="text-sm font-semibold text-white">Check Skill Gaps</p>
+                        <p className="text-sm font-semibold text-foreground">Check Skill Gaps</p>
                         <p className="text-[11px] text-muted-foreground">See what skills to add to your resume</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-400 group-hover:translate-x-1 transition-all shrink-0" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-500 dark:group-hover:text-emerald-400 group-hover:translate-x-1 transition-all shrink-0" />
                     </Link>
                   </div>
                 </div>
@@ -1223,21 +1234,21 @@ export function ResumeAnalyzerView({
       {confirmDeleteId && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
           <GlassCard variant="strong" className="max-w-md w-full">
-            <h3 className="text-lg font-bold text-white">Delete analysis?</h3>
+            <h3 className="text-lg font-bold text-foreground">Delete analysis?</h3>
             <p className="text-sm text-muted-foreground mt-2">
               This permanently removes this resume analysis. This cannot be undone.
             </p>
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setConfirmDeleteId(null)}
-                className="glass rounded-xl px-4 py-2 text-sm flex-1 hover:bg-white/10 transition cursor-pointer"
+                className="glass rounded-xl px-4 py-2 text-sm flex-1 hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer text-foreground"
               >
                 Cancel
               </button>
               <button
                 onClick={() => confirmDelete(confirmDeleteId)}
                 disabled={deletingId === confirmDeleteId}
-                className="rounded-xl px-4 py-2 text-sm flex-1 bg-red-500/30 text-red-100 hover:bg-red-500/50 transition disabled:opacity-50 cursor-pointer"
+                className="rounded-xl px-4 py-2 text-sm flex-1 bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-50 cursor-pointer font-medium"
               >
                 {deletingId === confirmDeleteId ? "Deleting..." : "Delete"}
               </button>

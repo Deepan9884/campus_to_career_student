@@ -31,7 +31,18 @@ const PICTURE_PANELS_ROW3 = [
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="dark min-h-screen relative bg-[#080D18] text-[#F2F4F7] overflow-hidden flex flex-col justify-between select-none">
+    <div className="dark min-h-screen relative bg-[#080D18] text-[#F2F4F7] overflow-hidden flex flex-col justify-between select-none auth-shell">
+      <style>{`
+        /* Prevent global light mode overrides from breaking the forced dark theme of the auth shell */
+        html.light .auth-shell h1, html.light .auth-shell h2, html.light .auth-shell h3, 
+        html.light .auth-shell h4, html.light .auth-shell h5, html.light .auth-shell h6 { color: #ffffff !important; }
+        html.light .auth-shell .text-slate-200 { color: #e2e8f0 !important; }
+        html.light .auth-shell .text-slate-300 { color: #cbd5e1 !important; }
+        html.light .auth-shell .text-slate-400 { color: #94a3b8 !important; }
+        html.light .auth-shell .text-slate-500 { color: #64748b !important; }
+        html.light .auth-shell .text-cyan-400 { color: #22d3ee !important; }
+        html.light .auth-shell .text-indigo-400 { color: #818cf8 !important; }
+      `}</style>
       {/* ── AMBIENT NEBULA LIGHTING ── */}
       <div className="fixed top-1/4 right-1/4 w-[600px] h-[600px] bg-[#6366F1]/15 rounded-full blur-[180px] pointer-events-none z-0" />
       <div className="fixed bottom-10 left-10 w-[600px] h-[600px] bg-[#2F4B6B]/30 rounded-full blur-[200px] pointer-events-none z-0" />

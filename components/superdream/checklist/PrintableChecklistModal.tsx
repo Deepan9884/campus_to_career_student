@@ -95,13 +95,47 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
         .pdf-table tbody tr:hover td {
           background-color: #f1f5f9 !important;
         }
+        .modal-top-bar {
+          background-color: #0b0f19 !important;
+          color: #ffffff !important;
+        }
+        .modal-top-bar h3,
+        .modal-top-bar .modal-title {
+          color: #ffffff !important;
+        }
+        .modal-top-bar span,
+        .modal-top-bar .modal-subtitle {
+          color: #cbd5e1 !important;
+        }
         .pdf-hero-card {
+          background: #0f172a !important;
           background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
           color: #ffffff !important;
           border: 1px solid #334155 !important;
         }
         .pdf-hero-card * {
+          color: inherit;
+        }
+        .pdf-hero-card h3,
+        .pdf-hero-card .hero-heading {
           color: #ffffff !important;
+        }
+        .pdf-hero-card p,
+        .pdf-hero-card .hero-sub {
+          color: #e2e8f0 !important;
+        }
+        .pdf-hero-card strong,
+        .pdf-hero-card .hero-gold {
+          color: #fcd34d !important;
+        }
+        .pdf-hero-card .hero-score {
+          color: #fbbf24 !important;
+        }
+        .pdf-hero-card .hero-status {
+          color: #34d399 !important;
+        }
+        .pdf-hero-card .hero-muted {
+          color: #cbd5e1 !important;
         }
 
         @media print {
@@ -154,16 +188,28 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
       {/* ========================================================================= */}
       {/* TOP PDF VIEWER TOOLBAR (Adobe Acrobat / macOS Preview Styled) */}
       {/* ========================================================================= */}
-      <div className="w-full bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between text-white shadow-xl z-20 shrink-0 no-print">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/30 grid place-items-center text-red-400 font-bold text-xs">
+      <div
+        className="w-full modal-top-bar border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-2xl z-20 shrink-0 no-print"
+        style={{ backgroundColor: "#0b0f19", color: "#ffffff" }}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div
+            className="w-8 h-8 rounded-lg bg-red-600 font-black text-xs grid place-items-center shadow-md shadow-red-600/30 shrink-0"
+            style={{ color: "#ffffff" }}
+          >
             PDF
           </div>
-          <div>
-            <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+          <div className="min-w-0">
+            <h3
+              className="text-sm font-bold tracking-tight flex items-center gap-2 truncate modal-title"
+              style={{ color: "#ffffff" }}
+            >
               Official Placement Readiness Audit Dossier.pdf
             </h3>
-            <span className="text-[11px] text-slate-400">
+            <span
+              className="text-[11.5px] font-medium block truncate modal-subtitle"
+              style={{ color: "#cbd5e1" }}
+            >
               Easwari Engineering College • Certified Technical Audit
             </span>
           </div>
@@ -172,27 +218,36 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
         {/* Center & Right Controls */}
         <div className="flex items-center gap-3">
           {/* Zoom Controls */}
-          <div className="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700 text-xs">
+          <div
+            className="flex items-center bg-slate-900 rounded-lg p-1 border border-slate-700 text-xs"
+            style={{ backgroundColor: "#0f172a", borderColor: "#334155" }}
+          >
             <button
               onClick={() => setZoomLevel((z) => Math.max(0.7, z - 0.1))}
-              className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition"
+              className="p-1.5 hover:bg-slate-800 rounded transition cursor-pointer"
+              style={{ color: "#cbd5e1" }}
               title="Zoom Out"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
-            <span className="px-2.5 font-mono text-xs text-slate-200 min-w-[50px] text-center font-bold">
+            <span
+              className="px-2.5 font-mono text-xs min-w-[50px] text-center font-bold"
+              style={{ color: "#ffffff" }}
+            >
               {Math.round(zoomLevel * 100)}%
             </span>
             <button
               onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))}
-              className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition"
+              className="p-1.5 hover:bg-slate-800 rounded transition cursor-pointer"
+              style={{ color: "#cbd5e1" }}
               title="Zoom In"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
             <button
               onClick={() => setZoomLevel(1)}
-              className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition ml-1"
+              className="p-1.5 hover:bg-slate-800 rounded transition ml-1 cursor-pointer"
+              style={{ color: "#94a3b8" }}
               title="Reset Zoom"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -201,7 +256,8 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
 
           <button
             onClick={handlePrint}
-            className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-500/20 active:scale-95"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-sky-600 to-emerald-600 hover:opacity-95 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-500/25 active:scale-95"
+            style={{ color: "#ffffff" }}
           >
             <Printer className="w-4 h-4" />
             <span>Print / Save PDF</span>
@@ -209,10 +265,11 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer border border-slate-700 ml-1"
+            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 transition cursor-pointer border border-slate-700 ml-1"
+            style={{ color: "#cbd5e1", backgroundColor: "#0f172a", borderColor: "#334155" }}
             title="Close document viewer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -325,31 +382,60 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
             </div>
 
             {/* Executive Placement Readiness Index Card */}
-            <div className="pdf-hero-card p-5 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+            <div
+              className="pdf-hero-card p-5 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md"
+              style={{
+                background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)",
+                color: "#ffffff",
+                border: "1px solid #334155",
+              }}
+            >
               <div className="space-y-1">
-                <span className="text-[10px] font-mono text-amber-300 font-bold uppercase tracking-widest block">
+                <span
+                  className="text-[10px] font-mono font-bold uppercase tracking-widest block hero-gold"
+                  style={{ color: "#fcd34d" }}
+                >
                   ★ INSTITUTIONAL READINESS ATTAINMENT
                 </span>
-                <h3 className="text-lg font-bold font-sans tracking-tight text-white">
+                <h3
+                  className="text-lg font-bold font-sans tracking-tight hero-heading"
+                  style={{ color: "#ffffff" }}
+                >
                   {tier.tierName}
                 </h3>
-                <p className="text-xs text-slate-200 font-sans">
-                  Forecasted Compensation Band: <strong className="text-amber-300 text-sm font-mono">{tier.packageRange}</strong>
+                <p className="text-xs font-sans hero-sub" style={{ color: "#e2e8f0" }}>
+                  Forecasted Compensation Band:{" "}
+                  <strong className="text-sm font-mono hero-gold" style={{ color: "#fcd34d" }}>
+                    {tier.packageRange}
+                  </strong>
                 </p>
-                <p className="text-[10px] text-slate-300 font-sans italic">
+                <p className="text-[10px] font-sans italic hero-muted" style={{ color: "#cbd5e1" }}>
                   {tier.recommendation}
                 </p>
               </div>
 
               <div className="text-right sm:border-l sm:border-slate-700 sm:pl-6 shrink-0">
-                <span className="text-[10px] font-sans text-slate-300 uppercase font-semibold block">Total Placement Score</span>
+                <span
+                  className="text-[10px] font-sans uppercase font-semibold block hero-muted"
+                  style={{ color: "#cbd5e1" }}
+                >
+                  Total Placement Score
+                </span>
                 <div className="flex items-baseline justify-end gap-1 mt-0.5">
-                  <span className="text-3xl sm:text-4xl font-black text-amber-400 font-mono">
+                  <span
+                    className="text-3xl sm:text-4xl font-black font-mono hero-score"
+                    style={{ color: "#fbbf24" }}
+                  >
                     {totalObtained}
                   </span>
-                  <span className="text-xs text-slate-300 font-mono">/ 100</span>
+                  <span className="text-xs font-mono hero-muted" style={{ color: "#cbd5e1" }}>
+                    / 100
+                  </span>
                 </div>
-                <span className="text-[10px] font-sans text-emerald-400 font-bold block mt-0.5">
+                <span
+                  className="text-[10px] font-sans font-bold block mt-0.5 hero-status"
+                  style={{ color: totalObtained >= 80 ? "#34d399" : "#38bdf8" }}
+                >
                   {totalObtained >= 80 ? "QUALIFIED FOR DIRECT INTERVIEWS" : "DEVELOPMENT PROTOCOL ACTIVE"}
                 </span>
               </div>

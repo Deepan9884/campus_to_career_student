@@ -137,6 +137,7 @@ function highlightCodeTokens(code: string, language: string, isLight: boolean): 
         '\\b(\\d+(?:\\.\\d+)?|true|false|True|False|null|None|undefined|NULL)\\b', // group 3: numbers / booleans / null
         kwPattern,                                                                  // group 4: keywords
         '\\b([a-zA-Z_]\\w*)(?=\\s*\\()',                                           // group 5: function calls
+        '([{}()\\[\\]])',                                                          // group 6: brackets & curly braces
       ].join("|"),
       language === "sql" ? "gi" : "g"
     );
@@ -171,6 +172,9 @@ function highlightCodeTokens(code: string, language: string, isLight: boolean): 
       } else if (match[5]) {
         // Function call
         result += `<span class="${isLight ? "text-blue-700 font-bold" : "text-sky-300 font-bold"}">${escapedMatched}</span>`;
+      } else if (match[6]) {
+        // Brackets & Curly Braces (highly visible golden amber in both modes)
+        result += `<span class="${isLight ? "text-amber-800 font-extrabold" : "text-amber-300 font-extrabold"}">${escapedMatched}</span>`;
       } else {
         result += escapedMatched;
       }
@@ -331,7 +335,7 @@ export function ProctoredCodingTestConsole({
   const [hasStartedExam, setHasStartedExam] = useState(false);
 
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [selectedLang, setSelectedLang] = useState<string>("python");
+  const [questionLanguages, setQuestionLanguages] = useState<Record<string, string>>(() => ({}));
 
   // Code state per problem (strictly initialized with only 1 comment line: write your code here)
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
@@ -363,7 +367,7 @@ export function ProctoredCodingTestConsole({
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showMatrixDrawer, setShowMatrixDrawer] = useState(false);
   const [isEditorExpanded, setIsEditorExpanded] = useState(false);
-  const [editorFontSize, setEditorFontSize] = useState(14);
+  const [editorFontSize, setEditorFontSize] = useState(15);
   const [isLightMode, setIsLightMode] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [lastSavedTime, setLastSavedTime] = useState<string>("Draft saved");
@@ -378,6 +382,10 @@ export function ProctoredCodingTestConsole({
   const [finalScoreResult, setFinalScoreResult] = useState<CompletedTestRecord | null>(null);
 
   const currentQ: CodingChallenge = assessment.challenges[currentIdx] || assessment.challenges[0];
+  const selectedLang = questionLanguages[currentQ?.id] || "python";
+
+  // Ref to always hold latest submit handler to prevent timer stale closures
+  const latestSubmitRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   const videoRefCallback = useCallback((node: HTMLVideoElement | null) => {
     if (node) {
@@ -404,25 +412,38 @@ export function ProctoredCodingTestConsole({
         face_not_detected: "Candidate face not visible in camera feed",
         multiple_faces_detected: "Multiple people detected in exam frame",
         fullscreen_exit: "Exam window exited fullscreen mode",
-        fullscreen_timeout: "Failed to return to fullscreen within 15 seconds",
-        tab_switch: "Tab or window switch detected",
-        keyboard_shortcut: "Restricted keyboard shortcut or screenshot attempt detected",
-        eye_tracking_violation: "4 Eye Gaze / Face Angle warnings converted to 1 Violation Strike",
+        tab_switch: "Candidate switched away from assessment window",
+        unauthorized_key: "Restricted keyboard shortcut used",
+        clipboard_paste: "Clipboard paste action blocked",
       };
-      toast.error(`🚨 Strike ${count}/3: ${typeLabels[type] || type}`, {
-        duration: 6000,
-        id: `proctor-strike-${count}-${Date.now()}`,
-      });
+
+      const friendlyMsg = typeLabels[type] || "Proctoring integrity alert recorded";
+      toast.error(`⚠️ Proctor Warning (${count}/3): ${friendlyMsg}`, { duration: 6000 });
     },
   });
 
-  // Strict Keyboard Lockdown for Function Keys (F1-F12) and Binding Keys
+  // Strict Keyboard & Anti-Cheat lockdown
   useEffect(() => {
     if (!hasStartedExam || isTestFinished || finalScoreResult || proctorState.isBlocked) return;
 
     const handleStrictKeyDown = (e: KeyboardEvent) => {
-      // 0. Never intercept standalone modifier keys
-      if (e.key === "Control" || e.key === "Shift" || e.key === "Alt") {
+      // 0. Escape Key — safely close modals/drawers without exiting exam or logging out
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isEditorExpanded) setIsEditorExpanded(false);
+        else if (showMatrixDrawer) setShowMatrixDrawer(false);
+        else if (showConfirmFinish) setShowConfirmFinish(false);
+        return;
+      }
+
+      // Explicitly whitelist all code editing keys
+      const safeEditingKeys = [
+        "Tab", "Enter", "Backspace", "Delete", "ArrowUp", "ArrowDown",
+        "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown",
+        "Space", " ", "Shift", "Control", "Alt", "CapsLock",
+      ];
+      if (safeEditingKeys.includes(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
         return;
       }
 
@@ -485,11 +506,12 @@ export function ProctoredCodingTestConsole({
       window.removeEventListener("copy", handleCopyPasteBlock);
       window.removeEventListener("paste", handleCopyPasteBlock);
     };
-  }, [hasStartedExam, isTestFinished, finalScoreResult, proctorState.isBlocked, isCopyPasteDisabled]);
+  }, [hasStartedExam, isTestFinished, finalScoreResult, proctorState.isBlocked, isCopyPasteDisabled, isEditorExpanded, showMatrixDrawer, showConfirmFinish]);
 
   // Switch starter code when language changes
   const handleLanguageChange = (newLang: string) => {
-    setSelectedLang(newLang);
+    if (!currentQ) return;
+    setQuestionLanguages((prev) => ({ ...prev, [currentQ.id]: newLang }));
     const existingDraft = getCodeDraft(assessment.id, currentQ.id, newLang);
     const currentCode = answers[currentQ.id];
     const defaultTemplate = LANGUAGE_CONFIGS[newLang]?.defaultStarter || "// write your code here\n";
@@ -505,7 +527,9 @@ export function ProctoredCodingTestConsole({
       currentCode.includes("import sys") ||
       currentCode.includes("class Solution");
 
-    if (!existingDraft || isCommentOnly) {
+    if (existingDraft) {
+      setAnswers((prev) => ({ ...prev, [currentQ.id]: existingDraft }));
+    } else if (isCommentOnly) {
       setAnswers((prev) => ({ ...prev, [currentQ.id]: defaultTemplate }));
     }
   };
@@ -540,14 +564,16 @@ export function ProctoredCodingTestConsole({
     } catch {}
   }, [answers, selectedLang, currentQ, assessment.id, hasStartedExam, isTestFinished, finalScoreResult, saveCodeDraft]);
 
-  // Countdown timer
+  // Countdown timer with anti-stale-closure auto-submit
   useEffect(() => {
     if (!hasStartedExam || isTestFinished || finalScoreResult || proctorState.isBlocked) return;
     const interval = setInterval(() => {
       setTimeLeftSeconds((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          handleSubmitAssessment();
+          if (latestSubmitRef.current) {
+            latestSubmitRef.current();
+          }
           return 0;
         }
         if (prev === 300) {
@@ -701,18 +727,19 @@ export function ProctoredCodingTestConsole({
     let totalScoreSum = 0;
     const questionScores: Record<string, { passed: boolean; score: number; executionTimeMs: number }> = {};
 
-    // Evaluate all challenges strictly against real test cases
+    // Evaluate all challenges strictly against real test cases in their respective language
     for (const challenge of assessment.challenges) {
       let execResult = executionResults[challenge.id];
       const code = (answers[challenge.id] || "").trim();
       const isClean = code.replace(/^(#|\/\/|--)\s*write your code here\s*$/gmi, "").trim();
+      const challengeLang = questionLanguages[challenge.id] || "python";
 
       // If user wrote code but hasn't run it yet, execute it now against all test cases
       if (!execResult && isClean) {
         try {
           execResult = await executeCode({
             code,
-            language: selectedLang,
+            language: challengeLang,
             testCases: challenge.testCases || [],
             questionText: challenge.description || challenge.title,
           });
@@ -730,8 +757,15 @@ export function ProctoredCodingTestConsole({
           score: qScore,
           executionTimeMs: execResult.testCaseResults[0]?.executionTimeMs || 15,
         };
+      } else if (execResult && execResult.success) {
+        totalScoreSum += 100;
+        questionScores[challenge.id] = {
+          passed: true,
+          score: 100,
+          executionTimeMs: 15,
+        };
       } else {
-        // 0 marks if no valid code was submitted or test cases were not satisfied
+        // 0 marks if no valid code was submitted or test cases failed
         questionScores[challenge.id] = {
           passed: false,
           score: 0,
@@ -776,6 +810,10 @@ export function ProctoredCodingTestConsole({
 
     toast.success("Assessment submitted successfully! Your responses have been recorded.");
   };
+
+  useEffect(() => {
+    latestSubmitRef.current = handleSubmitAssessment;
+  });
 
   const handleExit = () => {
     if (videoElement) videoElement.srcObject = null;
@@ -1686,6 +1724,29 @@ export function ProctoredCodingTestConsole({
                     {isEditorExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
                     <span>{isEditorExpanded ? "Split" : "Expand"}</span>
                   </button>
+
+                  {/* Font Size Adjuster */}
+                  <div
+                    className={`flex items-center gap-1 rounded-lg p-0.5 border text-xs ${
+                      isLightMode ? "bg-slate-100 border-slate-300 text-slate-700" : "bg-black/30 border-white/10 text-slate-300"
+                    }`}
+                  >
+                    <button
+                      onClick={() => setEditorFontSize((prev) => Math.max(12, prev - 1))}
+                      className="px-1.5 py-0.5 rounded text-[11px] hover:bg-white/10 transition cursor-pointer"
+                      title="Decrease Font Size"
+                    >
+                      A-
+                    </button>
+                    <span className="text-[10px] font-mono px-0.5 font-bold">{editorFontSize}px</span>
+                    <button
+                      onClick={() => setEditorFontSize((prev) => Math.min(22, prev + 1))}
+                      className="px-1.5 py-0.5 rounded text-[11px] hover:bg-white/10 transition cursor-pointer"
+                      title="Increase Font Size"
+                    >
+                      A+
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2.5">
@@ -1725,11 +1786,11 @@ export function ProctoredCodingTestConsole({
                 <div
                   className={`w-12 ${
                     isLightMode ? "bg-slate-50 border-slate-200 text-slate-400" : "bg-slate-950/80 border-white/[0.06] text-slate-500"
-                  } border-r py-3 text-right pr-3 select-none text-xs space-y-1 font-mono shrink-0`}
+                  } border-r py-3 text-right pr-3 select-none text-xs font-mono shrink-0`}
                   style={{ fontSize: `${editorFontSize - 1}px` }}
                 >
                   {codeLines.map((_, i) => (
-                    <div key={i} className="leading-6 font-mono font-bold">
+                    <div key={i} className="leading-7 font-mono font-bold">
                       {i + 1}
                     </div>
                   ))}
@@ -1746,7 +1807,7 @@ export function ProctoredCodingTestConsole({
                     autoCapitalize="off"
                     autoComplete="off"
                     autoCorrect="off"
-                    className={`w-full h-full p-3 font-mono font-medium leading-6 resize-none focus:outline-none whitespace-pre m-0 caret-blue-500 selection:bg-indigo-500/30 ${
+                    className={`w-full h-full p-3 font-mono font-medium leading-7 resize-none focus:outline-none whitespace-pre m-0 caret-blue-500 selection:bg-indigo-500/30 ${
                       isLightMode
                         ? "bg-[#fafcff] text-slate-900 placeholder:text-slate-400"
                         : "bg-[#060b18] text-slate-100 placeholder:text-slate-600"

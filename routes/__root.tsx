@@ -93,12 +93,12 @@ function RootComponent() {
   // Synchronize theme and accent with user preferences or localStorage
   useEffect(() => {
     const savedTheme =
-      user?.preferences?.theme ||
       (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_theme") : null) ||
+      user?.preferences?.theme ||
       "dark";
     const savedAccent =
-      user?.preferences?.accentColor ||
       (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_accent") : null) ||
+      user?.preferences?.accentColor ||
       "indigo";
 
     const root = document.documentElement;

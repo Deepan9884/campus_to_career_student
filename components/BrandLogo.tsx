@@ -91,13 +91,13 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       {/* Brand Text */}
       {!collapsed && (
         <div className="flex flex-col leading-none">
-          <div className={`font-extrabold tracking-tight text-white flex items-center gap-1.5 ${textSizes[size]}`}>
+          <div className={`font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 ${textSizes[size]}`}>
             <span className="font-['Outfit',sans-serif]">CampusToCareer</span>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 tracking-wide uppercase">
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 dark:border-indigo-500/40 text-indigo-600 dark:text-indigo-400 tracking-wide uppercase">
               AI
             </span>
           </div>
-          <span className="text-[9px] font-medium text-[#93A0B5] tracking-wider uppercase mt-0.5">
+          <span className="text-[9px] font-medium text-slate-500 dark:text-[#93A0B5] tracking-wider uppercase mt-0.5">
             Career Prep Studio
           </span>
         </div>

@@ -539,9 +539,9 @@ function EventsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : filteredEvents.length === 0 ? (
-        <GlassCard className="text-center py-12 space-y-3">
-          <Trophy className="h-12 w-12 text-muted-foreground mx-auto opacity-50" />
-          <h3 className="text-lg font-semibold">No events logged yet</h3>
+        <GlassCard variant="liquid" className="text-center py-12 space-y-3">
+          <Trophy className="h-12 w-12 text-amber-500 dark:text-amber-400 mx-auto" />
+          <h3 className="text-lg font-bold text-foreground">No events logged yet</h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
             Log your hackathon participations, ideathon wins, or competition proofs to strengthen your career profile and verify skills.
           </p>

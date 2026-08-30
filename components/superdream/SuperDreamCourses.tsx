@@ -119,32 +119,35 @@ export function SuperDreamCourses() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <GlassCard className="p-6 border-emerald-500/30 bg-gradient-to-r from-slate-900/90 via-emerald-950/40 to-slate-900/90 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+      <GlassCard
+        variant="liquid"
+        className="p-6 border border-emerald-300/60 dark:border-emerald-500/30 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/40 dark:from-slate-900/90 dark:via-emerald-950/40 dark:to-slate-900/90 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden rounded-2xl shadow-xs dark:shadow-none"
+      >
+        <div className="space-y-2 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             AI Proof Verification Protocol
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Super Dream Verified Curriculums
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-            High-yield technical courses required for Super Dream placements. Courses are marked as completed <strong className="text-emerald-300 font-bold">strictly after valid certificate submission and AI verification</strong>.
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-2xl leading-relaxed">
+            High-yield technical courses required for Super Dream placements. Courses are marked as completed <strong className="text-emerald-700 dark:text-emerald-300 font-bold">strictly after valid certificate submission and AI verification</strong>.
           </p>
         </div>
 
-        <div className="flex items-center gap-4 bg-slate-900/90 p-4 rounded-2xl border border-emerald-500/30 shrink-0 shadow-lg shadow-emerald-950/30">
+        <div className="flex items-center gap-4 bg-white/90 dark:bg-slate-900/90 p-4 rounded-2xl border border-emerald-300/70 dark:border-emerald-500/30 shrink-0 shadow-sm dark:shadow-lg dark:shadow-emerald-950/30 backdrop-blur-md z-10">
           <div className="text-center px-2">
-            <p className="text-xs text-slate-400 font-medium">Verified Courses</p>
-            <p className="text-2xl font-black text-emerald-400 font-mono">
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">Verified Courses</p>
+            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
               {completedCourses.length} / {courses.length}
             </p>
           </div>
-          <div className="h-10 w-[1px] bg-white/10" />
+          <div className="h-10 w-[1px] bg-slate-200 dark:bg-white/10" />
           <div className="text-center px-2">
-            <p className="text-xs text-slate-400 font-medium">Verification Status</p>
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-cyan-300">
-              <Zap className="w-3.5 h-3.5 text-cyan-400" /> Active Scanner
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">Verification Status</p>
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-sky-700 dark:text-cyan-300">
+              <Zap className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" /> Active Scanner
             </span>
           </div>
         </div>
@@ -152,9 +155,9 @@ export function SuperDreamCourses() {
 
       {/* Courses Grid */}
       {courses.length === 0 ? (
-        <GlassCard className="p-12 text-center text-slate-400 space-y-3 border-slate-800 bg-slate-900/40">
+        <GlassCard className="p-12 text-center text-slate-600 dark:text-slate-400 space-y-3 border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40">
           <GraduationCap className="w-10 h-10 text-slate-500 mx-auto" />
-          <h3 className="text-base font-bold text-white">No Courses Assigned Yet</h3>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">No Courses Assigned Yet</h3>
           <p className="text-xs max-w-md mx-auto">
             Your faculty mentor or placement cell will curate and assign accredited certification courses here.
           </p>
@@ -169,41 +172,41 @@ export function SuperDreamCourses() {
               <GlassCard
                 key={course.id}
                 className={cn(
-                  "p-6 border-slate-800 bg-slate-900/70 flex flex-col justify-between gap-5 card-hover-lift transition-all relative overflow-hidden",
-                  isVerified && "border-emerald-500/40 bg-slate-900/85"
+                  "p-6 border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 flex flex-col justify-between gap-5 card-hover-lift transition-all relative overflow-hidden shadow-xs dark:shadow-none",
+                  isVerified && "border-emerald-400/60 dark:border-emerald-500/40 bg-emerald-50/30 dark:bg-slate-900/85"
                 )}
               >
               {isVerified && (
-                <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-teal-500 text-slate-950 text-[10px] font-black uppercase px-3 py-1 rounded-bl-xl flex items-center gap-1 shadow-md">
+                <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-600 to-teal-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-xl flex items-center gap-1 shadow-md">
                   <Check className="w-3 h-3 stroke-[3]" /> AI Verified
                 </div>
               )}
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2 pr-16">
-                  <span className="text-xs font-semibold text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/20">
+                  <span className="text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-md border border-amber-500/30">
                     {course.provider}
                   </span>
                   <span
                     className={cn(
                       "text-[11px] font-mono font-bold px-2 py-0.5 rounded border",
                       course.difficulty === "Master"
-                        ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
-                        : "bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+                        ? "bg-rose-500/15 text-rose-800 dark:text-rose-300 border-rose-500/30"
+                        : "bg-indigo-500/15 text-indigo-800 dark:text-indigo-300 border-indigo-500/30"
                     )}
                   >
                     {course.difficulty}
                   </span>
                 </div>
 
-                <h3 className="text-base sm:text-lg font-bold text-white leading-snug mt-1">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug mt-1">
                   {course.title}
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Instructor: <span className="text-slate-200">{course.instructor}</span> • {course.duration}
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                  Instructor: <span className="text-slate-900 dark:text-slate-200 font-semibold">{course.instructor}</span> • {course.duration}
                 </p>
 
-                <p className="text-xs text-slate-300 mt-3 leading-relaxed">
+                <p className="text-xs text-slate-700 dark:text-slate-300 mt-3 leading-relaxed">
                   {course.description}
                 </p>
 
@@ -212,7 +215,7 @@ export function SuperDreamCourses() {
                   {course.topics.map((topic, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800/80 border border-slate-700 text-slate-300"
+                      className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                     >
                       {topic}
                     </span>
@@ -221,22 +224,22 @@ export function SuperDreamCourses() {
               </div>
 
               {/* Status and Actions */}
-              <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 {isVerified && course.certificateProof ? (
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-emerald-300">
+                      <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
                         Score: {course.certificateProof.verificationScore}% Authenticity
                       </p>
-                      <p className="text-[10px] text-slate-400 font-mono">
+                      <p className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
                         ID: {course.certificateProof.credentialId}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-xs text-slate-400">
-                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     <span>Proof Required for Completion</span>
                   </div>
                 )}
@@ -245,18 +248,18 @@ export function SuperDreamCourses() {
                   {isVerified ? (
                     <button
                       onClick={() => setActiveProofViewCourse(course)}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/60 transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-400/60 dark:border-emerald-500/40 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                     >
                       <FileCheck className="w-3.5 h-3.5" /> View Proof Dossier
                     </button>
                   ) : isLocked ? (
-                    <span className="text-xs text-slate-500 flex items-center gap-1 bg-slate-850 px-3 py-1.5 rounded-lg border border-slate-800">
+                    <span className="text-xs text-slate-500 flex items-center gap-1 bg-slate-100 dark:bg-slate-850 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 font-medium">
                       <Lock className="w-3 h-3" /> Locked by Mentor
                     </span>
                   ) : (
                     <button
                       onClick={() => handleOpenVerifyModal(course)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 via-indigo-600 to-amber-500 hover:opacity-95 text-white transition shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 via-indigo-600 to-amber-600 hover:opacity-95 text-white transition shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
                     >
                       <Scan className="w-3.5 h-3.5" /> Submit Proof for Verification
                     </button>
@@ -272,7 +275,7 @@ export function SuperDreamCourses() {
       {/* AI Verification Scanner Modal */}
       {activeCourseModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-emerald-500/40 p-6 shadow-2xl space-y-4 text-white relative">
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-emerald-400/60 dark:border-emerald-500/40 p-6 shadow-2xl space-y-4 text-slate-900 dark:text-white relative">
             <button
               onClick={() => {
                 if (!isVerifying) setActiveCourseModal(null);
@@ -342,7 +345,7 @@ export function SuperDreamCourses() {
               <form onSubmit={handleRunAiVerification} className="space-y-4 pt-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-300">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                       Credential ID / Certificate No. *
                     </label>
                     <input
@@ -351,12 +354,12 @@ export function SuperDreamCourses() {
                       placeholder="e.g. STAN-SYS-9942"
                       value={credentialId}
                       onChange={(e) => setCredentialId(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-400 font-mono"
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 font-mono"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-300">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                       Issuing Institution / Body *
                     </label>
                     <input
@@ -365,13 +368,13 @@ export function SuperDreamCourses() {
                       placeholder="e.g. Stanford Online, MIT, Coursera"
                       value={issuerName}
                       onChange={(e) => setIssuerName(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-400"
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-300">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Verification URL / Public Link
                   </label>
                   <input
@@ -379,29 +382,29 @@ export function SuperDreamCourses() {
                     placeholder="https://coursera.org/verify/YOUR_ID"
                     value={proofUrl}
                     onChange={(e) => setProofUrl(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-400"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[var(--foreground)] block mb-1">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Upload Certificate PDF / Image
                   </label>
-                  <label className="p-4 rounded-2xl panel-slot hover:bg-white/[0.08] hover:border-[var(--primary)]/40 transition flex items-center justify-center gap-3 cursor-pointer text-center block">
+                  <label className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 transition flex items-center justify-center gap-3 cursor-pointer text-center block">
                     <input
                       type="file"
                       accept=".pdf,.png,.jpg,.jpeg"
                       className="sr-only"
                       onChange={(e) => setSelectedFileName(e.target.files?.[0]?.name || "")}
                     />
-                    <div className="w-10 h-10 rounded-xl bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 flex items-center justify-center shrink-0">
                       <FileUp className="w-5 h-5" />
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-semibold text-[var(--foreground)]">
+                      <p className="text-xs font-semibold text-slate-900 dark:text-white">
                         {selectedFileName || "Click to browse completion certificate"}
                       </p>
-                      <p className="text-[11px] text-[var(--muted-foreground)] font-medium">PDF, PNG, JPG up to 10MB</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">PDF, PNG, JPG up to 10MB</p>
                     </div>
                   </label>
                 </div>
@@ -410,7 +413,7 @@ export function SuperDreamCourses() {
                   <button
                     type="button"
                     onClick={() => setActiveCourseModal(null)}
-                    className="px-4 py-2 rounded-full text-xs font-medium bg-white/[0.08] hover:bg-white/[0.14] text-[var(--foreground)] transition cursor-pointer"
+                    className="px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 dark:bg-white/[0.08] hover:bg-slate-200 dark:hover:bg-white/[0.14] text-slate-700 dark:text-white transition cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -430,58 +433,58 @@ export function SuperDreamCourses() {
       {/* View AI Verified Proof Details Modal */}
       {activeProofViewCourse?.certificateProof && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-emerald-500/50 p-6 shadow-2xl space-y-4 text-white relative">
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-emerald-400/60 dark:border-emerald-500/50 p-6 shadow-2xl space-y-4 text-slate-900 dark:text-white relative">
             <button
               onClick={() => setActiveProofViewCourse(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2 text-emerald-400">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
               <ShieldCheck className="w-5 h-5" />
-              <h3 className="text-base font-bold text-white">Verified Proof Dossier</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Verified Proof Dossier</h3>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 space-y-3">
               <div>
-                <p className="text-xs text-slate-400">Course</p>
-                <p className="text-sm font-bold text-white">{activeProofViewCourse.title}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Course</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{activeProofViewCourse.title}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span className="text-slate-400">Candidate:</span>{" "}
-                  <strong className="text-white">{activeProofViewCourse.certificateProof.studentName}</strong>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Candidate:</span>{" "}
+                  <strong className="text-slate-900 dark:text-white font-bold">{activeProofViewCourse.certificateProof.studentName}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400">Issued By:</span>{" "}
-                  <strong className="text-white">{activeProofViewCourse.certificateProof.issuedBy}</strong>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Issued By:</span>{" "}
+                  <strong className="text-slate-900 dark:text-white font-bold">{activeProofViewCourse.certificateProof.issuedBy}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400">Credential ID:</span>{" "}
-                  <strong className="text-emerald-400 font-mono">{activeProofViewCourse.certificateProof.credentialId}</strong>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Credential ID:</span>{" "}
+                  <strong className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">{activeProofViewCourse.certificateProof.credentialId}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400">Verified Date:</span>{" "}
-                  <strong className="text-slate-200">{activeProofViewCourse.certificateProof.issueDate}</strong>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Verified Date:</span>{" "}
+                  <strong className="text-slate-700 dark:text-slate-200 font-semibold">{activeProofViewCourse.certificateProof.issueDate}</strong>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-white/10 space-y-1.5 text-xs text-slate-300">
-                <p className="font-semibold text-emerald-300">Verification Checks:</p>
+              <div className="pt-2 border-t border-slate-200 dark:border-white/10 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                <p className="font-bold text-emerald-700 dark:text-emerald-300">Verification Checks:</p>
                 <div className="grid grid-cols-2 gap-1 text-[11px]">
-                  <span className="text-emerald-400">✓ Student Identity Matched</span>
-                  <span className="text-emerald-400">✓ Issuer Authenticated</span>
-                  <span className="text-emerald-400">✓ Credential ID Valid</span>
-                  <span className="text-emerald-400">✓ Syllabus Alignment 98%</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Student Identity Matched</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Issuer Authenticated</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Credential ID Valid</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Syllabus Alignment 98%</span>
                 </div>
               </div>
             </div>
 
             <button
               onClick={() => setActiveProofViewCourse(null)}
-              className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition"
+              className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-white transition"
             >
               Close Dossier
             </button>
