@@ -100,6 +100,7 @@ function RealGoogleButton({
   const [busy, setBusy] = useState(false);
 
   const handleGoogleAuth = useGoogleLogin({
+    scope: "openid profile email",
     onSuccess: async (tokenResponse) => {
       setBusy(true);
       setGoogleBusy(true);
