@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -56,7 +56,7 @@ function GoogleClientButton({
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const hasRealClientId = Boolean(clientId && !clientId.includes("demo1234567890abcdef"));
 
-  // If real Client ID is defined in environment, use Google's hook
+  // If real Client ID is defined in environment, use Google's native component
   if (hasRealClientId) {
     return (
       <RealGoogleButton
@@ -80,7 +80,7 @@ function GoogleClientButton({
       type="button"
       onClick={handleUnconfiguredGoogleLogin}
       disabled={isAnyLoading}
-      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
+      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50 min-h-[40px]"
     >
       <GoogleIcon className="w-4 h-4 shrink-0" />
       <span className="text-white font-medium">Google</span>
@@ -97,44 +97,32 @@ function RealGoogleButton({
   isAnyLoading: boolean;
   setGoogleBusy: (busy: boolean) => void;
 }) {
-  const [busy, setBusy] = useState(false);
-
-  const handleGoogleAuth = useGoogleLogin({
-    scope: "openid profile email",
-    onSuccess: async (tokenResponse) => {
-      setBusy(true);
-      setGoogleBusy(true);
-      try {
-        await onGoogleSuccess(tokenResponse.access_token);
-      } catch (err: any) {
-        toast.error(err?.message || "Google sign in failed");
-      } finally {
-        setBusy(false);
-        setGoogleBusy(false);
-      }
-    },
-    onError: (errorResponse) => {
-      console.warn("Google Auth error:", errorResponse);
-      toast.error("Google login was cancelled or failed. Please try again.");
-      setBusy(false);
-      setGoogleBusy(false);
-    },
-  });
-
   return (
-    <button
-      type="button"
-      onClick={() => handleGoogleAuth()}
-      disabled={isAnyLoading || busy}
-      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
-    >
-      {busy ? (
-        <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
-      ) : (
-        <GoogleIcon className="w-4 h-4 shrink-0" />
-      )}
-      <span className="text-white font-medium">{busy ? "Signing in..." : "Google"}</span>
-    </button>
+    <div className="w-full flex items-center justify-center overflow-hidden rounded-xl border border-slate-700/80 hover:border-slate-500 transition-all [&>div]:w-full [&>div>iframe]:!w-full min-h-[40px] opacity-95 hover:opacity-100">
+      <GoogleLogin
+        onSuccess={async (credentialResponse) => {
+          if (credentialResponse.credential) {
+            setGoogleBusy(true);
+            try {
+              await onGoogleSuccess(credentialResponse.credential);
+            } catch (err: any) {
+              toast.error(err?.message || "Google sign in failed");
+            } finally {
+              setGoogleBusy(false);
+            }
+          }
+        }}
+        onError={() => {
+          toast.error("Google sign in failed");
+          setGoogleBusy(false);
+        }}
+        theme="filled_black"
+        shape="rectangular"
+        size="medium"
+        width="100%"
+        text="signin"
+      />
+    </div>
   );
 }
 
