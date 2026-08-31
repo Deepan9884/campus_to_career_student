@@ -53,7 +53,8 @@ function GoogleClientButton({
   isAnyLoading: boolean;
   setGoogleBusy: (busy: boolean) => void;
 }) {
-  const hasRealClientId = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const hasRealClientId = Boolean(clientId && !clientId.includes("demo1234567890abcdef"));
 
   // If real Client ID is defined in environment, use Google's hook
   if (hasRealClientId) {
@@ -66,22 +67,18 @@ function GoogleClientButton({
     );
   }
 
-  // Fallback demo Google login button if Client ID is missing
-  const triggerDemoGoogleLogin = async () => {
-    setGoogleBusy(true);
-    try {
-      await onGoogleSuccess("demo-google-token");
-    } catch (err: any) {
-      toast.error(err?.message || "Google sign in failed");
-    } finally {
-      setGoogleBusy(false);
-    }
+  // Helpful prompt if Client ID is not configured yet
+  const handleUnconfiguredGoogleLogin = () => {
+    toast.info("Google Sign-In requires VITE_GOOGLE_CLIENT_ID in your .env file.", {
+      description: "Create an OAuth 2.0 Web Client ID in Google Cloud Console and paste it into .env.",
+      duration: 5000,
+    });
   };
 
   return (
     <button
       type="button"
-      onClick={triggerDemoGoogleLogin}
+      onClick={handleUnconfiguredGoogleLogin}
       disabled={isAnyLoading}
       className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
     >
@@ -100,19 +97,26 @@ function RealGoogleButton({
   isAnyLoading: boolean;
   setGoogleBusy: (busy: boolean) => void;
 }) {
+  const [busy, setBusy] = useState(false);
+
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setBusy(true);
       setGoogleBusy(true);
       try {
         await onGoogleSuccess(tokenResponse.access_token);
       } catch (err: any) {
         toast.error(err?.message || "Google sign in failed");
       } finally {
+        setBusy(false);
         setGoogleBusy(false);
       }
     },
-    onError: () => {
-      toast.error("Google login popup closed or failed");
+    onError: (errorResponse) => {
+      console.warn("Google Auth error:", errorResponse);
+      toast.error("Google login was cancelled or failed. Please try again.");
+      setBusy(false);
+      setGoogleBusy(false);
     },
   });
 
@@ -120,11 +124,15 @@ function RealGoogleButton({
     <button
       type="button"
       onClick={() => handleGoogleAuth()}
-      disabled={isAnyLoading}
+      disabled={isAnyLoading || busy}
       className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
     >
-      <GoogleIcon className="w-4 h-4 shrink-0" />
-      <span className="text-white font-medium">Google</span>
+      {busy ? (
+        <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
+      ) : (
+        <GoogleIcon className="w-4 h-4 shrink-0" />
+      )}
+      <span className="text-white font-medium">{busy ? "Signing in..." : "Google"}</span>
     </button>
   );
 }
