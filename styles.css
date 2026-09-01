@@ -1411,9 +1411,80 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   transform: scale(1.15);
 }
 
-/* ─── Global Card & Panel Surfaces (Plain UI Solid Contrast) ─── */
+/* ─── Global Dark Mode Glass & Morphism Surfaces (Default Dark Experience) ─── */
+html:not(.light) .liquid-glass,
+.dark .liquid-glass,
+html.dark .liquid-glass {
+  background: var(--glass-bg, linear-gradient(135deg, rgba(30, 24, 60, 0.75) 0%, rgba(18, 14, 38, 0.88) 100%)) !important;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.16)) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.60), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  color: var(--foreground, #F0EEFF) !important;
+}
+
+html:not(.light) .liquid-glass-card,
+.dark .liquid-glass-card,
+html.dark .liquid-glass-card {
+  background: var(--glass-bg, linear-gradient(145deg, rgba(36, 28, 70, 0.70) 0%, rgba(20, 16, 44, 0.85) 100%)) !important;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14)) !important;
+  backdrop-filter: blur(24px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  color: var(--foreground, #F0EEFF) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+html:not(.light) .liquid-glass-card:hover,
+.dark .liquid-glass-card:hover,
+html.dark .liquid-glass-card:hover {
+  background: linear-gradient(145deg, rgba(48, 38, 92, 0.80) 0%, rgba(28, 22, 58, 0.92) 100%) !important;
+  border-color: var(--primary, rgba(167, 139, 250, 0.60)) !important;
+  box-shadow: 0 20px 42px -6px rgba(0, 0, 0, 0.70), 0 0 20px -2px rgba(167, 139, 250, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+  transform: translateY(-2px) !important;
+}
+
+html:not(.light) .glass,
+.dark .glass,
+html.dark .glass {
+  background: var(--glass-bg, linear-gradient(145deg, rgba(32, 25, 62, 0.65) 0%, rgba(18, 14, 38, 0.80) 100%)) !important;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  color: var(--foreground, #F0EEFF) !important;
+}
+
+html:not(.light) .glass-strong,
+.dark .glass-strong,
+html.dark .glass-strong,
+html:not(.light) .panel-card,
+.dark .panel-card,
+html.dark .panel-card {
+  background: var(--glass-strong-bg, linear-gradient(135deg, rgba(42, 34, 82, 0.75) 0%, rgba(22, 17, 48, 0.90) 100%)) !important;
+  border: 1px solid var(--glass-strong-border, rgba(255, 255, 255, 0.20)) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  box-shadow: 0 18px 44px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  color: var(--foreground, #F0EEFF) !important;
+}
+
+html:not(.light) .panel-slot,
+.dark .panel-slot,
+html.dark .panel-slot {
+  background: var(--card, #1C1638) !important;
+  border: 1px solid var(--border, rgba(167, 139, 250, 0.22)) !important;
+  color: var(--foreground, #F0EEFF) !important;
+}
+
+/* ─── Global Card & Panel Surfaces (Plain UI Solid Contrast [data-glass="off"]) ─── */
 
 /* DARK MODE PLAIN UI */
+[data-glass="off"] .glass,
+[data-glass="off"] .liquid-glass,
+[data-glass="off"] .liquid-glass-card,
+[data-glass="off"] .panel-card,
+[data-glass="off"] .panel-slot,
 html.dark[data-glass="off"] .glass,
 html.dark[data-glass="off"] .liquid-glass,
 html.dark[data-glass="off"] .liquid-glass-card,
@@ -1424,23 +1495,29 @@ html.dark[data-glass="off"] .panel-slot,
 .dark[data-glass="off"] .liquid-glass-card,
 .dark[data-glass="off"] .panel-card,
 .dark[data-glass="off"] .panel-slot {
-  background: var(--card) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.65), 0 2px 8px -1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-  color: var(--card-foreground) !important;
+  background: var(--card, #1C1638) !important;
+  border: 1px solid var(--border, rgba(167, 139, 250, 0.22)) !important;
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.65), 0 2px 8px -1px rgba(0, 0, 0, 0.45) !important;
+  color: var(--card-foreground, #F0EEFF) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
+[data-glass="off"] .glass-strong,
 html.dark[data-glass="off"] .glass-strong,
 .dark[data-glass="off"] .glass-strong {
-  background: var(--popover) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.70), 0 3px 10px -2px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  background: var(--popover, #211A42) !important;
+  border: 1px solid var(--border, rgba(167, 139, 250, 0.25)) !important;
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.70), 0 3px 10px -2px rgba(0, 0, 0, 0.50) !important;
+  color: var(--popover-foreground, #F0EEFF) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
+[data-glass="off"] .panel-card:hover,
+[data-glass="off"] .liquid-glass-card:hover,
+[data-glass="off"] .glass:hover,
+[data-glass="off"] .glass-strong:hover,
 html.dark[data-glass="off"] .panel-card:hover,
 html.dark[data-glass="off"] .liquid-glass-card:hover,
 html.dark[data-glass="off"] .glass:hover,
@@ -1449,9 +1526,9 @@ html.dark[data-glass="off"] .glass-strong:hover,
 .dark[data-glass="off"] .liquid-glass-card:hover,
 .dark[data-glass="off"] .glass:hover,
 .dark[data-glass="off"] .glass-strong:hover {
-  background: var(--secondary) !important;
-  border-color: var(--primary) !important;
-  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.80), 0 4px 12px -2px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+  background: var(--secondary, #2C2359) !important;
+  border-color: var(--primary, #A78BFA) !important;
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.80), 0 4px 12px -2px rgba(0, 0, 0, 0.55) !important;
   transform: translateY(-2px) !important;
 }
 
@@ -1468,7 +1545,7 @@ html.light[data-glass="off"] .panel-slot,
 .light[data-glass="off"] .panel-slot {
   background: #FFFFFF !important;
   border: 1px solid rgba(203, 213, 225, 0.85) !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
   color: #0F172A !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -1478,7 +1555,8 @@ html.light[data-glass="off"] .glass-strong,
 .light[data-glass="off"] .glass-strong {
   background: #F8FAFC !important;
   border: 1px solid rgba(203, 213, 225, 0.95) !important;
-  box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04) !important;
+  color: #0F172A !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -1493,11 +1571,11 @@ html.light[data-glass="off"] .glass-strong:hover,
 .light[data-glass="off"] .glass-strong:hover {
   background: #F1F5F9 !important;
   border-color: #6366F1 !important;
-  box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06) !important;
   transform: translateY(-2px) !important;
 }
 
-/* Dark Mode Inputs & Controls */
+/* Dark & Light Mode Inputs & Controls */
 .glass-input,
 input.glass-input,
 textarea.glass-input,
@@ -1510,10 +1588,10 @@ html:not(.light) textarea.glass-input,
 html[data-glass="off"] .glass-input,
 html.dark[data-glass="off"] .glass-input,
 .dark[data-glass="off"] .glass-input {
-  background-color: var(--input) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--foreground) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  background-color: var(--input, #181335) !important;
+  border: 1px solid var(--border, rgba(167, 139, 250, 0.22)) !important;
+  color: var(--foreground, #F0EEFF) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
 }
 
 .glass-input:focus,
@@ -1528,8 +1606,8 @@ html:not(.light) textarea.glass-input:focus,
 html[data-glass="off"] .glass-input:focus,
 html.dark[data-glass="off"] .glass-input:focus,
 .dark[data-glass="off"] .glass-input:focus {
-  border-color: var(--primary) !important;
-  box-shadow: 0 0 0 3px var(--btn-glow, rgba(167, 139, 250, 0.25)), inset 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  border-color: var(--primary, #A78BFA) !important;
+  box-shadow: 0 0 0 3px var(--btn-glow, rgba(167, 139, 250, 0.25)), inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* ─── Global Light Mode Liquid Glass & Translucent Morphism Surfaces ─── */
