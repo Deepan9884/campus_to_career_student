@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -44,85 +44,71 @@ export function GithubIcon({ className = "w-4 h-4 shrink-0 fill-current text-whi
   );
 }
 
-function GoogleClientButton({
+function GoogleCustomButton({
   onGoogleSuccess,
   isAnyLoading,
   setGoogleBusy,
+  googleBusy,
 }: {
   onGoogleSuccess: (credentialOrToken: string) => Promise<void>;
   isAnyLoading: boolean;
   setGoogleBusy: (busy: boolean) => void;
+  googleBusy: boolean;
 }) {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const hasRealClientId = Boolean(clientId && !clientId.includes("demo1234567890abcdef"));
 
-  // If real Client ID is defined in environment, use Google's native component
-  if (hasRealClientId) {
-    return (
-      <RealGoogleButton
-        onGoogleSuccess={onGoogleSuccess}
-        isAnyLoading={isAnyLoading}
-        setGoogleBusy={setGoogleBusy}
-      />
-    );
-  }
+  const triggerGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      if (tokenResponse?.access_token) {
+        setGoogleBusy(true);
+        try {
+          await onGoogleSuccess(tokenResponse.access_token);
+        } catch (err: any) {
+          toast.error(err?.message || "Google sign in failed");
+        } finally {
+          setGoogleBusy(false);
+        }
+      }
+    },
+    onError: (err) => {
+      console.warn("[Google Auth]", err);
+      toast.error("Google sign in failed or was cancelled");
+      setGoogleBusy(false);
+    },
+  });
 
-  // Helpful prompt if Client ID is not configured yet
-  const handleUnconfiguredGoogleLogin = () => {
-    toast.info("Google Sign-In requires VITE_GOOGLE_CLIENT_ID in your .env file.", {
-      description: "Create an OAuth 2.0 Web Client ID in Google Cloud Console and paste it into .env.",
-      duration: 5000,
-    });
+  const handleClick = () => {
+    if (!hasRealClientId) {
+      toast.info("Google Sign-In requires VITE_GOOGLE_CLIENT_ID in your .env file.", {
+        description: "Create an OAuth 2.0 Web Client ID in Google Cloud Console and paste it into .env.",
+        duration: 5000,
+      });
+      return;
+    }
+    setGoogleBusy(true);
+    try {
+      triggerGoogleLogin();
+    } catch (err: any) {
+      setGoogleBusy(false);
+      toast.error(err?.message || "Could not open Google Sign-In");
+    }
   };
 
   return (
     <button
       type="button"
-      onClick={handleUnconfiguredGoogleLogin}
+      onClick={handleClick}
       disabled={isAnyLoading}
-      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50 min-h-[40px]"
+      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50 min-h-[42px]"
     >
-      <GoogleIcon className="w-4 h-4 shrink-0" />
+      {googleBusy ? (
+        <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
+      ) : (
+        <GoogleIcon className="w-4 h-4 shrink-0" />
+      )}
       <span className="text-white font-medium">Google</span>
     </button>
-  );
-}
-
-function RealGoogleButton({
-  onGoogleSuccess,
-  isAnyLoading,
-  setGoogleBusy,
-}: {
-  onGoogleSuccess: (credentialOrToken: string) => Promise<void>;
-  isAnyLoading: boolean;
-  setGoogleBusy: (busy: boolean) => void;
-}) {
-  return (
-    <div className="w-full flex items-center justify-center overflow-hidden rounded-xl border border-slate-700/80 hover:border-slate-500 transition-all [&>div]:w-full [&>div>iframe]:!w-full min-h-[40px] opacity-95 hover:opacity-100">
-      <GoogleLogin
-        onSuccess={async (credentialResponse) => {
-          if (credentialResponse.credential) {
-            setGoogleBusy(true);
-            try {
-              await onGoogleSuccess(credentialResponse.credential);
-            } catch (err: any) {
-              toast.error(err?.message || "Google sign in failed");
-            } finally {
-              setGoogleBusy(false);
-            }
-          }
-        }}
-        onError={() => {
-          toast.error("Google sign in failed");
-          setGoogleBusy(false);
-        }}
-        theme="filled_black"
-        shape="rectangular"
-        size="medium"
-        width="100%"
-        text="signin"
-      />
-    </div>
   );
 }
 
@@ -149,17 +135,18 @@ export function SocialAuthButtons({
 
   return (
     <div className="grid grid-cols-2 gap-3 w-full">
-      <GoogleClientButton
+      <GoogleCustomButton
         onGoogleSuccess={onGoogleSuccess}
         isAnyLoading={isAnyLoading}
         setGoogleBusy={setGoogleBusy}
+        googleBusy={googleBusy}
       />
 
       <button
         type="button"
         onClick={triggerGithubLogin}
         disabled={isAnyLoading}
-        className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50"
+        className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50 min-h-[42px]"
       >
         {githubBusy ? (
           <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
@@ -171,3 +158,4 @@ export function SocialAuthButtons({
     </div>
   );
 }
+
