@@ -167,56 +167,56 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <GlassCard variant="strong" className="w-full max-w-xl overflow-hidden relative shadow-2xl border-indigo-500/30 p-0">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-card text-card-foreground border border-border shadow-2xl relative flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="bg-gradient-to-br from-indigo-600/30 via-purple-600/20 to-slate-900 p-6 border-b border-white/10 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-primary/10 via-purple-500/5 to-transparent p-6 border-b border-border relative">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition z-20"
+            className="absolute top-4 right-4 p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition cursor-pointer"
             title="Skip Onboarding"
           >
             <X className="h-4 w-4" />
           </button>
           
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 border border-indigo-500/40 uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/15 text-primary border border-primary/20 uppercase tracking-wider">
               Profile Setup • Step {step} of 3
             </span>
           </div>
 
-          <h2 className="text-2xl font-black text-white flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
             Welcome to Campus to Career AI
           </h2>
-          <p className="text-xs text-indigo-200 mt-1 max-w-md">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-md">
             Let's personalize your AI interview practice, skill gap roadmaps, and career readiness telemetry.
           </p>
         </div>
 
         {/* Body Content per Step */}
-        <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto">
+        <div className="p-6 space-y-5 overflow-y-auto flex-1">
           {/* STEP 1: TARGET ROLE / DESIGNATION */}
           {step === 1 && (
             <div className="space-y-4 animate-in slide-in-from-right-4 duration-200">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 grid place-items-center shrink-0 text-indigo-400">
+                <div className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/25 grid place-items-center shrink-0 text-primary">
                   <Target className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">What is your target designation?</h3>
+                  <h3 className="font-bold text-foreground text-base">What is your target designation?</h3>
                   <p className="text-xs text-muted-foreground">Select or type the target position you are preparing for.</p>
                 </div>
               </div>
 
               <div className="relative">
-                <Briefcase className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                <Briefcase className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="e.g. Software Engineer, Frontend Developer..."
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-white placeholder:text-slate-500 transition"
+                  className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 hover:bg-secondary/70 focus:bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary text-sm text-foreground placeholder:text-muted-foreground transition"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && role.trim()) setStep(2);
                   }}
@@ -224,21 +224,21 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
               </div>
 
               <div className="space-y-2 pt-1">
-                <label className="text-xs font-semibold text-slate-300">Popular Career Tracks:</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Popular Career Tracks:</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {PRESET_ROLES.map((preset) => (
                     <button
                       key={preset.title}
                       type="button"
                       onClick={() => setRole(preset.title)}
-                      className={`text-xs p-2.5 rounded-xl border text-left flex items-center gap-2 transition ${
+                      className={`text-xs p-2.5 rounded-xl border text-left flex items-center gap-2 transition cursor-pointer ${
                         role === preset.title
-                          ? "bg-indigo-600/30 border-indigo-500 text-white font-semibold shadow-md"
-                          : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-300"
+                          ? "bg-primary/15 border-primary text-primary font-semibold shadow-xs"
+                          : "bg-secondary/40 hover:bg-secondary border-border text-foreground hover:border-primary/40"
                       }`}
                     >
-                      <preset.icon className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-                      <span className="truncate">{preset.title}</span>
+                      <preset.icon className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span className="font-medium truncate sm:whitespace-normal">{preset.title}</span>
                     </button>
                   ))}
                 </div>
@@ -250,44 +250,44 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
           {step === 2 && (
             <div className="space-y-5 animate-in slide-in-from-right-4 duration-200">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-purple-500/20 border border-purple-500/30 grid place-items-center shrink-0 text-purple-400">
+                <div className="h-10 w-10 rounded-xl bg-purple-500/15 border border-purple-500/25 grid place-items-center shrink-0 text-purple-600 dark:text-purple-400">
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">Experience & Interview Level</h3>
+                  <h3 className="font-bold text-foreground text-base">Experience & Interview Level</h3>
                   <p className="text-xs text-muted-foreground">Tailor AI interview difficulty and daily practice intensity.</p>
                 </div>
               </div>
 
               {/* Difficulty Cards */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300">Select Difficulty Track:</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Select Difficulty Track:</label>
                 <div className="grid grid-cols-1 gap-2.5">
                   {EXPERIENCE_LEVELS.map((lvl) => (
                     <button
                       key={lvl.id}
                       type="button"
                       onClick={() => setExperienceLevel(lvl.id)}
-                      className={`p-3.5 rounded-xl border text-left transition flex items-start justify-between ${
+                      className={`p-3.5 rounded-xl border text-left transition flex items-start justify-between cursor-pointer ${
                         experienceLevel === lvl.id
-                          ? "bg-indigo-600/20 border-indigo-500 text-white shadow-lg"
-                          : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-300"
+                          ? "bg-primary/10 border-primary text-foreground shadow-xs ring-1 ring-primary/30"
+                          : "bg-secondary/40 hover:bg-secondary border-border text-foreground hover:border-primary/40"
                       }`}
                     >
                       <div className="space-y-1 pr-2">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-white">{lvl.label}</span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300 font-mono">
+                          <span className="font-bold text-sm text-foreground">{lvl.label}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-mono font-medium">
                             {lvl.subLabel}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400">{lvl.desc}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{lvl.desc}</p>
                       </div>
                       <div className="shrink-0 mt-0.5">
                         {experienceLevel === lvl.id ? (
-                          <CheckCircle2 className="h-5 w-5 text-indigo-400" />
+                          <CheckCircle2 className="h-5 w-5 text-primary" />
                         ) : (
-                          <div className="h-5 w-5 rounded-full border border-white/30" />
+                          <div className="h-5 w-5 rounded-full border border-border" />
                         )}
                       </div>
                     </button>
@@ -296,9 +296,9 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
               </div>
 
               {/* Daily Problem Goal */}
-              <div className="space-y-2 pt-2 border-t border-white/10">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Flame className="h-4 w-4 text-amber-400" /> Daily Problem Target:
+              <div className="space-y-2 pt-2 border-t border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Flame className="h-4 w-4 text-amber-500" /> Daily Problem Target:
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {DAILY_GOALS.map((goal) => {
@@ -309,14 +309,14 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                         key={goal.count}
                         type="button"
                         onClick={() => setDailyGoal(goal.count)}
-                        className={`p-2.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 ${
+                        className={`p-2.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer ${
                           isSelected
-                            ? "bg-amber-500/20 border-amber-500 text-amber-200 font-bold"
-                            : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-400"
+                            ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold ring-1 ring-amber-500/30"
+                            : "bg-secondary/40 hover:bg-secondary border-border text-muted-foreground hover:text-foreground"
                         }`}
                       >
-                        <GoalIcon className={`h-4 w-4 ${isSelected ? "text-amber-400" : "text-slate-400"}`} />
-                        <span className="text-xs font-semibold text-white">{goal.desc}</span>
+                        <GoalIcon className={`h-4 w-4 ${isSelected ? "text-amber-500" : "text-muted-foreground"}`} />
+                        <span className="text-xs font-semibold text-foreground">{goal.desc}</span>
                         <span className="text-[10px] opacity-75">{goal.label}</span>
                       </button>
                     );
@@ -330,11 +330,11 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
           {step === 3 && (
             <div className="space-y-4 animate-in slide-in-from-right-4 duration-200">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 grid place-items-center shrink-0 text-emerald-400">
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 grid place-items-center shrink-0 text-emerald-600 dark:text-emerald-400">
                   <Code2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">Key Tech Stack & Focus Skills</h3>
+                  <h3 className="font-bold text-foreground text-base">Key Tech Stack & Focus Skills</h3>
                   <p className="text-xs text-muted-foreground">Select technologies to calibrate your skill gap matrix.</p>
                 </div>
               </div>
@@ -347,13 +347,13 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                       key={skill}
                       type="button"
                       onClick={() => handleToggleSkill(skill)}
-                      className={`text-xs px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition ${
+                      className={`text-xs px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition cursor-pointer ${
                         isSelected
-                          ? "bg-emerald-500/20 border-emerald-500 text-emerald-300 font-semibold shadow-sm"
-                          : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-300"
+                          ? "bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
+                          : "bg-secondary/40 hover:bg-secondary border-border text-foreground"
                       }`}
                     >
-                      {isSelected ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Plus className="h-3.5 w-3.5 text-slate-500" />}
+                      {isSelected ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <Plus className="h-3.5 w-3.5 text-muted-foreground" />}
                       <span>{skill}</span>
                     </button>
                   );
@@ -361,13 +361,13 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
               </div>
 
               {/* Custom Skill Input */}
-              <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+              <div className="flex items-center gap-2 pt-2 border-t border-border">
                 <input
                   type="text"
                   placeholder="Add custom skill (e.g. GraphQL, Kubernetes)..."
                   value={customSkill}
                   onChange={(e) => setCustomSkill(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="flex-1 px-3 py-2 bg-secondary/50 border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -379,22 +379,22 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                   type="button"
                   onClick={handleAddCustomSkill}
                   disabled={!customSkill.trim()}
-                  className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white disabled:opacity-50 transition"
+                  className="px-3.5 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-xs font-semibold text-foreground disabled:opacity-50 transition border border-border cursor-pointer"
                 >
                   Add
                 </button>
               </div>
 
-              <div className="text-[11px] text-slate-400 flex items-center justify-between">
-                <span>Selected: <strong className="text-white">{selectedSkills.length} skills</strong></span>
-                <span className="text-indigo-400">Target Role: <strong className="text-white">{role || "Not set"}</strong></span>
+              <div className="text-[11px] text-muted-foreground flex items-center justify-between">
+                <span>Selected: <strong className="text-foreground">{selectedSkills.length} skills</strong></span>
+                <span className="text-primary">Target Role: <strong className="text-foreground">{role || "Not set"}</strong></span>
               </div>
             </div>
           )}
         </div>
 
         {/* Footer Navigation */}
-        <div className="p-4 bg-slate-900/80 border-t border-white/10 flex justify-between items-center">
+        <div className="p-4 sm:p-5 bg-secondary/30 border-t border-border flex justify-between items-center rounded-b-2xl">
           {/* Step indicators */}
           <div className="flex items-center gap-2">
             {[1, 2, 3].map((s) => (
@@ -407,7 +407,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                   }
                 }}
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  s === step ? "w-8 bg-indigo-500" : s < step ? "w-3 bg-indigo-400/50" : "w-2 bg-white/20"
+                  s === step ? "w-8 bg-primary" : s < step ? "w-3 bg-primary/40" : "w-2 bg-border"
                 }`}
                 title={`Step ${s}`}
               />
@@ -419,7 +419,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
               <button
                 type="button"
                 onClick={() => setStep((prev) => (prev - 1) as 1 | 2 | 3)}
-                className="px-3.5 py-2 rounded-xl glass hover:bg-white/10 text-xs font-semibold text-slate-300 flex items-center gap-1 transition"
+                className="px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-xs font-semibold text-foreground flex items-center gap-1 transition cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" /> Back
               </button>
@@ -436,7 +436,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                   setStep((prev) => (prev + 1) as 1 | 2 | 3);
                 }}
                 disabled={!role.trim()}
-                className="btn-gradient px-5 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 disabled:opacity-50 transition shadow-lg"
+                className="btn-gradient px-5 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 disabled:opacity-50 transition shadow-md cursor-pointer"
               >
                 Next Step <ChevronRight className="h-4 w-4" />
               </button>
@@ -445,14 +445,14 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
                 type="button"
                 onClick={handleComplete}
                 disabled={saving || !role.trim()}
-                className="btn-gradient px-5 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 disabled:opacity-50 transition shadow-lg shadow-indigo-500/25"
+                className="btn-gradient px-5 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 disabled:opacity-50 transition shadow-md shadow-primary/25 cursor-pointer"
               >
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Complete & Start Product Tour</>}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Complete & Start Practice</>}
               </button>
             )}
           </div>
         </div>
-      </GlassCard>
+      </div>
     </div>
   );
 }
