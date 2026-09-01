@@ -31,8 +31,15 @@ function LoginPage() {
     ev.preventDefault();
     if (!validate()) return;
     try {
-      await login(email, password);
-      toast.success("Welcome back!");
+      const res = await login(email, password);
+      const isNew =
+        res?.isNewUser ||
+        (res?.user?.createdAt && Date.now() - new Date(res.user.createdAt).getTime() < 60000);
+      if (isNew) {
+        toast.success(`Welcome to Campus to Career AI, ${res?.user?.name || "Student"}! 🚀`);
+      } else {
+        toast.success(`Welcome back, ${res?.user?.name || "Student"}!`);
+      }
       navigate({ to: "/dashboard" });
     } catch (err: unknown) {
       const msg = err instanceof Error && err.message ? err.message : "Login failed";
@@ -117,13 +124,27 @@ function LoginPage() {
         <SocialAuthButtons
           isLoading={isLoading}
           onGoogleSuccess={async (cred) => {
-            await googleLogin(cred);
-            toast.success("Welcome back!");
+            const res = await googleLogin(cred);
+            const isNew =
+              res?.isNewUser ||
+              (res?.user?.createdAt && Date.now() - new Date(res.user.createdAt).getTime() < 60000);
+            if (isNew) {
+              toast.success(`Welcome to Campus to Career AI, ${res?.user?.name || "Student"}! 🚀`);
+            } else {
+              toast.success(`Welcome back, ${res?.user?.name || "Student"}!`);
+            }
             navigate({ to: "/dashboard" });
           }}
           onGithubSuccess={async (payload) => {
-            await githubLogin(payload);
-            toast.success("Welcome back via GitHub!");
+            const res = await githubLogin(payload);
+            const isNew =
+              res?.isNewUser ||
+              (res?.user?.createdAt && Date.now() - new Date(res.user.createdAt).getTime() < 60000);
+            if (isNew) {
+              toast.success(`Welcome to Campus to Career AI, ${res?.user?.name || "Student"}! 🚀`);
+            } else {
+              toast.success(`Welcome back, ${res?.user?.name || "Student"}!`);
+            }
             navigate({ to: "/dashboard" });
           }}
         />

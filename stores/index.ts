@@ -44,15 +44,21 @@ export interface User {
   };
 }
 
+interface AuthResponse {
+  user: User;
+  accessToken: string;
+  isNewUser?: boolean;
+}
+
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isCheckingAuth: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  googleLogin: (credential: string) => Promise<void>;
-  githubLogin: (payload?: { code?: string; accessToken?: string; username?: string }) => Promise<void>;
-  register: (data: { name: string; email: string; password: string }) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
+  googleLogin: (credential: string) => Promise<AuthResponse>;
+  githubLogin: (payload?: { code?: string; accessToken?: string; username?: string }) => Promise<AuthResponse>;
+  register: (data: { name: string; email: string; password: string }) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   updateUser: (patch: Partial<User>) => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -69,12 +75,13 @@ export const useAuth = create<AuthState>()(
       login: async (email, password) => {
         set({ isLoading: true });
         try {
-          const data = await api.post<{ user: User; accessToken: string }>("/auth/login", {
+          const data = await api.post<AuthResponse>("/auth/login", {
             email,
             password,
           });
           setAccessToken(data.accessToken);
           set({ user: data.user, isAuthenticated: true, isLoading: false });
+          return data;
         } catch (err) {
           set({ isLoading: false });
           throw err;
@@ -84,11 +91,12 @@ export const useAuth = create<AuthState>()(
       googleLogin: async (credential) => {
         set({ isLoading: true });
         try {
-          const data = await api.post<{ user: User; accessToken: string }>("/auth/google", {
+          const data = await api.post<AuthResponse>("/auth/google", {
             credential,
           });
           setAccessToken(data.accessToken);
           set({ user: data.user, isAuthenticated: true, isLoading: false });
+          return data;
         } catch (err) {
           set({ isLoading: false });
           throw err;
@@ -98,9 +106,10 @@ export const useAuth = create<AuthState>()(
       githubLogin: async (payload = {}) => {
         set({ isLoading: true });
         try {
-          const data = await api.post<{ user: User; accessToken: string }>("/auth/github", payload);
+          const data = await api.post<AuthResponse>("/auth/github", payload);
           setAccessToken(data.accessToken);
           set({ user: data.user, isAuthenticated: true, isLoading: false });
+          return data;
         } catch (err) {
           set({ isLoading: false });
           throw err;
@@ -110,9 +119,10 @@ export const useAuth = create<AuthState>()(
       register: async (data) => {
         set({ isLoading: true });
         try {
-          const res = await api.post<{ user: User; accessToken: string }>("/auth/register", data);
+          const res = await api.post<AuthResponse>("/auth/register", data);
           setAccessToken(res.accessToken);
           set({ user: res.user, isAuthenticated: true, isLoading: false });
+          return res;
         } catch (err) {
           set({ isLoading: false });
           throw err;
