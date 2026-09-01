@@ -19,6 +19,7 @@ import {
   ArrowRight,
   Zap,
   Palette,
+  Paintbrush,
   Code2,
   Sparkles,
   Star,
@@ -369,7 +370,7 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       id: `ambient-${p.id}`,
       title: `Atmospheric Lights: ${p.name}`,
       category: "appearance" as const,
-      icon: Sparkles,
+      icon: Paintbrush,
       badge: "Lighting",
       keywords: ["background", "lights", "ambient", "aurora", "theme", "stars", p.name.toLowerCase()],
       action: () => {

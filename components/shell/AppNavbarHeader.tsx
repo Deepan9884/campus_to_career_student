@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, Search, Sun, Moon, Sparkles, Settings, LogOut } from "lucide-react";
+import { Menu, Search, Sun, Moon, Paintbrush, Settings, LogOut } from "lucide-react";
 import { NotificationBell } from "@/components/shell/NotificationBell";
 
 export interface AppNavbarHeaderProps {
@@ -100,7 +100,7 @@ export function AppNavbarHeader({
         title="Atmospheric Lighting & Stars Studio (Customize background)"
         aria-label="Customize background lights & stars"
       >
-        <Sparkles className="h-4.5 w-4.5 text-indigo-500 group-hover:rotate-12 transition-transform" />
+        <Paintbrush className="h-4.5 w-4.5 text-indigo-500 group-hover:rotate-12 transition-transform" />
       </button>
       <Link to="/settings" className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/5 dark:hover:bg-white/10 dark:text-[var(--muted-foreground)] hover:text-slate-900 dark:hover:text-[var(--foreground)] transition border border-slate-200/90 dark:border-white/10 shadow-xs" aria-label="Settings">
         <Settings className="h-4.5 w-4.5" />
