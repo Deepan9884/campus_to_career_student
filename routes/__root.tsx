@@ -114,9 +114,10 @@ function RootComponent() {
     }
   }, [user?.preferences?.theme, user?.preferences?.accentColor]);
 
-  const googleClientId =
-    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-    "1000000000000-demo1234567890abcdef.apps.googleusercontent.com";
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+  if (!googleClientId) {
+    console.warn("[Auth] VITE_GOOGLE_CLIENT_ID is not set. Google Sign-In will be disabled.");
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
