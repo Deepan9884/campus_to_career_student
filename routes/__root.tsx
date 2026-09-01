@@ -95,11 +95,11 @@ function RootComponent() {
     const savedTheme =
       (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_theme") : null) ||
       user?.preferences?.theme ||
-      "dark";
+      "light";
     const savedAccent =
       (typeof localStorage !== "undefined" ? localStorage.getItem("c2c_accent") : null) ||
       user?.preferences?.accentColor ||
-      "indigo";
+      "purple";
 
     const root = document.documentElement;
     root.setAttribute("data-accent", savedAccent);
