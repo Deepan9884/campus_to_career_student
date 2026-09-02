@@ -251,6 +251,9 @@ export const useAmbientLighting = create<AmbientLightingState>()(
       },
 
       setBackgroundType: (backgroundType) => {
+        if (typeof document !== "undefined") {
+          document.documentElement.setAttribute("data-bg", backgroundType);
+        }
         set((state) => ({
           backgroundType,
           uiMode: "custom",
@@ -271,11 +274,14 @@ export const useAmbientLighting = create<AmbientLightingState>()(
         const targetAccent = customAccent || found?.accent;
         const targetPreset = (found as any)?.preset as AmbientPresetId | undefined;
 
-        if (targetAccent && typeof document !== "undefined") {
-          document.documentElement.setAttribute("data-accent", targetAccent);
-          try {
-            localStorage.setItem("c2c_accent", targetAccent);
-          } catch {}
+        if (typeof document !== "undefined") {
+          document.documentElement.setAttribute("data-bg", "solid");
+          if (targetAccent) {
+            document.documentElement.setAttribute("data-accent", targetAccent);
+            try {
+              localStorage.setItem("c2c_accent", targetAccent);
+            } catch {}
+          }
         }
 
         set((state) => ({

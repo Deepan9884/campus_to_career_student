@@ -452,7 +452,12 @@ export const InteractiveAppBackground: React.FC = () => {
     return (
       <div
         className="fixed inset-0 pointer-events-none z-0 transition-colors duration-500"
-        style={{ backgroundColor: resolvedColor }}
+        style={{
+          backgroundColor: resolvedColor,
+          backgroundImage: isLightMode
+            ? "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.05), transparent)"
+            : "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(167, 139, 250, 0.08), transparent)",
+        }}
         aria-hidden="true"
       />
     );

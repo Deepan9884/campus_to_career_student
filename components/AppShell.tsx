@@ -185,14 +185,15 @@ export function AppShell() {
     setExpandedBranch,
   } = useSuperDream();
 
-  const { glassPanelsEnabled } = useAmbientLighting();
+  const { glassPanelsEnabled, backgroundType } = useAmbientLighting();
 
-  // Sync data-glass on document root for full UI customizability
+  // Sync data-glass and data-bg on document root for full UI customizability
   useEffect(() => {
     if (typeof document !== "undefined") {
       document.documentElement.setAttribute("data-glass", glassPanelsEnabled ? "on" : "off");
+      document.documentElement.setAttribute("data-bg", backgroundType);
     }
-  }, [glassPanelsEnabled]);
+  }, [glassPanelsEnabled, backgroundType]);
 
   const isSuperDreamActive = pathname.startsWith("/super-dream");
 
