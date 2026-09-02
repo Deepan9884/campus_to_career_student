@@ -104,6 +104,18 @@ function RootComponent() {
     const root = document.documentElement;
     root.setAttribute("data-accent", savedAccent);
 
+    // Sync ambient lighting surface settings (data-glass and data-bg) immediately to prevent layout shifts/blackouts
+    try {
+      const rawAmbient = localStorage.getItem("ambient-lighting-storage");
+      if (rawAmbient) {
+        const parsed = JSON.parse(rawAmbient);
+        const bgType = parsed?.state?.backgroundType;
+        const glass = parsed?.state?.glassPanelsEnabled;
+        if (bgType) root.setAttribute("data-bg", bgType);
+        if (glass !== undefined) root.setAttribute("data-glass", glass ? "on" : "off");
+      }
+    } catch {}
+
     if (savedTheme === "system") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       root.classList.toggle("dark", prefersDark);

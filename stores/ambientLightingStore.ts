@@ -311,6 +311,11 @@ export const useAmbientLighting = create<AmbientLightingState>()(
           try {
             localStorage.setItem("c2c_accent", found.accent);
           } catch {}
+          const currentBg = get().backgroundType;
+          if (currentBg) {
+            document.documentElement.setAttribute("data-bg", currentBg);
+          }
+          document.documentElement.setAttribute("data-glass", get().glassPanelsEnabled ? "on" : "off");
         }
         set({ presetId });
       },

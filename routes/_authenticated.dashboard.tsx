@@ -322,7 +322,7 @@ function Dashboard() {
 
       {/* ── STUDENT WELCOME & READINESS OVERVIEW ── */}
       <div id="section-overview" className="scroll-mt-24" data-tour="readiness-card">
-        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-border shadow-xl glass-strong">
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-border shadow-xl glass-strong bg-card/90">
           <div className="relative z-10 grid lg:grid-cols-12 gap-6 items-center">
             {/* Left: Readiness Ring & Score */}
             <div className="lg:col-span-4 flex flex-col sm:flex-row items-center gap-5 border-b lg:border-b-0 lg:border-r border-border pb-6 lg:pb-0 lg:pr-6">
@@ -495,7 +495,7 @@ function Dashboard() {
 
               <div className="space-y-3">
                 {/* 1. Resume ATS Score */}
-                <div className="p-4 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/60 border border-border hover:border-primary/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-primary/15 border border-primary/30 text-primary">
@@ -522,7 +522,7 @@ function Dashboard() {
                 </div>
 
                 {/* 2. Mock Interview Articulation */}
-                <div className="p-4 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/60 border border-border hover:border-primary/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary">
@@ -549,7 +549,7 @@ function Dashboard() {
                 </div>
 
                 {/* 3. Target Role Skill Coverage */}
-                <div className="p-4 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all space-y-2.5">
+                <div className="p-4 rounded-2xl bg-muted/60 border border-border hover:border-primary/40 transition-all space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
@@ -602,7 +602,7 @@ function Dashboard() {
                     return (
                       <div
                         key={rec.title}
-                        className="p-3.5 rounded-2xl bg-muted/40 border border-border hover:border-primary/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                        className="p-3.5 rounded-2xl bg-muted/60 border border-border hover:border-primary/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                       >
                         <div className="flex items-start gap-3">
                           <div className="p-2 rounded-xl bg-card text-primary shrink-0 border border-border shadow-sm">
@@ -760,7 +760,7 @@ function Dashboard() {
                 <Link
                   key={i}
                   to={check.link as any}
-                  className="flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted border border-border transition-colors text-xs"
+                  className="flex items-center justify-between p-2 rounded-xl bg-muted/60 hover:bg-muted border border-border transition-colors text-xs"
                 >
                   <div className="flex items-center gap-2.5">
                     {check.done ? (
