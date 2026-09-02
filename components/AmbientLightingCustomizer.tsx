@@ -270,7 +270,7 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
                   <div
                     onClick={() => {
                       setUiMode("immersive");
-                      toast.success("Liquid Glass active");
+                      toast.success("Liquid Glass active with dynamic background");
                     }}
                     className={cn(
                       "p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 group relative overflow-hidden",
@@ -302,9 +302,16 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
                   <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-300 border border-purple-400/30 grid place-items-center shrink-0">
                     <Layers className="w-4 h-4" />
                   </div>
-                  <h4 className="text-xs sm:text-sm font-bold text-[var(--foreground)]">
-                    Liquid Glass Surfaces
-                  </h4>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-[var(--foreground)]">
+                      Liquid Glass Surfaces
+                    </h4>
+                    <p className="text-[11px] text-[var(--muted-foreground)]">
+                      {glassPanelsEnabled
+                        ? "Refractive surfaces paired with dynamic ambient backgrounds"
+                        : "Flat solid surfaces with plain background compatibility"}
+                    </p>
+                  </div>
                 </div>
 
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -313,7 +320,11 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
                     checked={glassPanelsEnabled}
                     onChange={(e) => {
                       setGlassPanelsEnabled(e.target.checked);
-                      toast.success(e.target.checked ? "Glass surfaces enabled" : "Flat surfaces enabled");
+                      toast.success(
+                        e.target.checked
+                          ? "Liquid Glass enabled (dynamic background active)"
+                          : "Flat solid surfaces enabled"
+                      );
                     }}
                     className="sr-only peer"
                   />
@@ -323,33 +334,50 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
 
               {/* 3. Background Type Selector */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">
-                  Background Style
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">
+                    Background Style
+                  </label>
+                  {glassPanelsEnabled && (
+                    <span className="text-[10px] text-[var(--primary)] font-medium">
+                      Liquid Glass pairs with Stars, Orbs & Mesh
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                   {(
                     [
-                      { id: "none", label: "None" },
-                      { id: "solid", label: "Plain Color" },
-                      { id: "stars", label: "Stars" },
-                      { id: "orbs", label: "Aurora Orbs" },
-                      { id: "full", label: "Full Mesh" },
-                    ] as { id: BackgroundType; label: string }[]
+                      { id: "none", label: "None", plainOnly: true },
+                      { id: "solid", label: "Plain Color", plainOnly: true },
+                      { id: "stars", label: "Stars", plainOnly: false },
+                      { id: "orbs", label: "Aurora Orbs", plainOnly: false },
+                      { id: "full", label: "Full Mesh", plainOnly: false },
+                    ] as { id: BackgroundType; label: string; plainOnly: boolean }[]
                   ).map((b) => (
                     <button
                       key={b.id}
                       onClick={() => {
+                        const wasGlass = glassPanelsEnabled;
                         setBackgroundType(b.id);
-                        toast.success(`Background: ${b.label}`);
+                        if (wasGlass && b.plainOnly) {
+                          toast.info(`Plain background active (switched to Plain Minimalist UI)`);
+                        } else {
+                          toast.success(`Background: ${b.label}`);
+                        }
                       }}
                       className={cn(
-                        "p-2.5 rounded-xl border text-center transition cursor-pointer flex items-center justify-center font-bold text-xs",
+                        "p-2.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-0.5 font-bold text-xs",
                         backgroundType === b.id
                           ? "bg-white/14 border-[var(--primary)] text-[var(--foreground)] ring-1 ring-[var(--primary)]/40 shadow-sm"
                           : "panel-slot border-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/8"
                       )}
                     >
                       <span className="truncate">{b.label}</span>
+                      {b.plainOnly && (
+                        <span className="text-[9px] font-normal text-[var(--muted-foreground)]">
+                          Plain UI
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -460,7 +488,11 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
                           } else if ((swatch as any).theme === "dark") {
                             handleSetTheme("dark");
                           }
-                          toast.success(`Set background: ${swatch.label}`);
+                          if (glassPanelsEnabled) {
+                            toast.info(`Set ${swatch.label} (switched to Plain Minimalist UI)`);
+                          } else {
+                            toast.success(`Set background: ${swatch.label}`);
+                          }
                         }}
                         style={{ backgroundColor: swatch.color }}
                         className={cn(

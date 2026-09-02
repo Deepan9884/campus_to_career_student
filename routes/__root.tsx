@@ -109,8 +109,12 @@ function RootComponent() {
       const rawAmbient = localStorage.getItem("ambient-lighting-storage");
       if (rawAmbient) {
         const parsed = JSON.parse(rawAmbient);
-        const bgType = parsed?.state?.backgroundType;
+        let bgType = parsed?.state?.backgroundType;
         const glass = parsed?.state?.glassPanelsEnabled;
+        // When Liquid Glass is active, plain/none background is not allowed — pair with dynamic background
+        if (glass && (bgType === "solid" || bgType === "none")) {
+          bgType = "full";
+        }
         if (bgType) root.setAttribute("data-bg", bgType);
         if (glass !== undefined) root.setAttribute("data-glass", glass ? "on" : "off");
       }

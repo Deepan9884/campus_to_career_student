@@ -238,12 +238,19 @@ export const useAmbientLighting = create<AmbientLightingState>()(
             document.documentElement.setAttribute("data-glass", "off");
           }
         } else if (uiMode === "immersive") {
+          const currentBg = get().backgroundType;
+          // When Liquid Glass is active, plain/none background is not allowed — switch to ambient background
+          const nextBg = (currentBg === "solid" || currentBg === "none") ? "full" : currentBg;
           set({
             uiMode: "immersive",
             glassPanelsEnabled: true,
+            backgroundType: nextBg,
+            starsEnabled: nextBg === "stars" || nextBg === "full",
+            orbsEnabled: nextBg === "orbs" || nextBg === "full",
           });
           if (typeof document !== "undefined") {
             document.documentElement.setAttribute("data-glass", "on");
+            document.documentElement.setAttribute("data-bg", nextBg);
           }
         } else {
           set({ uiMode: "custom" });
@@ -251,21 +258,41 @@ export const useAmbientLighting = create<AmbientLightingState>()(
       },
 
       setBackgroundType: (backgroundType) => {
+        // When Liquid Glass is active, plain or none background is not allowed!
+        // Selecting plain/none background switches to Plain Minimalist UI surfaces.
+        const isPlainRequested = backgroundType === "solid" || backgroundType === "none";
+        const willHaveGlass = isPlainRequested ? false : get().glassPanelsEnabled;
+
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-bg", backgroundType);
+          document.documentElement.setAttribute("data-glass", willHaveGlass ? "on" : "off");
         }
+
         set((state) => ({
           backgroundType,
-          uiMode: "custom",
+          glassPanelsEnabled: willHaveGlass,
+          uiMode: willHaveGlass ? "immersive" : "minimal",
           starsEnabled: backgroundType === "stars" || backgroundType === "full",
           orbsEnabled: backgroundType === "orbs" || backgroundType === "full",
         }));
       },
 
       setGlassPanelsEnabled: (enabled) => {
-        set({ glassPanelsEnabled: enabled, uiMode: "custom" });
+        let nextBg = get().backgroundType;
+        // When Liquid Glass is enabled, plain background is not allowed — automatically switch to ambient full mesh!
+        if (enabled && (nextBg === "solid" || nextBg === "none")) {
+          nextBg = "full";
+        }
+        set({
+          glassPanelsEnabled: enabled,
+          uiMode: enabled ? "immersive" : "minimal",
+          backgroundType: nextBg,
+          starsEnabled: nextBg === "stars" || nextBg === "full",
+          orbsEnabled: nextBg === "orbs" || nextBg === "full",
+        });
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-glass", enabled ? "on" : "off");
+          document.documentElement.setAttribute("data-bg", nextBg);
         }
       },
 
@@ -276,6 +303,8 @@ export const useAmbientLighting = create<AmbientLightingState>()(
 
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-bg", "solid");
+          // Solid plain background requires Plain Minimalist UI (no liquid glass)
+          document.documentElement.setAttribute("data-glass", "off");
           if (targetAccent) {
             document.documentElement.setAttribute("data-accent", targetAccent);
             try {
@@ -287,7 +316,10 @@ export const useAmbientLighting = create<AmbientLightingState>()(
         set((state) => ({
           solidBackgroundColor: color,
           backgroundType: "solid",
-          uiMode: state.uiMode === "minimal" ? "minimal" : state.uiMode,
+          glassPanelsEnabled: false,
+          uiMode: "minimal",
+          starsEnabled: false,
+          orbsEnabled: false,
           presetId: targetPreset || state.presetId,
         }));
       },
@@ -306,18 +338,27 @@ export const useAmbientLighting = create<AmbientLightingState>()(
 
       setPreset: (presetId) => {
         const found = AMBIENT_PRESETS.find((p) => p.id === presetId);
+        let currentBg = get().backgroundType;
+        // No plain/none background allowed with Liquid Glass Surfaces:
+        if (get().glassPanelsEnabled && (currentBg === "solid" || currentBg === "none")) {
+          currentBg = "full";
+        }
         if (found && typeof document !== "undefined") {
           document.documentElement.setAttribute("data-accent", found.accent);
           try {
             localStorage.setItem("c2c_accent", found.accent);
           } catch {}
-          const currentBg = get().backgroundType;
           if (currentBg) {
             document.documentElement.setAttribute("data-bg", currentBg);
           }
           document.documentElement.setAttribute("data-glass", get().glassPanelsEnabled ? "on" : "off");
         }
-        set({ presetId });
+        set({
+          presetId,
+          backgroundType: currentBg,
+          starsEnabled: currentBg === "stars" || currentBg === "full",
+          orbsEnabled: currentBg === "orbs" || currentBg === "full",
+        });
       },
 
       setIntensity: (intensity) => set({ intensity }),

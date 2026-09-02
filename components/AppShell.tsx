@@ -190,8 +190,13 @@ export function AppShell() {
   // Sync data-glass and data-bg on document root for full UI customizability
   useEffect(() => {
     if (typeof document !== "undefined") {
+      let resolvedBg = backgroundType;
+      // When Liquid Glass is active, plain/none background is not allowed — pair with dynamic background
+      if (glassPanelsEnabled && (resolvedBg === "solid" || resolvedBg === "none")) {
+        resolvedBg = "full";
+      }
       document.documentElement.setAttribute("data-glass", glassPanelsEnabled ? "on" : "off");
-      document.documentElement.setAttribute("data-bg", backgroundType);
+      document.documentElement.setAttribute("data-bg", resolvedBg);
     }
   }, [glassPanelsEnabled, backgroundType]);
 
