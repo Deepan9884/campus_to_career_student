@@ -6,6 +6,7 @@ import type { ModuleType, ViolationType } from "@/lib/proctoring-api";
 import { analyzeEyeGaze, type GazeDirection, type FaceFramingStatus } from "@/lib/eyeGazeDetector";
 import { playGazeWarningTone, playViolationStrikeTone, playClipboardAlertTone } from "@/lib/proctoringAudio";
 import { toast } from "sonner";
+import { requestAppFullscreen, isCurrentlyFullscreen } from "@/lib/fullscreenUtils";
 
 export interface ProctoringSessionOptions {
   moduleType: ModuleType;
@@ -209,10 +210,14 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
   const reEnterFullscreen = useCallback(async () => {
     try {
-      if (!document.fullscreenElement && typeof document !== "undefined") {
-        await document.documentElement.requestFullscreen();
+      if (!isCurrentlyFullscreen() && typeof document !== "undefined") {
+        await requestAppFullscreen();
       }
-      clearFullscreenCountdown();
+      if (fullscreenIntervalRef.current) {
+        clearInterval(fullscreenIntervalRef.current);
+        fullscreenIntervalRef.current = null;
+      }
+      fullscreenCountdownRef.current = null;
       setState((prev) => ({ ...prev, isFullscreen: true, fullscreenCountdown: null }));
     } catch (err) {
       console.warn("[Proctoring] Failed to re-enter fullscreen:", err);
@@ -278,10 +283,15 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   isStartedRef.current = isStarted;
 
   const startTimestampRef = useRef<number>(0);
+  if (isStarted && startTimestampRef.current === 0) {
+    startTimestampRef.current = Date.now();
+  } else if (!isStarted) {
+    startTimestampRef.current = 0;
+  }
   useEffect(() => {
-    if (isStarted) {
+    if (isStarted && startTimestampRef.current === 0) {
       startTimestampRef.current = Date.now();
-    } else {
+    } else if (!isStarted) {
       startTimestampRef.current = 0;
     }
   }, [isStarted]);
@@ -323,11 +333,11 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       if ((isBlockedRef.current && !forceBlock) || !isStartedRef.current) return;
 
       const now = Date.now();
-      // Brief 2-second warm-up after starting exam to allow fullscreen mode activation
+      // Generous 5-second warm-up after starting exam to allow fullscreen mode activation & layout stabilization
       if (
         isStartedRef.current &&
         startTimestampRef.current > 0 &&
-        now - startTimestampRef.current < 2000 &&
+        now - startTimestampRef.current < 5000 &&
         !forceBlock
       ) {
         console.log(`[Proctoring] Suppressing initial entrance warm-up event: ${type}`);
@@ -492,7 +502,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     }
 
     function handleFSChange() {
-      const isFS = Boolean(document.fullscreenElement);
+      const isFS = isCurrentlyFullscreen();
       setState((prev) => ({ ...prev, isFullscreen: isFS }));
 
       if (isFS) {
@@ -500,15 +510,26 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         clearFullscreenCountdown();
         requestSystemKeyboardLock();
       } else if (isStartedRef.current && !isBlockedRef.current) {
-        // Left fullscreen during active exam -> strike violation + start 15s timer + unlock
+        const now = Date.now();
+        // Warm-up check: suppress fullscreen exits occurring within first 5s of starting
+        if (startTimestampRef.current > 0 && now - startTimestampRef.current < 5000) {
+          console.log("[Proctoring] Fullscreen exit during initial 5s warm-up; suppressing countdown and violation");
+          return;
+        }
+
+        // Left fullscreen during active exam -> release keyboard lock, start 15s grace countdown, and warn
         releaseSystemKeyboardLock();
-        sendViolation("fullscreen_exit");
         startFullscreenCountdown();
+        sendViolation("fullscreen_exit");
       }
     }
 
     document.addEventListener("fullscreenchange", handleFSChange);
-    const initialFS = Boolean(document.fullscreenElement);
+    document.addEventListener("webkitfullscreenchange", handleFSChange);
+    document.addEventListener("mozfullscreenchange", handleFSChange);
+    document.addEventListener("MSFullscreenChange", handleFSChange);
+
+    const initialFS = isCurrentlyFullscreen();
     setState((prev) => ({ ...prev, isFullscreen: initialFS }));
     if (initialFS) {
       requestSystemKeyboardLock();
@@ -516,6 +537,9 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFSChange);
+      document.removeEventListener("webkitfullscreenchange", handleFSChange);
+      document.removeEventListener("mozfullscreenchange", handleFSChange);
+      document.removeEventListener("MSFullscreenChange", handleFSChange);
       clearFullscreenCountdown();
       releaseSystemKeyboardLock();
     };
@@ -527,12 +551,18 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleVisibility() {
       if (document.hidden && isStartedRef.current && !isBlockedRef.current) {
-        sendViolation("tab_switch");
-        if (fullscreenCountdownRef.current === null) {
-          startFullscreenCountdown();
+        const now = Date.now();
+        if (startTimestampRef.current > 0 && now - startTimestampRef.current < 5000) {
+          return;
         }
-        setState((prev) => ({ ...prev, isFullscreen: false }));
-      } else if (!document.hidden && document.fullscreenElement) {
+        sendViolation("tab_switch");
+        if (!isCurrentlyFullscreen()) {
+          if (fullscreenCountdownRef.current === null) {
+            startFullscreenCountdown();
+          }
+          setState((prev) => ({ ...prev, isFullscreen: false }));
+        }
+      } else if (!document.hidden && isCurrentlyFullscreen()) {
         clearFullscreenCountdown();
         setState((prev) => ({ ...prev, isFullscreen: true }));
       }
@@ -540,16 +570,22 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleWindowBlur() {
       if (isStartedRef.current && !isBlockedRef.current) {
-        sendViolation("tab_switch");
-        if (fullscreenCountdownRef.current === null) {
-          startFullscreenCountdown();
+        const now = Date.now();
+        if (startTimestampRef.current > 0 && now - startTimestampRef.current < 5000) {
+          return;
         }
-        setState((prev) => ({ ...prev, isFullscreen: false }));
+        sendViolation("tab_switch");
+        if (!isCurrentlyFullscreen()) {
+          if (fullscreenCountdownRef.current === null) {
+            startFullscreenCountdown();
+          }
+          setState((prev) => ({ ...prev, isFullscreen: false }));
+        }
       }
     }
 
     function handleWindowFocus() {
-      if (document.fullscreenElement) {
+      if (isCurrentlyFullscreen()) {
         clearFullscreenCountdown();
         setState((prev) => ({ ...prev, isFullscreen: true }));
       }

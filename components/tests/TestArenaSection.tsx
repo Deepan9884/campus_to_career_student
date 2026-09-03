@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Clock,
   Play,
@@ -519,8 +520,8 @@ export function TestArenaSection() {
       )}
 
       {/* ── STUDENT DETAILED SCORECARD MODAL ──────────────────────────────── */}
-      {selectedScorecard && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none overflow-y-auto">
+      {selectedScorecard && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 select-none overflow-y-auto">
           <div className="max-w-xl w-full bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto text-[var(--foreground)]">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
               <div>
@@ -584,7 +585,8 @@ export function TestArenaSection() {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -46,13 +46,15 @@ export function FullscreenCountdownModal({
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold uppercase tracking-wider">
             <AlertTriangle className="h-3.5 w-3.5" />
-            Security Violation Detected
+            {violationCount && violationCount > 0 ? "Security Violation Warning" : "Fullscreen Required"}
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Fullscreen Mode Required
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-            You exited full-screen mode during an active examination. This incident has been recorded as a violation strike.
+            {violationCount && violationCount > 0
+              ? "You exited full-screen mode during an active examination. Please re-enter fullscreen immediately."
+              : "Fullscreen mode is required for this examination. Please return to fullscreen before the grace period expires."}
           </p>
         </div>
 
@@ -114,9 +116,13 @@ export function FullscreenCountdownModal({
             Re-enter Fullscreen Now ({currentSeconds}s)
           </button>
 
-          {typeof violationCount === "number" && violationCount > 0 && (
-            <p className="text-[11px] text-slate-500">
+          {typeof violationCount === "number" && violationCount > 0 ? (
+            <p className="text-[11px] text-slate-400">
               Total Recorded Strikes: <span className="font-bold text-amber-300">{violationCount}/3</span>
+            </p>
+          ) : (
+            <p className="text-[11px] text-slate-400">
+              Returning to fullscreen now prevents security strikes and auto-lockout.
             </p>
           )}
         </div>

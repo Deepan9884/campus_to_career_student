@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import {
   Clock,
   Calendar,
@@ -63,6 +64,7 @@ import confetti from "canvas-confetti";
 import { useAuth } from "@/stores";
 import { useProctoringSession } from "@/hooks/useProctoringSession";
 import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
+import { requestAppFullscreen, isCurrentlyFullscreen, addFullscreenChangeListener } from "@/lib/fullscreenUtils";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { executeCode } from "@/lib/quiz-api";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -843,6 +845,13 @@ export function UnifiedExamConsole({
   };
 
   const [hasStartedExam, setHasStartedExam] = useState(false);
+  const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(() => isCurrentlyFullscreen());
+
+  useEffect(() => {
+    return addFullscreenChangeListener((isFS) => {
+      setIsBrowserFullscreen(isFS);
+    });
+  }, []);
 
   // Flatten questions list across sections with deep fallback support
   const sections = useMemo(() => examData?.sections || [], [examData]);
@@ -1082,6 +1091,15 @@ export function UnifiedExamConsole({
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  // Lock background body scroll while exam console or lobby is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
     };
   }, []);
 
@@ -1535,12 +1553,16 @@ export function UnifiedExamConsole({
       return;
     }
 
-    try {
-      if (document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
+    // Fullscreen Gate: If fullscreen is enforced, require and verify fullscreen before starting exam
+    if (isFullscreenEnforced && !isCurrentlyFullscreen()) {
+      const fsResult = await requestAppFullscreen();
+      if (!fsResult.success && !isCurrentlyFullscreen()) {
+        toast.error(
+          "Fullscreen Required: Fullscreen mode was blocked or denied by your browser. Please allow fullscreen in browser permissions or press F11, then click Start.",
+          { duration: 7000 }
+        );
+        return; // Guard candidate from launching into an immediate strike state!
       }
-    } catch (fsErr) {
-      console.warn("Fullscreen request error:", fsErr);
     }
 
     try {
@@ -1720,7 +1742,7 @@ export function UnifiedExamConsole({
 
   // ── SCREEN 1: LOCKED / DISQUALIFIED SCREEN (AWAITING MENTOR UNBLOCK) ────────
   if (isCandidateBlocked || proctorState.isBlocked || proctorState.violationCount >= tabSwitchLimit) {
-    return (
+    return createPortal(
       <div
         className={`fixed inset-0 z-[999999] ${
           isLightMode ? "light bg-[#f1f5f9] text-slate-900" : "dark bg-[#080d1a] text-slate-100"
@@ -1819,13 +1841,14 @@ export function UnifiedExamConsole({
             </button>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // ── SCREEN 2: SUBMITTED / CONCEALED SCORE SCREEN ──────────────────────────
   if (isTestFinished) {
-    return (
+    return createPortal(
       <div
         className={`fixed inset-0 z-[999999] ${
           isLightMode ? "bg-[#f1f5f9] text-slate-900" : "bg-[#0b1120] text-slate-100"
@@ -1913,13 +1936,14 @@ export function UnifiedExamConsole({
             Return to Assessment Arena
           </button>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // ── SCREEN 3: PRE-TEST PERMISSION CHECK & INSTRUCTIONS LOBBY ───────────────
   if (!hasStartedExam) {
-    return (
+    return createPortal(
       <div
         className={`fixed inset-0 z-[999999] ${
           isLightMode ? "light bg-[#f1f5f9] text-slate-900" : "dark bg-[#080d1a] text-slate-100"
@@ -2165,15 +2189,26 @@ export function UnifiedExamConsole({
                   >
                     <div className="flex items-center gap-2 font-medium">
                       <Lock className={`h-4 w-4 ${isLightMode ? "text-amber-600" : "text-amber-400"}`} />
-                      <span>Fullscreen Enforcement</span>
+                      <span>Fullscreen Security</span>
                     </div>
-                    <span
-                      className={`text-xs font-bold ${
-                        isLightMode ? "text-amber-700 font-extrabold" : "text-amber-400"
-                      }`}
-                    >
-                      {isFullscreenEnforced ? "Required on Start" : "Optional"}
-                    </span>
+                    {isBrowserFullscreen ? (
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        Active ✓
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const res = await requestAppFullscreen();
+                          if (!res.success) {
+                            toast.error("Fullscreen blocked by browser. Please check your browser permissions or press F11.");
+                          }
+                        }}
+                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
+                      >
+                        {isFullscreenEnforced ? "Enter Fullscreen" : "Optional"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2189,14 +2224,16 @@ export function UnifiedExamConsole({
                   <span>
                     {isWebcamRequired && !proctorState.cameraReady
                       ? "Camera Authorization Required to Start"
+                      : isFullscreenEnforced && !isBrowserFullscreen
+                      ? "Enter Fullscreen & Start Assessment"
                       : "Start Assessment Now"}
                   </span>
                 </button>
                 <p className={`text-[11px] text-center mt-2 ${isLightMode ? "text-slate-600 font-medium" : "text-slate-400"}`}>
                   {isWebcamRequired && !proctorState.cameraReady
                     ? "Camera permission must be allowed before you can enter the examination."
-                    : isFullscreenEnforced
-                    ? "Clicking will enter Fullscreen mode and initiate assessment security."
+                    : isFullscreenEnforced && !isBrowserFullscreen
+                    ? "Clicking will activate Fullscreen mode and initiate assessment security."
                     : "Clicking will launch the exam console directly."}
                 </p>
               </div>
@@ -2379,12 +2416,13 @@ export function UnifiedExamConsole({
             </div>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // ── ACTIVE EXAM WORKSPACE (RENDERED AFTER "START PROCTORED TEST NOW") ───────
-  return (
+  return createPortal(
     <div
       className={`fixed inset-0 z-[999999] h-screen w-screen overflow-hidden flex flex-col selection:bg-indigo-500/30 transition-colors duration-200 ${
         isLightMode ? "light bg-[#f8fafc] text-slate-900" : "dark bg-[#070b14] text-slate-100"
@@ -3427,14 +3465,15 @@ export function UnifiedExamConsole({
       )}
 
       {/* ── FULLSCREEN LOCKDOWN OVERLAY ── */}
-      {hasStartedExam && isFullscreenEnforced && (proctorState.fullscreenCountdown !== null || !proctorState.isFullscreen) && (
+      {hasStartedExam && isFullscreenEnforced && proctorState.fullscreenCountdown !== null && (
         <FullscreenCountdownModal
           countdown={proctorState.fullscreenCountdown}
           violationCount={proctorState.violationCount}
           onReEnterFullscreen={proctorState.reEnterFullscreen}
         />
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
 

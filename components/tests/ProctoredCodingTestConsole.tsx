@@ -1352,7 +1352,7 @@ export function ProctoredCodingTestConsole({
       <div className="fixed -bottom-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Fullscreen countdown modal on exit */}
-      {!proctorState.isFullscreen && (
+      {proctorState.fullscreenCountdown !== null && (
         <FullscreenCountdownModal
           countdown={proctorState.fullscreenCountdown}
           violationCount={proctorState.violationCount}

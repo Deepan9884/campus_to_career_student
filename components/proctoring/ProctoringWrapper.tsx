@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useProctoringSession, type ProctoringSessionOptions } from "@/hooks/useProctoringSession";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
+import { requestAppFullscreen, isCurrentlyFullscreen } from "@/lib/fullscreenUtils";
 import type { ViolationType } from "@/lib/proctoring-api";
 import {
   Shield,
@@ -186,8 +187,12 @@ export function ProctoringWrapper({
   // Direct user-gesture Fullscreen trigger
   async function handleLaunchExam() {
     try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
+      if (!isCurrentlyFullscreen()) {
+        const res = await requestAppFullscreen();
+        if (!res.success && !isCurrentlyFullscreen()) {
+          toast.error("Please allow fullscreen mode to begin the exam.");
+          return;
+        }
       }
       setIsExamStarted(true);
     } catch {
@@ -197,7 +202,7 @@ export function ProctoringWrapper({
 
   async function handleReEnterFullscreen() {
     try {
-      await document.documentElement.requestFullscreen();
+      await requestAppFullscreen();
     } catch {
       toast.error("Failed to re-enter fullscreen. Please try again.");
     }
@@ -356,7 +361,7 @@ export function ProctoringWrapper({
   return createPortal(
     <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col h-screen w-screen overflow-hidden select-none font-sans p-0 m-0">
       {/* If exited fullscreen during exam, overlay with 15s countdown timer */}
-      {!proctoringState.isFullscreen && !isActuallyBlocked && (
+      {proctoringState.fullscreenCountdown !== null && !isActuallyBlocked && (
         <FullscreenCountdownModal
           countdown={proctoringState.fullscreenCountdown}
           violationCount={proctoringState.violationCount}

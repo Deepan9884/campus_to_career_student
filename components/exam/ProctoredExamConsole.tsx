@@ -798,7 +798,7 @@ export function ProctoredExamConsole({
       } flex flex-col h-screen w-screen overflow-hidden select-none font-sans`}
     >
       {/* ── 15-SECOND FULLSCREEN GRACE PERIOD COUNTDOWN MODAL ── */}
-      {!proctorState.isFullscreen && !isCandidateDisqualified && (
+      {proctorState.fullscreenCountdown !== null && !isCandidateDisqualified && (
         <FullscreenCountdownModal
           countdown={proctorState.fullscreenCountdown}
           violationCount={proctorState.violationCount}
