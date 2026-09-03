@@ -11,6 +11,7 @@ import {
   type CsCoursePortal,
 } from "@/lib/super-dream-cs-data";
 import { CsFundamentalsQuizModal } from "./CsFundamentalsQuizModal";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import {
   Cpu,
   CheckCircle2,
@@ -64,6 +65,10 @@ export function Section2CsFundamentals() {
 
   // Active Main Tab: 'courses' | 'quizzes' | 'matrix'
   const [activeTab, setActiveTab] = useState<"courses" | "quizzes" | "matrix">("courses");
+
+  // View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [viewMode, setViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedSubjectId, setFocusedSubjectId] = useState<string>(CS_FUNDAMENTALS_SUBJECTS[0].id);
 
   // Selected Quiz for Proctored Assessment Modal
   const [activeQuiz, setActiveQuiz] = useState<CsQuizItem | null>(null);
@@ -251,13 +256,36 @@ export function Section2CsFundamentals() {
         )}
       </div>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ──────────────────────────────────────────────────────────────────────── */}
       {/* TAB 1: SUBJECTS & TOP COURSES SHOWCASE */}
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ──────────────────────────────────────────────────────────────────────── */}
       {activeTab === "courses" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {CS_FUNDAMENTALS_SUBJECTS.map((subj) => {
+          <SectionViewModeSwitcher
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            options={CS_FUNDAMENTALS_SUBJECTS.map((s) => ({
+              id: s.id,
+              label: s.subject,
+              badge: s.code,
+            }))}
+            selectedId={focusedSubjectId}
+            onSelectId={setFocusedSubjectId}
+            label="Subject"
+          />
+
+          <div
+            className={cn(
+              "gap-4",
+              viewMode === "focus"
+                ? "w-full space-y-4"
+                : "grid grid-cols-1 lg:grid-cols-2"
+            )}
+          >
+            {(viewMode === "focus"
+              ? CS_FUNDAMENTALS_SUBJECTS.filter((s) => s.id === focusedSubjectId)
+              : CS_FUNDAMENTALS_SUBJECTS
+            ).map((subj) => {
               const IconComp = CS_ICONS[subj.id] || BookOpen;
               const studentSubject = studentChecklist.section2CsFundamentals.find(
                 (s) => s.id === subj.id

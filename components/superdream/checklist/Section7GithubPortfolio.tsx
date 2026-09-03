@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
 import {
@@ -45,6 +46,12 @@ export function Section7GithubPortfolio() {
 
   // UI View Mode: 'table' (Exact image replica) vs 'cards' (Interactive Showcase)
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
+
+  // Single Focus view state inside cards view
+  const [cardViewMode, setCardViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedGhId, setFocusedGhId] = useState<string>(
+    studentChecklist.section7GithubPortfolio[0]?.id || "gh-1"
+  );
 
   // GitHub Account Telemetry Sync state
   const initialUsername = user?.githubUsername || user?.github || "";
@@ -580,8 +587,32 @@ export function Section7GithubPortfolio() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {studentChecklist.section7GithubPortfolio.map((item) => {
+          {/* View Mode Switcher: Overall Grid vs Single Focus */}
+          <SectionViewModeSwitcher
+            viewMode={cardViewMode}
+            onViewModeChange={setCardViewMode}
+            options={studentChecklist.section7GithubPortfolio.map((item) => ({
+              id: item.id,
+              label: item.activity,
+              badge: item.targetDisplay || `${item.target}`,
+            }))}
+            selectedId={focusedGhId}
+            onSelectId={setFocusedGhId}
+            label="Module"
+          />
+
+          <div
+            className={cn(
+              "gap-4",
+              cardViewMode === "focus"
+                ? "w-full space-y-4"
+                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            )}
+          >
+            {(cardViewMode === "focus"
+              ? studentChecklist.section7GithubPortfolio.filter((item) => item.id === focusedGhId)
+              : studentChecklist.section7GithubPortfolio
+            ).map((item) => {
               const targetVal =
                 typeof item.target === "number" ? item.target : item.targetValue || 1;
               const isCompleted =

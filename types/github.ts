@@ -3,11 +3,90 @@ export interface RepoAnalysis {
   user: string;
   repoFullName: string;
   repoUrl: string;
+  
+  // Executive Summary
   overview: string | null;
-  quality: string | null;
-  security: string | null;
-  resumeImpact: string[] | null;
+  projectType: string | null;
+  primaryTechStack: string[];
+  
+  // Code Quality Analysis
+  quality: {
+    overallScore?: number;
+    codeOrganization?: string;
+    readability?: string;
+    bestPractices?: string;
+    documentation?: string;
+    testing?: string;
+    strengths?: string[];
+    improvements?: string[];
+  } | string | null;
+  
+  // Technical Skills Demonstrated
+  technicalSkills?: {
+    languages: string[];
+    frameworks: string[];
+    tools: string[];
+    patterns: string[];
+    databases: string[];
+    cloudServices: string[];
+  };
+  
+  // Security Analysis
+  security: {
+    overallRating?: string;
+    issues?: string[];
+    goodPractices?: string[];
+    recommendations?: string[];
+  } | string | null;
+  
+  // Professional Readiness
+  professionalReadiness?: {
+    overallScore?: number;
+    productionReady?: boolean;
+    teamCollaboration?: string;
+    projectComplexity?: string;
+    businessValue?: string;
+    scalability?: string;
+  };
+  
+  // Resume & Interview Value
+  resumeImpact: {
+    bullets?: string[];
+    interviewTalkingPoints?: string[];
+    uniqueSellingPoints?: string[];
+    improvementSuggestions?: string[];
+  } | string[] | null;
+  
+  // Recruiter Perspective
+  recruiterView?: {
+    hiringPotential?: string;
+    standoutFeatures?: string[];
+    redFlags?: string[];
+    idealRoles?: string[];
+    experienceLevel?: string;
+  };
+  
+  // Comparison Benchmarks
+  benchmarks?: {
+    peerComparison?: string;
+    industryStandards?: string;
+    competitiveAdvantage?: string;
+  };
+  
+  // Metadata
   filesAnalyzed: string[];
+  repoStats?: {
+    stars?: number;
+    forks?: number;
+    language?: string;
+    size?: number;
+    lastUpdated?: string;
+    hasReadme?: boolean;
+    hasTests?: boolean;
+    hasCI?: boolean;
+    hasDocumentation?: boolean;
+  };
+  
   status: "processing" | "completed" | "failed";
   errorMessage: string | null;
   createdAt: string;

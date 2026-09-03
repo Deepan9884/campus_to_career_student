@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
 import {
@@ -57,6 +58,10 @@ export function Section4SoftwareDev() {
   const summary = summaries.find((s) => s.sectionId === 4) || summaries[3];
 
   const allocatedProjects = storeAllocatedProjects || INITIAL_ALLOCATED_PROJECTS;
+
+  // View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [viewMode, setViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedCategoryKey, setFocusedCategoryKey] = useState<string>(SOFTWARE_DEV_CATEGORIES[0].key);
 
   // Selected Category Modal for Project Management
   const [activeCategoryModal, setActiveCategoryModal] = useState<SoftwareDevCategoryConfig | null>(null);
@@ -298,9 +303,33 @@ export function Section4SoftwareDev() {
               Click any panel to manage attached GitHub repos & media
             </span>
           </div>
+ 
+          {/* View Mode Switcher: Overall Grid vs Single Focus */}
+          <SectionViewModeSwitcher
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            options={SOFTWARE_DEV_CATEGORIES.map((cat) => ({
+              id: cat.key,
+              label: cat.title,
+              badge: `${cat.targetCount} Target`,
+            }))}
+            selectedId={focusedCategoryKey}
+            onSelectId={setFocusedCategoryKey}
+            label="Category"
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SOFTWARE_DEV_CATEGORIES.map((cat, idx) => {
+          <div
+            className={cn(
+              "gap-4",
+              viewMode === "focus"
+                ? "w-full space-y-4"
+                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            )}
+          >
+            {(viewMode === "focus"
+              ? SOFTWARE_DEV_CATEGORIES.filter((c) => c.key === focusedCategoryKey)
+              : SOFTWARE_DEV_CATEGORIES
+            ).map((cat, idx) => {
               const Icon = getCategoryIcon(cat.iconName);
               const items = allocatedProjects.filter((p) => p.categoryKey === cat.key);
               const currentCount = items.length;

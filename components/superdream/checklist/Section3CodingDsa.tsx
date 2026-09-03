@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
 import {
@@ -102,6 +103,10 @@ export function Section3CodingDsa() {
 
   // Category Filter
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
+
+  // View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [viewMode, setViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedTopicId, setFocusedTopicId] = useState<string>("arrays");
 
   // Draft URL input state
   const [inputUrls, setInputUrls] = useState<Record<CodingPlatformKey, string>>({
@@ -641,11 +646,34 @@ export function Section3CodingDsa() {
           </span>
         </div>
 
-        {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        {/* TOPIC-BY-TOPIC COUNT & ANALYSIS GRID (SOFT, CALM STUDY CARDS) */}
-        {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          {filteredTopics.map((topic) => {
+        {/* ──────────────────────────────────────────────────────────────────────────────────────────────────────────── */}
+        {/* View Mode Switcher: Overall Grid vs Single Focus */}
+        <SectionViewModeSwitcher
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          options={filteredTopics.map((t) => ({
+            id: t.topicId,
+            label: t.topicName,
+            badge: `${t.targetCount} Qs`,
+          }))}
+          selectedId={focusedTopicId}
+          onSelectId={setFocusedTopicId}
+          label="DSA Topic"
+        />
+
+        {/* TOPIC-BY-TOPIC COUNT & ANALYSIS GRID */}
+        <div
+          className={cn(
+            "gap-3.5",
+            viewMode === "focus"
+              ? "w-full space-y-4"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          )}
+        >
+          {(viewMode === "focus"
+            ? filteredTopics.filter((t) => t.topicId === focusedTopicId)
+            : filteredTopics
+          ).map((topic) => {
             let solvedCount = 0;
             let targetCount = topic.targetCount;
             let easyCount = 0;

@@ -206,7 +206,7 @@ interface AmbientLightingState {
 
 export const useAmbientLighting = create<AmbientLightingState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       presetId: "cosmic-violet",
       uiMode: "immersive",
       backgroundType: "full",
@@ -218,9 +218,9 @@ export const useAmbientLighting = create<AmbientLightingState>()(
       motionSpeed: "flow",
       starsEnabled: true,
       starDensity: "medium",
-      interactiveConstellations: true,
+      interactiveConstellations: false,
       shootingStars: false,
-      clickRipple: true,
+      clickRipple: false,
       customColors: {
         orb1: "#8B5CF6",
         orb2: "#EC4899",
@@ -239,7 +239,7 @@ export const useAmbientLighting = create<AmbientLightingState>()(
           }
         } else if (uiMode === "immersive") {
           const currentBg = get().backgroundType;
-          // When Liquid Glass is active, plain/none background is not allowed — switch to ambient background
+          // When Liquid Glass is active, pair with dynamic background (switch to full if solid/none)
           const nextBg = (currentBg === "solid" || currentBg === "none") ? "full" : currentBg;
           set({
             uiMode: "immersive",
@@ -258,28 +258,27 @@ export const useAmbientLighting = create<AmbientLightingState>()(
       },
 
       setBackgroundType: (backgroundType) => {
-        // When Liquid Glass is active, plain or none background is not allowed!
-        // Selecting plain/none background switches to Plain Minimalist UI surfaces.
         const isPlainRequested = backgroundType === "solid" || backgroundType === "none";
-        const willHaveGlass = isPlainRequested ? false : get().glassPanelsEnabled;
+        const currentGlass = get().glassPanelsEnabled;
+        const willHaveGlass = isPlainRequested ? false : currentGlass;
 
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-bg", backgroundType);
           document.documentElement.setAttribute("data-glass", willHaveGlass ? "on" : "off");
         }
 
-        set((state) => ({
+        set({
           backgroundType,
           glassPanelsEnabled: willHaveGlass,
-          uiMode: willHaveGlass ? "immersive" : "minimal",
+          uiMode: willHaveGlass ? "immersive" : (isPlainRequested ? "minimal" : "custom"),
           starsEnabled: backgroundType === "stars" || backgroundType === "full",
           orbsEnabled: backgroundType === "orbs" || backgroundType === "full",
-        }));
+        });
       },
 
       setGlassPanelsEnabled: (enabled) => {
         let nextBg = get().backgroundType;
-        // When Liquid Glass is enabled, plain background is not allowed — automatically switch to ambient full mesh!
+        // When Liquid Glass is enabled, automatically switch to ambient full mesh if currently plain
         if (enabled && (nextBg === "solid" || nextBg === "none")) {
           nextBg = "full";
         }
@@ -325,13 +324,20 @@ export const useAmbientLighting = create<AmbientLightingState>()(
       },
 
       setOrbsEnabled: (enabled) => {
-        set((state) => ({
+        const state = get();
+        const nextBg: BackgroundType = enabled
+          ? (state.starsEnabled ? "full" : "orbs")
+          : (state.starsEnabled ? "stars" : (state.backgroundType === "solid" ? "solid" : "none"));
+
+        if (typeof document !== "undefined") {
+          document.documentElement.setAttribute("data-bg", nextBg);
+        }
+
+        set({
           orbsEnabled: enabled,
           uiMode: "custom",
-          backgroundType: enabled
-            ? (state.starsEnabled ? "full" : "orbs")
-            : (state.starsEnabled ? "stars" : (state.backgroundType === "solid" ? "solid" : "none")),
-        }));
+          backgroundType: nextBg,
+        });
       },
 
       setBackgroundOpacity: (backgroundOpacity) => set({ backgroundOpacity }),
@@ -363,14 +369,22 @@ export const useAmbientLighting = create<AmbientLightingState>()(
 
       setIntensity: (intensity) => set({ intensity }),
       setMotionSpeed: (motionSpeed) => set({ motionSpeed }),
-      setStarsEnabled: (starsEnabled) =>
-        set((state) => ({
+      setStarsEnabled: (starsEnabled) => {
+        const state = get();
+        const nextBg: BackgroundType = starsEnabled
+          ? (state.orbsEnabled ? "full" : "stars")
+          : (state.orbsEnabled ? "orbs" : (state.backgroundType === "solid" ? "solid" : "none"));
+
+        if (typeof document !== "undefined") {
+          document.documentElement.setAttribute("data-bg", nextBg);
+        }
+
+        set({
           starsEnabled,
           uiMode: "custom",
-          backgroundType: starsEnabled
-            ? (state.orbsEnabled ? "full" : "stars")
-            : (state.orbsEnabled ? "orbs" : (state.backgroundType === "solid" ? "solid" : "none")),
-        })),
+          backgroundType: nextBg,
+        });
+      },
       setStarDensity: (starDensity) => set({ starDensity }),
       setInteractiveConstellations: (interactiveConstellations) =>
         set({ interactiveConstellations }),
@@ -386,6 +400,7 @@ export const useAmbientLighting = create<AmbientLightingState>()(
         if (typeof document !== "undefined") {
           document.documentElement.setAttribute("data-accent", "indigo");
           document.documentElement.setAttribute("data-glass", "on");
+          document.documentElement.setAttribute("data-bg", "full");
           try {
             localStorage.setItem("c2c_accent", "indigo");
           } catch {}
@@ -402,9 +417,9 @@ export const useAmbientLighting = create<AmbientLightingState>()(
           motionSpeed: "flow",
           starsEnabled: true,
           starDensity: "medium",
-          interactiveConstellations: true,
+          interactiveConstellations: false,
           shootingStars: false,
-          clickRipple: true,
+          clickRipple: false,
           customColors: {
             orb1: "#8B5CF6",
             orb2: "#EC4899",

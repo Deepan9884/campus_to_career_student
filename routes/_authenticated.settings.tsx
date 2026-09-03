@@ -20,6 +20,8 @@ import {
   Mic,
   Map,
   BarChart3,
+  Terminal,
+  TrendingUp,
   X,
   Lock,
   Save,
@@ -57,8 +59,8 @@ const MODULES = [
   { key: "/linkedin-posts", label: "LinkedIn Post Ideas", icon: Linkedin },
   { key: "/skills", label: "Skill Gap Analysis", icon: Target },
   { key: "/roadmap", label: "Learning Roadmap", icon: Map },
-  { key: "/coding-platforms", label: "Coding Platforms", icon: BarChart3 },
-  { key: "/analytics", label: "Analytics", icon: BarChart3 },
+  { key: "/coding-platforms", label: "Coding Platforms", icon: Terminal },
+  { key: "/analytics", label: "Analytics", icon: TrendingUp },
 ];
 
 function SettingsPage() {
@@ -714,9 +716,104 @@ function SettingsPage() {
               ))}
             </div>
 
+            {/* UI Mode: Plain Minimalist vs Liquid Glass */}
+            <div className="pt-4 mt-4 border-t border-border dark:border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
+                  Surface &amp; Experience Style
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setStudioOpen(true)}
+                  className="text-xs font-semibold text-indigo-500 hover:text-indigo-400 flex items-center gap-1 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Studio Details →
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    ambientSettings.setUiMode("minimal");
+                    toast.success("Plain Minimalist UI activated");
+                  }}
+                  className={cn(
+                    "p-3 rounded-xl border text-left transition cursor-pointer flex items-center justify-between",
+                    !ambientSettings.glassPanelsEnabled
+                      ? "bg-emerald-500/10 border-emerald-500 ring-2 ring-emerald-500/30 text-emerald-600 dark:text-emerald-300 font-bold"
+                      : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/5 text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <div>
+                    <p className="text-xs font-bold">Plain Minimalist</p>
+                    <p className="text-[11px] text-muted-foreground font-normal">Solid opaque surfaces</p>
+                  </div>
+                  {!ambientSettings.glassPanelsEnabled && (
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    ambientSettings.setUiMode("immersive");
+                    toast.success("Liquid Glass Surfaces activated");
+                  }}
+                  className={cn(
+                    "p-3 rounded-xl border text-left transition cursor-pointer flex items-center justify-between",
+                    ambientSettings.glassPanelsEnabled
+                      ? "bg-indigo-500/15 border-indigo-500 ring-2 ring-indigo-500/30 text-indigo-600 dark:text-indigo-300 font-bold"
+                      : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/5 text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <div>
+                    <p className="text-xs font-bold">Liquid Glass</p>
+                    <p className="text-[11px] text-muted-foreground font-normal">Refraction &amp; glow</p>
+                  </div>
+                  {ambientSettings.glassPanelsEnabled && (
+                    <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Background Style Switcher */}
+            <div className="pt-4 mt-4 border-t border-border dark:border-white/10 space-y-3">
+              <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
+                Atmospheric Background
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: "stars", label: "Twinkling Stars", icon: Star },
+                  { id: "orbs", label: "Aurora Orbs", icon: Sparkles },
+                  { id: "full", label: "Full Mesh", icon: Sparkles },
+                  { id: "solid", label: "Plain Canvas", icon: Palette },
+                ].map((bg) => (
+                  <button
+                    key={bg.id}
+                    type="button"
+                    onClick={() => {
+                      ambientSettings.setBackgroundType(bg.id as any);
+                      toast.success(`Background set to ${bg.label}`);
+                    }}
+                    className={cn(
+                      "p-2.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 text-xs font-semibold",
+                      ambientSettings.backgroundType === bg.id
+                        ? "bg-indigo-500/15 border-indigo-500 text-indigo-600 dark:text-indigo-300 ring-1 ring-indigo-500/40 font-bold shadow-sm"
+                        : "bg-muted/40 dark:bg-black/20 border-border dark:border-white/5 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <bg.icon className="h-3.5 w-3.5" />
+                    <span>{bg.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Accent Theme Color Swatches */}
             <div className="pt-4 mt-4 border-t border-border dark:border-white/10 space-y-3">
-              <label className="block text-xs font-bold text-foreground">
+              <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
                 Primary Accent Theme Swatch
               </label>
               <div className="flex flex-wrap gap-2.5">
@@ -878,6 +975,12 @@ function SettingsPage() {
           </div>
         </div>
       )}
+
+      {/* UI & Atmosphere Studio Modal */}
+      <AmbientLightingCustomizer
+        open={studioOpen}
+        onClose={() => setStudioOpen(false)}
+      />
     </div>
   );
 }

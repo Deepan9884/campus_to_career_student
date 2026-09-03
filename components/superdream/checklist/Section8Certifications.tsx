@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores, IndustryCertItem } from "@/lib/super-dream-checklist";
 import {
@@ -157,6 +158,12 @@ export function Section8Certifications() {
   const { studentChecklist, updateIndustryCert } = useSuperDream();
   const { summaries } = calculateStudentChecklistScores(studentChecklist);
   const summary = summaries.find((s) => s.sectionId === 8) || summaries[7];
+
+  // View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [viewMode, setViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedCertId, setFocusedCertId] = useState<string>(
+    studentChecklist.section8Certifications[0]?.id || "cert-1"
+  );
 
   // Upload & Verification Modal State
   const [activeCertModal, setActiveCertModal] = useState<IndustryCertItem | null>(null);
@@ -348,8 +355,32 @@ export function Section8Certifications() {
 
       {/* 3. 12 Modular Certification Cards with PDF Upload Areas */}
       <div className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {studentChecklist.section8Certifications.map((item) => {
+        {/* View Mode Switcher: Overall Grid vs Single Focus */}
+        <SectionViewModeSwitcher
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          options={studentChecklist.section8Certifications.map((item) => ({
+            id: item.id,
+            label: item.certification,
+            badge: item.issuer || item.track,
+          }))}
+          selectedId={focusedCertId}
+          onSelectId={setFocusedCertId}
+          label="Certification"
+        />
+
+        <div
+          className={cn(
+            "gap-4",
+            viewMode === "focus"
+              ? "w-full space-y-4"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          )}
+        >
+          {(viewMode === "focus"
+            ? studentChecklist.section8Certifications.filter((item) => item.id === focusedCertId)
+            : studentChecklist.section8Certifications
+          ).map((item) => {
             const isCompleted = item.status === "Completed";
             const isInProgress = item.status === "In Progress";
             const hasPdf = Boolean(item.certificatePdfName);

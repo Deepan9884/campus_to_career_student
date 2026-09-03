@@ -442,15 +442,6 @@ function ResumeSelectorModule({
           <span className="text-[10px] mt-0.5 text-muted-foreground">Practice standard non-project questions</span>
         </div>
       </div>
-
-      {selectedResumeName && selectedResumeId && (
-        <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl">
-          <Bot className="h-3.5 w-3.5 shrink-0" />
-          <span>
-            Attached: <strong>{selectedResumeName}</strong>. Gemini AI will evaluate your past projects and technical choices.
-          </span>
-        </div>
-      )}
     </div>
   );
 }

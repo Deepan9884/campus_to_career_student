@@ -426,7 +426,7 @@ const [analyzing, setAnalyzing] = useState(false);
             }}
             className="w-full space-y-4 shrink-0 transition-[width] duration-75 lg:pr-3"
           >
-            <GlassCard className="space-y-4">
+            <GlassCard className="space-y-4 overflow-hidden p-5">
               <h3 className="font-semibold flex items-center gap-2 text-foreground">
                 <Github className="h-4 w-4 text-[color:var(--color-primary)]" /> GitHub Connection
               </h3>
@@ -438,33 +438,33 @@ const [analyzing, setAnalyzing] = useState(false);
                 );
                 return (
                   <>
-                    <div className="flex gap-2">
+                    <div className="flex items-stretch gap-2 min-w-0 w-full">
                       <input
                         ref={inputRef}
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="GitHub username"
                         disabled={connecting}
-                        className="flex-1 glass-input rounded-xl px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
+                        className="flex-1 min-w-0 glass-input rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
                         onKeyDown={(e) =>
                           e.key === "Enter" && !isCurrentConnected && !connecting && username.trim() && handleConnect()
                         }
                       />
                       {isCurrentConnected ? (
-                        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                        <div className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shrink-0 whitespace-nowrap shadow-[0_0_10px_rgba(16,185,129,0.15)]">
+                          <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
                           <span>Connected</span>
                         </div>
                       ) : (
                         <button
                           onClick={() => handleConnect()}
                           disabled={connecting || !username.trim()}
-                          className="btn-gradient btn-gradient-hover rounded-xl px-4 text-xs font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0 transition-transform active:scale-95 shadow-md"
+                          className="btn-gradient btn-gradient-hover rounded-xl px-3.5 py-2 text-xs font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap transition-transform active:scale-95 shadow-md"
                         >
                           {connecting ? (
                             <>
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              <span>Connecting...</span>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                              <span>{leftWidthPercent <= 28 ? "..." : "Connecting..."}</span>
                             </>
                           ) : connected ? (
                             "Switch"
@@ -983,67 +983,345 @@ function Overview({ analysis }: { analysis: RepoAnalysis }) {
 }
 
 function Quality({ analysis }: { analysis: RepoAnalysis }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <Code2 className="h-8 w-8 text-[color:var(--color-primary)]" />
-        <div>
-          <p className="text-sm font-semibold text-foreground">Code Quality Assessment</p>
-          <p className="text-xs text-muted-foreground">Based on analyzed project architecture</p>
+  // Handle both old (string) and new (object) format
+  const qualityData = analysis.quality;
+  
+  if (typeof qualityData === 'string') {
+    // Old format: simple string
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <Code2 className="h-8 w-8 text-[color:var(--color-primary)]" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">Code Quality Assessment</p>
+            <p className="text-xs text-muted-foreground">Based on analyzed project architecture</p>
+          </div>
+        </div>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+            {qualityData || "No quality assessment available"}
+          </p>
         </div>
       </div>
-      <div className="glass rounded-2xl p-4">
-        <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-          {analysis.quality || "No quality assessment available"}
-        </p>
+    );
+  }
+  
+  // New format: comprehensive object
+  if (qualityData && typeof qualityData === 'object') {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Code2 className="h-8 w-8 text-[color:var(--color-primary)]" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">Code Quality Assessment</p>
+            <p className="text-xs text-muted-foreground">Based on analyzed project architecture</p>
+          </div>
+        </div>
+        
+        {qualityData.overallScore !== undefined && (
+          <div className="glass rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground">Overall Quality Score</span>
+              <span className="text-2xl font-bold text-[color:var(--color-primary)]">
+                {qualityData.overallScore}/100
+              </span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all"
+                style={{ width: `${qualityData.overallScore}%` }}
+              />
+            </div>
+          </div>
+        )}
+        
+        <div className="grid md:grid-cols-2 gap-3">
+          {qualityData.codeOrganization && (
+            <div className="glass rounded-2xl p-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Code Organization</p>
+              <p className="text-sm text-foreground">{qualityData.codeOrganization}</p>
+            </div>
+          )}
+          
+          {qualityData.readability && (
+            <div className="glass rounded-2xl p-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Readability</p>
+              <p className="text-sm text-foreground">{qualityData.readability}</p>
+            </div>
+          )}
+          
+          {qualityData.bestPractices && (
+            <div className="glass rounded-2xl p-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Best Practices</p>
+              <p className="text-sm text-foreground">{qualityData.bestPractices}</p>
+            </div>
+          )}
+          
+          {qualityData.documentation && (
+            <div className="glass rounded-2xl p-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Documentation</p>
+              <p className="text-sm text-foreground">{qualityData.documentation}</p>
+            </div>
+          )}
+          
+          {qualityData.testing && (
+            <div className="glass rounded-2xl p-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Testing</p>
+              <p className="text-sm text-foreground">{qualityData.testing}</p>
+            </div>
+          )}
+        </div>
+        
+        {qualityData.strengths && qualityData.strengths.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-emerald-400 mb-2">✓ Strengths</p>
+            <ul className="space-y-1.5">
+              {qualityData.strengths.map((strength, i) => (
+                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                  <span className="text-emerald-400 mt-0.5">•</span>
+                  <span>{strength}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {qualityData.improvements && qualityData.improvements.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-amber-400 mb-2">⚡ Areas for Improvement</p>
+            <ul className="space-y-1.5">
+              {qualityData.improvements.map((improvement, i) => (
+                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                  <span className="text-amber-400 mt-0.5">•</span>
+                  <span>{improvement}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
+    );
+  }
+  
+  // No data
+  return (
+    <div className="glass rounded-2xl p-4 text-sm text-muted-foreground">
+      No quality assessment available
     </div>
   );
 }
 
 function Security({ analysis }: { analysis: RepoAnalysis }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <ShieldCheck className="h-8 w-8 text-[color:var(--color-success)]" />
-        <div>
-          <p className="text-sm font-semibold text-foreground">Security & API Health Assessment</p>
-          <p className="text-xs text-muted-foreground">Vulnerability checks and secrets audit</p>
+  // Handle both old (string) and new (object) format
+  const securityData = analysis.security;
+  
+  if (typeof securityData === 'string') {
+    // Old format: simple string
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="h-8 w-8 text-[color:var(--color-success)]" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">Security & API Health Assessment</p>
+            <p className="text-xs text-muted-foreground">Vulnerability checks and secrets audit</p>
+          </div>
+        </div>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+            {securityData || "No security assessment available"}
+          </p>
         </div>
       </div>
-      <div className="glass rounded-2xl p-4">
-        <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-          {analysis.security || "No security assessment available"}
-        </p>
+    );
+  }
+  
+  // New format: comprehensive object
+  if (securityData && typeof securityData === 'object') {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="h-8 w-8 text-[color:var(--color-success)]" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">Security & API Health Assessment</p>
+            <p className="text-xs text-muted-foreground">Vulnerability checks and secrets audit</p>
+          </div>
+        </div>
+        
+        {securityData.overallRating && (
+          <div className="glass rounded-2xl p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Overall Security Rating</span>
+              <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                securityData.overallRating === 'Excellent' ? 'bg-emerald-500/20 text-emerald-300' :
+                securityData.overallRating === 'Good' ? 'bg-green-500/20 text-green-300' :
+                securityData.overallRating === 'Fair' ? 'bg-amber-500/20 text-amber-300' :
+                'bg-rose-500/20 text-rose-300'
+              }`}>
+                {securityData.overallRating}
+              </span>
+            </div>
+          </div>
+        )}
+        
+        {securityData.goodPractices && securityData.goodPractices.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-emerald-400 mb-2">✓ Security Strengths</p>
+            <ul className="space-y-1.5">
+              {securityData.goodPractices.map((practice, i) => (
+                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                  <span className="text-emerald-400 mt-0.5">•</span>
+                  <span>{practice}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {securityData.issues && securityData.issues.length > 0 && (
+          <div className="glass rounded-2xl p-4 border border-rose-500/30">
+            <p className="text-xs font-semibold text-rose-400 mb-2">⚠ Security Concerns</p>
+            <ul className="space-y-1.5">
+              {securityData.issues.map((issue, i) => (
+                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                  <span className="text-rose-400 mt-0.5">•</span>
+                  <span>{issue}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {securityData.recommendations && securityData.recommendations.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-indigo-400 mb-2">💡 Recommendations</p>
+            <ul className="space-y-1.5">
+              {securityData.recommendations.map((rec, i) => (
+                <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                  <span className="text-indigo-400 mt-0.5">•</span>
+                  <span>{rec}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
+    );
+  }
+  
+  // No data
+  return (
+    <div className="glass rounded-2xl p-4 text-sm text-muted-foreground">
+      No security assessment available
     </div>
   );
 }
 
 function ResumeImpact({ analysis }: { analysis: RepoAnalysis }) {
-  const impacts = analysis.resumeImpact;
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Briefcase className="h-8 w-8 text-[color:var(--color-accent)]" />
-        <div>
-          <p className="text-sm font-semibold text-foreground">Resume Impact Bullets</p>
-          <p className="text-xs text-muted-foreground">How this project strengthens your career resume</p>
+  const resumeData = analysis.resumeImpact;
+  
+  // Handle old format (array of strings)
+  if (Array.isArray(resumeData)) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Briefcase className="h-8 w-8 text-[color:var(--color-accent)]" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">Resume Impact Bullets</p>
+            <p className="text-xs text-muted-foreground">How this project strengthens your career resume</p>
+          </div>
         </div>
+        {resumeData.length > 0 ? (
+          <div className="space-y-2.5">
+            {resumeData.map((item, i) => (
+              <div key={i} className="glass rounded-2xl p-3.5 border border-border/50 dark:border-white/10">
+                <p className="text-sm leading-relaxed text-foreground">{item}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="glass rounded-2xl p-4 text-sm text-muted-foreground">
+            No resume impact data available
+          </div>
+        )}
       </div>
-      {impacts && (impacts || []).length > 0 ? (
-        <div className="space-y-2.5">
-          {impacts.map((item, i) => (
-            <div key={i} className="glass rounded-2xl p-3.5 border border-border/50 dark:border-white/10">
-              <p className="text-sm leading-relaxed text-foreground">{item}</p>
+    );
+  }
+  
+  // Handle new format (comprehensive object)
+  if (resumeData && typeof resumeData === 'object') {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Briefcase className="h-8 w-8 text-[color:var(--color-accent)]" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">Resume & Interview Value</p>
+            <p className="text-xs text-muted-foreground">How to present this project professionally</p>
+          </div>
+        </div>
+        
+        {resumeData.bullets && resumeData.bullets.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-indigo-400 mb-3">📝 Resume Bullet Points</p>
+            <div className="space-y-2.5">
+              {resumeData.bullets.map((bullet, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-foreground">
+                  <span className="text-indigo-400 mt-1">•</span>
+                  <span>{bullet}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="glass rounded-2xl p-4 text-sm text-muted-foreground">
-          No resume impact data available
-        </div>
-      )}
+          </div>
+        )}
+        
+        {resumeData.interviewTalkingPoints && resumeData.interviewTalkingPoints.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-emerald-400 mb-3">💬 Interview Talking Points</p>
+            <div className="space-y-2.5">
+              {resumeData.interviewTalkingPoints.map((point, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-foreground">
+                  <span className="text-emerald-400 mt-1">•</span>
+                  <span>{point}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {resumeData.uniqueSellingPoints && resumeData.uniqueSellingPoints.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-amber-400 mb-3">⭐ Unique Selling Points</p>
+            <div className="space-y-2.5">
+              {resumeData.uniqueSellingPoints.map((point, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-foreground">
+                  <span className="text-amber-400 mt-1">•</span>
+                  <span>{point}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {resumeData.improvementSuggestions && resumeData.improvementSuggestions.length > 0 && (
+          <div className="glass rounded-2xl p-4">
+            <p className="text-xs font-semibold text-sky-400 mb-3">💡 How to Make It More Impressive</p>
+            <div className="space-y-2.5">
+              {resumeData.improvementSuggestions.map((suggestion, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-foreground">
+                  <span className="text-sky-400 mt-1">•</span>
+                  <span>{suggestion}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+  
+  // No data
+  return (
+    <div className="glass rounded-2xl p-4 text-sm text-muted-foreground">
+      No resume impact data available
     </div>
   );
 }

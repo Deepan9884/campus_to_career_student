@@ -740,9 +740,12 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
                   <div className="w-9 h-9 rounded-xl bg-amber-400/15 text-amber-300 border border-amber-400/30 grid place-items-center shrink-0">
                     <Star className="w-4 h-4 fill-current" />
                   </div>
-                  <h4 className="text-xs sm:text-sm font-bold text-[var(--foreground)]">
-                    Twinkling Star Field
-                  </h4>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-[var(--foreground)]">
+                      Twinkling Star Field
+                    </h4>
+                    <p className="text-[11px] text-[var(--muted-foreground)]">Celestial stardust sparkles</p>
+                  </div>
                 </div>
 
                 <label className="relative inline-flex items-center cursor-pointer">

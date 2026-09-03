@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
 import {
@@ -50,6 +51,10 @@ export function Section5AiDataScience() {
   const summary = summaries.find((s) => s.sectionId === 5) || summaries[4];
 
   const allocatedAiProjects = storeAllocatedAiProjects || INITIAL_ALLOCATED_AI_PROJECTS;
+
+  // View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [viewMode, setViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedCategoryKey, setFocusedCategoryKey] = useState<string>(AI_DATA_SCIENCE_CATEGORIES[0].key);
 
   // Selected Category Modal for AI Projects
   const [activeCategoryModal, setActiveCategoryModal] = useState<AiCategoryConfig | null>(null);
@@ -275,8 +280,32 @@ export function Section5AiDataScience() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {AI_DATA_SCIENCE_CATEGORIES.map((cat, idx) => {
+        {/* View Mode Switcher: Overall Grid vs Single Focus */}
+        <SectionViewModeSwitcher
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          options={AI_DATA_SCIENCE_CATEGORIES.map((cat) => ({
+            id: cat.key,
+            label: cat.label,
+            badge: `${cat.targetCount} Target`,
+          }))}
+          selectedId={focusedCategoryKey}
+          onSelectId={setFocusedCategoryKey}
+          label="AI Domain"
+        />
+
+        <div
+          className={cn(
+            "gap-4",
+            viewMode === "focus"
+              ? "w-full space-y-4"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+          )}
+        >
+          {(viewMode === "focus"
+            ? AI_DATA_SCIENCE_CATEGORIES.filter((c) => c.key === focusedCategoryKey)
+            : AI_DATA_SCIENCE_CATEGORIES
+          ).map((cat, idx) => {
             const Icon = getCategoryIcon(cat.iconName);
             const items = allocatedAiProjects.filter((p) => p.categoryKey === cat.key);
             const currentCount = items.length;

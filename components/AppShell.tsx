@@ -36,6 +36,8 @@ import {
   Award,
   Brain,
   Code2,
+  Terminal,
+  TrendingUp,
 } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/stores";
@@ -69,8 +71,8 @@ const nav = [
   { to: "/linkedin-posts", label: "LinkedIn Post Ideas", icon: Linkedin },
   { to: "/skills", label: "Skill Gap", icon: Target },
   { to: "/roadmap", label: "Learning Roadmap", icon: Map },
-  { to: "/coding-platforms", label: "Coding Platforms", icon: BarChart3 },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/coding-platforms", label: "Coding Platforms", icon: Terminal },
+  { to: "/analytics", label: "Analytics", icon: TrendingUp },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -445,7 +447,7 @@ export function AppShell() {
       />
 
       <OnboardingWizard
-        open={showOnboardingWizard ? true : undefined}
+        open={showOnboardingWizard}
         onClose={() => setShowOnboardingWizard(false)}
         onComplete={() => {
           setShowOnboardingWizard(false);
@@ -728,7 +730,7 @@ export function AppShell() {
       )}
 
       {/* Main */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col relative z-10">
         <AppNavbarHeader
           user={user}
           isCheckingAuth={isCheckingAuth}

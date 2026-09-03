@@ -19,7 +19,7 @@ export function GlassCard({
   return (
     <div
       className={cn(
-        "border border-border/80 rounded-2xl p-6 transition-all duration-300",
+        "relative border border-border/80 rounded-2xl p-6 transition-all duration-300",
         variant === "strong" && "glass-strong",
         variant === "liquid" && "liquid-glass",
         variant === "card" && "liquid-glass-card",

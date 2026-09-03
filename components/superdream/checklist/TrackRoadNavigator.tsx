@@ -178,8 +178,8 @@ export function TrackRoadNavigator() {
                 onClick={() => setActiveTab("tests")}
                 className="px-4 py-2 rounded-full btn-gradient btn-gradient-hover text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-500/20"
               >
-                <Code2 className="w-4 h-4" />
-                <span>Coding Tests Arena</span>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Proctored Tests Arena</span>
               </button>
 
               <button

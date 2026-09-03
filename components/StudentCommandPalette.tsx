@@ -24,6 +24,9 @@ import {
   Sparkles,
   Star,
   FileCode,
+  ShieldCheck,
+  Terminal,
+  TrendingUp,
 } from "lucide-react";
 import { useAuth } from "@/stores";
 import { useSuperDream } from "@/stores/superDreamStore";
@@ -141,7 +144,7 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       id: "nav-tests",
       title: "Super Dream Coding Tests Arena",
       category: "navigation",
-      icon: Code2,
+      icon: ShieldCheck,
       badge: "Super Dream",
       keywords: ["test", "tests", "coding", "compiler", "assessment", "proctoring", "exam", "dsa", "faang", "super dream"],
       action: () => {
@@ -223,7 +226,7 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       id: "nav-coding",
       title: "Coding Platform Analytics",
       category: "navigation",
-      icon: BarChart3,
+      icon: Terminal,
       keywords: ["coding", "leetcode", "hackerrank", "codechef", "codeforces"],
       action: () => {
         navigate({ to: "/coding-platforms" });
@@ -245,7 +248,7 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       id: "nav-analytics",
       title: "Readiness Analytics & Trends",
       category: "navigation",
-      icon: BarChart3,
+      icon: TrendingUp,
       keywords: ["analytics", "charts", "metrics", "history", "trend"],
       action: () => {
         navigate({ to: "/analytics" });
@@ -363,6 +366,86 @@ export function StudentCommandPalette({ open, onClose }: StudentCommandPalettePr
       badge: "Rose",
       keywords: ["accent", "color", "rose", "red", "pink"],
       action: () => handleSetAccent("rose", "Rose Bloom"),
+    },
+
+    // UI Mode & Glassmorphism Surfaces
+    {
+      id: "ui-mode-liquid",
+      title: "Switch to Liquid Glass UI Surfaces",
+      category: "appearance",
+      icon: Sparkles,
+      badge: "Liquid Glass",
+      keywords: ["liquid", "glass", "morphism", "ui", "glow", "translucent", "switch", "style"],
+      action: () => {
+        ambient.setUiMode("immersive");
+        toast.success("Liquid Glass Surfaces activated ✨");
+        onClose();
+      },
+    },
+    {
+      id: "ui-mode-plain",
+      title: "Switch to Plain Minimalist UI Surfaces",
+      category: "appearance",
+      icon: LayoutDashboard,
+      badge: "Plain UI",
+      keywords: ["plain", "minimal", "flat", "solid", "cards", "ui", "clean", "switch", "style"],
+      action: () => {
+        ambient.setUiMode("minimal");
+        toast.success("Plain Minimalist UI activated ⬛");
+        onClose();
+      },
+    },
+    {
+      id: "bg-stars",
+      title: "Set Background: Twinkling Star Field",
+      category: "appearance",
+      icon: Star,
+      badge: "Background",
+      keywords: ["stars", "particles", "background", "twinkle", "constellation", "space", "sky"],
+      action: () => {
+        ambient.setBackgroundType("stars");
+        toast.success("Background set to Twinkling Stars ⭐");
+        onClose();
+      },
+    },
+    {
+      id: "bg-orbs",
+      title: "Set Background: Glowing Aurora Orbs",
+      category: "appearance",
+      icon: Sparkles,
+      badge: "Background",
+      keywords: ["orbs", "aurora", "glow", "background", "nebula"],
+      action: () => {
+        ambient.setBackgroundType("orbs");
+        toast.success("Background set to Aurora Orbs 🌌");
+        onClose();
+      },
+    },
+    {
+      id: "bg-full-mesh",
+      title: "Set Background: Full Cyber Mesh (Stars + Aurora)",
+      category: "appearance",
+      icon: Sparkles,
+      badge: "Background",
+      keywords: ["full", "mesh", "stars", "orbs", "background", "atmosphere"],
+      action: () => {
+        ambient.setBackgroundType("full");
+        toast.success("Background set to Full Atmosphere 🚀");
+        onClose();
+      },
+    },
+    {
+      id: "bg-plain-solid",
+      title: "Set Background: Plain Canvas Color",
+      category: "appearance",
+      icon: Paintbrush,
+      badge: "Background",
+      keywords: ["solid", "plain", "black", "white", "canvas", "background"],
+      action: () => {
+        ambient.setBackgroundType("solid");
+        toast.success("Background set to Plain Canvas 🎨");
+        onClose();
+      },
     },
 
     // Atmospheric Background Lighting Presets

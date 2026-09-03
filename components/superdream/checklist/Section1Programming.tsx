@@ -34,6 +34,7 @@ import { PROGRAMMING_LANGUAGES_CURRICULUM } from "@/lib/super-dream-languages-da
 import { ProctoredLanguageQuizModal } from "./ProctoredLanguageQuizModal";
 import { LanguageProgressDrawerModal } from "./LanguageProgressDrawerModal";
 import { PracticeCodingConsole } from "./PracticeCodingConsole";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 
 const LANGUAGE_THEMES: Record<
   string,
@@ -198,6 +199,10 @@ export function Section1Programming() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Mastered" | "In Progress" | "Not Started">("All");
 
+  // View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [viewMode, setViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedSkillId, setFocusedSkillId] = useState<string>(studentChecklist.section1Programming[0]?.id || "p-1");
+
   const handleOpenExternalLink = (
     e: React.MouseEvent,
     skillId: string,
@@ -339,9 +344,33 @@ export function Section1Programming() {
         </div>
       </div>
 
+      {/* View Mode Switcher: Overall Grid vs Single Focus */}
+      <SectionViewModeSwitcher
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        options={studentChecklist.section1Programming.map((item) => ({
+          id: item.id,
+          label: item.skill,
+          badge: item.category,
+        }))}
+        selectedId={focusedSkillId}
+        onSelectId={setFocusedSkillId}
+        label="Language"
+      />
+
       {/* 9-10 Language & Course Panels Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredItems.map((item) => {
+      <div
+        className={cn(
+          "gap-5",
+          viewMode === "focus"
+            ? "w-full space-y-4"
+            : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+        )}
+      >
+        {(viewMode === "focus"
+          ? studentChecklist.section1Programming.filter((item) => item.id === focusedSkillId)
+          : filteredItems
+        ).map((item) => {
           const isMastered = item.status === "Mastered";
           const isInProgress = item.status === "In Progress";
           const curriculum =

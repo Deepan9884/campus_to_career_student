@@ -511,10 +511,13 @@ function AnalyticsPage() {
                   <Tooltip
                     contentStyle={{
                       background: "rgba(15, 23, 42, 0.95)",
-                      border: "1px solid rgba(99, 102, 241, 0.3)",
+                      border: "1px solid rgba(99, 102, 241, 0.35)",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 25px -5px rgba(0,0,0,0.5)",
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+                      color: "#FFFFFF",
                     }}
+                    labelStyle={{ color: "#93C5FD", fontWeight: 700, marginBottom: "4px" }}
+                    itemStyle={{ color: "#F1F5F9", fontSize: "12px" }}
                     formatter={(value: any) => [`${value} / 100`, "ATS Score"]}
                   />
                   <ReferenceLine y={80} stroke="#34D399" strokeDasharray="3 3" label={{ value: "Target 80", fill: "#34D399", fontSize: 10, position: "top" }} />
@@ -569,13 +572,17 @@ function AnalyticsPage() {
                   <XAxis dataKey="name" stroke="#64748B" fontSize={11} tickLine={false} />
                   <YAxis stroke="#64748B" fontSize={11} domain={[0, 100]} tickLine={false} />
                   <Tooltip
+                    cursor={false}
                     contentStyle={{
                       background: "rgba(15, 23, 42, 0.95)",
-                      border: "1px solid rgba(139, 92, 246, 0.3)",
+                      border: "1px solid rgba(139, 92, 246, 0.35)",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 25px -5px rgba(0,0,0,0.5)",
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+                      color: "#FFFFFF",
                     }}
-                    formatter={(value: any, _, item: any) => [`${value}/100 (${item.payload.type})`, "Round Score"]}
+                    labelStyle={{ color: "#A5B4FC", fontWeight: 700, marginBottom: "4px" }}
+                    itemStyle={{ color: "#F1F5F9", fontSize: "12px" }}
+                    formatter={(value: any, _, item: any) => [`${value}/100 (${item.payload?.type || "General"})`, "Round Score"]}
                   />
                   <ReferenceLine y={75} stroke="#818CF8" strokeDasharray="3 3" />
                   <Bar dataKey="score" fill="url(#barGrad)" radius={[6, 6, 0, 0]} barSize={28} />
@@ -682,10 +689,14 @@ function AnalyticsPage() {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      background: "rgba(15,23,42,0.95)",
-                      border: "1px solid rgba(255,255,255,0.18)",
-                      borderRadius: 12,
+                      background: "rgba(15, 23, 42, 0.95)",
+                      border: "1px solid rgba(255, 255, 255, 0.18)",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+                      color: "#FFFFFF",
                     }}
+                    labelStyle={{ color: "#A5B4FC", fontWeight: 700, marginBottom: "4px" }}
+                    itemStyle={{ color: "#F1F5F9", fontSize: "12px" }}
                   />
                   <Legend
                     wrapperStyle={{ fontSize: 12 }}

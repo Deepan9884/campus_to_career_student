@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
 import { InterviewEngine } from "@/components/interview/InterviewEngine";
@@ -113,6 +114,12 @@ export function Section9InterviewPrep() {
 
   const [viewMode, setViewMode] = useState<ViewMode>("targets");
   const [activeConfig, setActiveConfig] = useState<ActivePillarConfig | null>(null);
+
+  // View Mode for Targets: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [pillarViewMode, setPillarViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedPillarId, setFocusedPillarId] = useState<string>(
+    studentChecklist.section9InterviewPrep[0]?.id || "iv-1"
+  );
 
   const handleStartPillar = (pillarId: string) => {
     const meta = PILLAR_METAS[pillarId];
@@ -268,8 +275,32 @@ export function Section9InterviewPrep() {
       {/* 3. VIEW MODE A: 7 MODULAR INTERVIEW PILLARS */}
       {viewMode === "targets" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {studentChecklist.section9InterviewPrep.map((item) => {
+          {/* View Mode Switcher: Overall Grid vs Single Focus */}
+          <SectionViewModeSwitcher
+            viewMode={pillarViewMode}
+            onViewModeChange={setPillarViewMode}
+            options={studentChecklist.section9InterviewPrep.map((item) => ({
+              id: item.id,
+              label: item.activity,
+              badge: `${item.current}/${item.target}`,
+            }))}
+            selectedId={focusedPillarId}
+            onSelectId={setFocusedPillarId}
+            label="Pillar"
+          />
+
+          <div
+            className={cn(
+              "gap-4",
+              pillarViewMode === "focus"
+                ? "w-full space-y-4"
+                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            )}
+          >
+            {(pillarViewMode === "focus"
+              ? studentChecklist.section9InterviewPrep.filter((item) => item.id === focusedPillarId)
+              : studentChecklist.section9InterviewPrep
+            ).map((item) => {
               const isCompleted = item.current >= item.target;
               const percent = Math.min(100, Math.round((item.current / item.target) * 100));
               const meta = PILLAR_METAS[item.id] || {

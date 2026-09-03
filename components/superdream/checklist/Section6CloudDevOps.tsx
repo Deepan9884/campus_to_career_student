@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
 import { Cloud } from "lucide-react";
@@ -9,6 +10,12 @@ export function Section6CloudDevOps() {
   const { studentChecklist } = useSuperDream();
   const { summaries } = calculateStudentChecklistScores(studentChecklist);
   const summary = summaries.find((s) => s.sectionId === 6) || summaries[5];
+
+  // View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [viewMode, setViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedItemId, setFocusedItemId] = useState<string>(
+    studentChecklist.section6CloudDevOps[0]?.id || ""
+  );
 
   return (
     <div className="space-y-6">
@@ -27,10 +34,34 @@ export function Section6CloudDevOps() {
         statusColor={summary.statusColor}
       />
 
-      {/* 6 Modular Cloud Cards (Soft Study Palette) */}
+      {/* View Mode Switcher: Overall Grid vs Single Focus */}
+      <SectionViewModeSwitcher
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        options={studentChecklist.section6CloudDevOps.map((item) => ({
+          id: item.id,
+          label: item.activity,
+          badge: `${item.current}/${item.target}`,
+        }))}
+        selectedId={focusedItemId}
+        onSelectId={setFocusedItemId}
+        label="Cloud Deliverable"
+      />
+
+      {/* 6 Modular Cloud Cards */}
       <div className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          {studentChecklist.section6CloudDevOps.map((item) => {
+        <div
+          className={cn(
+            "gap-3.5",
+            viewMode === "focus"
+              ? "w-full space-y-4"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          )}
+        >
+          {(viewMode === "focus"
+            ? studentChecklist.section6CloudDevOps.filter((item) => item.id === focusedItemId)
+            : studentChecklist.section6CloudDevOps
+          ).map((item) => {
             const isCompleted = item.current >= item.target;
             const percent = Math.min(100, Math.round((item.current / item.target) * 100));
 

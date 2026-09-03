@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { SectionHeaderMetrics } from "./SectionHeaderMetrics";
+import { SectionViewModeSwitcher } from "./SectionViewModeSwitcher";
 import { useSuperDream } from "@/stores/superDreamStore";
 import {
   calculateStudentChecklistScores,
@@ -76,6 +77,10 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
   // Filter state for company matcher
   const [companyTierFilter, setCompanyTierFilter] = useState<string>("all");
   const [companySearchQuery, setCompanySearchQuery] = useState<string>("");
+
+  // Scorecard View Mode: 'focus' (single item with dropdown) vs 'overall' (grid)
+  const [scorecardViewMode, setScorecardViewMode] = useState<"overall" | "focus">("focus");
+  const [focusedCategoryIdx, setFocusedCategoryIdx] = useState<string>("0");
 
   const { categoryScores, totalObtained, tier, summaries } = useMemo(
     () => calculateStudentChecklistScores(studentChecklist),
@@ -331,8 +336,32 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categoryScores.map((cat, idx) => {
+            {/* View Mode Switcher: Overall Grid vs Single Focus */}
+            <SectionViewModeSwitcher
+              viewMode={scorecardViewMode}
+              onViewModeChange={setScorecardViewMode}
+              options={categoryScores.map((cat, idx) => ({
+                id: `${idx}`,
+                label: cat?.categoryName || cat?.category || cat?.key || `Category ${idx + 1}`,
+                badge: `${cat?.obtainedMarks ?? cat?.obtained ?? 0}/${cat?.maxMarks || 1} Marks`,
+              }))}
+              selectedId={focusedCategoryIdx}
+              onSelectId={setFocusedCategoryIdx}
+              label="Category"
+            />
+
+            <div
+              className={cn(
+                "gap-4",
+                scorecardViewMode === "focus"
+                  ? "w-full space-y-4"
+                  : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              )}
+            >
+              {(scorecardViewMode === "focus"
+                ? categoryScores.filter((_, idx) => `${idx}` === focusedCategoryIdx)
+                : categoryScores
+              ).map((cat, idx) => {
                 const catName = cat?.categoryName || cat?.category || cat?.key || `Category ${idx + 1}`;
                 const obtained = cat?.obtainedMarks ?? cat?.obtained ?? 0;
                 const max = cat?.maxMarks || 1;

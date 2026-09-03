@@ -13,6 +13,7 @@ interface Star {
   vx: number;
   vy: number;
   color: string;
+  hasFlare?: boolean;
 }
 
 interface ShootingStar {
@@ -54,8 +55,6 @@ export const InteractiveAppBackground: React.FC = () => {
   } = useAmbientLighting();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: -1000, y: -1000, active: false });
-  const ripplesRef = useRef<Ripple[]>([]);
   const shootingStarsRef = useRef<ShootingStar[]>([]);
   const lastShootingStarTime = useRef<number>(Date.now());
 
@@ -145,13 +144,12 @@ export const InteractiveAppBackground: React.FC = () => {
     // Initialize Stars
     const starPalette = isLightMode
       ? [
-          "#6366F1", // Indigo
-          "#8B5CF6", // Purple
-          "#3B82F6", // Blue
-          "#06B6D4", // Cyan
-          "#10B981", // Emerald
-          "#EC4899", // Pink
-          "#F59E0B", // Amber
+          "#818CF8", // Soft luminous iris
+          "#A78BFA", // Ethereal lilac violet
+          "#60A5FA", // Celestial daylight blue
+          "#C084FC", // Radiant lavender
+          "#93C5FD", // Soft sky sparkle
+          "#F472B6", // Soft rose starlight
         ]
       : [
           "#FFFFFF",
@@ -165,18 +163,24 @@ export const InteractiveAppBackground: React.FC = () => {
     const stars: Star[] = Array.from({ length: starCount }, () => {
       const x = Math.random() * width;
       const y = Math.random() * height;
+      const size = isLightMode
+        ? Math.random() * 1.3 + 0.8
+        : Math.random() * 1.6 + 0.5;
       return {
         x,
         y,
         originX: x,
         originY: y,
-        size: isLightMode ? Math.random() * 2.2 + 0.8 : Math.random() * 1.6 + 0.5,
-        baseAlpha: isLightMode ? Math.random() * 0.45 + 0.4 : Math.random() * 0.5 + 0.25,
+        size,
+        baseAlpha: isLightMode
+          ? Math.random() * 0.35 + 0.5
+          : Math.random() * 0.5 + 0.25,
         pulseSpeed: Math.random() * 0.025 + 0.01,
         pulsePhase: Math.random() * Math.PI * 2,
-        vx: (Math.random() - 0.5) * 0.1,
-        vy: (Math.random() - 0.5) * 0.1,
+        vx: (Math.random() - 0.5) * 0.08,
+        vy: (Math.random() - 0.5) * 0.08,
         color: starPalette[Math.floor(Math.random() * starPalette.length)],
+        hasFlare: Math.random() > 0.4,
       };
     });
 
@@ -198,34 +202,6 @@ export const InteractiveAppBackground: React.FC = () => {
       });
     };
 
-    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      const clientX = "touches" in e ? e.touches[0]?.clientX : (e as MouseEvent).clientX;
-      const clientY = "touches" in e ? e.touches[0]?.clientY : (e as MouseEvent).clientY;
-      if (clientX !== undefined && clientY !== undefined) {
-        mouseRef.current = { x: clientX, y: clientY, active: true };
-      }
-    };
-
-    const handlePointerLeave = () => {
-      mouseRef.current.active = false;
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      if (!clickRipple) return;
-      ripplesRef.current.push({
-        x: e.clientX,
-        y: e.clientY,
-        radius: 0,
-        maxRadius: 180,
-        opacity: 0.6,
-      });
-    };
-
-    window.addEventListener("mousemove", handlePointerMove, { passive: true });
-    window.addEventListener("touchmove", handlePointerMove, { passive: true });
-    window.addEventListener("mouseleave", handlePointerLeave);
-    window.addEventListener("click", handleClick);
-
     // Render loop
     let lastTime = performance.now();
     const render = (time: number) => {
@@ -233,26 +209,6 @@ export const InteractiveAppBackground: React.FC = () => {
       lastTime = time;
 
       ctx.clearRect(0, 0, width, height);
-
-      const mouse = mouseRef.current;
-
-      // Update & Draw Click Ripples
-      if (clickRipple && ripplesRef.current.length > 0) {
-        ripplesRef.current = ripplesRef.current.filter((r) => r.opacity > 0.01);
-        for (const ripple of ripplesRef.current) {
-          ripple.radius += (ripple.maxRadius - ripple.radius) * 0.08;
-          ripple.opacity *= 0.94;
-
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-          ctx.strokeStyle = orbColors.cursorGlow || "rgba(167, 139, 250, 0.4)";
-          ctx.lineWidth = 1.5;
-          ctx.globalAlpha = ripple.opacity;
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
 
       // Update & Spawn Shooting Stars
       if (shootingStarsEnabled) {
@@ -290,42 +246,6 @@ export const InteractiveAppBackground: React.FC = () => {
         }
       }
 
-      // Interactive Constellation Lines between nearby stars & mouse
-      if (interactiveConstellations && mouse.active) {
-        ctx.save();
-        ctx.strokeStyle = isLightMode
-          ? "rgba(99, 102, 241, 0.55)"
-          : (orbColors.constellationLine || "rgba(167, 139, 250, 0.3)");
-        ctx.lineWidth = isLightMode ? 1.2 : 0.75;
-
-        for (let i = 0; i < stars.length; i++) {
-          const s = stars[i];
-          const distToMouse = Math.hypot(s.x - mouse.x, s.y - mouse.y);
-          if (distToMouse < 130) {
-            const alpha = (1 - distToMouse / 130) * (isLightMode ? 0.65 : 0.45);
-            ctx.globalAlpha = alpha;
-            ctx.beginPath();
-            ctx.moveTo(s.x, s.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
-
-            // Connect nearby stars with each other near the cursor
-            for (let j = i + 1; j < stars.length; j++) {
-              const s2 = stars[j];
-              const distBetween = Math.hypot(s.x - s2.x, s.y - s2.y);
-              if (distBetween < 80) {
-                ctx.globalAlpha = (1 - distBetween / 80) * (isLightMode ? 0.40 : 0.25);
-                ctx.beginPath();
-                ctx.moveTo(s.x, s.y);
-                ctx.lineTo(s2.x, s2.y);
-                ctx.stroke();
-              }
-            }
-          }
-        }
-        ctx.restore();
-      }
-
       // Render & Twinkle Individual Stars
       for (const star of stars) {
         star.pulsePhase += star.pulseSpeed;
@@ -335,18 +255,6 @@ export const InteractiveAppBackground: React.FC = () => {
         // Subtle gentle drift
         star.x += star.vx;
         star.y += star.vy;
-
-        // Mouse repelling physics
-        if (mouse.active) {
-          const dx = star.x - mouse.x;
-          const dy = star.y - mouse.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist < 90 && dist > 0) {
-            const force = (1 - dist / 90) * 1.5;
-            star.x += (dx / dist) * force;
-            star.y += (dy / dist) * force;
-          }
-        }
 
         // Return gracefully to origin
         star.x += (star.originX - star.x) * 0.01;
@@ -359,40 +267,41 @@ export const InteractiveAppBackground: React.FC = () => {
         if (star.y > height) star.y = 0;
 
         ctx.save();
-        ctx.fillStyle = star.color;
 
-        // Star glow aura
-        if (star.size > 1.2) {
-          ctx.globalAlpha = currentAlpha * 0.25;
+        // 1. Soft glowing aura / halo
+        const auraRadius = isLightMode ? star.size * 3.6 : star.size * 2.2;
+        const auraGrad = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, auraRadius);
+        auraGrad.addColorStop(0, star.color);
+        auraGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = auraGrad;
+        ctx.globalAlpha = isLightMode ? currentAlpha * 0.45 : currentAlpha * 0.25;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, auraRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Diamond 4-Point Star Glint (gives stars a true celestial twinkle!)
+        if (star.hasFlare && star.size > 0.9) {
+          const flareLen = star.size * (isLightMode ? 3.4 : 3.0) * twinkle;
+          ctx.strokeStyle = star.color;
+          ctx.globalAlpha = isLightMode ? currentAlpha * 0.75 : currentAlpha * 0.5;
+          ctx.lineWidth = isLightMode ? 0.9 : 0.75;
           ctx.beginPath();
-          ctx.arc(star.x, star.y, star.size * 2.2, 0, Math.PI * 2);
-          ctx.fill();
+          // Horizontal flare
+          ctx.moveTo(star.x - flareLen, star.y);
+          ctx.lineTo(star.x + flareLen, star.y);
+          // Vertical flare
+          ctx.moveTo(star.x, star.y - flareLen);
+          ctx.lineTo(star.x, star.y + flareLen);
+          ctx.stroke();
         }
 
-        // Core star
-        ctx.globalAlpha = currentAlpha;
+        // 3. Central luminous core
+        ctx.fillStyle = isLightMode ? star.color : (star.size > 1.2 ? "#FFFFFF" : star.color);
+        ctx.globalAlpha = isLightMode ? currentAlpha * 0.9 : currentAlpha;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.arc(star.x, star.y, isLightMode ? star.size * 0.75 : star.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
-      }
 
-      // Draw subtle ambient glow ring at mouse position
-      if (interactiveConstellations && mouse.active) {
-        ctx.save();
-        const radGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 75);
-        if (isLightMode) {
-          radGrad.addColorStop(0, "rgba(99, 102, 241, 0.35)");
-          radGrad.addColorStop(0.5, "rgba(168, 85, 247, 0.15)");
-          radGrad.addColorStop(1, "transparent");
-        } else {
-          radGrad.addColorStop(0, orbColors.cursorGlow || "rgba(167, 139, 250, 0.25)");
-          radGrad.addColorStop(1, "transparent");
-        }
-        ctx.fillStyle = radGrad;
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 75, 0, Math.PI * 2);
-        ctx.fill();
         ctx.restore();
       }
 
@@ -404,10 +313,6 @@ export const InteractiveAppBackground: React.FC = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("mousemove", handlePointerMove);
-      window.removeEventListener("touchmove", handlePointerMove);
-      window.removeEventListener("mouseleave", handlePointerLeave);
-      window.removeEventListener("click", handleClick);
     };
   }, [
     shouldRenderStars,
@@ -435,7 +340,7 @@ export const InteractiveAppBackground: React.FC = () => {
   };
 
   // If backgroundType is none, return null for absolute minimalism
-  if (backgroundType === "none" || uiMode === "minimal") {
+  if (backgroundType === "none") {
     return null;
   }
 

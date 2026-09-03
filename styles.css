@@ -241,25 +241,25 @@
 
 [data-accent="charcoal"], .dark[data-accent="charcoal"], [data-theme="dark"][data-accent="charcoal"] {
   --background: #121212;
-  --foreground: #F5F5F5;
-  --card: #1E1E1E;
-  --card-foreground: #F5F5F5;
-  --popover: #262626;
-  --popover-foreground: #F5F5F5;
+  --foreground: #F8FAFC;
+  --card: #212126;
+  --card-foreground: #F8FAFC;
+  --popover: #292930;
+  --popover-foreground: #F8FAFC;
   --primary: #A3A3A3;
   --primary-foreground: #0A0A0A;
-  --secondary: #2E2E2E;
+  --secondary: #2E2E36;
   --secondary-foreground: #E5E5E5;
-  --muted: #242424;
+  --muted: #26262E;
   --muted-foreground: #A3A3A3;
-  --accent: #737373;
+  --accent: #82828E;
   --accent-foreground: #0A0A0A;
   --destructive: #FB7185;
   --destructive-foreground: #0A0A0A;
   --success: #34D399;
   --warning: #FDE68A;
-  --border: rgba(255, 255, 255, 0.16);
-  --input: #1E1E1E;
+  --border: rgba(255, 255, 255, 0.22);
+  --input: #26262E;
   --ring: #A3A3A3;
 
   --color-bg: #121212;
@@ -1281,6 +1281,57 @@
   pointer-events: none;
 }
 
+/* ─── Recharts Global Tooltip & Cursor Enhancements ────────────── */
+.recharts-default-tooltip {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(139, 92, 246, 0.35) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6) !important;
+  color: #F8FAFC !important;
+  padding: 10px 14px !important;
+  backdrop-filter: blur(8px);
+}
+
+.recharts-default-tooltip .recharts-tooltip-label {
+  color: #A5B4FC !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  margin-bottom: 4px !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-item-list {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-item {
+  color: #F1F5F9 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-item-name {
+  color: #CBD5E1 !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-item-value {
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+
+/* Eliminate harsh grey overlay rectangles on hovered BarChart columns */
+.recharts-rectangle.recharts-tooltip-cursor {
+  fill: transparent !important;
+  stroke: none !important;
+}
+
+.recharts-curve.recharts-tooltip-cursor {
+  stroke: rgba(99, 102, 241, 0.4) !important;
+  stroke-dasharray: 3 3 !important;
+}
+
 /* ─── Aurora Pastel Accent Border Utilities ───────────────────── */
 .aurora-border-violet {
   border-color: rgba(167, 139, 250, 0.35);
@@ -1629,10 +1680,11 @@ html.dark[data-glass="off"] .panel-slot,
 .dark[data-glass="off"] .liquid-glass-card,
 .dark[data-glass="off"] .panel-card,
 .dark[data-glass="off"] .panel-slot {
-  background: var(--card, #1C1638) !important;
-  border: 1px solid var(--border, rgba(167, 139, 250, 0.22)) !important;
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.65), 0 2px 8px -1px rgba(0, 0, 0, 0.45) !important;
-  color: var(--card-foreground, #F0EEFF) !important;
+  background: var(--card, #1E1E26) !important;
+  background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.20) 100%) !important;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.20)) !important;
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.75), 0 2px 8px -1px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+  color: var(--foreground, #F8FAFC) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -1640,26 +1692,24 @@ html.dark[data-glass="off"] .panel-slot,
 [data-glass="off"] .glass-strong,
 html.dark[data-glass="off"] .glass-strong,
 .dark[data-glass="off"] .glass-strong {
-  background: var(--popover, #211A42) !important;
-  border: 1px solid var(--border, rgba(167, 139, 250, 0.25)) !important;
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.70), 0 3px 10px -2px rgba(0, 0, 0, 0.50) !important;
-  color: var(--popover-foreground, #F0EEFF) !important;
+  background: var(--popover, #272730) !important;
+  background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(0, 0, 0, 0.24) 100%) !important;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.25)) !important;
+  box-shadow: 0 16px 44px -6px rgba(0, 0, 0, 0.85), 0 4px 14px -2px rgba(0, 0, 0, 0.60), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  color: var(--foreground, #F8FAFC) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 [data-glass="off"] .panel-card:hover,
 [data-glass="off"] .liquid-glass-card:hover,
-[data-glass="off"] .glass:hover,
-[data-glass="off"] .glass-strong:hover,
+[data-glass="off"] .card-hover-lift:hover,
 html.dark[data-glass="off"] .panel-card:hover,
 html.dark[data-glass="off"] .liquid-glass-card:hover,
-html.dark[data-glass="off"] .glass:hover,
-html.dark[data-glass="off"] .glass-strong:hover,
+html.dark[data-glass="off"] .card-hover-lift:hover,
 .dark[data-glass="off"] .panel-card:hover,
 .dark[data-glass="off"] .liquid-glass-card:hover,
-.dark[data-glass="off"] .glass:hover,
-.dark[data-glass="off"] .glass-strong:hover {
+.dark[data-glass="off"] .card-hover-lift:hover {
   background: var(--secondary, #2C2359) !important;
   border-color: var(--primary, #A78BFA) !important;
   box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.80), 0 4px 12px -2px rgba(0, 0, 0, 0.55) !important;
@@ -1905,13 +1955,11 @@ html.light:not([data-glass="off"]) .panel-slot {
 html.light[data-glass="off"] .liquid-glass,
 html.light[data-glass="off"] .liquid-glass-card,
 html.light[data-glass="off"] .glass,
-html.light[data-glass="off"] .glass-strong,
 html.light[data-glass="off"] .panel-card,
 html.light[data-glass="off"] .panel-slot,
 .light[data-glass="off"] .liquid-glass,
 .light[data-glass="off"] .liquid-glass-card,
 .light[data-glass="off"] .glass,
-.light[data-glass="off"] .glass-strong,
 .light[data-glass="off"] .panel-card,
 .light[data-glass="off"] .panel-slot {
   background: #FFFFFF !important;

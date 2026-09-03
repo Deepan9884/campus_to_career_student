@@ -1,5 +1,5 @@
 import React from "react";
-import { Compass, Code2, ChevronDown, ChevronUp } from "lucide-react";
+import { Compass, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SUPER_DREAM_BRANCHES } from "@/components/AppShell";
 import type { SuperDreamTab } from "@/stores/superDreamStore";
@@ -44,22 +44,15 @@ export function SuperDreamSidebarAccordion({
         onClick={() => onNavigate("tests")}
         title={sidebarCollapsed ? "Proctored Tests Arena" : undefined}
         className={cn(
-          "flex w-full items-center justify-between gap-2.5 rounded-xl text-[13.5px] font-bold transition-all text-left cursor-pointer",
+          "flex w-full items-center gap-3 rounded-xl text-[13.5px] font-bold transition-all text-left cursor-pointer",
           sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
           activeTab === "tests"
             ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40 shadow-sm"
             : "text-slate-600 dark:text-[var(--muted-foreground)] hover:bg-slate-50 dark:hover:bg-white/6 hover:text-slate-900 dark:hover:text-[var(--foreground)]"
         )}
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <Code2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
-          {!sidebarCollapsed && <span className="font-bold whitespace-nowrap">Proctored Tests Arena</span>}
-        </div>
-        {!sidebarCollapsed && (
-          <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-bold uppercase tracking-wider">
-            LIVE
-          </span>
-        )}
+        <ShieldCheck className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
+        {!sidebarCollapsed && <span className="font-bold whitespace-nowrap">Proctored Tests Arena</span>}
       </button>
 
       {/* 4 Major Branch Accordions */}

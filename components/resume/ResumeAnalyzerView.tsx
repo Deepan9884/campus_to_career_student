@@ -23,70 +23,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
-import { uploadResume, getResumeHistory, getResumeById, deleteResume, improveBulletPoint } from "@/lib/resume-api";
+import { uploadResume, getResumeHistory, getResumeById, deleteResume } from "@/lib/resume-api";
 import { AiStatusBadge } from "@/components/ui/AiStatusBadge";
+import { ComprehensiveResumeReport } from "./ComprehensiveResumeReport";
 import type { Resume, Pagination } from "@/types/resume";
-
-function ImprovementItem({ imp, role }: { imp: string; role?: string }) {
-  const [loading, setLoading] = useState(false);
-  const [improved, setImproved] = useState<string | null>(null);
-
-  async function handleImprove() {
-    setLoading(true);
-    try {
-      const res = await improveBulletPoint(imp, role);
-      setImproved(res.improved);
-      toast.success("Bullet point improved!");
-    } catch {
-      toast.error("Failed to improve bullet point. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <motion.li
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col gap-3 p-4 rounded-xl glass text-sm group transition-all relative overflow-hidden"
-    >
-      {improved && (
-        <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--color-primary)]/10 to-transparent pointer-events-none" />
-      )}
-
-      <div className="flex items-start gap-3 relative z-10">
-        <Zap
-          className={`h-4 w-4 mt-0.5 shrink-0 ${improved ? "text-[color:var(--color-primary)]" : "text-yellow-400"}`}
-        />
-        <div className="flex-1 space-y-3">
-          {improved ? (
-            <div className="space-y-3">
-              <div className="p-3 rounded-lg bg-[color:var(--color-primary)]/10 border border-[color:var(--color-primary)]/20 text-white font-medium">
-                <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-primary)] block mb-1 font-bold">
-                  AI Improved Version
-                </span>
-                {improved}
-              </div>
-              <div className="text-muted-foreground opacity-50 line-through text-xs">{imp}</div>
-            </div>
-          ) : (
-            <span className="text-muted-foreground">{imp}</span>
-          )}
-        </div>
-      </div>
-
-      {!improved && (
-        <button
-          onClick={handleImprove}
-          disabled={loading}
-          className="self-end opacity-0 group-hover:opacity-100 transition text-[10px] uppercase font-bold tracking-wider text-[color:var(--color-primary)] hover:text-white bg-[color:var(--color-primary)]/10 hover:bg-[color:var(--color-primary)] disabled:opacity-50 px-3 py-1.5 rounded flex items-center gap-1.5 relative z-10 cursor-pointer"
-        >
-          {loading ? <RefreshCw className="h-3 w-3 animate-spin" /> : <><Bot className="h-3 w-3 inline" /> Improve with AI</>}
-        </button>
-      )}
-    </motion.li>
-  );
-}
 
 type ViewMode = "idle" | "uploading" | "completed" | "failed";
 
@@ -423,7 +363,7 @@ export function ResumeAnalyzerView({
             className="space-y-6"
           >
             {/* Top: Upload Resume Hero Card */}
-            <GlassCard data-tour="resume-upload-zone" className="relative overflow-visible">
+            <GlassCard variant="strong" data-tour="resume-upload-zone" className="relative overflow-visible">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
@@ -728,100 +668,105 @@ export function ResumeAnalyzerView({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="space-y-6"
+            className="space-y-6 min-w-0"
           >
-            <div className="grid lg:grid-cols-[1fr_2fr] gap-6 items-start">
+            <div className="grid lg:grid-cols-[380px_1fr] min-w-0 gap-6 items-start">
               {/* Left Column: Upload & History Sidebar */}
-              <GlassCard data-tour="resume-upload-zone" className="space-y-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-sm text-foreground">Upload Resume</h3>
-                  <button
-                    onClick={resetUpload}
-                    className="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1 cursor-pointer"
-                  >
-                    <RefreshCw className="h-3 w-3" /> New
-                  </button>
-                </div>
-
-                {mode === "uploading" ? (
-                  <div className="border-2 border-dashed rounded-xl p-6 text-center border-indigo-500/30 bg-indigo-500/5">
-                    <RefreshCw className="h-7 w-7 mx-auto text-indigo-500 dark:text-indigo-400 animate-spin" />
-                    <p className="text-xs mt-3 font-medium text-indigo-700 dark:text-indigo-200">Analyzing resume...</p>
-                  </div>
-                ) : (
-                  <>
-                    <div
-                      onClick={() => inputRef.current?.click()}
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        setDragging(true);
-                      }}
-                      onDragLeave={() => setDragging(false)}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        setDragging(false);
-                        const f = e.dataTransfer.files?.[0];
-                        if (f) handleFile(f);
-                      }}
-                      className={`cursor-pointer border-2 border-dashed rounded-xl p-5 text-center transition ${
-                        dragging ? "border-indigo-500 bg-indigo-50 dark:bg-white/5" : "border-slate-300 dark:border-white/15 hover:border-indigo-500"
-                      }`}
-                    >
-                      <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
-                      <p className="text-xs mt-2 font-medium text-foreground">Upload another resume</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">PDF or DOCX, max 5MB</p>
-                      <input
-                        ref={inputRef}
-                        type="file"
-                        accept=".pdf,.docx"
-                        hidden
-                        onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-                      />
-                    </div>
-
-                    <div className="relative z-20">
-                      <TargetRoleSelect
-                        value={targetRole}
-                        onChange={setTargetRole}
-                        placeholder="Target role (optional)"
-                      />
-                    </div>
-                  </>
-                )}
-
-                {file && mode !== "uploading" && (
-                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center gap-2 text-xs">
-                    <FileText className="h-4 w-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
-                    <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">{file.name}</span>
-                  </div>
-                )}
-
-                {mode === "failed" && (
-                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30">
-                    <p className="text-xs text-red-600 dark:text-red-300">{errorMsg}</p>
+              <div className="min-w-0 w-full">
+                <GlassCard variant="strong" data-tour="resume-upload-zone" className="space-y-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm text-foreground">Upload Resume</h3>
                     <button
                       onClick={resetUpload}
-                      className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 transition cursor-pointer"
+                      className="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1 cursor-pointer"
                     >
-                      Try again
+                      <RefreshCw className="h-3 w-3" /> New
                     </button>
                   </div>
-                )}
 
-                {/* History in sidebar */}
-                <div className="pt-2 border-t border-slate-200 dark:border-white/10">
-                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
-                    Upload History
-                  </h4>
-                  {renderHistoryList(true)}
-                </div>
-              </GlassCard>
+                  {mode === "uploading" ? (
+                    <div className="border-2 border-dashed rounded-xl p-6 text-center border-indigo-500/30 bg-indigo-500/5">
+                      <RefreshCw className="h-7 w-7 mx-auto text-indigo-500 dark:text-indigo-400 animate-spin" />
+                      <p className="text-xs mt-3 font-medium text-indigo-700 dark:text-indigo-200">Analyzing resume...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        onClick={() => inputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setDragging(true);
+                        }}
+                        onDragLeave={() => setDragging(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setDragging(false);
+                          const f = e.dataTransfer.files?.[0];
+                          if (f) handleFile(f);
+                        }}
+                        className={`cursor-pointer border-2 border-dashed rounded-xl p-5 text-center transition ${
+                          dragging
+                            ? "border-indigo-500 bg-indigo-500/10"
+                            : "border-slate-300 dark:border-white/20 hover:border-indigo-400 dark:hover:border-indigo-400 bg-slate-50/50 dark:bg-white/[0.03] hover:bg-white/[0.06]"
+                        }`}
+                      >
+                        <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+                        <p className="text-xs mt-2 font-medium text-foreground">Upload another resume</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">PDF or DOCX, max 5MB</p>
+                        <input
+                          ref={inputRef}
+                          type="file"
+                          accept=".pdf,.docx"
+                          hidden
+                          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                        />
+                      </div>
+
+                      <div className="relative z-20">
+                        <TargetRoleSelect
+                          value={targetRole}
+                          onChange={setTargetRole}
+                          placeholder="Target role (optional)"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {file && mode !== "uploading" && (
+                    <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center gap-2 text-xs">
+                      <FileText className="h-4 w-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                      <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">{file.name}</span>
+                    </div>
+                  )}
+
+                  {mode === "failed" && (
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30">
+                      <p className="text-xs text-red-600 dark:text-red-300">{errorMsg}</p>
+                      <button
+                        onClick={resetUpload}
+                        className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 transition cursor-pointer"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  )}
+
+                  {/* History in sidebar */}
+                  <div className="pt-2 border-t border-slate-200 dark:border-white/10">
+                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
+                      Upload History
+                    </h4>
+                    {renderHistoryList(true)}
+                  </div>
+                </GlassCard>
+              </div>
 
               {/* Right Column: Analysis Results Card with Animated Entrance */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.98, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
+                className="min-w-0 w-full"
               >
                 <GlassCard variant="strong" className="relative overflow-hidden">
                   {/* Top header bar in results card */}
@@ -938,105 +883,7 @@ export function ResumeAnalyzerView({
                         return null;
                       })()}
 
-                      {/* Score Ring + Keywords */}
-                      <div className="grid md:grid-cols-[auto_1fr] gap-6 items-start">
-                        <ScoreRing score={display.atsScore ?? 0} label="ATS Score" />
-                        <div className="space-y-4 w-full">
-                          {/* Matched keywords */}
-                          {display.keywordBreakdown?.matched && display.keywordBreakdown.matched.length > 0 && (
-                            <div>
-                              <h4 className="text-xs uppercase tracking-wider text-green-600 dark:text-green-400 mb-2 font-semibold">
-                                Keywords Found ({display.keywordBreakdown.matched.length})
-                              </h4>
-                              <div className="flex flex-wrap gap-1.5">
-                                {display.keywordBreakdown.matched.map((k, i) => (
-                                  <span
-                                    key={i}
-                                    className="text-xs px-2.5 py-1 rounded-full bg-green-500/15 text-green-700 dark:text-green-300 border border-green-500/30 font-medium"
-                                  >
-                                    {k}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Missing keywords */}
-                          {display.keywordBreakdown?.missing && display.keywordBreakdown.missing.length > 0 && (
-                            <div>
-                              <h4 className="text-xs uppercase tracking-wider text-red-600 dark:text-red-400 mb-2 font-semibold">
-                                Missing Keywords ({display.keywordBreakdown.missing.length})
-                              </h4>
-                              <div className="flex flex-wrap gap-1.5">
-                                {display.keywordBreakdown.missing.map((k, i) => (
-                                  <span
-                                    key={i}
-                                    className="text-xs px-2.5 py-1 rounded-full bg-red-500/15 text-red-700 dark:text-red-300 border border-red-500/30 font-medium"
-                                  >
-                                    {k}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Summary */}
-                      {display.summary && (
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10">
-                          <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5 font-semibold">
-                            Analysis Summary
-                          </h4>
-                          <p className="text-sm text-slate-800 dark:text-slate-300 leading-relaxed">{display.summary}</p>
-                        </div>
-                      )}
-
-                      {/* Strengths */}
-                      {display.strengths && display.strengths.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold mb-2.5 flex items-center gap-1.5 text-foreground">
-                            <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400" /> Key Strengths
-                          </h4>
-                          <ul className="space-y-2">
-                            {display.strengths.map((s, i) => (
-                              <li
-                                key={i}
-                                className="flex items-start gap-2.5 text-sm text-slate-800 dark:text-slate-300 p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5"
-                              >
-                                <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 mt-0.5 shrink-0" />
-                                <span>{s}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Improvements */}
-                      {display.improvements && display.improvements.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold mb-2.5 flex items-center gap-1.5 text-foreground">
-                            <Target className="h-4 w-4 text-amber-500 dark:text-yellow-400" /> Actionable Improvements
-                          </h4>
-                          <ul className="space-y-2.5">
-                            {display.improvements.map((imp, i) => (
-                              <ImprovementItem
-                                key={i}
-                                imp={imp}
-                                role={display.inferredTargetRole || undefined}
-                              />
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Inferred / target role */}
-                      {display.inferredTargetRole && (
-                        <p className="text-xs text-muted-foreground pt-2 border-t border-slate-200 dark:border-white/5">
-                          Target / Detected Role:{" "}
-                          <span className="font-medium text-slate-800 dark:text-slate-200">{display.inferredTargetRole}</span>
-                        </p>
-                      )}
+                      <ComprehensiveResumeReport display={display} />
                     </motion.div>
                   ) : display && display.status === "failed" ? (
                     <div className="h-72 grid place-items-center text-center p-6">
