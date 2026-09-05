@@ -108,6 +108,12 @@ export interface PlatformTelemetryStats {
   contestsAttended: number;
   accuracyRate: number; // percentage
   lastActiveDate: string;
+  // Enhanced rank telemetry
+  dsaRank?: string;
+  contestRank?: string;
+  countryRank?: string;
+  dsaRating?: number;
+  bestContestRank?: number;
 }
 
 export const INITIAL_PLATFORM_STATS: Record<CodingPlatformKey, PlatformTelemetryStats> = {
@@ -154,6 +160,8 @@ export const INITIAL_PLATFORM_STATS: Record<CodingPlatformKey, PlatformTelemetry
     hardSolved: 0,
     contestRating: 0,
     globalRank: "Not Connected",
+    dsaRank: "Not Connected",
+    contestRank: "Not Connected",
     streakDays: 0,
     contestsAttended: 0,
     accuracyRate: 0,
@@ -193,20 +201,28 @@ export function extractUsernameFromUrl(platform: CodingPlatformKey, input: strin
     const segments = urlObj.pathname.split("/").filter(Boolean);
 
     if (platform === "leetcode") {
-      if (segments[0] === "u" && segments[1]) return segments[1];
-      if (segments[0]) return segments[0];
+      const idx = segments.findIndex((s) => s === "u" || s === "profile");
+      if (idx >= 0 && segments[idx + 1]) return segments[idx + 1];
+      return segments[segments.length - 1] || clean;
     }
     if (platform === "gfg") {
-      if (segments[0] === "user" && segments[1]) return segments[1];
-      if (segments[0]) return segments[0];
+      const idx = segments.findIndex((s) => s === "user" || s === "profile");
+      if (idx >= 0 && segments[idx + 1]) return segments[idx + 1];
+      const filtered = segments.filter(
+        (s) => !["user", "profile", "practice", "batch", "courses"].includes(s.toLowerCase())
+      );
+      if (filtered.length > 0) return filtered[filtered.length - 1];
+      return segments[segments.length - 1] || clean;
     }
     if (platform === "codechef") {
-      if (segments[0] === "users" && segments[1]) return segments[1];
-      if (segments[0]) return segments[0];
+      const idx = segments.findIndex((s) => s === "users" || s === "user" || s === "profile");
+      if (idx >= 0 && segments[idx + 1]) return segments[idx + 1];
+      return segments[segments.length - 1] || clean;
     }
     if (platform === "hackerrank") {
-      if (segments[0] === "profile" && segments[1]) return segments[1];
-      if (segments[0]) return segments[0];
+      const idx = segments.findIndex((s) => s === "profile" || s === "users" || s === "user");
+      if (idx >= 0 && segments[idx + 1]) return segments[idx + 1];
+      return segments[segments.length - 1] || clean;
     }
     return segments[segments.length - 1] || clean;
   } catch {
@@ -411,7 +427,15 @@ export async function fetchLiveCodeChefStats(usernameOrUrl: string): Promise<Par
         const rating = Number(data.currentRating || data.rating || 0);
         const easy = Math.round(total * 0.5);
         const medium = Math.round(total * 0.35);
-        const hard = Math.round(total * 0.15);
+        const hard = Math.max(0, total - easy - medium);
+        const gRank = data.globalRank
+          ? String(data.globalRank).startsWith("#")
+            ? String(data.globalRank)
+            : `Global #${Number(data.globalRank).toLocaleString()}`
+          : data.stars
+          ? `${data.stars} Division`
+          : "Division 3";
+
         return {
           platform: "codechef",
           username,
@@ -422,7 +446,17 @@ export async function fetchLiveCodeChefStats(usernameOrUrl: string): Promise<Par
           mediumSolved: medium,
           hardSolved: hard,
           contestRating: rating || 1400,
-          globalRank: data.globalRank ? `Global #${Number(data.globalRank).toLocaleString()}` : (data.stars ? `${data.stars} Division` : "Division 3"),
+          globalRank: gRank,
+          dsaRank: data.dsaRank
+            ? String(data.dsaRank).startsWith("#")
+              ? String(data.dsaRank)
+              : `DSA #${Number(data.dsaRank).toLocaleString()}`
+            : "Inactive",
+          contestRank: data.contestRank
+            ? String(data.contestRank).startsWith("#")
+              ? String(data.contestRank)
+              : `Contest #${Number(data.contestRank).toLocaleString()}`
+            : undefined,
           streakDays: Math.max(1, Math.min(180, Math.round(total / 8))),
           contestsAttended: Math.max(1, Math.round(total / 25)),
           accuracyRate: 88,
@@ -451,13 +485,13 @@ export async function fetchLiveGfgStats(usernameOrUrl: string): Promise<Partial<
         const total = Number(stats.overall?.count || data.totalProblemsSolved || 0);
         const easy = Number(stats.easy?.count || data.easySolved || Math.round(total * 0.5));
         const medium = Number(stats.medium?.count || data.mediumSolved || Math.round(total * 0.35));
-        const hard = Number(stats.hard?.count || data.hardSolved || Math.round(total * 0.15));
+        const hard = Number(stats.hard?.count || data.hardSolved || Math.max(0, total - easy - medium));
         const codingScore = Number(stats.score || data.codingScore || total * 4);
 
         return {
           platform: "gfg",
           username,
-          profileUrl: `https://auth.geeksforgeeks.org/user/${username}/`,
+          profileUrl: `https://www.geeksforgeeks.org/user/${username}/`,
           isConnected: true,
           totalSolved: total,
           easySolved: easy,
