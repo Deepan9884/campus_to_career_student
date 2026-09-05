@@ -460,15 +460,15 @@ function RoadmapDetail({
 
   const handleStatusChange = async (
     subTopicId: string,
-    status: "not_started" | "in_progress" | "passed",
+    status: "not_started" | "in_progress",
   ) => {
     try {
       const updated = await updateSubTopicStatus(roadmapId, subTopicId, status);
       setRoadmap(updated);
       toast.success(`Milestone updated to ${status.replace("_", " ")}`);
       loadRecommendations();
-    } catch {
-      toast.error("Failed to update milestone status");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || "Failed to update milestone status");
     }
   };
 
@@ -686,32 +686,38 @@ function RoadmapDetail({
                     <Clock className="h-3.5 w-3.5 animate-pulse" />
                     <span>In Progress</span>
                   </span>
-                  <button
-                    onClick={() => handleStatusChange(primaryRec.subTopicId, "passed")}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition shadow-xs"
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                    <span>Mark Completed</span>
-                  </button>
+                  {primaryMilestone && (
+                    <button
+                      onClick={() => {
+                        setQuizMilestone(primaryMilestone);
+                        setQuizOpen(true);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-purple-500/20"
+                    >
+                      <Brain className="h-3.5 w-3.5" />
+                      <span>Take Verification Quiz to Pass</span>
+                    </button>
+                  )}
                 </div>
               ) : (
-                <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span>Mastered ✓</span>
-                </span>
-              )}
-
-              {primaryMilestone && (
-                <button
-                  onClick={() => {
-                    setQuizMilestone(primaryMilestone);
-                    setQuizOpen(true);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-purple-500/20"
-                >
-                  <Brain className="h-3.5 w-3.5" />
-                  <span>Take Verification Quiz</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    <span>Mastered ✓</span>
+                  </span>
+                  {primaryMilestone && (
+                    <button
+                      onClick={() => {
+                        setQuizMilestone(primaryMilestone);
+                        setQuizOpen(true);
+                      }}
+                      className="px-3 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Brain className="h-3.5 w-3.5" />
+                      <span>Review / Retake Quiz</span>
+                    </button>
+                  )}
+                </div>
               )}
             </div>
 
@@ -932,33 +938,34 @@ function RoadmapDetail({
                       {status === "not_started" ? (
                         <button
                           onClick={() => handleStatusChange(item.subTopicId, "in_progress")}
-                          className="text-xs px-2.5 py-1 rounded-lg btn-gradient text-white font-semibold cursor-pointer"
+                          className="text-xs px-2.5 py-1 rounded-lg btn-gradient text-white font-semibold cursor-pointer flex items-center gap-1"
                         >
-                          Start Topic
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>Start Topic</span>
                         </button>
                       ) : status === "in_progress" ? (
-                        <button
-                          onClick={() => handleStatusChange(item.subTopicId, "passed")}
-                          className="text-xs px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-semibold cursor-pointer"
-                        >
-                          Mark Done
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 font-semibold border border-amber-500/25 flex items-center gap-1">
+                            <Clock className="w-3 h-3 animate-pulse" />
+                            <span>In Progress</span>
+                          </span>
+                          {fullMilestone && (
+                            <button
+                              onClick={() => {
+                                setQuizMilestone(fullMilestone);
+                                setQuizOpen(true);
+                              }}
+                              className="text-xs px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold cursor-pointer flex items-center gap-1 shadow-xs"
+                            >
+                              <Brain className="w-3 h-3" />
+                              <span>Take Quiz</span>
+                            </button>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Passed
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Passed
                         </span>
-                      )}
-
-                      {fullMilestone && (
-                        <button
-                          onClick={() => {
-                            setQuizMilestone(fullMilestone);
-                            setQuizOpen(true);
-                          }}
-                          className="text-xs px-2.5 py-1 rounded-lg glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 font-semibold cursor-pointer"
-                        >
-                          Quiz
-                        </button>
                       )}
                     </div>
 
@@ -1014,33 +1021,34 @@ function RoadmapDetail({
                       {status === "not_started" ? (
                         <button
                           onClick={() => handleStatusChange(item.subTopicId, "in_progress")}
-                          className="text-xs px-2.5 py-1 rounded-lg btn-gradient text-white font-semibold cursor-pointer"
+                          className="text-xs px-2.5 py-1 rounded-lg btn-gradient text-white font-semibold cursor-pointer flex items-center gap-1"
                         >
-                          Start Topic
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>Start Topic</span>
                         </button>
                       ) : status === "in_progress" ? (
-                        <button
-                          onClick={() => handleStatusChange(item.subTopicId, "passed")}
-                          className="text-xs px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-semibold cursor-pointer"
-                        >
-                          Mark Done
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 font-semibold border border-amber-500/25 flex items-center gap-1">
+                            <Clock className="w-3 h-3 animate-pulse" />
+                            <span>In Progress</span>
+                          </span>
+                          {fullMilestone && (
+                            <button
+                              onClick={() => {
+                                setQuizMilestone(fullMilestone);
+                                setQuizOpen(true);
+                              }}
+                              className="text-xs px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold cursor-pointer flex items-center gap-1 shadow-xs"
+                            >
+                              <Brain className="w-3 h-3" />
+                              <span>Take Quiz</span>
+                            </button>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Passed
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Passed
                         </span>
-                      )}
-
-                      {fullMilestone && (
-                        <button
-                          onClick={() => {
-                            setQuizMilestone(fullMilestone);
-                            setQuizOpen(true);
-                          }}
-                          className="text-xs px-2.5 py-1 rounded-lg glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 font-semibold cursor-pointer"
-                        >
-                          Quiz
-                        </button>
                       )}
                     </div>
 
@@ -1255,7 +1263,7 @@ function RoadmapDetail({
         <QuizDialog
           open={quizOpen}
           onOpenChange={setQuizOpen}
-          roadmapItemId={quizMilestone._id || quizMilestone.subTopicId || roadmap?._id || ""}
+          roadmapItemId={roadmap?._id || ""}
           subTopicName={quizMilestone.subTopicId || quizMilestone.skillName}
           skillName={quizMilestone.skillName}
           onPassed={handleQuizPass}
@@ -1281,7 +1289,7 @@ function MilestoneCard({
   isExpanded: boolean;
   subTopicStatus: string;
   onToggle: () => void;
-  onUpdateStatus?: (status: "not_started" | "in_progress" | "passed") => void;
+  onUpdateStatus?: (status: "not_started" | "in_progress") => void;
   onQuiz: () => void;
 }) {
   const humanize = (str: string) => str.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -1325,41 +1333,47 @@ function MilestoneCard({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {/* Interactive Status Switcher */}
-              {onUpdateStatus && (
-                <div className="flex items-center gap-1">
-                  {subTopicStatus === "not_started" ? (
+              {/* Interactive Status & Quiz Actions */}
+              <div className="flex items-center gap-1">
+                {subTopicStatus === "not_started" ? (
+                  onUpdateStatus && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         onUpdateStatus("in_progress");
                       }}
                       className="text-[11px] px-2.5 py-1 rounded-md glass hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-semibold border border-amber-500/30 flex items-center gap-1 cursor-pointer transition"
-                      title="Mark as In Progress"
+                      title="Start Learning (Mark In Progress)"
                     >
                       <Play className="w-3 h-3 fill-current" />
                       <span>Start</span>
                     </button>
-                  ) : subTopicStatus === "in_progress" ? (
+                  )
+                ) : subTopicStatus === "in_progress" ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 font-semibold border border-amber-500/25 flex items-center gap-1">
+                      <Clock className="w-3 h-3 animate-pulse" />
+                      <span>In Progress</span>
+                    </span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onUpdateStatus("passed");
+                        onQuiz();
                       }}
-                      className="text-[11px] px-2.5 py-1 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition"
-                      title="Mark as Done"
+                      className="text-[11px] px-2.5 py-1 rounded-md bg-purple-600 hover:bg-purple-700 text-white font-semibold flex items-center gap-1 cursor-pointer transition shadow-xs"
+                      title="Take Verification Quiz to Pass Milestone"
                     >
-                      <Check className="w-3 h-3" />
-                      <span>Complete</span>
+                      <Brain className="w-3 h-3" />
+                      <span>Take Quiz</span>
                     </button>
-                  ) : (
-                    <span className="text-[11px] px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Passed</span>
-                    </span>
-                  )}
-                </div>
-              )}
+                  </div>
+                ) : (
+                  <span className="text-[11px] px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Passed</span>
+                  </span>
+                )}
+              </div>
 
               <span
                 className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
@@ -1413,7 +1427,11 @@ function MilestoneCard({
                 className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl btn-gradient text-sm font-bold text-white cursor-pointer shadow-md shadow-indigo-500/20 hover:opacity-95"
               >
                 <Brain className="h-4 w-4" />
-                <span>Take Milestone Verification Quiz</span>
+                <span>
+                  {subTopicStatus === "passed"
+                    ? "Retake Milestone Verification Quiz"
+                    : "Take Milestone Verification Quiz to Pass"}
+                </span>
               </button>
             </div>
           )}
