@@ -62,6 +62,7 @@ interface ProctoredExamConsoleProps {
   submitting?: boolean;
   result?: QuizSubmissionResult | null;
   onRetry?: () => void;
+  isSuperDream?: boolean;
 }
 
 const LANGUAGE_CONFIGS: Record<string, { label: string; ext: string; placeholder: string }> = {
@@ -221,9 +222,19 @@ export function ProctoredExamConsole({
   submitting = false,
   result,
   onRetry,
+  isSuperDream: propIsSuperDream,
 }: ProctoredExamConsoleProps) {
   const { user } = useAuth();
   const STORAGE_KEY = `c2c_exam_${quiz.attemptId}`;
+
+  const isSuperDream = Boolean(
+    propIsSuperDream ||
+    (typeof window !== "undefined" &&
+      (window.location.pathname.includes("super-dream") || window.location.hash.includes("super-dream"))) ||
+    subTopicName?.toLowerCase().includes("super dream") ||
+    skillName?.toLowerCase().includes("super dream") ||
+    quiz?.subTopicName?.toLowerCase().includes("super dream")
+  );
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedLang, setSelectedLang] = useState<string>(() => getInitialLanguage(skillName, subTopicName));
@@ -298,6 +309,7 @@ export function ProctoredExamConsole({
     moduleId: quiz.attemptId,
     enabled: !isTestFinished && !result,
     isStarted: true,
+    isSuperDream,
     videoElement: null,
     webcamRequired: false,
     aiFaceDetection: false,
@@ -771,10 +783,15 @@ export function ProctoredExamConsole({
   if (isCandidateDisqualified) {
     return (
       <ProctoringBlockLockoutModal
+        isSuperDream={isSuperDream}
         initialRemainingSeconds={1800}
-        title="Assessment Access Suspended (30m)"
-        subtitle="Cheating Violation Detected"
-        message={`Exam security violation limit reached for ${skillName}. Your assessment access has been suspended for 30 minutes. Only your assigned mentor can restore access early.`}
+        title={isSuperDream ? "Super Dream Exam Suspended" : "Assessment Access Suspended (30m)"}
+        subtitle={isSuperDream ? "Super Dream Track · Mentor Authorization Required" : "Cheating Violation Detected"}
+        message={
+          isSuperDream
+            ? `Security violation limit reached for ${skillName} in Super Dream. In Super Dream, auto-unblock timers are disabled. Only your assigned mentor can restore your access.`
+            : `Exam security violation limit reached for ${skillName}. Your assessment access has been suspended for 30 minutes. Only your assigned mentor can restore access early, or access will auto-restore in 30 minutes.`
+        }
         onUnblocked={() => {
           onBlockStateChange(false);
           proctorState.resetSession?.();

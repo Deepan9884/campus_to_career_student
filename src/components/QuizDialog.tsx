@@ -35,6 +35,7 @@ interface QuizDialogProps {
   customQuiz?: QuizGenerationResult;
   onCustomSubmit?: (answers: Record<string, string>) => Promise<QuizSubmissionResult>;
   onPassed?: () => void | Promise<void>;
+  isSuperDream?: boolean;
 }
 
 export function QuizDialog({
@@ -46,7 +47,16 @@ export function QuizDialog({
   customQuiz,
   onCustomSubmit,
   onPassed,
+  isSuperDream: propIsSuperDream,
 }: QuizDialogProps) {
+  const isSuperDream = Boolean(
+    propIsSuperDream ||
+    (typeof window !== "undefined" &&
+      (window.location.pathname.includes("super-dream") || window.location.hash.includes("super-dream"))) ||
+    subTopicName?.toLowerCase().includes("super dream") ||
+    skillName?.toLowerCase().includes("super dream")
+  );
+
   const [phase, setPhase] = useState<"loading" | "ready" | "taking" | "submitting" | "error">("loading");
   const [gen, setGen] = useState<QuizGenerationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +64,7 @@ export function QuizDialog({
   const [isQuizBlocked, setIsQuizBlocked] = useState(false);
   const [blockInfo, setBlockInfo] = useState<{
     isBlocked: boolean;
+    isSuperDream?: boolean;
     remainingSeconds?: number;
     blockedAt?: string | null;
     mentorName?: string;
@@ -102,6 +113,7 @@ export function QuizDialog({
         ) {
           setBlockInfo({
             isBlocked: true,
+            isSuperDream: Boolean(err.data?.isSuperDream ?? isSuperDream),
             remainingSeconds: err.data?.remainingSeconds ?? 1800,
             blockedAt: err.data?.blockedAt || null,
             mentorName: err.data?.mentor?.name,
@@ -149,10 +161,13 @@ export function QuizDialog({
       if (
         err.statusCode === 403 ||
         err.data?.isProctoringBlocked ||
-        err.message?.includes("suspended for 30 minutes")
+        err.message?.includes("suspended for 30 minutes") ||
+        err.message?.includes("proctoring") ||
+        err.message?.includes("blocked")
       ) {
         setBlockInfo({
           isBlocked: true,
+          isSuperDream: Boolean(err.data?.isSuperDream ?? isSuperDream),
           remainingSeconds: err.data?.remainingSeconds ?? 1800,
           blockedAt: err.data?.blockedAt || null,
           mentorName: err.data?.mentor?.name,
@@ -262,10 +277,11 @@ export function QuizDialog({
     );
   }
 
-  // 1.8 Proctoring Blocked Phase (30-Minute Lockout & Mentor Override)
+  // 1.8 Proctoring Blocked Phase (Classic 30m Lockout vs Super Dream Mentor Unblock)
   if (blockInfo?.isBlocked || isQuizBlocked) {
     return createPortal(
       <ProctoringBlockLockoutModal
+        isSuperDream={blockInfo?.isSuperDream ?? isSuperDream}
         initialRemainingSeconds={blockInfo?.remainingSeconds ?? 1800}
         blockedAt={blockInfo?.blockedAt}
         mentorName={blockInfo?.mentorName}
@@ -327,6 +343,7 @@ export function QuizDialog({
       submitting={phase === "submitting"}
       result={result}
       onRetry={handleRetry}
+      isSuperDream={isSuperDream}
     />,
     document.body
   );

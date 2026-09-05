@@ -41,6 +41,7 @@ export function SuperDreamInterviewCenter() {
         subtitle="Practice multi-round technical, system design, DSA live coding, and resume-driven HR interviews matching Tier-1 placement standards."
         onSessionComplete={handleSessionComplete}
         showHistory={true}
+        isSuperDream={true}
       />
     </div>
   );

@@ -462,6 +462,7 @@ export function Section9InterviewPrep() {
             onSessionComplete={handleSessionComplete}
             onBackToPillars={() => setViewMode("targets")}
             showHistory={true}
+            isSuperDream={true}
           />
         </div>
       )}
