@@ -40,6 +40,7 @@ import { useAuth } from "@/stores";
 import type { DashboardResponse } from "@/types/dashboard";
 import { getBadges } from "@/lib/badges-api";
 import type { BadgeId } from "@/types/badges";
+import { sanitizeDisplayName } from "@/lib/userUtils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Student Dashboard — Campus to Career" }] }),
@@ -359,7 +360,7 @@ function Dashboard() {
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight">
-                Hey {user?.name?.split(" ")[0] || "Student"}! You're{" "}
+                Hey {sanitizeDisplayName(user?.name, user?.email)?.split(" ")[0] || "Student"}! You're{" "}
                 <span className="text-ember-gradient">{overallScore}% ready</span> for campus placements.
               </h2>
 

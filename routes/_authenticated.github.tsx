@@ -834,12 +834,22 @@ const [analyzing, setAnalyzing] = useState(false);
               </GlassCard>
 
               <div className="flex flex-wrap gap-3">
+                {analysis.status === "failed" && selectedRepo && (
+                  <button
+                    onClick={() => handleAnalyze(selectedRepo)}
+                    disabled={analyzing}
+                    className="btn-gradient btn-gradient-hover rounded-xl px-5 py-2.5 text-sm font-semibold flex items-center gap-1.5"
+                  >
+                    <RotateCw className="h-4 w-4" />
+                    Retry Analysis
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setAnalysis(null);
                     setSelectedRepo(null);
                   }}
-                  className="btn-gradient btn-gradient-hover rounded-xl px-5 py-2.5 text-sm font-semibold"
+                  className={analysis.status === "failed" ? "glass rounded-xl px-5 py-2.5 text-sm hover:bg-white/10" : "btn-gradient btn-gradient-hover rounded-xl px-5 py-2.5 text-sm font-semibold"}
                 >
                   Analyze Another
                 </button>
@@ -1374,9 +1384,9 @@ function LinkedInPost({
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground bg-slate-800/50 rounded-lg p-3">
-        <strong>Note:</strong> This generates a draft for you to review and edit. 
-        The "Share on LinkedIn" button opens LinkedIn&apos;s share dialog — 
+      <p className="text-xs text-muted-foreground bg-muted/60 dark:bg-slate-800/50 border border-border/60 rounded-lg p-3">
+        <strong className="text-foreground">Note:</strong> This generates a draft for you to review and edit. 
+        The &quot;Share on LinkedIn&quot; button opens LinkedIn&apos;s share dialog &mdash; 
         you must manually post from there. No automatic posting occurs.
       </p>
 

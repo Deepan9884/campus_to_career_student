@@ -233,9 +233,9 @@ export function SectionHeaderMetrics({
                     if (active && payload && payload.length) {
                       const item = payload[0];
                       return (
-                        <div className="px-2.5 py-1 rounded-xl bg-slate-900/95 border border-purple-500/30 text-white text-[11px] font-semibold shadow-xl backdrop-blur-xl">
+                        <div className="px-2.5 py-1 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-purple-200 dark:border-purple-500/30 text-slate-800 dark:text-white text-[11px] font-semibold shadow-xl backdrop-blur-xl">
                           <span>{item.name}: </span>
-                          <strong className="text-purple-300 ml-1">{item.value}%</strong>
+                          <strong className="text-purple-700 dark:text-purple-300 ml-1">{item.value}%</strong>
                         </div>
                       );
                     }
@@ -280,9 +280,9 @@ export function SectionHeaderMetrics({
                     if (active && payload && payload.length) {
                       const item = payload[0];
                       return (
-                        <div className="px-2.5 py-1 rounded-xl bg-slate-900/95 border border-emerald-500/30 text-white text-[11px] font-semibold shadow-xl backdrop-blur-xl">
+                        <div className="px-2.5 py-1 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-emerald-200 dark:border-emerald-500/30 text-slate-800 dark:text-white text-[11px] font-semibold shadow-xl backdrop-blur-xl">
                           <span>{item.name}: </span>
-                          <strong className="text-emerald-300 ml-1">{item.value}</strong>
+                          <strong className="text-emerald-700 dark:text-emerald-300 ml-1">{item.value}</strong>
                         </div>
                       );
                     }
@@ -325,9 +325,9 @@ export function SectionHeaderMetrics({
                     if (active && payload && payload.length) {
                       const item = payload[0];
                       return (
-                        <div className="px-2.5 py-1 rounded-xl bg-slate-900/95 border border-amber-500/30 text-white text-[11px] font-semibold shadow-xl backdrop-blur-xl">
+                        <div className="px-2.5 py-1 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-amber-200 dark:border-amber-500/30 text-slate-800 dark:text-white text-[11px] font-semibold shadow-xl backdrop-blur-xl">
                           <span>{item.name}: </span>
-                          <strong className="text-amber-300 ml-1">{item.value}%</strong>
+                          <strong className="text-amber-700 dark:text-amber-300 ml-1">{item.value}%</strong>
                         </div>
                       );
                     }

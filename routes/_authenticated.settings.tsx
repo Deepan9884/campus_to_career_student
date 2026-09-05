@@ -418,7 +418,7 @@ function SettingsPage() {
           {/* Profile Section */}
           <GlassCard>
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-black dark:text-white">
-              <Monitor className="h-5 w-5 text-brand-400" /> Account Details
+              <Monitor className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> Account Details
             </h3>
 
             <div className="flex items-center gap-4 mb-6">
@@ -437,9 +437,11 @@ function SettingsPage() {
                 <button
                   onClick={() => fileRef.current?.click()}
                   type="button"
-                  className="absolute -bottom-1 -right-1 p-1.5 bg-brand-500 rounded-full text-white hover:bg-brand-600 transition shadow-sm"
+                  className="absolute -bottom-1 -right-1 p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-md ring-2 ring-white dark:ring-slate-900 transition-all duration-150 flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95 z-10"
+                  title="Upload profile photo"
+                  aria-label="Upload profile photo"
                 >
-                  <Camera className="h-3.5 w-3.5" />
+                  <Camera className="h-3.5 w-3.5 text-white stroke-[2.2]" />
                 </button>
                 <input
                   type="file"
@@ -501,7 +503,7 @@ function SettingsPage() {
 
               {/* Institutional & Academic Details (Synced with Super Dream Track) */}
               <div className="pt-3 border-t border-border/50 dark:border-white/10 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand-400">
+                <p className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                   College & Super Dream Track Profile
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -962,13 +964,13 @@ function SettingsPage() {
               placeholder="Enter 6-digit code"
               value={twoFactorCode}
               onChange={(e) => setTwoFactorCode(e.target.value)}
-              className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-center tracking-widest font-mono text-xl text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 mb-4"
+              className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-center tracking-widest font-mono text-xl text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 mb-4"
               maxLength={6}
             />
             <button
               onClick={handleVerify2FA}
               disabled={twoFactorCode.length < 6}
-              className="w-full py-3 bg-brand-500 hover:bg-brand-600 rounded-xl text-white font-medium transition disabled:opacity-50"
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-white font-medium transition disabled:opacity-50"
             >
               Verify & Enable
             </button>

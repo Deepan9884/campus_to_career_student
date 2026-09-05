@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, Search, Sun, Moon, Paintbrush, Settings, LogOut } from "lucide-react";
 import { NotificationBell } from "@/components/shell/NotificationBell";
+import { sanitizeDisplayName } from "@/lib/userUtils";
 
 export interface AppNavbarHeaderProps {
   user: any;
@@ -39,7 +40,7 @@ export function AppNavbarHeader({
   onMarkAllAsRead,
 }: AppNavbarHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-2xl border-b border-border px-4 lg:px-6 py-3.5 flex items-center gap-3 shadow-xs">
+    <header className="sticky top-3 z-30 bg-card/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-border/80 dark:border-white/10 m-3 rounded-2xl px-4 lg:px-6 py-3 flex items-center gap-3 shadow-sm">
       <button
         onClick={() => {
           if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -48,16 +49,18 @@ export function AppNavbarHeader({
             onToggleSidebar();
           }
         }}
-        className="p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition"
+        className="md:hidden p-2 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition"
         aria-label="Toggle sidebar"
-        title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title="Open menu"
       >
         <Menu className="h-5 w-5" />
       </button>
       <div className="min-w-0 flex-1 flex items-center justify-between gap-4">
         <div>
           <p className="text-xs text-[var(--muted-foreground)]">Welcome back</p>
-          <p className="text-sm font-semibold truncate text-[var(--foreground)] font-[var(--font-display)]">{user?.name ?? "Guest"}</p>
+          <p className="text-sm font-semibold truncate text-[var(--foreground)] font-[var(--font-display)]">
+            {sanitizeDisplayName(user?.name, user?.email)}
+          </p>
         </div>
 
         {/* Quick Command Palette Button */}
@@ -121,7 +124,7 @@ export function AppNavbarHeader({
             <>
               <div className="h-9 w-9 rounded-full grid place-items-center text-xs font-bold text-white"
                 style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)" }}>
-                {(user?.name ?? "G").charAt(0).toUpperCase()}
+                {(sanitizeDisplayName(user?.name, user?.email)).charAt(0).toUpperCase()}
               </div>
               {user?.avatar && (
                 <img

@@ -3,6 +3,7 @@ import type {
   LearningRoadmap,
   RoadmapHistoryResponse,
   GenerateRoadmapPayload,
+  RoadmapRecommendations,
 } from "@/types/roadmap";
 
 export async function generateRoadmap(payload: GenerateRoadmapPayload): Promise<LearningRoadmap> {
@@ -29,4 +30,20 @@ export async function getRoadmapByGapAnalysis(
 
 export async function getLatestRoadmap(): Promise<LearningRoadmap | null> {
   return api.get<LearningRoadmap | null>("/roadmap/latest");
+}
+
+export async function getRoadmapRecommendations(
+  id: string,
+): Promise<RoadmapRecommendations> {
+  return api.get<RoadmapRecommendations>(`/roadmap/${id}/recommendations`);
+}
+
+export async function updateSubTopicStatus(
+  roadmapId: string,
+  subTopicId: string,
+  status: "not_started" | "in_progress" | "passed",
+): Promise<LearningRoadmap> {
+  return api.patch<LearningRoadmap>(`/roadmap/${roadmapId}/subtopic/${subTopicId}`, {
+    status,
+  });
 }

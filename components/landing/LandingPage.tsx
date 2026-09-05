@@ -26,8 +26,6 @@ import {
   Eye,
   Check,
   ShieldCheck,
-  Sun,
-  Moon,
   Play,
   Bot,
 } from "lucide-react";
@@ -193,35 +191,14 @@ export const LandingPage: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [previewModalPanel, setPreviewModalPanel] = useState<SectionData | null>(null);
 
-  // Active theme state and dynamic observer
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof document !== "undefined") {
-      return document.documentElement.classList.contains("light") ? "light" : "dark";
-    }
-    return "dark";
-  });
-
+  // Enforce pristine white / light theme (no dark mode option)
   useEffect(() => {
-    const checkTheme = () => {
-      const isLight = document.documentElement.classList.contains("light");
-      setTheme(isLight ? "light" : "dark");
-    };
-    checkTheme();
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === "light" ? "dark" : "light";
-    setTheme(nextTheme);
-    const root = document.documentElement;
-    root.classList.toggle("dark", nextTheme === "dark");
-    root.classList.toggle("light", nextTheme === "light");
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem("c2c_theme", nextTheme);
+      localStorage.setItem("c2c_theme", "light");
     }
-  };
+  }, []);
 
   // Auto-cycle featured decks smoothly
   useEffect(() => {
@@ -271,35 +248,35 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full relative font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen w-full relative font-sans selection:bg-indigo-500 selection:text-white bg-white">
       {/* ── CINEMATIC OPENING INTRO ANIMATION ── */}
       {showIntro && (
         <LandingIntroAnimation onComplete={() => setShowIntro(false)} />
       )}
 
-      {/* Interactive Developer Study Constellation Canvas */}
-      <StudyConstellation />
+      {/* ── MAIN LANDING CONTENT (STRICTLY HIDDEN UNTIL INTRO COMPLETES) ── */}
+      <div
+        className={`transition-opacity duration-700 ${showIntro ? "opacity-0 pointer-events-none invisible" : "opacity-100 visible"}`}
+        style={showIntro ? { display: "none" } : undefined}
+      >
+        {/* Interactive Developer Study Constellation Canvas */}
+        <StudyConstellation />
 
-      {/* Ambient Background Orbs */}
-      <div className="fixed top-0 left-1/4 w-[850px] h-[850px] bg-indigo-200/30 dark:bg-[#2F4B6B]/25 rounded-full blur-[220px] pointer-events-none -z-10" />
-      <div className="fixed top-20 right-10 w-[750px] h-[750px] bg-sky-200/30 dark:bg-[#6366F1]/10 rounded-full blur-[200px] pointer-events-none -z-10" />
-      <div className="fixed bottom-0 right-1/4 w-[750px] h-[750px] bg-blue-200/25 dark:bg-[#38BDF8]/08 rounded-full blur-[220px] pointer-events-none -z-10" />
-      <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-indigo-100/40 dark:bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
+        {/* Ambient Background Orbs */}
+        <div className="fixed top-0 left-1/4 w-[850px] h-[850px] bg-indigo-200/30 dark:bg-[#2F4B6B]/25 rounded-full blur-[220px] pointer-events-none -z-10" />
+        <div className="fixed top-20 right-10 w-[750px] h-[750px] bg-sky-200/30 dark:bg-[#6366F1]/10 rounded-full blur-[200px] pointer-events-none -z-10" />
+        <div className="fixed bottom-0 right-1/4 w-[750px] h-[750px] bg-blue-200/25 dark:bg-[#38BDF8]/08 rounded-full blur-[220px] pointer-events-none -z-10" />
+        <div className="fixed top-1/2 left-0 w-[500px] h-[500px] bg-indigo-100/40 dark:bg-[#2F4B6B]/15 rounded-full blur-[180px] pointer-events-none -z-10" />
 
-      {/* ── SPACIOUS MODERN NAVBAR (APPEARS ONCE INTRO ANIMATION COMPLETES) ── */}
-      <header className={`sticky top-0 z-40 w-full bg-white/80 dark:bg-[#080D18]/90 border-b border-slate-200/80 dark:border-[#2F4B6B]/40 backdrop-blur-2xl px-4 sm:px-6 md:px-10 py-3.5 transition-all duration-500 ${showIntro ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+        {/* ── SPACIOUS MODERN NAVBAR ── */}
+        <header className="sticky top-0 z-40 w-full bg-white/90 border-b border-slate-200/80 backdrop-blur-2xl px-4 sm:px-6 md:px-10 py-3.5 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left Brand */}
           <div className="flex items-center space-x-3 cursor-pointer shrink-0" onClick={() => scrollToSection("hero")}>
             <img
               src="/logo.png"
               alt="Campus to Career"
-              className="block dark:hidden h-9 md:h-10 w-auto object-contain transition-transform hover:scale-[1.02]"
-            />
-            <img
-              src="/logo-dark.png"
-              alt="Campus to Career"
-              className="hidden dark:block h-9 md:h-10 w-auto object-contain transition-transform hover:scale-[1.02]"
+              className="h-9 md:h-10 w-auto object-contain transition-transform hover:scale-[1.02]"
             />
           </div>
 
@@ -333,19 +310,6 @@ export const LandingPage: React.FC = () => {
 
           {/* Right Action */}
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-            {/* Quick Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
-              className="p-2 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#131B2E] dark:hover:bg-[#1B2740] border border-slate-200 dark:border-[#2F4B6B] text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all flex items-center justify-center cursor-pointer shadow-sm"
-              aria-label="Toggle Theme"
-            >
-              {theme === "light" ? (
-                <Moon className="w-4 h-4 text-indigo-600" />
-              ) : (
-                <Sun className="w-4 h-4 text-amber-400" />
-              )}
-            </button>
 
             {isCheckingAuth ? (
               <div className="h-9 w-24 bg-slate-200 dark:bg-[#131B2E] animate-pulse rounded-xl" />
@@ -525,34 +489,25 @@ export const LandingPage: React.FC = () => {
                   }}
                   animate={{
                     scale: isCenter ? 1 : 0.82,
-                    opacity: isCenter ? 1 : theme === "light" ? 0.55 : 0.25,
+                    opacity: isCenter ? 1 : 0.6,
                     filter: isCenter
-                      ? theme === "light"
-                        ? "brightness(1) drop-shadow(0 20px 35px rgba(99,102,241,0.12))"
-                        : "brightness(1) drop-shadow(0 15px 30px rgba(0,0,0,0.6))"
-                      : theme === "light"
-                      ? "brightness(0.96) blur(0.5px)"
-                      : "brightness(0.35) blur(1px)",
+                      ? "brightness(1) drop-shadow(0 20px 35px rgba(99,102,241,0.14))"
+                      : "brightness(0.96) blur(0.5px)",
                     x: isCenter ? 0 : isLeft ? -360 : 360,
                     zIndex: isCenter ? 30 : 10,
                   }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                   className={`absolute w-[92vw] max-w-[680px] p-3.5 rounded-2xl cursor-pointer transition-all border ${
                     isCenter
-                      ? "bg-white/95 dark:bg-[#111827]/98 border-indigo-400/60 dark:border-indigo-500/60 shadow-2xl"
-                      : "bg-slate-100/90 dark:bg-[#080D18]/80 border-slate-200/90 dark:border-[#2F4B6B]/30 shadow-md dark:shadow-none pointer-events-auto"
+                      ? "bg-white/98 border-indigo-300 shadow-2xl"
+                      : "bg-slate-50/90 border-slate-200/90 shadow-md pointer-events-auto"
                   }`}
                   style={
                     isCenter
-                      ? theme === "light"
-                        ? {
-                            boxShadow:
-                              "0 20px 50px -10px rgba(99,102,241,0.18), 0 10px 25px -5px rgba(0,0,0,0.06), inset 0 1px 0 0 rgba(255,255,255,0.9)",
-                          }
-                        : {
-                            boxShadow:
-                              "0 15px 50px rgba(0,0,0,0.7), 0 0 30px rgba(99,102,241,0.18), inset 0 1px 0 0 rgba(99,102,241,0.25)",
-                          }
+                      ? {
+                          boxShadow:
+                            "0 20px 50px -10px rgba(99,102,241,0.18), 0 10px 25px -5px rgba(0,0,0,0.06), inset 0 1px 0 0 rgba(255,255,255,0.9)",
+                        }
                       : {}
                   }
                 >
@@ -597,20 +552,20 @@ export const LandingPage: React.FC = () => {
                   </p>
 
                   {/* Feature Image with High Fidelity */}
-                  <div className="relative rounded-xl overflow-hidden border border-slate-200/90 dark:border-[#2F4B6B]/60 bg-slate-900 dark:bg-[#0A0F1A] h-36 sm:h-40 md:h-44 group">
+                  <div className="relative rounded-xl overflow-hidden border border-slate-200/90 bg-slate-100 h-36 sm:h-40 md:h-44 group shadow-inner">
                     <img
                       src={panel.imagePath}
                       alt={panel.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent dark:from-[#0A0F1A]/90 dark:via-transparent dark:to-transparent flex items-end p-2.5">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent flex items-end p-2.5">
                       <div className="flex flex-wrap gap-1.5">
                         {panel.highlights.slice(0, 2).map((h, i) => (
                           <span
                             key={i}
-                            className="text-[9px] font-medium bg-white/90 dark:bg-[#111827]/90 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-[#2F4B6B]/80 backdrop-blur-md flex items-center gap-1 shadow-sm"
+                            className="text-[9px] font-semibold bg-white/95 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200/80 backdrop-blur-md flex items-center gap-1 shadow-sm"
                           >
-                            <Check className="h-2.5 w-2.5 text-indigo-600 dark:text-cyan-400 shrink-0" />
+                            <Check className="h-2.5 w-2.5 text-indigo-600 shrink-0" />
                             <span>{h}</span>
                           </span>
                         ))}
@@ -619,9 +574,9 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   {/* Card Footer Indicator */}
-                  <div className="flex items-center justify-between pt-1.5 mt-1.5 border-t border-slate-100 dark:border-[#2F4B6B]/40 text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                  <div className="flex items-center justify-between pt-1.5 mt-1.5 border-t border-slate-100 text-[11px] text-indigo-600 font-semibold">
                     <span className="flex items-center gap-1">
-                      <Flame className="w-3 h-3 text-indigo-600 dark:text-indigo-400" /> Live module
+                      <Flame className="w-3 h-3 text-indigo-600" /> Live module
                     </span>
                     <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                       Explore Feature <ArrowRight className="w-3 h-3" />
@@ -732,15 +687,15 @@ export const LandingPage: React.FC = () => {
                 <div className="relative rounded-3xl p-3.5 bg-white/90 dark:bg-[#131B2E]/80 border border-slate-200 dark:border-[#2F4B6B] backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-2xl overflow-hidden group card-hover-lift cursor-default">
                   {/* Glowing corner accent */}
                   <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-                  <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-[#2F4B6B]/60 bg-slate-900 dark:bg-[#0A0F1A]">
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 bg-slate-100 shadow-inner">
                     <img
                       src={sec.imagePath}
                       alt={sec.title}
                       className="w-full h-auto max-h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent dark:from-[#0A0F1A]/80 flex items-end p-5">
-                      <div className="flex items-center space-x-2 text-xs font-semibold text-slate-800 dark:text-[#F2F4F7] bg-white/90 dark:bg-[#131B2E]/90 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-indigo-500/25 backdrop-blur-md shadow-md">
-                        <Flame className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent flex items-end p-5">
+                      <div className="flex items-center space-x-2 text-xs font-semibold text-slate-800 bg-white/95 px-3 py-1.5 rounded-xl border border-slate-200 backdrop-blur-md shadow-md">
+                        <Flame className="w-3.5 h-3.5 text-indigo-600" />
                         <span>Academic Prep Studio</span>
                       </div>
                     </div>
@@ -860,6 +815,7 @@ export const LandingPage: React.FC = () => {
           </button>
         </div>
       </footer>
+    </div>
 
       {/* Preview Sandbox Modal */}
       {previewModalPanel && (

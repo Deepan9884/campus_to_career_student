@@ -75,8 +75,8 @@ export interface GenerateLinkedInPostPayload {
   projectLink?: string;
   repoFullName?: string;
   overview?: string;
-  quality?: string;
-  resumeImpact?: string[];
+  quality?: string | Record<string, any>;
+  resumeImpact?: string[] | Record<string, any>;
   repoUrl?: string;
   tone?: string;
   length?: string;

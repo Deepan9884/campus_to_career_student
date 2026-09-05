@@ -1,6 +1,15 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { api, setAccessToken, getAccessToken, tryRefresh } from "@/lib/api";
+import { sanitizeDisplayName } from "@/lib/userUtils";
+
+export function cleanUser(user: User | null | undefined): User | null {
+  if (!user) return null;
+  return {
+    ...user,
+    name: sanitizeDisplayName(user.name, user.email),
+  };
+}
 
 export interface User {
   _id: string;
@@ -80,7 +89,7 @@ export const useAuth = create<AuthState>()(
             password,
           });
           setAccessToken(data.accessToken);
-          set({ user: data.user, isAuthenticated: true, isLoading: false });
+          set({ user: cleanUser(data.user), isAuthenticated: true, isLoading: false });
           return data;
         } catch (err) {
           set({ isLoading: false });
@@ -95,7 +104,7 @@ export const useAuth = create<AuthState>()(
             credential,
           });
           setAccessToken(data.accessToken);
-          set({ user: data.user, isAuthenticated: true, isLoading: false });
+          set({ user: cleanUser(data.user), isAuthenticated: true, isLoading: false });
           return data;
         } catch (err) {
           set({ isLoading: false });
@@ -108,7 +117,7 @@ export const useAuth = create<AuthState>()(
         try {
           const data = await api.post<AuthResponse>("/auth/github", payload);
           setAccessToken(data.accessToken);
-          set({ user: data.user, isAuthenticated: true, isLoading: false });
+          set({ user: cleanUser(data.user), isAuthenticated: true, isLoading: false });
           return data;
         } catch (err) {
           set({ isLoading: false });
@@ -121,7 +130,7 @@ export const useAuth = create<AuthState>()(
         try {
           const res = await api.post<AuthResponse>("/auth/register", data);
           setAccessToken(res.accessToken);
-          set({ user: res.user, isAuthenticated: true, isLoading: false });
+          set({ user: cleanUser(res.user), isAuthenticated: true, isLoading: false });
           return res;
         } catch (err) {
           set({ isLoading: false });
@@ -150,7 +159,7 @@ export const useAuth = create<AuthState>()(
             }
           }
           const user = await api.get<User>("/auth/me");
-          set({ user, isAuthenticated: true, isCheckingAuth: false });
+          set({ user: cleanUser(user), isAuthenticated: true, isCheckingAuth: false });
         } catch {
           setAccessToken(null);
           set({ user: null, isAuthenticated: false, isCheckingAuth: false });
@@ -160,7 +169,7 @@ export const useAuth = create<AuthState>()(
       updateUser: async (patch) => {
         try {
           const user = await api.patch<User>("/auth/me", patch);
-          set((s) => (s.user ? { user } : s));
+          set((s) => (s.user ? { user: cleanUser(user) } : s));
         } catch (err) {
           throw err;
         }
@@ -170,7 +179,7 @@ export const useAuth = create<AuthState>()(
       name: "cf-auth",
       partialize: (state) => ({
         user: state.user
-          ? { ...state.user, avatar: undefined }
+          ? { ...cleanUser(state.user)!, avatar: undefined }
           : state.user,
         isAuthenticated: state.isAuthenticated,
       }),

@@ -460,8 +460,8 @@ export function AppShell() {
       {/* Sidebar — Persistent on desktop/tablet */}
       <aside
         className={cn(
-          "hidden md:flex flex-col liquid-glass m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] transition-all duration-300 shrink-0 z-40",
-          sidebarCollapsed ? "w-20 items-center px-3" : "w-72",
+          "hidden md:flex flex-col bg-card/85 dark:bg-slate-900/85 backdrop-blur-2xl border border-border/80 dark:border-white/10 m-3 mr-0 rounded-2xl p-4 sticky top-3 h-[calc(100vh-1.5rem)] shadow-sm transition-all duration-300 shrink-0 z-40",
+          sidebarCollapsed ? "w-20 items-center px-3" : "w-68",
         )}
       >
         {isSuperDreamActive ? (
@@ -748,7 +748,7 @@ export function AppShell() {
           onMarkAsRead={markAsRead}
           onMarkAllAsRead={markAllAsRead}
         />
-        <main className="flex-1 p-3 lg:p-6">
+        <main className="flex-1 p-3 lg:p-6 pt-0">
           <Outlet />
         </main>
       </div>

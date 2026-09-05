@@ -2021,22 +2021,35 @@ html.light textarea::placeholder {
 }
 
 /* Typography in Light Mode */
-.light h1, .light h2, .light h3, .light h4, .light h5, .light h6,
-html.light h1, html.light h2, html.light h3, html.light h4, html.light h5, html.light h6 {
-  color: #0F172A !important;
+.light h1:not(.dark *):not([data-theme="dark"] *),
+.light h2:not(.dark *):not([data-theme="dark"] *),
+.light h3:not(.dark *):not([data-theme="dark"] *),
+.light h4:not(.dark *):not([data-theme="dark"] *),
+.light h5:not(.dark *):not([data-theme="dark"] *),
+.light h6:not(.dark *):not([data-theme="dark"] *),
+html.light h1:not(.dark *):not([data-theme="dark"] *),
+html.light h2:not(.dark *):not([data-theme="dark"] *),
+html.light h3:not(.dark *):not([data-theme="dark"] *),
+html.light h4:not(.dark *):not([data-theme="dark"] *),
+html.light h5:not(.dark *):not([data-theme="dark"] *),
+html.light h6:not(.dark *):not([data-theme="dark"] *) {
+  color: #0F172A;
 }
 
-.light label, html.light label {
-  color: #334155 !important;
+.light label:not(.dark *):not([data-theme="dark"] *),
+html.light label:not(.dark *):not([data-theme="dark"] *) {
+  color: #334155;
   font-weight: 600;
 }
 
-.light .text-foreground, html.light .text-foreground {
-  color: #0F172A !important;
+.light .text-foreground:not(.dark *):not([data-theme="dark"] *),
+html.light .text-foreground:not(.dark *):not([data-theme="dark"] *) {
+  color: #0F172A;
 }
 
-.light .text-muted-foreground, html.light .text-muted-foreground {
-  color: #475569 !important;
+.light .text-muted-foreground:not(.dark *):not([data-theme="dark"] *),
+html.light .text-muted-foreground:not(.dark *):not([data-theme="dark"] *) {
+  color: #475569;
 }
 
 /* Light mode overrides for arbitrary white-opacity border and background utilities (strictly scoped outside .dark) */

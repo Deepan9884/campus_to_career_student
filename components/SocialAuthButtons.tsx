@@ -32,7 +32,7 @@ export function GoogleIcon({ className = "w-4 h-4 shrink-0" }: { className?: str
   );
 }
 
-export function GithubIcon({ className = "w-4 h-4 shrink-0 fill-current text-white" }: { className?: string }) {
+export function GithubIcon({ className = "w-4 h-4 shrink-0 fill-current text-slate-800" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24">
       <path
@@ -100,14 +100,14 @@ function GoogleCustomButton({
       type="button"
       onClick={handleClick}
       disabled={isAnyLoading}
-      className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50 min-h-[42px]"
+      className="w-full bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 shadow-xs hover:shadow-sm cursor-pointer disabled:opacity-50 min-h-[42px]"
     >
       {googleBusy ? (
-        <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
+        <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
       ) : (
         <GoogleIcon className="w-4 h-4 shrink-0" />
       )}
-      <span className="text-white font-medium">Google</span>
+      <span className="text-slate-700 font-medium">Google</span>
     </button>
   );
 }
@@ -146,14 +146,14 @@ export function SocialAuthButtons({
         type="button"
         onClick={triggerGithubLogin}
         disabled={isAnyLoading}
-        className="w-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-white rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer disabled:opacity-50 min-h-[42px]"
+        className="w-full bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl py-2.5 px-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 shadow-xs hover:shadow-sm cursor-pointer disabled:opacity-50 min-h-[42px]"
       >
         {githubBusy ? (
-          <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
+          <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
         ) : (
-          <GithubIcon className="w-4 h-4 shrink-0 fill-current text-white" />
+          <GithubIcon className="w-4 h-4 shrink-0 fill-current text-slate-800" />
         )}
-        <span className="text-white font-medium">GitHub</span>
+        <span className="text-slate-700 font-medium">GitHub</span>
       </button>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useProctoringSession, type ProctoringSessionOptions } from "@/hooks/useProctoringSession";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
@@ -6,20 +6,12 @@ import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCoun
 import { requestAppFullscreen, isCurrentlyFullscreen } from "@/lib/fullscreenUtils";
 import type { ViolationType } from "@/lib/proctoring-api";
 import {
-  Shield,
   ShieldX,
   ShieldCheck,
-  Camera,
   AlertTriangle,
   Lock,
-  RefreshCw,
   Maximize,
   CheckCircle2,
-  Move,
-  Minimize2,
-  Maximize2,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,31 +50,9 @@ export function ProctoringWrapper({
   const [isActuallyBlocked, setIsActuallyBlocked] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Floating Draggable PiP Camera State
-  const [pipPos, setPipPos] = useState<{ x: number; y: number } | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isPipMinimized, setIsPipMinimized] = useState(false);
-  const dragStartRef = useRef<{ startX: number; startY: number; initialPipX: number; initialPipY: number }>({
-    startX: 0,
-    startY: 0,
-    initialPipX: 0,
-    initialPipY: 0,
-  });
-
-  const previewVideoRef = useRef<HTMLVideoElement | null>(null);
-  const pipVideoRef = useRef<HTMLVideoElement | null>(null);
-
   useEffect(() => {
     setMounted(true);
     document.body.style.overflow = "hidden";
-
-    // Set initial PiP position at bottom-right of viewport
-    if (typeof window !== "undefined") {
-      setPipPos({
-        x: Math.max(16, window.innerWidth - 220),
-        y: Math.max(16, window.innerHeight - 190),
-      });
-    }
 
     return () => {
       document.body.style.overflow = "";
@@ -90,28 +60,13 @@ export function ProctoringWrapper({
     };
   }, []);
 
-  // Window resize bounds adjustment
-  useEffect(() => {
-    const handleResize = () => {
-      setPipPos((prev) => {
-        if (!prev) return null;
-        const maxX = Math.max(16, window.innerWidth - 200);
-        const maxY = Math.max(16, window.innerHeight - 180);
-        return {
-          x: Math.min(Math.max(16, prev.x), maxX),
-          y: Math.min(Math.max(16, prev.y), maxY),
-        };
-      });
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const proctoringState = useProctoringSession({
     moduleType,
     moduleId,
     enabled,
     isStarted: isExamStarted,
+    webcamRequired: false,
+    aiFaceDetection: false,
     onBlocked: () => {
       setIsActuallyBlocked(true);
       onBlocked?.();
@@ -125,64 +80,6 @@ export function ProctoringWrapper({
       });
     },
   });
-
-  // Attach mediaStream safely via useEffect without inline render loops
-  useEffect(() => {
-    if (previewVideoRef.current && proctoringState.mediaStream) {
-      previewVideoRef.current.srcObject = proctoringState.mediaStream;
-      previewVideoRef.current.play().catch(() => {});
-    }
-  }, [proctoringState.mediaStream, isExamStarted]);
-
-  useEffect(() => {
-    if (pipVideoRef.current && proctoringState.mediaStream) {
-      pipVideoRef.current.srcObject = proctoringState.mediaStream;
-      pipVideoRef.current.play().catch(() => {});
-    }
-  }, [proctoringState.mediaStream, isExamStarted, isPipMinimized]);
-
-  // Pointer drag event handlers
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0 && e.pointerType === "mouse") return;
-    const initialX = pipPos?.x ?? Math.max(16, window.innerWidth - 220);
-    const initialY = pipPos?.y ?? Math.max(16, window.innerHeight - 190);
-
-    dragStartRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      initialPipX: initialX,
-      initialPipY: initialY,
-    };
-    setIsDragging(true);
-    e.currentTarget.setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    const deltaX = e.clientX - dragStartRef.current.startX;
-    const deltaY = e.clientY - dragStartRef.current.startY;
-    const newX = dragStartRef.current.initialPipX + deltaX;
-    const newY = dragStartRef.current.initialPipY + deltaY;
-
-    const width = isPipMinimized ? 160 : 195;
-    const height = isPipMinimized ? 40 : 170;
-    const maxX = Math.max(12, window.innerWidth - width - 12);
-    const maxY = Math.max(12, window.innerHeight - height - 12);
-
-    setPipPos({
-      x: Math.min(Math.max(12, newX), maxX),
-      y: Math.min(Math.max(12, newY), maxY),
-    });
-  };
-
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isDragging) {
-      setIsDragging(false);
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {}
-    }
-  };
 
   // Direct user-gesture Fullscreen trigger
   async function handleLaunchExam() {
@@ -220,46 +117,6 @@ export function ProctoringWrapper({
     return null;
   }
 
-  // 1. Camera Denied Screen
-  if (enabled && proctoringState.cameraError) {
-    return createPortal(
-      <div className="fixed inset-0 z-[999999] bg-black/95 flex items-center justify-center p-6 backdrop-blur-md select-none font-sans">
-        <div className="max-w-md w-full glass rounded-2xl p-8 text-center space-y-4 border border-red-500/30 shadow-2xl">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto text-red-400">
-            <Camera className="h-8 w-8" />
-          </div>
-          <h2 className="text-xl font-bold text-red-300">Camera Access Required</h2>
-          <p className="text-sm text-muted-foreground">
-            {proctoringState.cameraError}
-          </p>
-          <div className="text-xs text-muted-foreground/80 bg-white/5 p-3 rounded-xl border border-white/5 text-left space-y-1">
-            <p className="font-semibold text-white/90">Why is this required?</p>
-            <p>• Automated mobile phone & device detection</p>
-            <p>• AI proctoring identity verification</p>
-            <p>• Exam integrity & plagiarism prevention</p>
-          </div>
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => proctoringState.retryCamera()}
-              className="flex-1 btn-gradient btn-gradient-hover rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" /> Retry Camera Access
-            </button>
-            {onExit && (
-              <button
-                onClick={handleExit}
-                className="glass rounded-xl px-4 py-2.5 text-sm hover:bg-white/10"
-              >
-                Exit Exam
-              </button>
-            )}
-          </div>
-        </div>
-      </div>,
-      document.body
-    );
-  }
-
   // 2. Pre-Exam Check-In & Fullscreen Launch Gate (Before questions appear)
   if (!isExamStarted) {
     return createPortal(
@@ -269,66 +126,26 @@ export function ProctoringWrapper({
             <div className="w-12 h-12 rounded-2xl bg-[color:var(--color-primary)]/10 border border-[color:var(--color-primary)]/30 flex items-center justify-center mx-auto text-[color:var(--color-primary)]">
               <ShieldCheck className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold">Proctored Examination Check-In</h2>
+            <h2 className="text-xl font-bold">Interview Assessment Check-In</h2>
             <p className="text-xs text-muted-foreground">
-              Complete the verification checklist below to enter fullscreen and unlock your questions.
+              Review the guidelines below and enter fullscreen to begin your session.
             </p>
-          </div>
-
-          {/* Live Camera Preview Verification */}
-          <div className="glass rounded-2xl p-4 border border-white/10 space-y-3 bg-black/40">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-white/90 flex items-center gap-1.5">
-                <Camera className="h-4 w-4 text-[color:var(--color-primary)]" />
-                Camera Feed Verification
-              </span>
-              <span className="text-[11px] text-green-400 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                Proctor Connected
-              </span>
-            </div>
-
-            <div className="relative w-full h-48 rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center border border-white/10">
-              {proctoringState.mediaStream ? (
-                <video
-                  ref={previewVideoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                  style={{ transform: "scaleX(-1)" }}
-                />
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
-                  <RefreshCw className="h-6 w-6 animate-spin text-[color:var(--color-primary)]" />
-                  <span>Connecting camera stream...</span>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Rules Checklist */}
           <div className="glass rounded-2xl p-4 border border-white/10 space-y-2.5 text-xs text-muted-foreground">
-            <p className="font-bold text-white/90 text-sm mb-2">Examination Integrity Rules</p>
+            <p className="font-bold text-white/90 text-sm mb-2">Assessment Guidelines</p>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">Full Screen Enforced:</strong> The exam must stay in fullscreen. Exiting records a strike and gives 15 seconds to return before an automatic block.</span>
+              <span><strong className="text-white/90">Full Screen Enforced:</strong> The interview runs in fullscreen to help you concentrate. Exiting records a strike and gives 15 seconds to return.</span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">No Mobile Phones:</strong> Real-time camera feed monitors for unauthorized devices.</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">Restricted Shortcuts:</strong> Tab switches, DevTools, Win+G, and copy/paste are blocked.</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">Full Face & Eye Gaze Enforced:</strong> Entire face must remain visible and centered. Half-face, quarter-face, edge cutoffs, or looking away trigger warnings (4 warnings = 1 strike).</span>
+              <span><strong className="text-white/90">Focused Assessment:</strong> Tab switching, DevTools, and restricted OS shortcuts are disabled during the session.</span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">3-Strike Policy:</strong> Reaching 3 violations will immediately suspend your exam access.</span>
+              <span><strong className="text-white/90">3-Strike Policy:</strong> Reaching 3 violations will temporarily suspend your session.</span>
             </div>
           </div>
 
@@ -336,11 +153,10 @@ export function ProctoringWrapper({
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleLaunchExam}
-              disabled={!proctoringState.cameraReady}
-              className="flex-1 btn-gradient btn-gradient-hover rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/20 disabled:opacity-50"
+              className="flex-1 btn-gradient btn-gradient-hover rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/20"
             >
               <Maximize className="h-4 w-4" />
-              Enter Fullscreen & Begin Exam
+              Enter Fullscreen & Begin Session
             </button>
             {onExit && (
               <button
@@ -374,154 +190,29 @@ export function ProctoringWrapper({
         {children}
       </div>
 
-      {/* ── DRAGGABLE FLOATING CAMERA PIP PREVIEW ─────────────────────────── */}
-      {enabled && proctoringState.mediaStream && (
+      {/* ── STRIKE VIOLATION MONITOR (Tab switch / Fullscreen exit) ──────── */}
+      {proctoringState.violationCount > 0 && (
         <div
           style={{
-            transform: pipPos ? `translate3d(${pipPos.x}px, ${pipPos.y}px, 0)` : undefined,
             position: "fixed",
-            top: 0,
-            left: 0,
+            bottom: "24px",
+            right: "24px",
             zIndex: 9999999,
           }}
-          className={`flex flex-col items-end gap-1.5 touch-none select-none transition-shadow duration-200 ${
-            isDragging ? "opacity-95 scale-105 cursor-grabbing" : "opacity-100"
-          }`}
+          className="flex flex-col items-end gap-2 font-sans select-none pointer-events-auto"
         >
-          <div className="glass rounded-2xl overflow-hidden border border-white/20 shadow-2xl backdrop-blur-2xl bg-slate-950/90 w-48 transition-all duration-150">
-            {/* Draggable Header Handle */}
-            <div
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              className="flex items-center justify-between px-2.5 py-1.5 bg-slate-900/90 text-[11px] text-muted-foreground border-b border-white/10 cursor-grab active:cursor-grabbing gap-1.5 hover:bg-slate-800/90 transition"
-              title="Drag to reposition camera anywhere"
-            >
-              <div className="flex items-center gap-1.5 font-medium text-white/90 truncate min-w-0">
-                <Move className="h-3 w-3 text-slate-400 shrink-0" />
-                <div
-                  className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${
-                    proctoringState.aiStatus === "phone_detected"
-                      ? "bg-red-500"
-                      : proctoringState.aiStatus === "face_missing"
-                      ? "bg-yellow-400"
-                      : proctoringState.aiStatus === "multiple_faces"
-                      ? "bg-orange-500"
-                      : proctoringState.aiStatus === "partial_face"
-                      ? "bg-amber-500"
-                      : proctoringState.aiStatus === "looking_away"
-                      ? "bg-amber-400"
-                      : proctoringState.aiStatus === "active"
-                      ? "bg-green-400"
-                      : "bg-blue-400"
-                  }`}
-                />
-                <span className="text-[10px] font-semibold truncate">
-                  {proctoringState.aiStatus === "phone_detected"
-                    ? "Phone Detected!"
-                    : proctoringState.aiStatus === "face_missing"
-                    ? "No Face"
-                    : proctoringState.aiStatus === "multiple_faces"
-                    ? "Multiple People"
-                    : proctoringState.aiStatus === "partial_face"
-                    ? "Partial Face!"
-                    : proctoringState.aiStatus === "looking_away"
-                    ? "Looking Away!"
-                    : proctoringState.aiStatus === "active"
-                    ? "Face Verified"
-                    : "Scanning..."}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsPipMinimized((prev) => !prev);
-                  }}
-                  className="p-1 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition"
-                  title={isPipMinimized ? "Expand camera preview" : "Minimize camera"}
-                >
-                  {isPipMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Video Feed (Collapsed or Expanded) */}
-            {!isPipMinimized && (
-              <div className="relative w-48 h-32 bg-slate-950">
-                <video
-                  ref={pipVideoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                  style={{ transform: "scaleX(-1)" }}
-                />
-                <div
-                  className={`absolute inset-0 border-2 pointer-events-none transition-colors duration-300 ${
-                    proctoringState.aiStatus === "phone_detected"
-                      ? "border-red-500/80 bg-red-500/10"
-                      : proctoringState.aiStatus === "face_missing"
-                      ? "border-yellow-500/80 bg-yellow-500/10"
-                      : proctoringState.aiStatus === "multiple_faces"
-                      ? "border-orange-500/80 bg-orange-500/10"
-                      : proctoringState.aiStatus === "partial_face"
-                      ? "border-amber-500/80 bg-amber-500/10"
-                      : proctoringState.aiStatus === "looking_away"
-                      ? "border-amber-500/80 bg-amber-500/10"
-                      : "border-green-500/20"
-                  }`}
-                />
-              </div>
-            )}
-
-            {/* Real-time Face & Eye Gaze Warning Progress Meter (4 Warnings = 1 Strike) */}
-            {!isPipMinimized && (
-              <div className="px-2.5 py-1.5 bg-slate-900/95 border-t border-white/10 flex items-center justify-between text-[10px]">
-                <span className="text-slate-300 flex items-center gap-1 font-medium">
-                  <Eye className="h-3 w-3 text-indigo-400 shrink-0" />
-                  Face & Gaze
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4].map((step) => (
-                      <span
-                        key={step}
-                        className={`w-2.5 h-1.5 rounded-sm transition-all duration-300 ${
-                          step <= proctoringState.gazeWarningsInCurrentStrike
-                            ? step === 4
-                              ? "bg-red-500 shadow-sm shadow-red-500"
-                              : "bg-amber-400 shadow-sm shadow-amber-400"
-                            : "bg-slate-700/60"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="font-mono text-[9px] font-bold text-slate-300">
-                    {proctoringState.gazeWarningsInCurrentStrike}/4
-                  </span>
-                </div>
-              </div>
-            )}
+          <div
+            className={`glass rounded-full px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 border shadow-lg ${
+              proctoringState.violationCount === 1
+                ? "border-yellow-500/50 bg-yellow-500/20 text-yellow-300"
+                : proctoringState.violationCount === 2
+                ? "border-orange-500/50 bg-orange-500/20 text-orange-300 animate-pulse"
+                : "border-red-500/50 bg-red-500/20 text-red-300"
+            }`}
+          >
+            <AlertTriangle className="h-3.5 w-3.5" />
+            {proctoringState.violationCount}/3 Strikes
           </div>
-
-          {/* Warning badge */}
-          {proctoringState.violationCount > 0 && (
-            <div
-              className={`glass rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5 border shadow-lg ${
-                proctoringState.violationCount === 1
-                  ? "border-yellow-500/50 bg-yellow-500/20 text-yellow-300"
-                  : proctoringState.violationCount === 2
-                  ? "border-orange-500/50 bg-orange-500/20 text-orange-300 animate-pulse"
-                  : "border-red-500/50 bg-red-500/20 text-red-300"
-              }`}
-            >
-              <AlertTriangle className="h-3.5 w-3.5" />
-              {proctoringState.violationCount}/3 Strikes
-            </div>
-          )}
         </div>
       )}
 

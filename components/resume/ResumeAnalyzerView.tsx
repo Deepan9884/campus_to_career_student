@@ -373,14 +373,6 @@ export function ResumeAnalyzerView({
                     Upload your resume in PDF or DOCX format for real-time ATS scoring, keyword detection, and AI bullet optimization.
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs flex items-center gap-1.5 font-medium">
-                    <FileText className="h-3 w-3 text-indigo-500 dark:text-indigo-400" /> Instant ATS Score
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-xs flex items-center gap-1.5 font-medium">
-                    <Target className="h-3 w-3 text-blue-500 dark:text-blue-400" /> Keyword Gap Detection
-                  </span>
-                </div>
               </div>
 
               {/* Large interactive drop zone */}

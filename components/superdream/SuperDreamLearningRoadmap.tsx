@@ -141,32 +141,32 @@ export function SuperDreamLearningRoadmap() {
       {/* Header Banner */}
       <GlassCard className="p-6 border-purple-500/30 bg-gradient-to-r from-slate-900/90 via-purple-950/40 to-slate-900/90 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
-            <Map className="w-3.5 h-3.5 text-purple-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-600 dark:text-purple-300 text-xs font-semibold">
+            <Map className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
             Mentor-Curated Engineering Syllabus
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Learning Roadmap & System Architecture Mastery
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
             Curated syllabus targeting high-frequency systems topics: low-level concurrency, distributed consensus, and microservice patterns with topic quizzes.
           </p>
         </div>
 
-        <div className="bg-slate-900/90 p-4 rounded-2xl border border-purple-500/30 shrink-0 text-center shadow-lg shadow-purple-950/30">
-          <p className="text-xs text-slate-400">Curriculum Source</p>
-          <p className="text-sm font-bold text-purple-300 mt-0.5 flex items-center justify-center gap-1.5">
-            <Compass className="w-4 h-4 text-purple-400" /> Mentor Curated
+        <div className="bg-card dark:bg-slate-900/90 p-4 rounded-2xl border border-purple-500/30 shrink-0 text-center shadow-xs dark:shadow-lg dark:shadow-purple-950/30">
+          <p className="text-xs text-muted-foreground">Curriculum Source</p>
+          <p className="text-sm font-bold text-purple-600 dark:text-purple-300 mt-0.5 flex items-center justify-center gap-1.5">
+            <Compass className="w-4 h-4 text-purple-500 dark:text-purple-400" /> Mentor Curated
           </p>
         </div>
       </GlassCard>
 
       {/* Roadmap Modules */}
       {mentorRoadmap.length === 0 ? (
-        <GlassCard className="p-12 text-center text-slate-400 space-y-3 border-slate-800 bg-slate-900/40">
-          <Map className="w-10 h-10 text-slate-500 mx-auto" />
-          <h3 className="text-base font-bold text-white">No Learning Modules Assigned Yet</h3>
-          <p className="text-xs max-w-md mx-auto">
+        <GlassCard className="p-12 text-center text-muted-foreground space-y-3 border-dashed border-border/80 dark:border-slate-800 bg-card/60 dark:bg-slate-900/40 shadow-xs">
+          <Map className="w-10 h-10 text-purple-500/60 mx-auto" />
+          <h3 className="text-base font-bold text-foreground">No Learning Modules Assigned Yet</h3>
+          <p className="text-xs max-w-md mx-auto leading-relaxed">
             Your faculty mentor will assign curated system architecture modules and milestones here.
           </p>
         </GlassCard>
@@ -180,18 +180,18 @@ export function SuperDreamLearningRoadmap() {
               <GlassCard
                 key={milestone.id}
                 className={cn(
-                  "p-6 border-slate-800 bg-slate-900/70 space-y-4 transition card-hover-lift",
+                  "p-6 border-border/80 dark:border-slate-800 bg-card/80 dark:bg-slate-900/70 space-y-4 transition card-hover-lift",
                   isDone && "border-emerald-500/40"
                 )}
               >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
                       Module 0{idx + 1}
                     </span>
-                    <h3 className="text-base font-bold text-white">{milestone.title}</h3>
-                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                    <h3 className="text-base font-bold text-foreground">{milestone.title}</h3>
+                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
                       {milestone.tag}
                     </span>
                   </div>

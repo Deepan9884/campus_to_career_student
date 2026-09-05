@@ -297,7 +297,9 @@ export function ProctoredExamConsole({
     moduleId: quiz.attemptId,
     enabled: !isTestFinished && !result,
     isStarted: true,
-    videoElement: videoElement,
+    videoElement: null,
+    webcamRequired: false,
+    aiFaceDetection: false,
     onBlocked: () => {
       onBlockStateChange(true);
     },
@@ -819,9 +821,11 @@ export function ProctoredExamConsole({
               isLightMode ? "border-slate-200" : "border-slate-800"
             }`}
           >
-            <div className="w-8 h-8 rounded-lg bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500 font-bold text-xs">
-              C2C
-            </div>
+            <img
+              src={isLightMode ? "/logo.png" : "/logo-dark.png"}
+              alt="Campus to Career"
+              className="h-7 w-auto object-contain shrink-0"
+            />
             <div className="hidden sm:block">
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-400 leading-tight">
                 AI Assessment
@@ -928,81 +932,15 @@ export function ProctoredExamConsole({
             {isLightMode ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
           </button>
 
-          {/* Live AI Proctor HUD */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-            <div
-              className={`relative w-20 sm:w-24 h-12 rounded-lg overflow-hidden bg-black border shadow-md flex items-center justify-center transition-colors duration-300 ${
-                proctorState.aiStatus === "phone_detected"
-                  ? "border-red-500 ring-2 ring-red-500/50"
-                  : proctorState.aiStatus === "face_missing"
-                  ? "border-yellow-500 ring-2 ring-yellow-500/50"
-                  : proctorState.aiStatus === "active"
-                  ? "border-green-500/60"
-                  : "border-slate-700"
-              }`}
-            >
-              {proctorState.cameraError ? (
-                <button
-                  onClick={() => proctorState.retryCamera()}
-                  className="text-[8px] text-red-400 text-center px-1 font-bold leading-tight flex flex-col items-center justify-center"
-                >
-                  <Camera className="h-3 w-3 text-red-500" />
-                  <span>RETRY</span>
-                </button>
-              ) : (
-                <>
-                  <video
-                    ref={videoRefCallback}
-                    autoPlay
-                    muted
-                    playsInline
-                    width="640"
-                    height="480"
-                    className="w-full h-full object-cover transform -scale-x-100"
-                  />
-                  <div className="absolute top-1 right-1 flex items-center gap-1 bg-black/70 backdrop-blur-xs px-1.5 py-0.5 rounded-full text-[8px] font-semibold border border-white/10">
-                    <div
-                      className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                        proctorState.aiStatus === "phone_detected"
-                          ? "bg-red-500"
-                          : proctorState.aiStatus === "face_missing"
-                          ? "bg-yellow-400"
-                          : proctorState.aiStatus === "active"
-                          ? "bg-green-400"
-                          : "bg-blue-400"
-                      }`}
-                    />
-                    <span
-                      className={
-                        proctorState.aiStatus === "phone_detected"
-                          ? "text-red-400 font-bold"
-                          : proctorState.aiStatus === "face_missing"
-                          ? "text-yellow-400 font-bold"
-                          : proctorState.aiStatus === "active"
-                          ? "text-green-400"
-                          : "text-blue-400"
-                      }
-                    >
-                      {proctorState.aiStatus === "phone_detected"
-                        ? "PHONE!"
-                        : proctorState.aiStatus === "face_missing"
-                        ? "NO FACE"
-                        : proctorState.aiStatus === "active"
-                        ? "AI OK"
-                        : "AI..."}
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {proctorState.violationCount > 0 && (
+          {/* Proctor Integrity Badge (if strikes occur) */}
+          {proctorState.violationCount > 0 && (
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
               <div className="px-2 py-1 rounded-full text-[9px] font-bold border flex items-center gap-1 bg-yellow-500/15 border-yellow-500/30 text-yellow-400">
                 <ShieldAlert className="h-3 w-3" />
                 {proctorState.violationCount}/3
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </header>
 

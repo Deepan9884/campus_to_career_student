@@ -863,9 +863,9 @@ export function Section3CodingDsa() {
                     if (active && payload && payload.length) {
                       const val = payload[0].value;
                       return (
-                        <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700 dark:border-purple-500/40 text-white text-xs font-semibold shadow-xl backdrop-blur-xl">
-                          <span className="text-slate-300">{label}: </span>
-                          <strong className="text-emerald-400 dark:text-emerald-300 ml-1">{val} Solved</strong>
+                        <div className="px-3 py-1.5 rounded-xl bg-white/95 dark:bg-slate-950/95 border border-slate-200 dark:border-purple-500/40 text-slate-800 dark:text-white text-xs font-semibold shadow-xl backdrop-blur-xl">
+                          <span className="text-slate-600 dark:text-slate-300">{label}: </span>
+                          <strong className="text-emerald-600 dark:text-emerald-300 ml-1">{val} Solved</strong>
                         </div>
                       );
                     }
@@ -906,15 +906,15 @@ export function Section3CodingDsa() {
                       const solved = payload.find((p) => p.dataKey === "solved")?.value ?? 0;
                       const target = payload.find((p) => p.dataKey === "target")?.value ?? 0;
                       return (
-                        <div className="p-3 rounded-2xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700 dark:border-purple-500/40 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[140px]">
-                          <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">{label}</p>
-                          <div className="flex items-center justify-between text-xs text-purple-200">
-                            <span>Solved:</span>
-                            <strong className="text-purple-300 font-bold ml-2">{solved}</strong>
+                        <div className="p-3 rounded-2xl bg-white/95 dark:bg-slate-950/95 border border-slate-200 dark:border-purple-500/40 shadow-xl backdrop-blur-xl space-y-1.5 min-w-[140px]">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white tracking-wide border-b border-slate-200/80 dark:border-white/10 pb-1">{label}</p>
+                          <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
+                            <span className="font-medium">Solved:</span>
+                            <strong className="text-purple-600 dark:text-purple-300 font-bold ml-2">{solved}</strong>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-slate-300">
-                            <span>Target:</span>
-                            <strong className="text-slate-200 font-semibold ml-2">{target}</strong>
+                          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
+                            <span className="font-medium">Target:</span>
+                            <strong className="text-slate-800 dark:text-slate-200 font-semibold ml-2">{target}</strong>
                           </div>
                         </div>
                       );

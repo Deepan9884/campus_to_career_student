@@ -412,6 +412,11 @@ export const useSuperDream = create<SuperDreamState>()(
             }),
           },
         }));
+        scheduleBackendSync(get, {
+          actionType: "language_tracking_updated",
+          sectionId: 1,
+          title: "Language practice and telemetry updated",
+        });
       },
 
       toggleLanguageSubtopic: (id, subtopic) => {

@@ -5,23 +5,53 @@ import { useState, useRef, useEffect } from "react";
  * Handles theme, resizable panels, sidebar/console visibility
  */
 export function useExamLayoutState(storagePrefix: string = "c2c_exam") {
-  // Theme state (light mode default for professional assessment)
+  // Theme state (inherits from app theme or saved preference)
   const [isLightMode, setIsLightMode] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem(`${storagePrefix}_theme`);
-      return saved ? saved === "light" : true;
+      if (saved) return saved === "light";
+      const appTheme = localStorage.getItem("c2c_theme");
+      if (appTheme) return appTheme === "light";
+      if (typeof document !== "undefined") {
+        return !document.documentElement.classList.contains("dark");
+      }
+      return false;
     } catch {
-      return true;
+      return false;
     }
   });
 
   const toggleTheme = () => {
-    const next = !isLightMode;
-    setIsLightMode(next);
-    try {
-      localStorage.setItem(`${storagePrefix}_theme`, next ? "light" : "dark");
-    } catch {}
+    setIsLightMode((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(`${storagePrefix}_theme`, next ? "light" : "dark");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent(`c2c_exam_layout_theme_${storagePrefix}`, {
+              detail: { isLightMode: next },
+            })
+          );
+        }
+      } catch {}
+      return next;
+    });
   };
+
+  useEffect(() => {
+    const handleThemeSync = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isLightMode: boolean }>;
+      if (customEvent.detail && typeof customEvent.detail.isLightMode === "boolean") {
+        setIsLightMode(customEvent.detail.isLightMode);
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener(`c2c_exam_layout_theme_${storagePrefix}`, handleThemeSync);
+      return () => {
+        window.removeEventListener(`c2c_exam_layout_theme_${storagePrefix}`, handleThemeSync);
+      };
+    }
+  }, [storagePrefix]);
 
   // Resizable panel widths
   const [leftPanelWidthPercent, setLeftPanelWidthPercent] = useState<number>(() => {

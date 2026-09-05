@@ -124,73 +124,73 @@ METRICS BREAKDOWN:
 
       {/* Hero Metric Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <GlassCard className="p-5 border-amber-500/40 bg-slate-900/70">
+        <GlassCard className="p-5 border-amber-500/40 bg-white/80 dark:bg-slate-900/70">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-400">Readiness Score</p>
-            <Crown className="w-4 h-4 text-amber-400" />
+            <p className="text-xs text-slate-600 dark:text-slate-400">Readiness Score</p>
+            <Crown className="w-4 h-4 text-amber-500" />
           </div>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-3xl font-extrabold tabular-nums text-amber-300">{totalObtained}</span>
-            <span className="text-xs text-slate-400">/ 100</span>
+            <span className="text-3xl font-extrabold tabular-nums text-amber-600 dark:text-amber-300">{totalObtained}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">/ 100</span>
           </div>
-          <p className="text-xs text-emerald-400 mt-1 font-semibold flex items-center gap-1">
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-semibold flex items-center gap-1">
             <Award className="w-3 h-3" /> {tier.tierName}
           </p>
         </GlassCard>
 
-        <GlassCard className="p-5 border-emerald-500/40 bg-slate-900/70">
+        <GlassCard className="p-5 border-emerald-500/40 bg-white/80 dark:bg-slate-900/70">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-400">Verified Courses</p>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <p className="text-xs text-slate-600 dark:text-slate-400">Verified Courses</p>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           </div>
-          <p className="text-3xl font-extrabold tabular-nums text-emerald-400 mt-1">
+          <p className="text-3xl font-extrabold tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
             {verifiedCourses} / {courses.length}
           </p>
-          <p className="text-xs text-slate-400 mt-1">{courses.length - verifiedCourses} Remaining</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{courses.length - verifiedCourses} Remaining</p>
         </GlassCard>
 
-        <GlassCard className="p-5 border-purple-500/40 bg-slate-900/70">
+        <GlassCard className="p-5 border-purple-500/40 bg-white/80 dark:bg-slate-900/70">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-400">Proctored Tests</p>
-            <Award className="w-4 h-4 text-purple-400" />
+            <p className="text-xs text-slate-600 dark:text-slate-400">Proctored Tests</p>
+            <Award className="w-4 h-4 text-purple-500" />
           </div>
-          <p className="text-3xl font-extrabold tabular-nums text-purple-300 mt-1">
-            {completedTests.length} <span className="text-sm font-normal text-slate-400">/ {tests.length}</span>
+          <p className="text-3xl font-extrabold tabular-nums text-purple-600 dark:text-purple-300 mt-1">
+            {completedTests.length} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">/ {tests.length}</span>
           </p>
-          <p className="text-xs text-purple-400/90 mt-1 font-medium">{tests.length - completedTests.length} Modules Remaining</p>
+          <p className="text-xs text-purple-600 dark:text-purple-400/90 mt-1 font-medium">{tests.length - completedTests.length} Modules Remaining</p>
         </GlassCard>
 
-        <GlassCard className="p-5 border-sky-500/40 bg-slate-900/70">
+        <GlassCard className="p-5 border-sky-500/40 bg-white/80 dark:bg-slate-900/70">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-400">Total Solved</p>
-            <Zap className="w-4 h-4 text-sky-400" />
+            <p className="text-xs text-slate-600 dark:text-slate-400">Total Solved</p>
+            <Zap className="w-4 h-4 text-sky-500" />
           </div>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-3xl font-extrabold tabular-nums text-sky-300">{codingStats.totalSolved}</span>
-            <span className="text-xs text-slate-400">Problems</span>
+            <span className="text-3xl font-extrabold tabular-nums text-sky-600 dark:text-sky-300">{codingStats.totalSolved}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Problems</span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">{codingStats.platformCount} Platforms Connected</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{codingStats.platformCount} Platforms Connected</p>
         </GlassCard>
       </div>
 
       {/* Visualizations Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Radar Chart */}
-        <GlassCard className="p-6 border-slate-800 bg-slate-900/70 flex flex-col justify-between">
+        <GlassCard className="p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 flex flex-col justify-between">
           <div className="mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-indigo-400" />
-              <h3 className="text-sm font-bold text-white">Competency Radar vs FAANG Benchmark</h3>
+              <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Competency Radar vs FAANG Benchmark</h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">Multi-axis technical evaluation score</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Multi-axis technical evaluation score</p>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={competencyRadar}>
-                <PolarGrid stroke="#334155" />
-                <PolarAngleAxis dataKey="subject" stroke="#cbd5e1" tick={{ fontSize: 11, fontWeight: "600" }} />
-                <PolarRadiusAxis stroke="#475569" angle={30} domain={[0, 100]} tick={false} />
+                <PolarGrid stroke="rgba(148, 163, 184, 0.3)" />
+                <PolarAngleAxis dataKey="subject" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 10, fontWeight: "600" }} />
+                <PolarRadiusAxis stroke="#64748b" angle={30} domain={[0, 100]} tick={false} />
                 <Radar
                   name="Candidate Score"
                   dataKey="score"
@@ -210,7 +210,27 @@ METRICS BREAKDOWN:
                 />
                 <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#475569", borderRadius: "12px", fontSize: "12px" }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const score = payload.find((p) => p.dataKey === "score")?.value ?? 0;
+                      const benchmark = payload.find((p) => p.dataKey === "benchmark")?.value ?? 0;
+                      const title = payload[0]?.payload?.subject || "Competency";
+                      return (
+                        <div className="p-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-purple-200 dark:border-purple-500/30 text-xs shadow-xl backdrop-blur-xl space-y-1">
+                          <p className="font-bold text-slate-900 dark:text-white border-b border-slate-200/80 dark:border-slate-800 pb-1">{title}</p>
+                          <div className="flex items-center justify-between gap-3 text-purple-700 dark:text-purple-300">
+                            <span>Score:</span>
+                            <strong>{score}%</strong>
+                          </div>
+                          <div className="flex items-center justify-between gap-3 text-amber-700 dark:text-amber-300">
+                            <span>Benchmark:</span>
+                            <strong>{benchmark}%</strong>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -218,13 +238,13 @@ METRICS BREAKDOWN:
         </GlassCard>
 
         {/* Milestone Velocity Area Chart */}
-        <GlassCard className="p-6 border-slate-800 bg-slate-900/70 flex flex-col justify-between">
+        <GlassCard className="p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 flex flex-col justify-between">
           <div className="mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-              <h3 className="text-sm font-bold text-white">Milestone Completion Velocity</h3>
+              <div className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Milestone Completion Velocity</h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">Cumulative weekly deliverables vs planned target</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cumulative weekly deliverables vs planned target</p>
           </div>
 
           <div className="h-64 w-full">
@@ -236,10 +256,25 @@ METRICS BREAKDOWN:
                     <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="week" stroke="#64748b" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#64748b" tick={{ fontSize: 11 }} />
+                <XAxis dataKey="week" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 10 }} />
+                <YAxis stroke="#64748b" tick={{ fill: "#64748b", fontSize: 10 }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#475569", borderRadius: "12px", fontSize: "12px" }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="p-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-cyan-200 dark:border-cyan-500/30 text-xs shadow-xl backdrop-blur-xl space-y-1">
+                          <p className="font-bold text-slate-900 dark:text-white border-b border-slate-200/80 dark:border-slate-800 pb-1">{label}</p>
+                          {payload.map((p, i) => (
+                            <div key={i} className="flex items-center justify-between gap-3 text-slate-700 dark:text-slate-300">
+                              <span>{p.name}:</span>
+                              <strong className="font-mono text-cyan-600 dark:text-cyan-400">{p.value}</strong>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
                 <Area
                   type="monotone"
@@ -266,22 +301,35 @@ METRICS BREAKDOWN:
         </GlassCard>
 
         {/* Proctored Assessment Module Progress */}
-        <GlassCard className="p-6 border-slate-800 bg-slate-900/70 flex flex-col justify-between">
+        <GlassCard className="p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 flex flex-col justify-between">
           <div className="mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-purple-400" />
-              <h3 className="text-sm font-bold text-white">Assessment Modules & Coverage</h3>
+              <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Assessment Modules & Coverage</h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">Problem complexity count across proctored test suites</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Problem complexity count across proctored test suites</p>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={tests.map((t) => ({ testName: t.title.length > 16 ? t.title.slice(0, 14) + "…" : t.title, rounds: t.questionsCount || 3 }))}>
-                <XAxis dataKey="testName" stroke="#64748b" tick={{ fontSize: 10 }} />
-                <YAxis stroke="#64748b" tick={{ fontSize: 11 }} />
+                <XAxis dataKey="testName" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 10 }} />
+                <YAxis stroke="#64748b" tick={{ fill: "#64748b", fontSize: 10 }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#475569", borderRadius: "12px", fontSize: "12px" }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="p-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-purple-200 dark:border-purple-500/30 text-xs shadow-xl backdrop-blur-xl space-y-1">
+                          <p className="font-bold text-slate-900 dark:text-white border-b border-slate-200/80 dark:border-slate-800 pb-1">{label}</p>
+                          <div className="flex items-center justify-between gap-3 text-purple-700 dark:text-purple-300">
+                            <span>Challenge Rounds:</span>
+                            <strong className="font-mono">{payload[0]?.value}</strong>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
                 <Bar dataKey="rounds" name="Challenge Rounds" fill="#8B5CF6" radius={[6, 6, 0, 0]} />
                 <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
@@ -291,13 +339,13 @@ METRICS BREAKDOWN:
         </GlassCard>
 
         {/* Problem Distribution Donut Chart */}
-        <GlassCard className="p-6 border-slate-800 bg-slate-900/70 flex flex-col justify-between">
+        <GlassCard className="p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 flex flex-col justify-between">
           <div className="mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-              <h3 className="text-sm font-bold text-white">Problem Difficulty Distribution</h3>
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Problem Difficulty Distribution</h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">Breakdown of {codingStats.totalSolved} solved problems</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Breakdown of {codingStats.totalSolved} solved problems</p>
           </div>
 
           <div className="h-64 w-full flex items-center justify-center">
@@ -317,7 +365,18 @@ METRICS BREAKDOWN:
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#475569", borderRadius: "12px", fontSize: "12px" }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const item = payload[0];
+                      return (
+                        <div className="p-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-emerald-200 dark:border-emerald-500/30 text-xs shadow-xl backdrop-blur-xl space-y-1">
+                          <span className="font-bold text-slate-900 dark:text-white">{item.name}</span>
+                          <p className="text-emerald-700 dark:text-emerald-300 font-mono font-bold">{item.value} Solved</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
                 <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
               </PieChart>
@@ -327,31 +386,31 @@ METRICS BREAKDOWN:
       </div>
 
       {/* Mentor Strategic Recommendations */}
-      <GlassCard className="p-6 border-slate-800 bg-slate-900/70 space-y-4">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2">
-          <Target className="w-4 h-4 text-amber-400" />
+      <GlassCard className="p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/70 space-y-4">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <Target className="w-4 h-4 text-amber-500" />
           Strategic Placement Preparation Action Plan
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-emerald-500/30 space-y-2">
-            <p className="font-bold text-emerald-300 flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Verified Core Strengths:
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-300">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-emerald-500/30 space-y-2">
+            <p className="font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Verified Core Strengths:
             </p>
             {(() => {
               const strengths = summaries.filter((s) => s.readinessScore >= 80);
               if (strengths.length === 0) {
                 return (
-                  <p className="text-slate-400 text-xs italic">
+                  <p className="text-slate-500 dark:text-slate-400 text-xs italic">
                     Complete sections with ≥ 80% readiness to unlock verified strengths.
                   </p>
                 );
               }
               return (
-                <ul className="space-y-1.5 text-slate-300 list-disc list-inside text-xs">
+                <ul className="space-y-1.5 text-slate-600 dark:text-slate-300 list-disc list-inside text-xs">
                   {strengths.slice(0, 3).map((s) => (
                     <li key={s.sectionId}>
-                      <span className="font-semibold text-white">{s.title.replace(/^\d+\.\s*/, "")}</span>: {s.readinessScore}% readiness index ({s.completedTasks}/{s.totalTasks} deliverables met).
+                      <span className="font-semibold text-slate-900 dark:text-white">{s.title.replace(/^\d+\.\s*/, "")}</span>: {s.readinessScore}% readiness index ({s.completedTasks}/{s.totalTasks} deliverables met).
                     </li>
                   ))}
                 </ul>
@@ -359,9 +418,9 @@ METRICS BREAKDOWN:
             })()}
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-amber-500/30 space-y-2">
-            <p className="font-bold text-amber-300 flex items-center gap-1.5">
-              <Target className="w-4 h-4 text-amber-400" /> Target Next Milestones:
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-amber-500/30 space-y-2">
+            <p className="font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+              <Target className="w-4 h-4 text-amber-500" /> Target Next Milestones:
             </p>
             {(() => {
               const pendingSections = [...summaries]
@@ -371,17 +430,17 @@ METRICS BREAKDOWN:
 
               if (pendingSections.length === 0) {
                 return (
-                  <p className="text-emerald-400 text-xs font-semibold">
+                  <p className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                     Outstanding! All placement readiness sections are 100% completed.
                   </p>
                 );
               }
 
               return (
-                <ul className="space-y-1.5 text-slate-300 list-disc list-inside text-xs">
+                <ul className="space-y-1.5 text-slate-600 dark:text-slate-300 list-disc list-inside text-xs">
                   {pendingSections.map((s) => (
                     <li key={s.sectionId}>
-                      Advance <span className="font-semibold text-white">{s.title.replace(/^\d+\.\s*/, "")}</span> — currently at {s.completionPercent}% completion ({s.totalTasks - s.completedTasks} tasks remaining).
+                      Advance <span className="font-semibold text-slate-900 dark:text-white">{s.title.replace(/^\d+\.\s*/, "")}</span> — currently at {s.completionPercent}% completion ({s.totalTasks - s.completedTasks} tasks remaining).
                     </li>
                   ))}
                 </ul>

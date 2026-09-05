@@ -1279,9 +1279,11 @@ function ActiveView({
           {/* Left: Platform Logo & Round Info */}
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <div className="flex items-center gap-2.5 pr-3 border-r border-slate-800">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs">
-                C2C
-              </div>
+              <img
+                src="/logo-dark.png"
+                alt="Campus to Career"
+                className="h-7 w-auto object-contain shrink-0"
+              />
               <div className="hidden sm:block">
                 <p className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-400 leading-tight">
                   AI Mock Interview

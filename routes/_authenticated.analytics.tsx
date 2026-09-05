@@ -65,7 +65,18 @@ const TIER_COLORS = {
 
 /* ─── Weekly Progress Digest ─────────────────────────────────────── */
 function WeeklyReportCard() {
-  const [report, setReport] = useState<WeeklyReportResponse | null>(null);
+  const [report, setReport] = useState<WeeklyReportResponse | null>(() => {
+    try {
+      const saved = sessionStorage.getItem("cf_weekly_digest");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.summary && Array.isArray(parsed?.recommendations) && parsed.recommendations.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return null;
+  });
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -73,8 +84,13 @@ function WeeklyReportCard() {
     setLoading(true);
     try {
       const res = await getWeeklyReport();
-      setReport(res);
-      toast.success("Weekly summary generated");
+      if (res && res.summary) {
+        setReport(res);
+        try {
+          sessionStorage.setItem("cf_weekly_digest", JSON.stringify(res));
+        } catch {}
+        toast.success("Weekly summary generated");
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to generate weekly summary.");
     } finally {

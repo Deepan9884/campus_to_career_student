@@ -2446,7 +2446,13 @@ export function UnifiedExamConsole({
         }`}
       >
         {/* Brand */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <img
+            src={isLightMode ? "/logo.png" : "/logo-dark.png"}
+            alt="Campus to Career"
+            className="h-7 w-auto object-contain shrink-0"
+          />
+          <div className={`h-4 w-px ${isLightMode ? "bg-slate-200" : "bg-slate-800"}`} />
           <span className="font-bold text-base sm:text-lg tracking-tight">
             {examData.title ? examData.title.replace(/\$/g, "").trim() : "Proctored Examination"}
           </span>

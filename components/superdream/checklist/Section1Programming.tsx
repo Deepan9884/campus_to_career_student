@@ -278,7 +278,12 @@ export function Section1Programming() {
             </div>
           </div>
           <p className="text-2xl sm:text-3xl font-bold text-[var(--warning)] tabular-nums">
-            {totalHoursSpent}h <span className="text-xs font-normal text-[var(--muted-foreground)] uppercase">Logged</span>
+            {totalHoursSpent === 0
+              ? "0.0h"
+              : totalHoursSpent < 0.1
+              ? `${Math.max(1, Math.round(totalHoursSpent * 60))}m`
+              : `${Number(totalHoursSpent).toFixed(2)}h`}{" "}
+            <span className="text-xs font-normal text-[var(--muted-foreground)] uppercase">Logged</span>
           </p>
         </div>
 
@@ -534,7 +539,11 @@ const visitedLinks = item.visitedLinks || [];
                       Practice Time
                     </span>
                     <span className="font-bold text-[var(--warning)] tabular-nums">
-                      {hours % 1 === 0 ? hours : hours.toFixed(1)} Hours
+                      {hours === 0
+                        ? "0.0 Hours"
+                        : hours < 1
+                        ? `${Math.max(1, Math.round(hours * 60))} Mins`
+                        : `${hours.toFixed(1)} Hours`}
                     </span>
                   </div>
 

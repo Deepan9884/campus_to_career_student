@@ -24,6 +24,13 @@ const PLATFORM_COLORS: Record<string, string> = {
   gfg: "#3b82f6", // Blue
 };
 
+const PLATFORM_NAMES: Record<string, string> = {
+  leetcode: "LeetCode",
+  codechef: "CodeChef",
+  hackerrank: "HackerRank",
+  gfg: "GFG",
+};
+
 interface Props {
   platforms: CodingPlatformItem[];
   totalProblemsSolved?: number;
@@ -52,12 +59,16 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
     .filter((item) => item.value > 0);
 
   // 2. Stacked Bar Chart data: Difficulty breakdown per platform
-  const difficultyData = platforms.map((p) => ({
-    name: p.platform.charAt(0).toUpperCase() + p.platform.slice(1),
-    Easy: p.easySolved || 0,
-    Medium: p.mediumSolved || 0,
-    Hard: p.hardSolved || 0,
-  }));
+  const difficultyData = platforms.map((p) => {
+    const pKey = p.platform.toLowerCase();
+    const displayName = PLATFORM_NAMES[pKey] || (p.platform.charAt(0).toUpperCase() + p.platform.slice(1));
+    return {
+      name: displayName,
+      Easy: p.easySolved || 0,
+      Medium: p.mediumSolved || 0,
+      Hard: p.hardSolved || 0,
+    };
+  });
 
   // 3. Frequency Trend Data (Last 6 months estimated activity distribution)
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
@@ -89,15 +100,20 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
       const data = payload[0];
       const total = totalSolvedCount || 1;
       const pct = Math.round((Number(data.value) / total) * 100);
+      const pKey = String(data.name || "").toLowerCase();
+      const displayName = PLATFORM_NAMES[pKey] || data.name;
       return (
-        <div className="bg-slate-900/95 border border-slate-700/80 rounded-xl px-3.5 py-2.5 shadow-2xl text-xs space-y-1 backdrop-blur-md pointer-events-none z-50">
+        <div
+          className="dark bg-slate-900/95 border border-slate-700/80 rounded-xl px-3.5 py-2.5 shadow-2xl text-xs space-y-1 backdrop-blur-md pointer-events-none z-50 text-white"
+          data-theme="dark"
+        >
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: data.payload.color }} />
-            <span className="font-bold text-white uppercase tracking-wider">{data.name}</span>
+            <span className="font-bold uppercase tracking-wider text-white" style={{ color: "#FFFFFF" }}>{displayName}</span>
           </div>
           <div className="flex items-baseline gap-2 pt-0.5">
-            <span className="text-base font-black text-white font-mono">{data.value}</span>
-            <span className="text-slate-400 text-[11px]">solved ({pct}%)</span>
+            <span className="text-base font-black font-mono text-white" style={{ color: "#FFFFFF" }}>{data.value}</span>
+            <span className="text-[11px] text-slate-300" style={{ color: "#CBD5E1" }}>solved ({pct}%)</span>
           </div>
         </div>
       );
@@ -109,19 +125,22 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
     if (active && payload && payload.length) {
       const totalForPlatform = payload.reduce((acc: number, item: any) => acc + (Number(item.value) || 0), 0);
       return (
-        <div className="bg-slate-900/95 border border-slate-700/80 rounded-xl p-3 shadow-2xl text-xs space-y-2 backdrop-blur-md pointer-events-none z-50 min-w-[140px]">
+        <div
+          className="dark bg-slate-900/95 border border-slate-700/80 rounded-xl p-3 shadow-2xl text-xs space-y-2 backdrop-blur-md pointer-events-none z-50 min-w-[150px] text-white"
+          data-theme="dark"
+        >
           <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-            <span className="font-bold text-white uppercase">{label}</span>
-            <span className="font-mono text-slate-400 text-[11px]">{totalForPlatform} total</span>
+            <span className="font-bold uppercase text-white" style={{ color: "#FFFFFF" }}>{label}</span>
+            <span className="font-mono text-[11px] text-slate-300" style={{ color: "#CBD5E1" }}>{totalForPlatform} total</span>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {payload.map((entry: any, index: number) => (
               <div key={`item-${index}`} className="flex items-center justify-between gap-3 text-[11px]">
-                <span className="flex items-center gap-1.5 text-slate-300">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                <span className="flex items-center gap-1.5 text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
                   {entry.name}:
                 </span>
-                <span className="font-mono font-bold text-white">{entry.value}</span>
+                <span className="font-mono font-bold text-white" style={{ color: "#FFFFFF" }}>{entry.value}</span>
               </div>
             ))}
           </div>
@@ -134,20 +153,27 @@ export function CodingPlatformAnalyticsCharts({ platforms, totalProblemsSolved }
   const CustomFrequencyTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900/95 border border-slate-700/80 rounded-xl p-3 shadow-2xl text-xs space-y-2 backdrop-blur-md pointer-events-none z-50 min-w-[130px]">
-          <p className="font-bold text-white border-b border-slate-800 pb-1 text-[11px] uppercase tracking-wider">
+        <div
+          className="dark bg-slate-900/95 border border-slate-700/80 rounded-xl p-3 shadow-2xl text-xs space-y-2 backdrop-blur-md pointer-events-none z-50 min-w-[150px] text-white"
+          data-theme="dark"
+        >
+          <p className="font-bold text-white border-b border-slate-800 pb-1 text-[11px] uppercase tracking-wider" style={{ color: "#FFFFFF" }}>
             {label} Activity
           </p>
-          <div className="space-y-1">
-            {payload.map((entry: any, index: number) => (
-              <div key={`freq-${index}`} className="flex items-center justify-between gap-3 text-[11px]">
-                <span className="flex items-center gap-1.5 text-slate-300 capitalize">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                  {entry.name}:
-                </span>
-                <span className="font-mono font-bold text-white">{entry.value} solved</span>
-              </div>
-            ))}
+          <div className="space-y-1.5">
+            {payload.map((entry: any, index: number) => {
+              const platformKey = String(entry.name || "").toLowerCase();
+              const displayName = PLATFORM_NAMES[platformKey] || (entry.name ? entry.name.charAt(0).toUpperCase() + entry.name.slice(1) : "Platform");
+              return (
+                <div key={`freq-${index}`} className="flex items-center justify-between gap-3 text-[11px]">
+                  <span className="flex items-center gap-1.5 text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                    {displayName}:
+                  </span>
+                  <span className="font-mono font-bold text-white" style={{ color: "#FFFFFF" }}>{entry.value} solved</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       );

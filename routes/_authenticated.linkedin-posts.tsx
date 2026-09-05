@@ -315,9 +315,17 @@ function LinkedInPostsPage() {
     try {
       const detail = await getAnalysisById(analysis._id);
       setRepoOverview(detail.overview || "");
-      setRepoQuality(detail.quality || "");
+      const qualityStr = typeof detail.quality === "string" 
+        ? detail.quality 
+        : ((detail.quality as any)?.readability || (detail.quality as any)?.bestPractices || "");
+      setRepoQuality(qualityStr);
       if (Array.isArray(detail.resumeImpact) && detail.resumeImpact.length > 0) {
         const formatted = detail.resumeImpact
+          .map((item) => (item.trim().startsWith("•") ? item.trim() : `• ${item.trim()}`))
+          .join("\n");
+        setRepoResumeImpact(formatted);
+      } else if (typeof detail.resumeImpact === "object" && Array.isArray((detail.resumeImpact as any)?.bullets)) {
+        const formatted = ((detail.resumeImpact as any).bullets as string[])
           .map((item) => (item.trim().startsWith("•") ? item.trim() : `• ${item.trim()}`))
           .join("\n");
         setRepoResumeImpact(formatted);

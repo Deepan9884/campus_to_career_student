@@ -9,12 +9,20 @@ import {
     AlertTriangle,
     BookOpen,
     Code,
+    Target,
+    Trophy,
+    Flame,
+    Activity,
+    Award,
+    TrendingUp,
+    Sparkles,
+    BarChart3,
+    Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { upsertCodingProfile, refreshCodingProfile, getProblemRecommendations, getAllCodingProfiles } from "@/lib/coding-profiles-api";
 import { useSuperDream } from "@/stores/superDreamStore";
-import { Target, Trophy, Flame } from "lucide-react";
 import { CodingPlatformAnalyticsCharts } from "@/components/CodingPlatformAnalyticsCharts";
 
 type Platform = "leetcode" | "codechef" | "hackerrank" | "gfg";
@@ -49,6 +57,8 @@ const PLATFORMS: { key: Platform; label: string; icon: React.ReactNode; placehol
 type CodingProfileStats = {
     solved?: number;
     byDifficulty?: Record<string, number>;
+    ranking?: number;
+    rating?: number;
     raw?: any;
 };
 
@@ -126,6 +136,8 @@ function CodingPlatformsPage() {
                                     Medium: Number(cs.mediumSolved ?? cs.byDifficulty?.Medium ?? (solved > 0 ? Math.round(solved * 0.35) : 0)),
                                     Hard: Number(cs.hardSolved ?? cs.byDifficulty?.Hard ?? (solved > 0 ? Math.round(solved * 0.15) : 0)),
                                 },
+                                ranking: cs.ranking || cs.globalRanking || cs.raw?.data?.matchedUser?.profile?.ranking || cs.raw?.data?.userContestRanking?.globalRanking,
+                                rating: cs.rating || cs.raw?.data?.userContestRanking?.rating,
                                 raw: cs.raw ?? cs,
                             };
                         }
@@ -187,6 +199,8 @@ function CodingPlatformsPage() {
                             Medium: Number(cachedStats.mediumSolved ?? cachedStats.byDifficulty?.Medium ?? (solved > 0 ? Math.round(solved * 0.35) : 0)),
                             Hard: Number(cachedStats.hardSolved ?? cachedStats.byDifficulty?.Hard ?? (solved > 0 ? Math.round(solved * 0.15) : 0)),
                         },
+                        ranking: cachedStats.ranking || cachedStats.globalRanking || cachedStats.raw?.data?.matchedUser?.profile?.ranking || cachedStats.raw?.data?.userContestRanking?.globalRanking,
+                        rating: cachedStats.rating || cachedStats.raw?.data?.userContestRanking?.rating,
                         raw: cachedStats.raw ?? cachedStats,
                     },
                 }));
@@ -306,7 +320,7 @@ function CodingPlatformsPage() {
                                 ) : (
                                     <RefreshCw className="h-4 w-4" />
                                 )}
-                                Refresh (manual)
+                                Refresh
                             </button>
 
                             <button
@@ -321,33 +335,12 @@ function CodingPlatformsPage() {
                         </div>
                     </GlassCard>
 
-                    <GlassCard>
-                        <h3 className="font-semibold mb-3 text-foreground">Connected Stats</h3>
-                        {statsByPlatform[active] ? (
-                            <div className="space-y-3">
-                                <StatRow label="Solved" value={statsByPlatform[active]?.solved ?? "—"} />
-                                <div className="text-xs text-muted-foreground font-semibold">
-                                    Difficulty breakdown:
-                                </div>
-                                {statsByPlatform[active]?.byDifficulty ? (
-                                    <ul className="text-sm space-y-1">
-                                        {Object.entries(statsByPlatform[active]!.byDifficulty!).map(([k, v]) => (
-                                            <li key={k} className="flex items-center justify-between">
-                                                <span className="text-muted-foreground">{k}</span>
-                                                <span className="font-bold text-foreground">{v}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">
-                                        {"Backend fetcher not wired yet"}
-                                    </p>
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">No stats connected yet.</p>
-                        )}
-                    </GlassCard>
+                    <ConnectedStatsCard
+                        stats={statsByPlatform[active]}
+                        platformMeta={activePlatformMeta}
+                        onRefresh={() => handleRefresh(active)}
+                        loading={Boolean(loading[active])}
+                    />
                 </div>
 
                 {/* Right: recommendations */}
@@ -418,16 +411,374 @@ function CodingPlatformsPage() {
                         </div>
                     </GlassCard>
 
-                    <GlassCard variant="strong">
-                        <p className="text-sm font-semibold mb-2 text-foreground">Note</p>
-                        <p className="text-xs text-muted-foreground">
-                            This page includes the UX/tabs layout now. Backend endpoints for coding
-                            stats + caching + recommendations will replace the placeholder UI.
-                        </p>
-                    </GlassCard>
                 </div>
             </div>
         </div>
+    );
+}
+
+function ConnectedStatsCard({
+    stats,
+    platformMeta,
+    onRefresh,
+    loading,
+}: {
+    stats?: CodingProfileStats;
+    platformMeta: { key: Platform; label: string; icon: React.ReactNode };
+    onRefresh: () => void;
+    loading?: boolean;
+}) {
+    const solved = Number(stats?.solved ?? 0);
+    const byDiff = stats?.byDifficulty || {};
+
+    const easy = Number(byDiff.Easy ?? byDiff.easy ?? 0);
+    const medium = Number(byDiff.Medium ?? byDiff.medium ?? 0);
+    const hard = Number(byDiff.Hard ?? byDiff.hard ?? 0);
+
+    const otherEntries = Object.entries(byDiff).filter(
+        ([k]) => !["Easy", "easy", "Medium", "medium", "Hard", "hard", "All", "all"].includes(k)
+    );
+
+    const sumDiff = easy + medium + hard;
+    const effectiveTotal = sumDiff > 0 ? sumDiff : (solved > 0 ? solved : 1);
+
+    const easyPct = sumDiff > 0 ? (easy / effectiveTotal) * 100 : (solved > 0 ? 50 : 0);
+    const medPct = sumDiff > 0 ? (medium / effectiveTotal) * 100 : (solved > 0 ? 35 : 0);
+    const hardPct = sumDiff > 0 ? (hard / effectiveTotal) * 100 : (solved > 0 ? 15 : 0);
+
+    const ranking = stats?.ranking;
+    const rating = stats?.rating;
+
+    // SVG Donut calculation metrics
+    const radius = 34;
+    const circumference = 2 * Math.PI * radius; // ~213.63
+    const easyStroke = (easyPct / 100) * circumference;
+    const medStroke = (medPct / 100) * circumference;
+    const hardStroke = (hardPct / 100) * circumference;
+
+    const hasStats = Boolean(stats && (solved > 0 || Object.keys(byDiff).length > 0));
+
+    const solverTier =
+        solved >= 500
+            ? { label: "Elite Problem Solver", badgeClass: "text-amber-500 bg-amber-500/10 border-amber-500/25" }
+            : solved >= 250
+            ? { label: "Advanced Coder", badgeClass: "text-purple-500 bg-purple-500/10 border-purple-500/25" }
+            : solved >= 50
+            ? { label: "Intermediate Coder", badgeClass: "text-blue-500 bg-blue-500/10 border-blue-500/25" }
+            : { label: "Getting Started", badgeClass: "text-emerald-500 bg-emerald-500/10 border-emerald-500/25" };
+
+    return (
+        <GlassCard className="relative overflow-hidden transition-all duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                        {platformMeta.icon}
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-base text-foreground flex items-center gap-2">
+                            Connected Stats
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                            {platformMeta.label} Live Telemetry & Breakdown
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {hasStats ? (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            Live Synced
+                        </div>
+                    ) : (
+                        <span className="text-xs font-medium text-muted-foreground px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/5 border border-white/10">
+                            Not Connected
+                        </span>
+                    )}
+
+                    <button
+                        onClick={onRefresh}
+                        disabled={loading}
+                        title="Refresh live stats"
+                        className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                        <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin text-primary")} />
+                    </button>
+                </div>
+            </div>
+
+            {hasStats ? (
+                <div className="space-y-4">
+                    {/* Hero Problem-Solving Showcase Banner with Donut Chart */}
+                    <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/[0.04] to-transparent shadow-xs">
+                        <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="space-y-1">
+                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <Trophy className="h-3.5 w-3.5 text-amber-500" /> Problems Solved
+                                </span>
+                                <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight flex items-baseline gap-2">
+                                    {solved.toLocaleString()}
+                                    <span className="text-xs font-medium text-muted-foreground">total</span>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                                    <span className={cn("text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-xs", solverTier.badgeClass)}>
+                                        {solverTier.label}
+                                    </span>
+                                    <span className="text-[11px] font-medium text-muted-foreground bg-foreground/5 px-2 py-0.5 rounded-md border border-foreground/10">
+                                        {platformMeta.label}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Donut Chart Visual */}
+                            <div className="relative flex items-center justify-center shrink-0">
+                                <svg className="w-20 h-20 -rotate-90" viewBox="0 0 88 88">
+                                    {/* Background Track */}
+                                    <circle
+                                        cx="44"
+                                        cy="44"
+                                        r={radius}
+                                        fill="transparent"
+                                        stroke="currentColor"
+                                        strokeWidth="7"
+                                        className="text-muted/15"
+                                    />
+                                    {/* Easy Arc */}
+                                    {easyStroke > 0 && (
+                                        <circle
+                                            cx="44"
+                                            cy="44"
+                                            r={radius}
+                                            fill="transparent"
+                                            stroke="#10b981"
+                                            strokeWidth="7"
+                                            strokeDasharray={`${easyStroke} ${circumference}`}
+                                            strokeDashoffset="0"
+                                            strokeLinecap="round"
+                                            className="transition-all duration-700"
+                                        />
+                                    )}
+                                    {/* Medium Arc */}
+                                    {medStroke > 0 && (
+                                        <circle
+                                            cx="44"
+                                            cy="44"
+                                            r={radius}
+                                            fill="transparent"
+                                            stroke="#f59e0b"
+                                            strokeWidth="7"
+                                            strokeDasharray={`${medStroke} ${circumference}`}
+                                            strokeDashoffset={`${-easyStroke}`}
+                                            strokeLinecap="round"
+                                            className="transition-all duration-700"
+                                        />
+                                    )}
+                                    {/* Hard Arc */}
+                                    {hardStroke > 0 && (
+                                        <circle
+                                            cx="44"
+                                            cy="44"
+                                            r={radius}
+                                            fill="transparent"
+                                            stroke="#f43f5e"
+                                            strokeWidth="7"
+                                            strokeDasharray={`${hardStroke} ${circumference}`}
+                                            strokeDashoffset={`${-(easyStroke + medStroke)}`}
+                                            strokeLinecap="round"
+                                            className="transition-all duration-700"
+                                        />
+                                    )}
+                                </svg>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                                    <Flame className="h-5 w-5 text-amber-500 animate-pulse" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Proportional Segmented Progress Bar */}
+                    <div className="space-y-1.5">
+                        <div className="flex justify-between items-center text-xs font-medium text-muted-foreground">
+                            <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                                <BarChart3 className="h-3.5 w-3.5 text-primary" /> Difficulty Split
+                            </span>
+                            <span className="text-xs font-mono text-muted-foreground">
+                                {easy} Easy • {medium} Med • {hard} Hard
+                            </span>
+                        </div>
+                        <div className="h-3 w-full rounded-full bg-slate-100 dark:bg-white/5 overflow-hidden flex p-0.5 gap-0.5 border border-slate-200 dark:border-white/10 shadow-inner">
+                            {easyPct > 0 && (
+                                <div
+                                    style={{ width: `${easyPct}%` }}
+                                    className="h-full bg-emerald-500 rounded-l-full transition-all duration-700 hover:brightness-110 cursor-pointer"
+                                    title={`Easy: ${easy} (${easyPct.toFixed(1)}%)`}
+                                />
+                            )}
+                            {medPct > 0 && (
+                                <div
+                                    style={{ width: `${medPct}%` }}
+                                    className={cn(
+                                        "h-full bg-amber-500 transition-all duration-700 hover:brightness-110 cursor-pointer",
+                                        easyPct === 0 && "rounded-l-full",
+                                        hardPct === 0 && "rounded-r-full"
+                                    )}
+                                    title={`Medium: ${medium} (${medPct.toFixed(1)}%)`}
+                                />
+                            )}
+                            {hardPct > 0 && (
+                                <div
+                                    style={{ width: `${hardPct}%` }}
+                                    className="h-full bg-rose-500 rounded-r-full transition-all duration-700 hover:brightness-110 cursor-pointer"
+                                    title={`Hard: ${hard} (${hardPct.toFixed(1)}%)`}
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Difficulty Metric Cards Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* Easy Card */}
+                        <div className="p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.07] hover:bg-emerald-500/[0.1] transition-all duration-200 shadow-xs group">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                                    <span className="text-xs font-bold text-foreground">Easy</span>
+                                </div>
+                                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-md font-mono">
+                                    {easyPct.toFixed(1)}%
+                                </span>
+                            </div>
+                            <div className="flex items-baseline justify-between mt-2">
+                                <span className="text-2xl font-black text-foreground">{easy.toLocaleString()}</span>
+                                <span className="text-[11px] text-muted-foreground">solved</span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-emerald-500/20 mt-2.5 overflow-hidden">
+                                <div
+                                    className="h-full bg-emerald-500 rounded-full transition-all duration-700"
+                                    style={{ width: `${easyPct}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Medium Card */}
+                        <div className="p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/[0.04] dark:bg-amber-500/[0.07] hover:bg-amber-500/[0.1] transition-all duration-200 shadow-xs group">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                                    <span className="text-xs font-bold text-foreground">Medium</span>
+                                </div>
+                                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-md font-mono">
+                                    {medPct.toFixed(1)}%
+                                </span>
+                            </div>
+                            <div className="flex items-baseline justify-between mt-2">
+                                <span className="text-2xl font-black text-foreground">{medium.toLocaleString()}</span>
+                                <span className="text-[11px] text-muted-foreground">solved</span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-amber-500/20 mt-2.5 overflow-hidden">
+                                <div
+                                    className="h-full bg-amber-500 rounded-full transition-all duration-700"
+                                    style={{ width: `${medPct}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Hard Card */}
+                        <div className="p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/[0.04] dark:bg-rose-500/[0.07] hover:bg-rose-500/[0.1] transition-all duration-200 shadow-xs group">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />
+                                    <span className="text-xs font-bold text-foreground">Hard</span>
+                                </div>
+                                <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-md font-mono">
+                                    {hardPct.toFixed(1)}%
+                                </span>
+                            </div>
+                            <div className="flex items-baseline justify-between mt-2">
+                                <span className="text-2xl font-black text-foreground">{hard.toLocaleString()}</span>
+                                <span className="text-[11px] text-muted-foreground">solved</span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-rose-500/20 mt-2.5 overflow-hidden">
+                                <div
+                                    className="h-full bg-rose-500 rounded-full transition-all duration-700"
+                                    style={{ width: `${hardPct}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Non-standard categories if present */}
+                    {otherEntries.length > 0 && (
+                        <div className="p-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                                Additional Categories
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {otherEntries.map(([k, v]) => (
+                                    <div key={k} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-foreground/5 text-xs font-medium text-foreground">
+                                        <span className="text-muted-foreground">{k}:</span>
+                                        <span className="font-bold">{v}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Global Rank & Contest Rating Ribbon */}
+                    {(ranking || rating) && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                            {ranking && (
+                                <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-500/[0.05] border border-blue-500/20 shadow-xs">
+                                    <div className="p-2 rounded-lg bg-blue-500/15 text-blue-500 shrink-0">
+                                        <Award className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                            Global Ranking
+                                        </div>
+                                        <div className="text-sm font-black text-foreground">
+                                            #{Number(ranking).toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {rating && (
+                                <div className="flex items-center gap-3 p-3 rounded-xl bg-purple-500/[0.05] border border-purple-500/20 shadow-xs">
+                                    <div className="p-2 rounded-lg bg-purple-500/15 text-purple-500 shrink-0">
+                                        <TrendingUp className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                            Contest Rating
+                                        </div>
+                                        <div className="text-sm font-black text-foreground">
+                                            {Math.round(Number(rating)).toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="text-center py-8 px-4 rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3 border border-primary/20 shadow-xs">
+                        {platformMeta.icon}
+                    </div>
+                    <h4 className="text-sm font-bold text-foreground">No {platformMeta.label} Stats Connected</h4>
+                    <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1 mb-4">
+                        Enter your profile URL in the field above and click <span className="font-semibold text-foreground">Save</span> to sync live problem-solving telemetry, difficulty breakdowns, and unlock recommendations.
+                    </p>
+                </div>
+            )}
+        </GlassCard>
     );
 }
 

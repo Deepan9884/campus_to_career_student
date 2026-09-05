@@ -318,7 +318,7 @@ export function SuperDreamBrainAnalyzer() {
         <div className="flex items-center gap-2.5 shrink-0 relative z-10">
           <button
             onClick={handleExportTelemetry}
-            className="px-4 py-2 rounded-full text-xs font-medium transition flex items-center gap-2 cursor-pointer bg-white/5 hover:bg-white/10 text-[var(--foreground)] border border-white/12"
+            className="px-4 py-2 rounded-full text-xs font-medium transition flex items-center gap-2 cursor-pointer bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-[var(--foreground)] border border-slate-300/80 dark:border-white/12 shadow-xs"
           >
             <Download className="w-3.5 h-3.5" /> Export Telemetry JSON
           </button>
@@ -376,14 +376,14 @@ export function SuperDreamBrainAnalyzer() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
-                <PolarGrid stroke="rgba(167,139,250,0.15)" />
+                <PolarGrid stroke="rgba(167,139,250,0.2)" />
                 <PolarAngleAxis
                   dataKey="subject"
                   stroke="rgba(167,139,250,0.4)"
                   fontSize={9}
-                  tick={{ fill: "#A89FCE" }}
+                  tick={{ fill: "#64748B", fontSize: 9.5 }}
                 />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(167,139,250,0.15)" fontSize={9} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(167,139,250,0.2)" fontSize={9} />
                 <Radar name="Student Score" dataKey="score" stroke="#A78BFA" fill="#A78BFA" fillOpacity={0.35} />
                 <Radar name="Target Benchmark" dataKey="benchmark" stroke="#F9A8D4" fill="#F9A8D4" fillOpacity={0.12} />
                 <Tooltip
@@ -393,17 +393,17 @@ export function SuperDreamBrainAnalyzer() {
                       const benchmark = payload.find((p) => p.dataKey === "benchmark")?.value ?? 0;
                       const title = payload[0]?.payload?.subject || "Section";
                       return (
-                        <div className="p-3 rounded-2xl bg-[#0f0a1c]/95 border border-purple-500/30 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[150px]">
-                          <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">
+                        <div className="p-3 rounded-2xl bg-white/95 dark:bg-[#0f0a1c]/95 border border-purple-200 dark:border-purple-500/30 shadow-xl backdrop-blur-xl space-y-1.5 min-w-[150px]">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white tracking-wide border-b border-slate-200/80 dark:border-white/10 pb-1">
                             {title}
                           </p>
-                          <div className="flex items-center justify-between text-xs text-purple-200">
-                            <span>Score:</span>
-                            <strong className="text-purple-300 font-bold">{score}%</strong>
+                          <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
+                            <span className="font-medium">Score:</span>
+                            <strong className="text-purple-600 dark:text-purple-300 font-bold">{score}%</strong>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-pink-300">
-                            <span>Benchmark:</span>
-                            <strong className="text-pink-200 font-bold">{benchmark}%</strong>
+                          <div className="flex items-center justify-between text-xs text-pink-700 dark:text-pink-300">
+                            <span className="font-medium">Benchmark:</span>
+                            <strong className="text-pink-600 dark:text-pink-200 font-bold">{benchmark}%</strong>
                           </div>
                         </div>
                       );
@@ -436,8 +436,8 @@ export function SuperDreamBrainAnalyzer() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryBarData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="rgba(167,139,250,0.3)" fontSize={9} />
-                <YAxis stroke="rgba(167,139,250,0.3)" fontSize={10} />
+                <XAxis dataKey="name" stroke="rgba(167,139,250,0.4)" fontSize={9} tick={{ fill: "#64748B", fontSize: 9.5 }} />
+                <YAxis stroke="rgba(167,139,250,0.4)" fontSize={10} tick={{ fill: "#64748B", fontSize: 10 }} />
                 <Tooltip
                   cursor={{ fill: "rgba(167, 139, 250, 0.08)", radius: 6 }}
                   content={({ active, payload, label }) => {
@@ -445,17 +445,17 @@ export function SuperDreamBrainAnalyzer() {
                       const obtained = payload.find((p) => p.dataKey === "obtained")?.value ?? 0;
                       const max = payload.find((p) => p.dataKey === "max")?.value ?? 0;
                       return (
-                        <div className="p-3 rounded-2xl bg-[#0f0a1c]/95 border border-purple-500/30 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[150px]">
-                          <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">
+                        <div className="p-3 rounded-2xl bg-white/95 dark:bg-[#0f0a1c]/95 border border-purple-200 dark:border-purple-500/30 shadow-xl backdrop-blur-xl space-y-1.5 min-w-[150px]">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white tracking-wide border-b border-slate-200/80 dark:border-white/10 pb-1">
                             {label}
                           </p>
-                          <div className="flex items-center justify-between text-xs text-purple-200">
+                          <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
                             <span className="font-medium">Obtained Marks:</span>
-                            <strong className="text-purple-300 font-bold ml-2">{obtained}</strong>
+                            <strong className="text-purple-600 dark:text-purple-300 font-bold ml-2">{obtained}</strong>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-slate-300">
+                          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
                             <span className="font-medium">Max Marks:</span>
-                            <strong className="text-slate-200 font-semibold ml-2">{max}</strong>
+                            <strong className="text-slate-800 dark:text-slate-200 font-semibold ml-2">{max}</strong>
                           </div>
                         </div>
                       );
@@ -484,14 +484,14 @@ export function SuperDreamBrainAnalyzer() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
-                <Building2 className="w-3.5 h-3.5 text-amber-400" />
+                <Building2 className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 Target Company Cutoff vs Candidate Score
               </h3>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
                 Benchmark scores required for Tier-1 Super Dream companies (₹40–75 LPA).
               </p>
             </div>
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25">
+            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
               Cutoff: 88–95%
             </span>
           </div>
@@ -499,29 +499,29 @@ export function SuperDreamBrainAnalyzer() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={companyComparisonData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="rgba(251,191,36,0.3)" fontSize={9} />
-                <YAxis domain={[0, 100]} stroke="rgba(251,191,36,0.3)" fontSize={10} />
+                <XAxis dataKey="name" stroke="rgba(251,191,36,0.4)" fontSize={9} tick={{ fill: "#64748B", fontSize: 9.5 }} />
+                <YAxis domain={[0, 100]} stroke="rgba(251,191,36,0.4)" fontSize={10} tick={{ fill: "#64748B", fontSize: 10 }} />
                 <Tooltip
                   cursor={{ fill: "rgba(251,191,36,0.08)", radius: 6 }}
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       const data = payload[0]?.payload;
                       return (
-                        <div className="p-3 rounded-2xl bg-[#0f0a1c]/95 border border-amber-500/30 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[170px]">
-                          <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">
+                        <div className="p-3 rounded-2xl bg-white/95 dark:bg-[#0f0a1c]/95 border border-amber-200 dark:border-amber-500/30 shadow-xl backdrop-blur-xl space-y-1.5 min-w-[170px]">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white tracking-wide border-b border-slate-200/80 dark:border-white/10 pb-1">
                             {label} ({data?.package})
                           </p>
-                          <div className="flex items-center justify-between text-xs text-amber-200">
-                            <span>Target Cutoff:</span>
-                            <strong className="text-amber-300 font-bold">{data?.cutoff}%</strong>
+                          <div className="flex items-center justify-between text-xs text-amber-700 dark:text-amber-200">
+                            <span className="font-medium">Target Cutoff:</span>
+                            <strong className="text-amber-600 dark:text-amber-300 font-bold">{data?.cutoff}%</strong>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-purple-200">
-                            <span>Your Score:</span>
-                            <strong className="text-purple-300 font-bold">{data?.current}%</strong>
+                          <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
+                            <span className="font-medium">Your Score:</span>
+                            <strong className="text-purple-600 dark:text-purple-300 font-bold">{data?.current}%</strong>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-rose-300 border-t border-white/10 pt-1">
-                            <span>Readiness Gap:</span>
-                            <strong className={data?.gap > 0 ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>
+                          <div className="flex items-center justify-between text-xs border-t border-slate-200/80 dark:border-white/10 pt-1">
+                            <span className="font-medium text-slate-600 dark:text-slate-300">Readiness Gap:</span>
+                            <strong className={data?.gap > 0 ? "text-rose-600 dark:text-rose-400 font-bold" : "text-emerald-600 dark:text-emerald-400 font-bold"}>
                               {data?.gap > 0 ? `-${data?.gap}% Gap` : "Eligible ✓"}
                             </strong>
                           </div>
@@ -549,14 +549,14 @@ export function SuperDreamBrainAnalyzer() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
-                <Target className="w-3.5 h-3.5 text-sky-400" />
+                <Target className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
                 Placement Package CTC Probability Curve
               </h3>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
                 Calculated statistical probability of securing offers across CTC package tiers.
               </p>
             </div>
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/25">
+            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/25">
               Current: {tier.packageRange}
             </span>
           </div>
@@ -570,19 +570,19 @@ export function SuperDreamBrainAnalyzer() {
                     <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="tier" stroke="rgba(56,189,248,0.3)" fontSize={8.5} />
-                <YAxis domain={[0, 100]} stroke="rgba(56,189,248,0.3)" fontSize={10} />
+                <XAxis dataKey="tier" stroke="rgba(56,189,248,0.4)" fontSize={8.5} tick={{ fill: "#64748B", fontSize: 9 }} />
+                <YAxis domain={[0, 100]} stroke="rgba(56,189,248,0.4)" fontSize={10} tick={{ fill: "#64748B", fontSize: 10 }} />
                 <Tooltip
                   cursor={{ stroke: "rgba(56,189,248,0.3)", strokeWidth: 1, strokeDasharray: "3 3" }}
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       const prob = payload[0]?.value;
                       return (
-                        <div className="p-3 rounded-2xl bg-[#0f0a1c]/95 border border-sky-500/30 shadow-2xl backdrop-blur-xl space-y-1 min-w-[160px]">
-                          <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">{label}</p>
-                          <div className="flex items-center justify-between text-xs text-sky-200">
-                            <span>Placement Probability:</span>
-                            <strong className="text-sky-300 font-bold text-sm">{prob}%</strong>
+                        <div className="p-3 rounded-2xl bg-white/95 dark:bg-[#0f0a1c]/95 border border-sky-200 dark:border-sky-500/30 shadow-xl backdrop-blur-xl space-y-1 min-w-[160px]">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white tracking-wide border-b border-slate-200/80 dark:border-white/10 pb-1">{label}</p>
+                          <div className="flex items-center justify-between text-xs text-sky-700 dark:text-sky-200">
+                            <span className="font-medium">Placement Probability:</span>
+                            <strong className="text-sky-600 dark:text-sky-300 font-bold text-sm">{prob}%</strong>
                           </div>
                         </div>
                       );
@@ -610,7 +610,7 @@ export function SuperDreamBrainAnalyzer() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
-                <Code2 className="w-3.5 h-3.5 text-emerald-400" />
+                <Code2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                 Competitive Coding & Problem Solving Velocity
               </h3>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
@@ -619,7 +619,7 @@ export function SuperDreamBrainAnalyzer() {
             </div>
             <button
               onClick={() => setActiveSectionId(3)}
-              className="text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 transition cursor-pointer flex items-center gap-1"
+              className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition cursor-pointer flex items-center gap-1"
             >
               Sync Profiles <ArrowRight className="w-3 h-3" />
             </button>
@@ -628,8 +628,8 @@ export function SuperDreamBrainAnalyzer() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={codingTelemetryData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="rgba(16,185,129,0.3)" fontSize={9} />
-                <YAxis stroke="rgba(16,185,129,0.3)" fontSize={10} />
+                <XAxis dataKey="name" stroke="rgba(16,185,129,0.4)" fontSize={9} tick={{ fill: "#64748B", fontSize: 9.5 }} />
+                <YAxis stroke="rgba(16,185,129,0.4)" fontSize={10} tick={{ fill: "#64748B", fontSize: 10 }} />
                 <Tooltip
                   cursor={{ fill: "rgba(16,185,129,0.08)", radius: 6 }}
                   content={({ active, payload, label }) => {
@@ -637,19 +637,19 @@ export function SuperDreamBrainAnalyzer() {
                       const data = payload[0]?.payload;
                       const pct = Math.round((data.current / (data.target || 1)) * 100);
                       return (
-                        <div className="p-3 rounded-2xl bg-[#0f0a1c]/95 border border-emerald-500/30 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[150px]">
-                          <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">{label}</p>
-                          <div className="flex items-center justify-between text-xs text-emerald-200">
-                            <span>Target Count:</span>
-                            <strong className="text-emerald-300 font-bold">{data.target}</strong>
+                        <div className="p-3 rounded-2xl bg-white/95 dark:bg-[#0f0a1c]/95 border border-emerald-200 dark:border-emerald-500/30 shadow-xl backdrop-blur-xl space-y-1.5 min-w-[150px]">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white tracking-wide border-b border-slate-200/80 dark:border-white/10 pb-1">{label}</p>
+                          <div className="flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-200">
+                            <span className="font-medium">Target Count:</span>
+                            <strong className="text-emerald-600 dark:text-emerald-300 font-bold">{data.target}</strong>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-purple-200">
-                            <span>Solved Synced:</span>
-                            <strong className="text-purple-300 font-bold">{data.current}</strong>
+                          <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
+                            <span className="font-medium">Solved Synced:</span>
+                            <strong className="text-purple-600 dark:text-purple-300 font-bold">{data.current}</strong>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-sky-200 border-t border-white/10 pt-1">
-                            <span>Completion:</span>
-                            <strong className="text-sky-300 font-bold">{pct}%</strong>
+                          <div className="flex items-center justify-between text-xs border-t border-slate-200/80 dark:border-white/10 pt-1">
+                            <span className="font-medium text-slate-600 dark:text-sky-200">Completion:</span>
+                            <strong className="text-sky-600 dark:text-sky-300 font-bold">{pct}%</strong>
                           </div>
                         </div>
                       );
@@ -675,14 +675,14 @@ export function SuperDreamBrainAnalyzer() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
-                <PieIcon className="w-3.5 h-3.5 text-pink-400" />
+                <PieIcon className="w-3.5 h-3.5 text-pink-500 dark:text-pink-400" />
                 10-Section Deliverables & Verification Pipeline
               </h3>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
                 Real-time breakdown of all {completedCount + inProgressCount + pendingCount} curriculum requirements.
               </p>
             </div>
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-300 border border-pink-500/25">
+            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-500/25">
               {completedCount} Verified
             </span>
           </div>
@@ -707,9 +707,9 @@ export function SuperDreamBrainAnalyzer() {
                       if (active && payload && payload.length) {
                         const item = payload[0];
                         return (
-                          <div className="p-2.5 rounded-xl bg-[#0f0a1c]/95 border border-pink-500/30 shadow-xl text-xs space-y-1">
-                            <span className="font-semibold text-white">{item.name}</span>
-                            <p className="text-pink-300 font-mono font-bold">{item.value} Tasks</p>
+                          <div className="p-2.5 rounded-xl bg-white/95 dark:bg-[#0f0a1c]/95 border border-pink-200 dark:border-pink-500/30 shadow-xl text-xs space-y-1">
+                            <span className="font-semibold text-slate-900 dark:text-white">{item.name}</span>
+                            <p className="text-pink-600 dark:text-pink-300 font-mono font-bold">{item.value} Tasks</p>
                           </div>
                         );
                       }
@@ -725,25 +725,25 @@ export function SuperDreamBrainAnalyzer() {
               <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                  <span className="text-xs text-emerald-200 font-medium">Verified / Completed</span>
+                  <span className="text-xs text-emerald-900 dark:text-emerald-200 font-medium">Verified / Completed</span>
                 </div>
-                <span className="font-mono font-bold text-xs text-emerald-300">{completedCount}</span>
+                <span className="font-mono font-bold text-xs text-emerald-700 dark:text-emerald-300">{completedCount}</span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-amber-500" />
-                  <span className="text-xs text-amber-200 font-medium">Submitted / In Review</span>
+                  <span className="text-xs text-amber-900 dark:text-amber-200 font-medium">Submitted / In Review</span>
                 </div>
-                <span className="font-mono font-bold text-xs text-amber-300">{inProgressCount}</span>
+                <span className="font-mono font-bold text-xs text-amber-700 dark:text-amber-300">{inProgressCount}</span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-500/10 border border-slate-500/20 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-slate-500" />
-                  <span className="text-xs text-slate-300 font-medium">Not Started</span>
+                  <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">Not Started</span>
                 </div>
-                <span className="font-mono font-bold text-xs text-slate-400">{pendingCount}</span>
+                <span className="font-mono font-bold text-xs text-slate-700 dark:text-slate-400">{pendingCount}</span>
               </div>
             </div>
           </div>
@@ -761,7 +761,7 @@ export function SuperDreamBrainAnalyzer() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)] flex items-center gap-2">
-              <Mic className="w-3.5 h-3.5 text-rose-400" />
+              <Mic className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
               7-Pillar Interview Simulation Readiness Scorecard
             </h3>
             <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
@@ -779,26 +779,26 @@ export function SuperDreamBrainAnalyzer() {
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={interviewReadinessData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <XAxis dataKey="name" stroke="rgba(244,63,94,0.3)" fontSize={9} />
-              <YAxis stroke="rgba(244,63,94,0.3)" fontSize={10} />
+              <XAxis dataKey="name" stroke="rgba(244,63,94,0.4)" fontSize={9} tick={{ fill: "#64748B", fontSize: 9.5 }} />
+              <YAxis stroke="rgba(244,63,94,0.4)" fontSize={10} tick={{ fill: "#64748B", fontSize: 10 }} />
               <Tooltip
                 content={({ active, payload, label }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0]?.payload;
                     return (
-                      <div className="p-3 rounded-2xl bg-[#0f0a1c]/95 border border-rose-500/30 shadow-2xl backdrop-blur-xl space-y-1.5 min-w-[170px]">
-                        <p className="text-xs font-bold text-white tracking-wide border-b border-white/10 pb-1">{data?.fullName}</p>
-                        <div className="flex items-center justify-between text-xs text-rose-200">
-                          <span>Target Rounds:</span>
-                          <strong className="text-rose-300 font-bold">{data?.target}</strong>
+                      <div className="p-3 rounded-2xl bg-white/95 dark:bg-[#0f0a1c]/95 border border-rose-200 dark:border-rose-500/30 shadow-xl backdrop-blur-xl space-y-1.5 min-w-[170px]">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white tracking-wide border-b border-slate-200/80 dark:border-white/10 pb-1">{data?.fullName}</p>
+                        <div className="flex items-center justify-between text-xs text-rose-700 dark:text-rose-200">
+                          <span className="font-medium">Target Rounds:</span>
+                          <strong className="text-rose-600 dark:text-rose-300 font-bold">{data?.target}</strong>
                         </div>
-                        <div className="flex items-center justify-between text-xs text-purple-200">
-                          <span>Completed:</span>
-                          <strong className="text-purple-300 font-bold">{data?.current}</strong>
+                        <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
+                          <span className="font-medium">Completed:</span>
+                          <strong className="text-purple-600 dark:text-purple-300 font-bold">{data?.current}</strong>
                         </div>
-                        <div className="flex items-center justify-between text-xs text-emerald-200 border-t border-white/10 pt-1">
-                          <span>Readiness:</span>
-                          <strong className="text-emerald-300 font-bold">{data?.completionPct}%</strong>
+                        <div className="flex items-center justify-between text-xs border-t border-slate-200/80 dark:border-white/10 pt-1">
+                          <span className="font-medium text-slate-600 dark:text-emerald-200">Readiness:</span>
+                          <strong className="text-emerald-600 dark:text-emerald-300 font-bold">{data?.completionPct}%</strong>
                         </div>
                       </div>
                     );
@@ -808,7 +808,7 @@ export function SuperDreamBrainAnalyzer() {
               />
               <Bar dataKey="target" fill="rgba(244,63,94,0.20)" radius={[6, 6, 0, 0]} name="Target Rounds" />
               <Bar dataKey="current" fill="#F43F5E" radius={[6, 6, 0, 0]} name="Completed Rounds" />
-              <Line type="monotone" dataKey="completionPct" stroke="#FDE68A" strokeWidth={2.5} dot={{ r: 4, fill: "#FDE68A" }} name="Completion %" />
+              <Line type="monotone" dataKey="completionPct" stroke="#D97706" strokeWidth={2.5} dot={{ r: 4, fill: "#D97706" }} name="Completion %" />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

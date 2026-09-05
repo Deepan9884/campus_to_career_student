@@ -57,30 +57,30 @@ export function EventCard({
   };
 
   const eventTypeColors: Record<EventType, string> = {
-    hackathon: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    ideathon: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    "coding-competition": "bg-green-500/20 text-green-400 border-green-500/30",
-    ctf: "bg-red-500/20 text-red-400 border-red-500/30",
-    "game-jam": "bg-pink-500/20 text-pink-400 border-pink-500/30",
-    "research-symposium": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-    "startup-weekend": "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    other: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    hackathon: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30",
+    ideathon: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30",
+    "coding-competition": "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30",
+    ctf: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30",
+    "game-jam": "bg-pink-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/30",
+    "research-symposium": "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30",
+    "startup-weekend": "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30",
+    other: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border border-slate-500/30",
   };
 
   const resultColors: Record<EventResult, string> = {
-    winner: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    "runner-up": "bg-slate-300/20 text-slate-300 border-slate-300/30",
-    finalist: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    shortlisted: "bg-green-500/20 text-green-400 border-green-500/30",
-    participated: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    winner: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30",
+    "runner-up": "bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-400/30",
+    finalist: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30",
+    shortlisted: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30",
+    participated: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border border-slate-500/30",
   };
 
   const levelColors: Record<EventLevel, string> = {
-    "intra-college": "bg-gray-500/20 text-gray-400",
-    "inter-college": "bg-blue-500/20 text-blue-400",
-    state: "bg-green-500/20 text-green-400",
-    national: "bg-purple-500/20 text-purple-400",
-    international: "bg-amber-500/20 text-amber-400",
+    "intra-college": "bg-gray-500/15 text-gray-700 dark:text-gray-300 border border-gray-500/20",
+    "inter-college": "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+    state: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+    national: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+    international: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20",
   };
 
   const eventTypeIcons: Record<EventType, typeof Zap> = {
@@ -181,8 +181,8 @@ export function EventCard({
       </div>
 
       {event.projectTitle && (
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="font-medium">{event.projectTitle}</p>
+        <div className="mt-4 pt-4 border-t border-border/60">
+          <p className="font-medium text-foreground">{event.projectTitle}</p>
           {event.problemStatement && (
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{event.problemStatement}</p>
           )}
@@ -192,12 +192,12 @@ export function EventCard({
       {event.techStack.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {event.techStack.slice(0, isFeatured ? 8 : 6).map((tech) => (
-            <span key={tech} className="text-xs px-2 py-1 rounded-full bg-white/5 text-muted-foreground hover:bg-white/10 transition">
+            <span key={tech} className="text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/50 hover:bg-muted transition font-medium">
               {tech}
             </span>
           ))}
           {event.techStack.length > (isFeatured ? 8 : 6) && (
-            <span className="text-xs px-2 py-1 rounded-full bg-white/5 text-muted-foreground">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/50 font-medium">
               +{event.techStack.length - (isFeatured ? 8 : 6)} more
             </span>
           )}
@@ -205,16 +205,16 @@ export function EventCard({
       )}
 
       {event.reflection?.whatDidYouLearn && (
-        <div className="mt-4 pt-4 border-t border-white/10 bg-white/5 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-            <Lightbulb className="h-3 w-3" />
+        <div className="mt-4 pt-4 border-t border-border/60 bg-muted/30 border border-border/40 rounded-xl p-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5 font-medium">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
             <span>Reflection</span>
           </div>
-          <p className="text-sm text-slate-300 line-clamp-2">{event.reflection.whatDidYouLearn}</p>
+          <p className="text-sm text-foreground/90 line-clamp-2">{event.reflection.whatDidYouLearn}</p>
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-4 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1"><Trophy className="h-3 w-3" /> {calculateWinRate([event])}% win rate</span>
           <span className="flex items-center gap-1"><Code className="h-3 w-3" /> {getUniqueTechStack([event]).length} techs</span>
@@ -225,7 +225,7 @@ export function EventCard({
           {onAnalyzeGaps && (
             <button
               onClick={(e) => { e.stopPropagation(); onAnalyzeGaps(event._id); }}
-              className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition flex items-center gap-1"
+              className="text-xs px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60 transition flex items-center gap-1 font-medium"
             >
               <Target className="h-3 w-3" /> Analyze Gaps
             </button>
@@ -233,7 +233,7 @@ export function EventCard({
           {event.certificateUrl && onViewCertificate && (
             <button
               onClick={(e) => { e.stopPropagation(); onViewCertificate(getCertificateUrl(event.certificateUrl)); }}
-              className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition flex items-center gap-1"
+              className="text-xs px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60 transition flex items-center gap-1 font-medium"
             >
               <FileText className="h-3 w-3" /> Certificate
             </button>
@@ -244,7 +244,7 @@ export function EventCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition flex items-center gap-1"
+              className="text-xs px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60 transition flex items-center gap-1 font-medium"
             >
               <ExternalLink className="h-3 w-3" /> Project
             </a>

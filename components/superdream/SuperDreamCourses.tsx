@@ -281,42 +281,42 @@ export function SuperDreamCourses() {
                 if (!isVerifying) setActiveCourseModal(null);
               }}
               disabled={isVerifying}
-              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white disabled:opacity-50"
+              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white disabled:opacity-50"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                 <ShieldCheck className="w-3 h-3" /> Proof Verification Engine
               </div>
-              <h3 className="text-lg font-bold text-white">{activeCourseModal.title}</h3>
-              <p className="text-xs text-slate-400">
-                Candidate: <strong className="text-white">{user?.name || "Student"}</strong> • Provider: {activeCourseModal.provider}
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{activeCourseModal.title}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Candidate: <strong className="text-slate-900 dark:text-white font-semibold">{user?.name || "Student"}</strong> • Provider: {activeCourseModal.provider}
               </p>
             </div>
 
             {isVerifying ? (
               <div className="py-8 space-y-5 text-center">
                 <div className="relative w-20 h-20 mx-auto">
-                  <div className="w-full h-full rounded-full border-4 border-emerald-500/30 border-t-emerald-400 animate-spin" />
+                  <div className="w-full h-full rounded-full border-4 border-emerald-500/30 border-t-emerald-500 dark:border-t-emerald-400 animate-spin" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Scan className="w-8 h-8 text-emerald-400 animate-pulse" />
+                    <Scan className="w-8 h-8 text-emerald-500 dark:text-emerald-400 animate-pulse" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-bold text-white">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
                     Verification in Progress...
                   </p>
-                  <div className="space-y-1 text-xs text-slate-300 font-mono max-w-sm mx-auto text-left bg-slate-950 p-3 rounded-xl border border-white/10">
-                    <p className={cn(verificationStep >= 1 ? "text-emerald-400 font-semibold" : "text-slate-600")}>
+                  <div className="space-y-1 text-xs text-slate-700 dark:text-slate-300 font-mono max-w-sm mx-auto text-left bg-slate-100 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-white/10">
+                    <p className={cn(verificationStep >= 1 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-slate-600")}>
                       ✓ [1/3] Validating candidate details & credential ID...
                     </p>
-                    <p className={cn(verificationStep >= 2 ? "text-emerald-400 font-semibold" : "text-slate-600")}>
+                    <p className={cn(verificationStep >= 2 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-slate-600")}>
                       ✓ [2/3] Cross-referencing {issuerName} syllabus coverage...
                     </p>
-                    <p className={cn(verificationStep >= 3 ? "text-emerald-400 font-semibold" : "text-slate-600")}>
+                    <p className={cn(verificationStep >= 3 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-slate-400 dark:text-slate-600")}>
                       ✓ [3/3] Authenticating certificate proof...
                     </p>
                   </div>
@@ -325,13 +325,13 @@ export function SuperDreamCourses() {
             ) : verificationResult?.success ? (
               <div className="space-y-4 py-2 text-center">
                 <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-1" />
-                  <p className="text-base font-bold text-white">Certificate Verified Successfully!</p>
-                  <p className="text-xs text-emerald-300 font-mono">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500 dark:text-emerald-400 mx-auto mb-1" />
+                  <p className="text-base font-bold text-slate-900 dark:text-white">Certificate Verified Successfully!</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-300 font-mono">
                     Authenticity Score: {verificationResult.score}% • Verified
                   </p>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3 rounded-xl border border-white/10">
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-100 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-white/10">
                   {verificationResult.summary}
                 </p>
                 <button
