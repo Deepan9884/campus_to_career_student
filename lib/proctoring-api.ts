@@ -15,6 +15,14 @@ export type ModuleType = "quiz" | "interview" | "exam";
 export interface ViolationResponse {
   violationCount: number;
   isBlocked: boolean;
+  isProctoringBlocked?: boolean;
+  remainingSeconds?: number;
+  remainingMinutes?: number;
+  blockedAt?: string;
+  mentor?: {
+    name: string;
+    email: string | null;
+  };
   message: string;
 }
 
@@ -22,7 +30,22 @@ export interface ViolationStatusResponse {
   violationCount: number;
   isBlocked: boolean;
   blockedAt?: string;
+  remainingSeconds?: number;
+  remainingMinutes?: number;
   events: Array<{ violationType: ViolationType; detectedAt: string }>;
+}
+
+export interface MyProctoringBlockStatus {
+  isBlocked: boolean;
+  autoUnblocked?: boolean;
+  remainingMs?: number;
+  remainingSeconds?: number;
+  remainingMinutes?: number;
+  blockedAt?: string | null;
+  mentor?: {
+    name: string;
+    email: string | null;
+  };
 }
 
 export async function reportViolation(
@@ -43,4 +66,8 @@ export async function getViolationStatus(
   moduleId: string
 ): Promise<ViolationStatusResponse> {
   return api.get<ViolationStatusResponse>(`/proctoring/status/${moduleId}`);
+}
+
+export async function checkMyProctoringStatus(): Promise<MyProctoringBlockStatus> {
+  return api.get<MyProctoringBlockStatus>("/proctoring/check-status");
 }

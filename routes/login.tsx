@@ -48,7 +48,7 @@ function LoginPage() {
       let msg = "Login failed";
       if (err instanceof ApiError && err.errors && err.errors.length > 0) {
         const firstErr = err.errors[0];
-        msg = (typeof firstErr === "string" ? firstErr : firstErr?.message) || err.message;
+        msg = (typeof firstErr === "string" ? firstErr : (firstErr as any)?.message) || err.message;
       } else if (err instanceof Error && err.message) {
         msg = err.message;
       }
