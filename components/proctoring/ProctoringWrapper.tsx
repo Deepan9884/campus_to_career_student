@@ -44,12 +44,20 @@ export function ProctoringWrapper({
   moduleType,
   moduleId,
   enabled = true,
+  isSuperDream: propIsSuperDream,
   onBlocked,
   onExit,
 }: ProctoringWrapperProps) {
   const [isExamStarted, setIsExamStarted] = useState(false);
   const [isActuallyBlocked, setIsActuallyBlocked] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  const isSuperDream = Boolean(
+    propIsSuperDream ||
+    (typeof window !== "undefined" &&
+      (window.location.pathname.includes("super-dream") || window.location.hash.includes("super-dream"))) ||
+    (typeof moduleId === "string" && moduleId.includes("super-dream"))
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -66,6 +74,7 @@ export function ProctoringWrapper({
     moduleId,
     enabled,
     isStarted: isExamStarted,
+    isSuperDream,
     webcamRequired: false,
     aiFaceDetection: false,
     onBlocked: () => {
@@ -217,13 +226,18 @@ export function ProctoringWrapper({
         </div>
       )}
 
-      {/* 30-Minute Proctoring Blocked Screen Overlay */}
+      {/* Proctoring Blocked Screen Overlay (Classic = 30m countdown, Super Dream = Mentor unblock only) */}
       {isActuallyBlocked && (
         <ProctoringBlockLockoutModal
+          isSuperDream={isSuperDream}
           initialRemainingSeconds={1800}
-          title="Interview Access Suspended (30m)"
-          subtitle="Proctoring Violation Strikeout"
-          message="Candidate has reached the maximum proctoring violations limit. Interview access has been suspended for 30 minutes. Only your assigned mentor can unblock you early."
+          title={isSuperDream ? "Super Dream Interview Suspended" : "Interview Access Suspended (30m)"}
+          subtitle={isSuperDream ? "Super Dream Track · Mentor Authorization Required" : "Proctoring Violation Strikeout"}
+          message={
+            isSuperDream
+              ? "Proctoring security violations were detected in this Super Dream interview. In Super Dream, auto-unblock timers are disabled. Only your assigned mentor can review and unblock your session access."
+              : "Candidate has reached the maximum proctoring violations limit. Interview access has been suspended for 30 minutes. Only your assigned mentor can unblock you early, or access will auto-restore in 30 minutes."
+          }
           onUnblocked={() => {
             setIsActuallyBlocked(false);
             proctoringState.resetSession();

@@ -86,6 +86,7 @@ export interface InterviewEngineProps {
   initialQuestionCount?: number;
   autoStart?: boolean;
   onBackToPillars?: () => void;
+  isSuperDream?: boolean;
 }
 
 export function InterviewEngine({
@@ -99,10 +100,19 @@ export function InterviewEngine({
   initialQuestionCount = 5,
   autoStart = false,
   onBackToPillars,
+  isSuperDream: propIsSuperDream,
 }: InterviewEngineProps) {
   const { user } = useAuth();
   const [mode, setMode] = useState<ViewMode>("setup");
   const [session, setSession] = useState<InterviewSession | null>(null);
+
+  const isSuperDream = Boolean(
+    propIsSuperDream ||
+    (typeof window !== "undefined" &&
+      (window.location.pathname.includes("super-dream") || window.location.hash.includes("super-dream"))) ||
+    title?.toLowerCase().includes("super dream") ||
+    subtitle?.toLowerCase().includes("super dream")
+  );
   const [isAutoStarting, setIsAutoStarting] = useState(Boolean(autoStart));
   const autoStartedRef = useRef(false);
   const [historyViewingId, setHistoryViewingId] = useState<string | null>(null);
@@ -184,6 +194,7 @@ export function InterviewEngine({
             setSession={setSession}
             onFinish={handleFinishSession}
             onBackToSetup={handleBackToSetup}
+            isSuperDream={isSuperDream}
           />
         </div>
       ) : (
@@ -1067,11 +1078,13 @@ function ActiveView({
   setSession,
   onFinish,
   onBackToSetup,
+  isSuperDream,
 }: {
   session: InterviewSession;
   setSession: (s: InterviewSession) => void;
   onFinish: (s: InterviewSession) => void;
   onBackToSetup: () => void;
+  isSuperDream?: boolean;
 }) {
   const currentRoundIndex = session.currentRoundIndex ?? 0;
   const currentRound: InterviewRound = session.rounds[currentRoundIndex] || session.rounds[0];
@@ -1270,6 +1283,7 @@ function ActiveView({
     <ProctoringWrapper
       moduleType="interview"
       moduleId={session._id}
+      isSuperDream={isSuperDream}
       onBlocked={() => setIsExamBlocked(true)}
       onExit={onBackToSetup}
     >

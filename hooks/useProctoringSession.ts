@@ -21,6 +21,7 @@ export interface ProctoringSessionOptions {
   fullscreenEnforced?: boolean;
   tabSwitchLimit?: number;
   copyPasteDisabled?: boolean;
+  isSuperDream?: boolean;
 }
 
 export type ProctoringAiStatus =
@@ -200,7 +201,15 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     fullscreenEnforced = true,
     tabSwitchLimit = 3,
     copyPasteDisabled = false,
+    isSuperDream: propIsSuperDream,
   } = options;
+
+  const isSuperDreamTrack = Boolean(
+    propIsSuperDream ||
+    (typeof window !== "undefined" &&
+      (window.location.pathname.includes("super-dream") || window.location.hash.includes("super-dream"))) ||
+    (typeof moduleId === "string" && moduleId.includes("super-dream"))
+  );
 
   const [cameraAttempt, setCameraAttempt] = useState(0);
 
@@ -381,11 +390,11 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       });
 
       // Fire-and-forget sync to backend
-      reportViolation(moduleType, effectiveModuleId, type, forceBlock).catch((err) => {
+      reportViolation(moduleType, effectiveModuleId, type, forceBlock, isSuperDreamTrack).catch((err) => {
         console.warn("[Proctoring Sync] Remote violation log error, local strike recorded:", err);
       });
     },
-    [moduleType, moduleId, tabSwitchLimit]
+    [moduleType, moduleId, tabSwitchLimit, isSuperDreamTrack]
   );
 
   const clearFullscreenCountdown = useCallback(() => {

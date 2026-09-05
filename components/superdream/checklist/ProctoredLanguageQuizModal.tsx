@@ -209,6 +209,7 @@ export function ProctoredLanguageQuizModal({
       subTopicName={`${quizData.languageName} (Super Dream Proctored Exam)`}
       customQuiz={customQuiz}
       onCustomSubmit={handleCustomSubmit}
+      isSuperDream={true}
     />
   );
 }

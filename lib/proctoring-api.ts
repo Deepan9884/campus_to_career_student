@@ -16,6 +16,8 @@ export interface ViolationResponse {
   violationCount: number;
   isBlocked: boolean;
   isProctoringBlocked?: boolean;
+  isSuperDream?: boolean;
+  hasTimer?: boolean;
   remainingSeconds?: number;
   remainingMinutes?: number;
   blockedAt?: string;
@@ -29,6 +31,8 @@ export interface ViolationResponse {
 export interface ViolationStatusResponse {
   violationCount: number;
   isBlocked: boolean;
+  isSuperDream?: boolean;
+  hasTimer?: boolean;
   blockedAt?: string;
   remainingSeconds?: number;
   remainingMinutes?: number;
@@ -38,6 +42,8 @@ export interface ViolationStatusResponse {
 export interface MyProctoringBlockStatus {
   isBlocked: boolean;
   autoUnblocked?: boolean;
+  isSuperDream?: boolean;
+  hasTimer?: boolean;
   remainingMs?: number;
   remainingSeconds?: number;
   remainingMinutes?: number;
@@ -52,13 +58,15 @@ export async function reportViolation(
   moduleType: ModuleType,
   moduleId: string,
   violationType: ViolationType,
-  forceBlock?: boolean
+  forceBlock?: boolean,
+  isSuperDream?: boolean
 ): Promise<ViolationResponse> {
   return api.post<ViolationResponse>("/proctoring/violation", {
     moduleType,
     moduleId,
     violationType,
     ...(forceBlock ? { forceBlock: true } : {}),
+    ...(isSuperDream ? { isSuperDream: true, track: "super_dream" } : { track: "classic" }),
   });
 }
 
