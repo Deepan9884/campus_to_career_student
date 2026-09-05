@@ -159,10 +159,10 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
   return (
     <div className="space-y-6">
       {/* ── 1. Top Multi-Pillar Scoreboard ── */}
-      <div className="grid lg:grid-cols-[auto_1fr] gap-6 items-center p-5 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10">
-        <div className="flex flex-col items-center justify-center p-2 text-center shrink-0">
-          <ScoreRing score={display.atsScore ?? 0} label="Composite ATS" />
-          <span className="text-[11px] font-semibold mt-1 px-2.5 py-0.5 rounded-full bg-[color:var(--color-primary)]/10 text-[color:var(--color-primary)] border border-[color:var(--color-primary)]/20">
+      <div className="grid lg:grid-cols-[auto_1fr] gap-6 items-center p-5 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 min-w-0">
+        <div className="flex flex-col items-center justify-center p-2 text-center shrink-0 min-w-[144px]">
+          <ScoreRing score={display.atsScore ?? 0} size={144} stroke={12} label="Composite ATS" />
+          <span className="text-[11px] font-semibold mt-1.5 px-2.5 py-0.5 rounded-full bg-[color:var(--color-primary)]/10 text-[color:var(--color-primary)] border border-[color:var(--color-primary)]/20">
             {(display.atsScore ?? 0) >= 75 ? "Placement Ready" : (display.atsScore ?? 0) >= 55 ? "Review Ready" : "Needs Polish"}
           </span>
           <span className="text-[10px] text-muted-foreground mt-1">
@@ -171,26 +171,26 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
         </div>
 
         {/* 5-Pillar Visual Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2.5 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-6 2xl:grid-cols-5 gap-2.5 w-full min-w-0">
           {/* Pillar 1: Internships */}
           <div
             onClick={() => setActiveTab("internships")}
-            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between min-w-0 overflow-hidden col-span-1 md:col-span-2 2xl:col-span-1 ${
               activeTab === "internships"
                 ? "bg-indigo-500/15 border-indigo-500/40 shadow-sm"
                 : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.06]"
             }`}
           >
-            <div className="flex items-center justify-between gap-1 mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <Briefcase className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
-                <span className="text-[11px] font-bold text-foreground">Internships</span>
+            <div className="flex items-center justify-between gap-1.5 mb-1.5 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                <Briefcase className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                <span className="text-[11px] font-bold text-foreground truncate">Internships</span>
               </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold">25%</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold shrink-0">25%</span>
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-lg font-extrabold text-foreground">{pillars.internshipsAndWork.score}%</span>
-              <span className="text-[10px] text-muted-foreground font-medium">
+            <div className="flex items-baseline justify-between gap-1 mt-1 min-w-0">
+              <span className="text-base sm:text-lg font-extrabold text-foreground shrink-0 tabular-nums">{pillars.internshipsAndWork.score}%</span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate text-right">
                 {totalInternshipMonths > 0 ? `${totalInternshipMonths}m total` : `${internships.length} roles`}
               </span>
             </div>
@@ -205,22 +205,22 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
           {/* Pillar 2: Projects */}
           <div
             onClick={() => setActiveTab("projects")}
-            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between min-w-0 overflow-hidden col-span-1 md:col-span-2 2xl:col-span-1 ${
               activeTab === "projects"
                 ? "bg-purple-500/15 border-purple-500/40 shadow-sm"
                 : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.06]"
             }`}
           >
-            <div className="flex items-center justify-between gap-1 mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <Code2 className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" />
-                <span className="text-[11px] font-bold text-foreground">Projects Depth</span>
+            <div className="flex items-center justify-between gap-1.5 mb-1.5 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                <Code2 className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400 shrink-0" />
+                <span className="text-[11px] font-bold text-foreground truncate">Project Depth</span>
               </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold">25%</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold shrink-0">25%</span>
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-lg font-extrabold text-foreground">{pillars.projectsAndPersonal.score}%</span>
-              <span className="text-[10px] text-muted-foreground font-medium">
+            <div className="flex items-baseline justify-between gap-1 mt-1 min-w-0">
+              <span className="text-base sm:text-lg font-extrabold text-foreground shrink-0 tabular-nums">{pillars.projectsAndPersonal.score}%</span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate text-right">
                 {personalProjectsCount} Personal
               </span>
             </div>
@@ -235,22 +235,22 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
           {/* Pillar 3: Skills & Keywords */}
           <div
             onClick={() => setActiveTab("keywords")}
-            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between min-w-0 overflow-hidden col-span-1 md:col-span-2 2xl:col-span-1 ${
               activeTab === "keywords"
                 ? "bg-emerald-500/15 border-emerald-500/40 shadow-sm"
                 : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.06]"
             }`}
           >
-            <div className="flex items-center justify-between gap-1 mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <Target className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
-                <span className="text-[11px] font-bold text-foreground">Skills Match</span>
+            <div className="flex items-center justify-between gap-1.5 mb-1.5 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                <Target className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                <span className="text-[11px] font-bold text-foreground truncate">Skills Match</span>
               </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">25%</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">25%</span>
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-lg font-extrabold text-foreground">{pillars.skillsAndKeywords.score}%</span>
-              <span className="text-[10px] text-muted-foreground font-medium">
+            <div className="flex items-baseline justify-between gap-1 mt-1 min-w-0">
+              <span className="text-base sm:text-lg font-extrabold text-foreground shrink-0 tabular-nums">{pillars.skillsAndKeywords.score}%</span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate text-right">
                 {display.keywordBreakdown?.matched?.length || 0} found
               </span>
             </div>
@@ -265,22 +265,22 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
           {/* Pillar 4: Events & Hackathons */}
           <div
             onClick={() => setActiveTab("events")}
-            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between min-w-0 overflow-hidden col-span-1 md:col-span-3 2xl:col-span-1 ${
               activeTab === "events"
                 ? "bg-amber-500/15 border-amber-500/40 shadow-sm"
                 : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.06]"
             }`}
           >
-            <div className="flex items-center justify-between gap-1 mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <Trophy className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
-                <span className="text-[11px] font-bold text-foreground">Events & Hack</span>
+            <div className="flex items-center justify-between gap-1.5 mb-1.5 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                <Trophy className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
+                <span className="text-[11px] font-bold text-foreground truncate">Events & Hack</span>
               </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold">15%</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold shrink-0">15%</span>
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-lg font-extrabold text-foreground">{pillars.eventsAndHackathons.score}%</span>
-              <span className="text-[10px] text-muted-foreground font-medium">
+            <div className="flex items-baseline justify-between gap-1 mt-1 min-w-0">
+              <span className="text-base sm:text-lg font-extrabold text-foreground shrink-0 tabular-nums">{pillars.eventsAndHackathons.score}%</span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate text-right">
                 {events.length} events
               </span>
             </div>
@@ -295,22 +295,22 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
           {/* Pillar 5: Format & Structure */}
           <div
             onClick={() => setActiveTab("overview")}
-            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between min-w-0 overflow-hidden col-span-2 md:col-span-3 2xl:col-span-1 ${
               activeTab === "overview"
                 ? "bg-cyan-500/15 border-cyan-500/40 shadow-sm"
                 : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.06]"
             }`}
           >
-            <div className="flex items-center justify-between gap-1 mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <FileText className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
-                <span className="text-[11px] font-bold text-foreground">ATS Format</span>
+            <div className="flex items-center justify-between gap-1.5 mb-1.5 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                <FileText className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                <span className="text-[11px] font-bold text-foreground truncate">ATS Format</span>
               </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-semibold">10%</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-semibold shrink-0">10%</span>
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-lg font-extrabold text-foreground">{pillars.formatAndStructure.score}%</span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+            <div className="flex items-baseline justify-between gap-1 mt-1 min-w-0">
+              <span className="text-base sm:text-lg font-extrabold text-foreground shrink-0 tabular-nums">{pillars.formatAndStructure.score}%</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold truncate text-right">
                 {pillars.formatAndStructure.hasMetrics ? "KPIs Detected" : "Needs KPIs"}
               </span>
             </div>

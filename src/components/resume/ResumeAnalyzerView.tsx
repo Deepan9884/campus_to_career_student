@@ -662,7 +662,7 @@ export function ResumeAnalyzerView({
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="space-y-6 min-w-0"
           >
-            <div className="grid lg:grid-cols-[380px_1fr] min-w-0 gap-6 items-start">
+            <div className="grid lg:grid-cols-[320px_1fr] xl:grid-cols-[340px_1fr] 2xl:grid-cols-[360px_1fr] min-w-0 gap-6 items-start">
               {/* Left Column: Upload & History Sidebar */}
               <div className="min-w-0 w-full">
                 <GlassCard variant="strong" data-tour="resume-upload-zone" className="space-y-5">
