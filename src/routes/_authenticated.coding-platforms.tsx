@@ -57,10 +57,73 @@ const PLATFORMS: { key: Platform; label: string; icon: React.ReactNode; placehol
 type CodingProfileStats = {
     solved?: number;
     byDifficulty?: Record<string, number>;
-    ranking?: number;
+    ranking?: number | string;
     rating?: number;
+    globalRank?: string | number;
+    countryRank?: string | number;
+    dsaRank?: string | number;
+    dsaRating?: string | number;
+    contestRank?: string | number;
+    bestContestRank?: string | number;
+    latestContestName?: string;
+    contestsAttended?: number;
+    stars?: string;
+    codingScore?: number;
+    instituteRank?: string | null;
+    streak?: number;
     raw?: any;
 };
+
+function parsePlatformStats(cs: any): CodingProfileStats {
+    if (!cs) return {};
+    const solved = Number(cs.totalSolved ?? cs.solved ?? cs.problemsSolved ?? cs.solvedCount ?? 0);
+    const globalRank =
+        cs.globalRank ||
+        cs.ranking ||
+        cs.globalRanking ||
+        cs.raw?.data?.matchedUser?.profile?.ranking ||
+        cs.raw?.data?.userContestRanking?.globalRanking ||
+        null;
+    const rating =
+        cs.currentRating ||
+        cs.rating ||
+        cs.raw?.data?.userContestRanking?.rating ||
+        (cs.codingScore !== undefined ? cs.codingScore : null);
+
+    const easy = Number(
+        cs.easySolved ?? cs.byDifficulty?.Easy ?? cs.byDifficulty?.easy ?? (solved > 0 ? Math.round(solved * 0.5) : 0)
+    );
+    const medium = Number(
+        cs.mediumSolved ?? cs.byDifficulty?.Medium ?? cs.byDifficulty?.medium ?? (solved > 0 ? Math.round(solved * 0.35) : 0)
+    );
+    const hard = Number(
+        cs.hardSolved ?? cs.byDifficulty?.Hard ?? cs.byDifficulty?.hard ?? (solved > 0 ? Math.max(0, solved - easy - medium) : 0)
+    );
+
+    return {
+        solved,
+        byDifficulty: {
+            Easy: easy,
+            Medium: medium,
+            Hard: hard,
+        },
+        ranking: globalRank,
+        rating: rating !== null && !isNaN(Number(rating)) ? Number(rating) : undefined,
+        globalRank,
+        countryRank: cs.countryRank || null,
+        dsaRank: cs.dsaRank || null,
+        dsaRating: cs.dsaRating !== undefined && cs.dsaRating !== null ? Number(cs.dsaRating) : undefined,
+        contestRank: cs.contestRank || cs.latestContestRank || null,
+        bestContestRank: cs.bestContestRank || null,
+        latestContestName: cs.latestContestName || null,
+        contestsAttended: cs.contestsAttended ? Number(cs.contestsAttended) : undefined,
+        stars: cs.stars || undefined,
+        codingScore: cs.codingScore !== undefined ? Number(cs.codingScore) : undefined,
+        instituteRank: cs.instituteRank || null,
+        streak: cs.streak !== undefined ? Number(cs.streak) : undefined,
+        raw: cs.raw ?? cs,
+    };
+}
 
 type Recommendation = { title: string; url: string; topic: string; difficulty?: string; platform?: string };
 
@@ -127,19 +190,7 @@ function CodingPlatformsPage() {
                     if (plat && urlsMap.hasOwnProperty(plat)) {
                         urlsMap[plat] = item.profileUrl || "";
                         if (item.cachedStats) {
-                            const cs = item.cachedStats;
-                            const solved = Number(cs.totalSolved ?? cs.solved ?? cs.problemsSolved ?? cs.solvedCount ?? 0);
-                            statsMap[plat] = {
-                                solved,
-                                byDifficulty: {
-                                    Easy: Number(cs.easySolved ?? cs.byDifficulty?.Easy ?? (solved > 0 ? Math.round(solved * 0.5) : 0)),
-                                    Medium: Number(cs.mediumSolved ?? cs.byDifficulty?.Medium ?? (solved > 0 ? Math.round(solved * 0.35) : 0)),
-                                    Hard: Number(cs.hardSolved ?? cs.byDifficulty?.Hard ?? (solved > 0 ? Math.round(solved * 0.15) : 0)),
-                                },
-                                ranking: cs.ranking || cs.globalRanking || cs.raw?.data?.matchedUser?.profile?.ranking || cs.raw?.data?.userContestRanking?.globalRanking,
-                                rating: cs.rating || cs.raw?.data?.userContestRanking?.rating,
-                                raw: cs.raw ?? cs,
-                            };
+                            statsMap[plat] = parsePlatformStats(item.cachedStats);
                         }
                     }
                 });
@@ -189,20 +240,9 @@ function CodingPlatformsPage() {
             const cachedStats = res?.profile?.cachedStats;
 
             if (cachedStats !== undefined && cachedStats !== null) {
-                const solved = Number(cachedStats.totalSolved ?? cachedStats.solved ?? cachedStats.problemsSolved ?? cachedStats.solvedCount ?? 0);
                 setStatsByPlatform((s) => ({
                     ...s,
-                    [platform]: {
-                        solved,
-                        byDifficulty: {
-                            Easy: Number(cachedStats.easySolved ?? cachedStats.byDifficulty?.Easy ?? (solved > 0 ? Math.round(solved * 0.5) : 0)),
-                            Medium: Number(cachedStats.mediumSolved ?? cachedStats.byDifficulty?.Medium ?? (solved > 0 ? Math.round(solved * 0.35) : 0)),
-                            Hard: Number(cachedStats.hardSolved ?? cachedStats.byDifficulty?.Hard ?? (solved > 0 ? Math.round(solved * 0.15) : 0)),
-                        },
-                        ranking: cachedStats.ranking || cachedStats.globalRanking || cachedStats.raw?.data?.matchedUser?.profile?.ranking || cachedStats.raw?.data?.userContestRanking?.globalRanking,
-                        rating: cachedStats.rating || cachedStats.raw?.data?.userContestRanking?.rating,
-                        raw: cachedStats.raw ?? cachedStats,
-                    },
+                    [platform]: parsePlatformStats(cachedStats),
                 }));
             } else {
                 setStatsByPlatform((s) => ({
@@ -730,8 +770,146 @@ function ConnectedStatsCard({
                         </div>
                     )}
 
-                    {/* Global Rank & Contest Rating Ribbon */}
-                    {(ranking || rating) && (
+                    {/* CodeChef Dedicated Telemetry: Global Rank, DSA Rank, Contest Rank */}
+                    {platformMeta.key === "codechef" && (
+                        <div className="space-y-2 pt-1">
+                            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                                <span className="flex items-center gap-1.5">
+                                    <Trophy className="h-3.5 w-3.5 text-purple-500" />
+                                    CodeChef Competitive Ranks
+                                </span>
+                                {stats?.stars && (
+                                    <span className="text-[11px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                                        {stats.stars} {stats.rating ? `(${stats.rating})` : ""}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                {/* Global Rank */}
+                                <div className="p-3 rounded-xl bg-purple-500/[0.06] border border-purple-500/25 shadow-xs flex flex-col justify-between">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                                            Global Rank
+                                        </span>
+                                        <Globe className="h-3.5 w-3.5 text-purple-500" />
+                                    </div>
+                                    <div className="text-lg font-black text-foreground mt-1">
+                                        {stats?.globalRank
+                                            ? !isNaN(Number(stats.globalRank))
+                                                ? `#${Number(stats.globalRank).toLocaleString()}`
+                                                : String(stats.globalRank)
+                                            : "Inactive"}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                                        {stats?.countryRank
+                                            ? `Country Rank: #${stats.countryRank}`
+                                            : "Overall World Standing"}
+                                    </div>
+                                </div>
+
+                                {/* DSA Rank */}
+                                <div className="p-3 rounded-xl bg-cyan-500/[0.06] border border-cyan-500/25 shadow-xs flex flex-col justify-between">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                                            DSA Rank
+                                        </span>
+                                        <Code className="h-3.5 w-3.5 text-cyan-500" />
+                                    </div>
+                                    <div className="text-lg font-black text-foreground mt-1">
+                                        {stats?.dsaRank
+                                            ? !isNaN(Number(stats.dsaRank))
+                                                ? `#${Number(stats.dsaRank).toLocaleString()}`
+                                                : String(stats.dsaRank)
+                                            : "Inactive"}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                                        {stats?.dsaRating
+                                            ? `DSA Rating: ${stats.dsaRating}`
+                                            : "DSA Monday Track"}
+                                    </div>
+                                </div>
+
+                                {/* Contest Rank */}
+                                <div className="p-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/25 shadow-xs flex flex-col justify-between">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                            Contest Rank
+                                        </span>
+                                        <Award className="h-3.5 w-3.5 text-amber-500" />
+                                    </div>
+                                    <div className="text-lg font-black text-foreground mt-1">
+                                        {stats?.contestRank
+                                            ? !isNaN(Number(stats.contestRank))
+                                                ? `#${Number(stats.contestRank).toLocaleString()}`
+                                                : String(stats.contestRank)
+                                            : stats?.bestContestRank
+                                            ? `Best #${Number(stats.bestContestRank).toLocaleString()}`
+                                            : "Unranked"}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground mt-0.5 truncate" title={stats?.latestContestName || undefined}>
+                                        {stats?.latestContestName
+                                            ? stats.latestContestName
+                                            : stats?.contestsAttended
+                                            ? `${stats.contestsAttended} Contests Attended`
+                                            : "Recent Contest Standing"}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* GFG Dedicated Telemetry: Coding Score, Institute Rank, Streak */}
+                    {platformMeta.key === "gfg" && (
+                        <div className="space-y-2 pt-1">
+                            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                                <Zap className="h-3.5 w-3.5 text-green-500" />
+                                GeeksforGeeks Profile Metrics
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div className="p-3 rounded-xl bg-green-500/[0.06] border border-green-500/25 shadow-xs">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400">
+                                            Coding Score
+                                        </span>
+                                        <Zap className="h-3.5 w-3.5 text-green-500" />
+                                    </div>
+                                    <div className="text-lg font-black text-foreground mt-1">
+                                        {stats?.codingScore !== undefined ? stats.codingScore.toLocaleString() : (stats?.rating || 0).toLocaleString()}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground mt-0.5">Overall Score</div>
+                                </div>
+
+                                <div className="p-3 rounded-xl bg-blue-500/[0.06] border border-blue-500/25 shadow-xs">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                            Institute Rank
+                                        </span>
+                                        <Award className="h-3.5 w-3.5 text-blue-500" />
+                                    </div>
+                                    <div className="text-lg font-black text-foreground mt-1">
+                                        {stats?.instituteRank ? `#${stats.instituteRank}` : "Campus Member"}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground mt-0.5">College Leaderboard</div>
+                                </div>
+
+                                <div className="p-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/25 shadow-xs">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                            POTD Streak
+                                        </span>
+                                        <Flame className="h-3.5 w-3.5 text-amber-500" />
+                                    </div>
+                                    <div className="text-lg font-black text-foreground mt-1">
+                                        {stats?.streak || 0} Days
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground mt-0.5">Daily Problem Streak</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Standard Global Rank & Contest Rating Ribbon (LeetCode, HackerRank) */}
+                    {platformMeta.key !== "codechef" && platformMeta.key !== "gfg" && (ranking || rating) && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                             {ranking && (
                                 <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-500/[0.05] border border-blue-500/20 shadow-xs">

@@ -578,23 +578,49 @@ export function Section3CodingDsa() {
                     @{currentPlatformStats.username}
                   </span>
                 </div>
-                <p className="text-xs text-[var(--muted-foreground)]">
-                  {currentConfig.ratingLabel}:{" "}
-                  <strong className="text-[var(--warning)] font-mono">
-                    {currentPlatformStats.contestRating} ({currentPlatformStats.globalRank})
-                  </strong>{" "}
-                  • Accuracy:{" "}
-                  <strong className="text-[var(--success)] font-mono">
-                    {currentPlatformStats.accuracyRate}%
-                  </strong>{" "}
-                  • Streak:{" "}
-                  <strong className="text-[var(--primary)]/90 font-mono">
-                    {currentPlatformStats.streakDays} Days
-                  </strong>
-                </p>
+                {selectedPlatformTab === "codechef" ? (
+                  <p className="text-xs text-[var(--muted-foreground)] flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span>
+                      Global: <strong className="text-purple-400 font-mono">{currentPlatformStats.globalRank || "Inactive"}</strong>
+                    </span>
+                    •
+                    <span>
+                      DSA: <strong className="text-cyan-400 font-mono">{currentPlatformStats.dsaRank || "Inactive"}</strong>
+                    </span>
+                    •
+                    <span>
+                      Contest: <strong className="text-amber-400 font-mono">{currentPlatformStats.contestRank || (currentPlatformStats.contestsAttended ? `${currentPlatformStats.contestsAttended} Contests` : "Unranked")}</strong>
+                    </span>
+                    •
+                    <span>
+                      Rating: <strong className="text-[var(--warning)] font-mono">{currentPlatformStats.contestRating}</strong>
+                    </span>
+                  </p>
+                ) : (
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {currentConfig.ratingLabel}:{" "}
+                    <strong className="text-[var(--warning)] font-mono">
+                      {currentPlatformStats.contestRating} ({currentPlatformStats.globalRank})
+                    </strong>{" "}
+                    • Accuracy:{" "}
+                    <strong className="text-[var(--success)] font-mono">
+                      {currentPlatformStats.accuracyRate}%
+                    </strong>{" "}
+                    • Streak:{" "}
+                    <strong className="text-[var(--primary)]/90 font-mono">
+                      {currentPlatformStats.streakDays} Days
+                    </strong>
+                  </p>
+                )}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0 text-xs font-mono">
+              <div className="flex items-center gap-2 shrink-0 text-xs font-mono flex-wrap sm:flex-nowrap">
+                {selectedPlatformTab === "codechef" && currentPlatformStats.dsaRank && (
+                  <div className="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-center">
+                    <span className="text-[10px] text-cyan-400 block">DSA Rank</span>
+                    <span className="font-bold text-cyan-300">{currentPlatformStats.dsaRank}</span>
+                  </div>
+                )}
                 <div className="px-2.5 py-1 rounded-lg bg-transparent border border-white/10 text-center">
                   <span className="text-[10px] text-[var(--muted-foreground)] block">Contests</span>
                   <span className="font-bold text-[var(--foreground)]">{currentPlatformStats.contestsAttended}</span>

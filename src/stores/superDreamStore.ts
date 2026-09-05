@@ -677,11 +677,28 @@ export const useSuperDream = create<SuperDreamState>()(
                     profileUrl: p.profileUrl || targetUrl,
                     isConnected: true,
                     totalSolved: Number(cStats.solved || cStats.totalSolved || 0),
-                    easySolved: Number(cStats.byDifficulty?.easy || cStats.easySolved || 0),
-                    mediumSolved: Number(cStats.byDifficulty?.medium || cStats.mediumSolved || 0),
-                    hardSolved: Number(cStats.byDifficulty?.hard || cStats.hardSolved || 0),
-                    contestRating: Number(cStats.rating || cStats.contestRating || 0),
-                    globalRank: cStats.rank ? `Rank #${cStats.rank}` : "Active",
+                    easySolved: Number(cStats.byDifficulty?.Easy || cStats.byDifficulty?.easy || cStats.easySolved || 0),
+                    mediumSolved: Number(cStats.byDifficulty?.Medium || cStats.byDifficulty?.medium || cStats.mediumSolved || 0),
+                    hardSolved: Number(cStats.byDifficulty?.Hard || cStats.byDifficulty?.hard || cStats.hardSolved || 0),
+                    contestRating: Number(cStats.currentRating || cStats.rating || cStats.contestRating || cStats.codingScore || 0),
+                    globalRank: cStats.globalRank
+                      ? String(cStats.globalRank).startsWith("#")
+                        ? String(cStats.globalRank)
+                        : `Global #${cStats.globalRank}`
+                      : cStats.rank
+                      ? `Rank #${cStats.rank}`
+                      : cStats.overallRank || "Active",
+                    dsaRank: cStats.dsaRank
+                      ? String(cStats.dsaRank).startsWith("#")
+                        ? String(cStats.dsaRank)
+                        : `DSA #${cStats.dsaRank}`
+                      : undefined,
+                    contestRank: cStats.contestRank
+                      ? String(cStats.contestRank).startsWith("#")
+                        ? String(cStats.contestRank)
+                        : `Contest #${cStats.contestRank}`
+                      : undefined,
+                    contestsAttended: Number(cStats.contestsAttended || 0),
                     streakDays: Number(cStats.streak || 0),
                     lastActiveDate: "Live Synced",
                   },
