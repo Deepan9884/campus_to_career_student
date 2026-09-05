@@ -50,10 +50,12 @@ export function getAccessToken(): string | null {
 export class ApiError extends Error {
   statusCode: number;
   errors: string[];
-  constructor(statusCode: number, message: string, errors: string[] = []) {
+  data?: any;
+  constructor(statusCode: number, message: string, errors: string[] = [], data?: any) {
     super(message);
     this.statusCode = statusCode;
     this.errors = errors;
+    this.data = data;
   }
 }
 
@@ -177,6 +179,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
       json?.statusCode || res.status,
       errorMsg,
       json?.errors || [],
+      json,
     );
   }
 

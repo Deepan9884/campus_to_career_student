@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useProctoringSession, type ProctoringSessionOptions } from "@/hooks/useProctoringSession";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
+import { ProctoringBlockLockoutModal } from "@/components/proctoring/ProctoringBlockLockoutModal";
 import { requestAppFullscreen, isCurrentlyFullscreen } from "@/lib/fullscreenUtils";
 import type { ViolationType } from "@/lib/proctoring-api";
 import {
@@ -216,47 +217,19 @@ export function ProctoringWrapper({
         </div>
       )}
 
-      {/* 3-Strike Blocked Screen Overlay */}
+      {/* 30-Minute Proctoring Blocked Screen Overlay */}
       {isActuallyBlocked && (
-        <div className="fixed inset-0 z-[9999] bg-black/97 flex items-center justify-center p-6 backdrop-blur-xl select-none">
-          <div className="max-w-lg w-full glass rounded-3xl p-8 text-center space-y-6 border border-red-500/40 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
-            <div className="w-20 h-20 rounded-full bg-red-500/10 border-2 border-red-500/40 flex items-center justify-center mx-auto text-red-400">
-              <ShieldX className="h-10 w-10" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-red-300">Exam Access Blocked</h2>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                You have reached 3 proctoring violations. Your examination access has been temporarily suspended to maintain institutional evaluation integrity.
-              </p>
-            </div>
-
-            <div className="glass rounded-2xl p-5 text-xs text-left space-y-3 border border-red-500/20 bg-red-500/5">
-              <p className="font-semibold text-red-200 flex items-center gap-1.5">
-                <AlertTriangle className="h-4 w-4 text-red-400" />
-                What happens next?
-              </p>
-              <ul className="space-y-1.5 text-muted-foreground list-disc list-inside">
-                <li>Your answers submitted prior to this point have been saved.</li>
-                <li>Your mentor has been alerted in real-time with telemetry logs.</li>
-                <li>Your assigned mentor can review the violation history and restore your exam access.</li>
-              </ul>
-            </div>
-
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Lock className="h-3.5 w-3.5 text-red-400" />
-              <span>Contact your assigned mentor through the platform to request an unblock.</span>
-            </div>
-
-            {onExit && (
-              <button
-                onClick={handleExit}
-                className="w-full glass rounded-xl py-3 text-sm font-semibold hover:bg-white/10 transition"
-              >
-                Return to Dashboard
-              </button>
-            )}
-          </div>
-        </div>
+        <ProctoringBlockLockoutModal
+          initialRemainingSeconds={1800}
+          title="Interview Access Suspended (30m)"
+          subtitle="Proctoring Violation Strikeout"
+          message="Candidate has reached the maximum proctoring violations limit. Interview access has been suspended for 30 minutes. Only your assigned mentor can unblock you early."
+          onUnblocked={() => {
+            setIsActuallyBlocked(false);
+            proctoringState.resetSession();
+          }}
+          onClose={handleExit}
+        />
       )}
     </div>,
     document.body

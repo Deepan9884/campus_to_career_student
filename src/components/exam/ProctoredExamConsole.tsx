@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/stores";
 import { useProctoringSession } from "@/hooks/useProctoringSession";
 import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
+import { ProctoringBlockLockoutModal } from "@/components/proctoring/ProctoringBlockLockoutModal";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { executeCode } from "@/lib/quiz-api";
 import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
@@ -769,27 +770,18 @@ export function ProctoredExamConsole({
 
   if (isCandidateDisqualified) {
     return (
-      <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col items-center justify-center p-6 select-none">
-        <div className="max-w-lg w-full bg-[#111c34] border border-red-500/40 rounded-3xl p-8 shadow-2xl text-center space-y-6">
-          <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center bg-red-500/10 border-2 border-red-500/40 text-red-400">
-            <ShieldX className="h-10 w-10 animate-bounce" />
-          </div>
-
-          <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-red-400 tracking-tight">Assessment Disqualified</h2>
-            <p className="text-xs text-slate-400">
-              Exam security violation limit reached for <strong>{skillName}</strong>.
-            </p>
-          </div>
-
-          <button
-            onClick={handleExitConsole}
-            className="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition border border-slate-700"
-          >
-            Exit Assessment
-          </button>
-        </div>
-      </div>
+      <ProctoringBlockLockoutModal
+        initialRemainingSeconds={1800}
+        title="Assessment Access Suspended (30m)"
+        subtitle="Cheating Violation Detected"
+        message={`Exam security violation limit reached for ${skillName}. Your assessment access has been suspended for 30 minutes. Only your assigned mentor can restore access early.`}
+        onUnblocked={() => {
+          onBlockStateChange(false);
+          proctorState.resetSession?.();
+          onRetry?.();
+        }}
+        onClose={handleExitConsole}
+      />
     );
   }
 

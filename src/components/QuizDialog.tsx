@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { generateQuiz, submitQuiz } from "@/lib/quiz-api";
 import { ProctoredExamConsole } from "@/components/exam/ProctoredExamConsole";
+import { ProctoringBlockLockoutModal } from "@/components/proctoring/ProctoringBlockLockoutModal";
 import { acquireCameraStream, stopAllCameraStreams } from "@/lib/cameraManager";
 import { runProctorDetection, preloadProctoringModel } from "@/lib/proctoringAiDetector";
 import type { QuizGenerationResult, QuizSubmissionResult } from "@/types/quiz";
@@ -51,6 +52,14 @@ export function QuizDialog({
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<QuizSubmissionResult | null>(null);
   const [isQuizBlocked, setIsQuizBlocked] = useState(false);
+  const [blockInfo, setBlockInfo] = useState<{
+    isBlocked: boolean;
+    remainingSeconds?: number;
+    blockedAt?: string | null;
+    mentorName?: string;
+    mentorEmail?: string | null;
+    message?: string;
+  } | null>(null);
 
   // Reset state on modal open
 
@@ -61,6 +70,7 @@ export function QuizDialog({
       setError(null);
       setResult(null);
       setIsQuizBlocked(false);
+      setBlockInfo(null);
       setPhase("loading");
       return;
     }
@@ -70,6 +80,7 @@ export function QuizDialog({
     async function loadQuiz() {
       setPhase("loading");
       setError(null);
+      setBlockInfo(null);
       if (customQuiz) {
         setGen(customQuiz);
         setPhase("ready");
@@ -82,6 +93,24 @@ export function QuizDialog({
         setPhase("ready");
       } catch (err: any) {
         if (!active) return;
+        if (
+          err.statusCode === 403 ||
+          err.data?.isProctoringBlocked ||
+          err.message?.includes("suspended for 30 minutes") ||
+          err.message?.includes("proctoring") ||
+          err.message?.includes("blocked")
+        ) {
+          setBlockInfo({
+            isBlocked: true,
+            remainingSeconds: err.data?.remainingSeconds ?? 1800,
+            blockedAt: err.data?.blockedAt || null,
+            mentorName: err.data?.mentor?.name,
+            mentorEmail: err.data?.mentor?.email,
+            message: err.message,
+          });
+          setPhase("error");
+          return;
+        }
         setError(err.message || "Failed to generate assessment questions.");
         setPhase("error");
       }
@@ -117,6 +146,22 @@ export function QuizDialog({
         onPassed?.();
       }
     } catch (err: any) {
+      if (
+        err.statusCode === 403 ||
+        err.data?.isProctoringBlocked ||
+        err.message?.includes("suspended for 30 minutes")
+      ) {
+        setBlockInfo({
+          isBlocked: true,
+          remainingSeconds: err.data?.remainingSeconds ?? 1800,
+          blockedAt: err.data?.blockedAt || null,
+          mentorName: err.data?.mentor?.name,
+          mentorEmail: err.data?.mentor?.email,
+          message: err.message,
+        });
+        setIsQuizBlocked(true);
+        return;
+      }
       toast.error(err.message || "Failed to submit assessment answers.");
     }
   };
@@ -125,6 +170,7 @@ export function QuizDialog({
     setError(null);
     setResult(null);
     setIsQuizBlocked(false);
+    setBlockInfo(null);
     setPhase("loading");
     if (customQuiz) {
       setGen(customQuiz);
@@ -136,7 +182,25 @@ export function QuizDialog({
         setGen(data);
         setPhase("ready");
       })
-      .catch((err) => {
+      .catch((err: any) => {
+        if (
+          err.statusCode === 403 ||
+          err.data?.isProctoringBlocked ||
+          err.message?.includes("suspended for 30 minutes") ||
+          err.message?.includes("proctoring") ||
+          err.message?.includes("blocked")
+        ) {
+          setBlockInfo({
+            isBlocked: true,
+            remainingSeconds: err.data?.remainingSeconds ?? 1800,
+            blockedAt: err.data?.blockedAt || null,
+            mentorName: err.data?.mentor?.name,
+            mentorEmail: err.data?.mentor?.email,
+            message: err.message,
+          });
+          setPhase("error");
+          return;
+        }
         setError(err.message || "Failed to generate assessment.");
         setPhase("error");
       });
@@ -193,6 +257,26 @@ export function QuizDialog({
           setPhase("taking");
         }}
         onCancel={handleClose}
+      />,
+      document.body
+    );
+  }
+
+  // 1.8 Proctoring Blocked Phase (30-Minute Lockout & Mentor Override)
+  if (blockInfo?.isBlocked || isQuizBlocked) {
+    return createPortal(
+      <ProctoringBlockLockoutModal
+        initialRemainingSeconds={blockInfo?.remainingSeconds ?? 1800}
+        blockedAt={blockInfo?.blockedAt}
+        mentorName={blockInfo?.mentorName}
+        mentorEmail={blockInfo?.mentorEmail}
+        message={blockInfo?.message}
+        onUnblocked={() => {
+          setBlockInfo(null);
+          setIsQuizBlocked(false);
+          handleRetry();
+        }}
+        onClose={handleClose}
       />,
       document.body
     );
