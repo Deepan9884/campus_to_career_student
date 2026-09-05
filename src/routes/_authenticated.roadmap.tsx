@@ -28,7 +28,6 @@ import {
   ArrowRight,
   RefreshCw,
   Flame,
-  ShieldCheck,
   Search,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -483,12 +482,6 @@ function RoadmapDetail({
     }
   }, [roadmapId, loadRecommendations]);
 
-  const primaryRec = recommendations?.primaryRecommendation;
-  const primaryMilestone = useMemo(() => {
-    if (!primaryRec) return null;
-    return roadmap.milestones.find((m) => m.subTopicId === primaryRec.subTopicId) || null;
-  }, [primaryRec, roadmap.milestones]);
-
   return (
     <div className="space-y-6">
       <button
@@ -618,130 +611,6 @@ function RoadmapDetail({
           </p>
         )}
       </GlassCard>
-
-      {/* === PRIMARY RECOMMENDATION HERO CARD ("TODAY'S SUGGESTED PRIORITY") === */}
-      {primaryRec && (
-        <div className="p-5 rounded-2xl border border-indigo-500/40 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-cyan-500/10 backdrop-blur-md shadow-lg space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-600 text-white shadow-xs">
-                <Target className="w-3 h-3" />
-                Priority Suggestion — Recommended Next
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-md font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
-                {primaryRec.difficulty}
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-md font-semibold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/20">
-                {primaryRec.importance}
-              </span>
-            </div>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-              {primaryRec.impactScore}
-            </span>
-          </div>
-
-          <div>
-            <h3 className="text-xl font-bold text-foreground mb-1">{primaryRec.name}</h3>
-            <p className="text-xs text-muted-foreground">
-              {primaryRec.skillName} • Estimated effort: {primaryRec.estimatedTimeframe}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-indigo-200/60 dark:border-indigo-900/40 text-xs leading-relaxed text-slate-700 dark:text-slate-200">
-            <strong className="text-indigo-600 dark:text-indigo-400 font-bold">Why the engine recommends this: </strong>
-            <span>{primaryRec.reason}</span>
-          </div>
-
-          {/* Target Learning Outcomes */}
-          {primaryRec.learningOutcomes && primaryRec.learningOutcomes.length > 0 && (
-            <div className="space-y-1.5">
-              <p className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
-                Target Outcomes for This Milestone:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {primaryRec.learningOutcomes.map((out, idx) => (
-                  <div key={idx} className="flex items-start gap-2 p-2 rounded-lg bg-slate-50/80 dark:bg-white/5 border border-slate-200/60 dark:border-white/5 text-xs">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>{out}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Action Row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-indigo-200/50 dark:border-white/10">
-            <div className="flex items-center gap-2">
-              {primaryRec.status === "not_started" ? (
-                <button
-                  onClick={() => handleStatusChange(primaryRec.subTopicId, "in_progress")}
-                  className="btn-gradient px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 shadow-md cursor-pointer hover:opacity-95"
-                >
-                  <Play className="h-3.5 w-3.5 fill-current" />
-                  <span>Start Learning (Mark In Progress)</span>
-                </button>
-              ) : primaryRec.status === "in_progress" ? (
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5 animate-pulse" />
-                    <span>In Progress</span>
-                  </span>
-                  {primaryMilestone && (
-                    <button
-                      onClick={() => {
-                        setQuizMilestone(primaryMilestone);
-                        setQuizOpen(true);
-                      }}
-                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-purple-500/20"
-                    >
-                      <Brain className="h-3.5 w-3.5" />
-                      <span>Take Verification Quiz to Pass</span>
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                    <span>Mastered ✓</span>
-                  </span>
-                  {primaryMilestone && (
-                    <button
-                      onClick={() => {
-                        setQuizMilestone(primaryMilestone);
-                        setQuizOpen(true);
-                      }}
-                      className="px-3 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-                    >
-                      <Brain className="h-3.5 w-3.5" />
-                      <span>Review / Retake Quiz</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Quick Resources links */}
-            {primaryRec.resources && primaryRec.resources.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] text-muted-foreground font-semibold">Recommended Resources:</span>
-                {primaryRec.resources.slice(0, 2).map((r, i) => (
-                  <a
-                    key={i}
-                    href={r.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2.5 py-1 rounded-lg text-xs font-medium glass hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 flex items-center gap-1 transition cursor-pointer"
-                  >
-                    <span>{r.name}</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* === RECOMMENDATION TRACK TABS === */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-3">
