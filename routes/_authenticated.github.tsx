@@ -137,10 +137,10 @@ const [analyzing, setAnalyzing] = useState(false);
     };
   }, [isDragging]);
 
-  const fetchRepos = useCallback(async () => {
+  const fetchRepos = useCallback(async (targetUsername?: string) => {
     setLoadingRepos(true);
     try {
-      const data = await listRepos();
+      const data = await listRepos(targetUsername);
       setRepos(data.repos || []);
       if ((data.repos || []).length > 0) {
         setConnected(true);
@@ -178,6 +178,9 @@ const [analyzing, setAnalyzing] = useState(false);
     const targetHandle = (customHandle || username).trim();
     if (!targetHandle) return;
     setConnecting(true);
+    setRepos([]); // Clear previous repos immediately
+    setSelectedRepo(null);
+    setAnalysis(null);
     try {
       const data = await connectGithub({ githubUsername: targetHandle });
       setConnected(true);
@@ -188,7 +191,7 @@ const [analyzing, setAnalyzing] = useState(false);
           user: state.user ? { ...state.user, ...data.user, githubUsername: data.user.githubUsername } : (data.user as any),
         }));
       }
-      await fetchRepos();
+      await fetchRepos(data.github.login);
       toast.success(`Connected as @${data.github.login}`);
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
@@ -204,24 +207,15 @@ const [analyzing, setAnalyzing] = useState(false);
       autoConnectAttempted.current = handle;
       setUsername(handle);
       setConnecting(true);
-      listRepos()
-        .then((data) => {
+      connectGithub({ githubUsername: handle })
+        .then((res) => {
           setConnected(true);
-          setRepos(data.repos || []);
-          connectGithub({ githubUsername: handle })
-            .then((res) => {
-              setGithubProfile(res.github);
-            })
-            .catch(() => {});
+          setGithubProfile(res.github);
+          setUsername(res.github.login);
+          fetchRepos(res.github.login);
         })
         .catch(() => {
-          connectGithub({ githubUsername: handle })
-            .then((res) => {
-              setConnected(true);
-              setGithubProfile(res.github);
-              fetchRepos();
-            })
-            .catch(() => {});
+          fetchRepos(handle);
         })
         .finally(() => {
           setConnecting(false);
@@ -483,8 +477,12 @@ const [analyzing, setAnalyzing] = useState(false);
                             className="w-9 h-9 rounded-full border border-white/20 shrink-0"
                           />
                           <div className="text-xs min-w-0">
-                            <p className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-semibold truncate">
-                              <Check className="h-3.5 w-3.5 shrink-0" /> @{githubProfile.login}
+                            <p
+                              className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-semibold truncate"
+                              title={`@${githubProfile.login}`}
+                            >
+                              <Check className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">@{githubProfile.login}</span>
                             </p>
                             <p className="text-muted-foreground">{githubProfile.public_repos} public repos</p>
                           </div>
@@ -520,7 +518,7 @@ const [analyzing, setAnalyzing] = useState(false);
                 </h4>
                 {connected && (
                   <button
-                    onClick={() => fetchRepos()}
+                    onClick={() => fetchRepos(githubProfile?.login || username)}
                     disabled={loadingRepos}
                     className="text-xs text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted dark:hover:bg-white/5 transition flex items-center gap-1"
                     title="Refresh repositories"

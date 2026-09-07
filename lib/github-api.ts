@@ -12,8 +12,9 @@ export async function connectGithub(payload: ConnectPayload): Promise<GithubConn
   return api.post<GithubConnectResponse>("/github/connect", payload);
 }
 
-export async function listRepos(): Promise<RepoListResponse> {
-  return api.get<RepoListResponse>("/github/repos");
+export async function listRepos(username?: string): Promise<RepoListResponse> {
+  const query = username ? `?username=${encodeURIComponent(username.trim())}` : "";
+  return api.get<RepoListResponse>(`/github/repos${query}`);
 }
 
 export async function analyzeRepo(payload: AnalyzePayload): Promise<RepoAnalysis> {
