@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import {
@@ -23,6 +23,19 @@ import {
   PanelLeftOpen,
   Maximize2,
   Minimize2,
+  Share2,
+  Copy,
+  Download,
+  Sparkles,
+  Image as ImageIcon,
+  CheckCircle2,
+  ArrowUpRight,
+  Tag,
+  Eye,
+  FileText,
+  Info,
+  Linkedin,
+  Wand2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -34,6 +47,7 @@ import {
   getAnalysisById,
   deleteAnalysis,
   generateLinkedInPost,
+  type LinkedInPostResult,
 } from "@/lib/github-api";
 import { useAuth } from "@/stores";
 import type {
@@ -79,6 +93,7 @@ const [analyzing, setAnalyzing] = useState(false);
 
   // LinkedIn post generation state
   const [linkedinPost, setLinkedinPost] = useState<string>("");
+  const [linkedinResult, setLinkedinResult] = useState<LinkedInPostResult | null>(null);
   const [generatingPost, setGeneratingPost] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -282,15 +297,23 @@ const [analyzing, setAnalyzing] = useState(false);
     if (!analysis || generatingPost) return;
     setGeneratingPost(true);
     try {
+      const techList: string[] = [];
+      if (Array.isArray(analysis.primaryTechStack)) techList.push(...analysis.primaryTechStack);
+      if (analysis.technicalSkills?.languages) techList.push(...analysis.technicalSkills.languages);
+      if (analysis.technicalSkills?.frameworks) techList.push(...analysis.technicalSkills.frameworks);
+      const uniqueTech = Array.from(new Set(techList.filter(Boolean)));
+
       const result = await generateLinkedInPost({
         repoFullName: analysis.repoFullName,
         overview: analysis.overview || "",
         quality: analysis.quality || "",
         resumeImpact: analysis.resumeImpact || [],
+        techStack: uniqueTech.length > 0 ? uniqueTech : undefined,
         repoUrl: analysis.repoUrl,
       });
+      setLinkedinResult(result);
       setLinkedinPost(result.draft);
-      toast.success("Post draft generated");
+      toast.success("LinkedIn post draft generated!");
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
       toast.error(apiErr.message || "Failed to generate post");
@@ -299,20 +322,28 @@ const [analyzing, setAnalyzing] = useState(false);
     }
   };
 
-  const handleCopyPost = async () => {
-    if (!linkedinPost) return;
+  const handleCopyPost = async (textToCopy?: string) => {
+    const text = textToCopy || linkedinPost;
+    if (!text) return;
     try {
-      await navigator.clipboard.writeText(linkedinPost);
+      await navigator.clipboard.writeText(text);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
-      toast.success("Copied to clipboard");
+      toast.success("Post draft copied to clipboard!");
     } catch {
-      toast.error("Failed to copy");
+      toast.error("Failed to copy post text");
     }
   };
 
-  const handleShareOnLinkedIn = () => {
-    if (!analysis?.repoUrl || !linkedinPost) return;
+  const handleShareOnLinkedIn = async (textToShare?: string) => {
+    const text = textToShare || linkedinPost;
+    if (!analysis?.repoUrl || !text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Post draft copied to clipboard! Paste (Ctrl+V) into LinkedIn compose box.");
+    } catch {
+      toast.info("Opening LinkedIn... Please copy your draft text!");
+    }
     const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(analysis.repoUrl)}`;
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   };
@@ -800,7 +831,7 @@ const [analyzing, setAnalyzing] = useState(false);
                       {tab === "quality" && <Quality analysis={analysis} />}
                       {tab === "security" && <Security analysis={analysis} />}
                       {tab === "resume" && <ResumeImpact analysis={analysis} />}
-                      {tab === "linkedin" && <LinkedInPost analysis={analysis} draft={linkedinPost} generating={generatingPost} onGenerate={handleGenerateLinkedInPost} onCopy={handleCopyPost} onShare={handleShareOnLinkedIn} copySuccess={copySuccess} />}
+                      {tab === "linkedin" && <LinkedInPost analysis={analysis} draft={linkedinPost} result={linkedinResult} generating={generatingPost} onGenerate={handleGenerateLinkedInPost} onCopy={handleCopyPost} onShare={handleShareOnLinkedIn} copySuccess={copySuccess} />}
                     </div>
                   </>
                 )}
@@ -1345,9 +1376,167 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
+function toUnicodeBold(text: string): string {
+  return text
+    .split("")
+    .map((c) => {
+      const code = c.charCodeAt(0);
+      if (code >= 65 && code <= 90) return String.fromCodePoint(0x1d400 + code - 65);
+      if (code >= 97 && code <= 122) return String.fromCodePoint(0x1d41a + code - 97);
+      if (code >= 48 && code <= 57) return String.fromCodePoint(0x1d7ce + code - 48);
+      return c;
+    })
+    .join("");
+}
+
+function generateRepoSocialCard(
+  analysis: RepoAnalysis,
+  userName: string,
+  targetRole?: string,
+): string {
+  if (typeof document === "undefined") return "";
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 630;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+
+  // 1. Dark futuristic background
+  const bgGradient = ctx.createLinearGradient(0, 0, 1200, 630);
+  bgGradient.addColorStop(0, "#080c14");
+  bgGradient.addColorStop(0.5, "#0d172a");
+  bgGradient.addColorStop(1, "#0a1120");
+  ctx.fillStyle = bgGradient;
+  ctx.fillRect(0, 0, 1200, 630);
+
+  // 2. Glow orbs
+  const orb1 = ctx.createRadialGradient(250, 140, 10, 250, 140, 420);
+  orb1.addColorStop(0, "rgba(59, 130, 246, 0.4)");
+  orb1.addColorStop(1, "transparent");
+  ctx.fillStyle = orb1;
+  ctx.fillRect(0, 0, 1200, 630);
+
+  const orb2 = ctx.createRadialGradient(980, 480, 10, 980, 480, 450);
+  orb2.addColorStop(0, "rgba(147, 51, 234, 0.35)");
+  orb2.addColorStop(1, "transparent");
+  ctx.fillStyle = orb2;
+  ctx.fillRect(0, 0, 1200, 630);
+
+  // 3. Subtle outer border
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(30, 30, 1140, 570);
+
+  // 4. Badges Header
+  ctx.fillStyle = "rgba(59, 130, 246, 0.2)";
+  ctx.strokeStyle = "rgba(96, 165, 250, 0.4)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(70, 70, 390, 42, 21);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.font = "bold 15px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#93c5fd";
+  ctx.fillText("⚡ CAMPUS TO CAREER AI • REPO AUDIT", 92, 97);
+
+  const scoreText =
+    typeof analysis.quality === "object" && analysis.quality?.overallScore
+      ? `CODE SCORE: ${analysis.quality.overallScore}/100`
+      : "VERIFIED OPEN SOURCE";
+  ctx.fillStyle = "rgba(16, 185, 129, 0.2)";
+  ctx.strokeStyle = "rgba(52, 211, 153, 0.4)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(830, 70, 300, 42, 21);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.font = "bold 15px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#6ee7b7";
+  ctx.fillText(scoreText, 855, 97);
+
+  // 5. Main Title (Repo Full Name)
+  ctx.font = "bold 44px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#ffffff";
+  const repoName = analysis.repoFullName || "Software Project";
+  const truncatedTitle = repoName.length > 36 ? repoName.slice(0, 34) + "..." : repoName;
+  ctx.fillText(truncatedTitle, 70, 205);
+
+  // 6. Subtitle & Stats
+  const stars = analysis.repoStats?.stars || 0;
+  const forks = analysis.repoStats?.forks || 0;
+  const subtitle = `⭐ ${stars} Stars  •  🍴 ${forks} Forks  •  Production-grade Architecture`;
+  ctx.font = "500 22px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#94a3b8";
+  ctx.fillText(subtitle, 70, 250);
+
+  // 7. Middle Glass Panel: Key Highlights
+  ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(70, 285, 1060, 160, 16);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.font = "bold 16px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#38bdf8";
+  ctx.fillText("ARCHITECTURE & ENGINEERING HIGHLIGHTS", 95, 322);
+
+  const rawOverview =
+    analysis.overview ||
+    (typeof analysis.quality === "object" && analysis.quality?.codeOrganization) ||
+    "Clean modular architecture with robust error handling and high-efficiency performance.";
+  const cleanOverview = rawOverview.replace(/[\n\r]+/g, " ");
+  const overviewQuote = cleanOverview.length > 175 ? cleanOverview.slice(0, 170) + "..." : cleanOverview;
+
+  ctx.font = "italic 19px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillText(`"${overviewQuote}"`, 95, 365);
+
+  // 8. Tech Stack Pills
+  const techList: string[] = [];
+  if (Array.isArray(analysis.primaryTechStack)) techList.push(...analysis.primaryTechStack);
+  if (analysis.technicalSkills?.languages) techList.push(...analysis.technicalSkills.languages);
+  if (analysis.technicalSkills?.frameworks) techList.push(...analysis.technicalSkills.frameworks);
+  const uniqueTech = Array.from(new Set(techList.filter(Boolean))).slice(0, 5);
+  if (uniqueTech.length === 0) uniqueTech.push("JavaScript", "TypeScript", "React", "Node.js");
+
+  let startX = 70;
+  uniqueTech.forEach((tech) => {
+    ctx.fillStyle = "rgba(99, 102, 241, 0.22)";
+    ctx.strokeStyle = "rgba(129, 140, 248, 0.4)";
+    ctx.lineWidth = 1;
+    const pillWidth = Math.max(100, tech.length * 13 + 32);
+    ctx.beginPath();
+    ctx.roundRect(startX, 485, pillWidth, 40, 20);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = "600 15px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#c7d2fe";
+    ctx.fillText(tech, startX + 16, 510);
+    startX += pillWidth + 14;
+  });
+
+  // 9. Author Footer
+  ctx.font = "bold 21px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#ffffff";
+  const displayAuthor = userName || "Software Engineer";
+  ctx.fillText(displayAuthor, 860, 530);
+
+  ctx.font = "14px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#64748b";
+  ctx.fillText(targetRole || "Campus to Career AI Developer", 860, 555);
+
+  return canvas.toDataURL("image/png");
+}
+
 function LinkedInPost({
   analysis,
   draft,
+  result,
   generating,
   onGenerate,
   onCopy,
@@ -1356,93 +1545,412 @@ function LinkedInPost({
 }: {
   analysis: RepoAnalysis;
   draft: string;
+  result: LinkedInPostResult | null;
   generating: boolean;
   onGenerate: () => void;
-  onCopy: () => void;
-  onShare: () => void;
+  onCopy: (text?: string) => void;
+  onShare: (text?: string) => void;
   copySuccess: boolean;
 }) {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<"story" | "technical" | "executive" | "achievement">("story");
   const [editedDraft, setEditedDraft] = useState(draft);
+  const [graphicPreview, setGraphicPreview] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"preview" | "editor">("preview");
 
   useEffect(() => {
-    setEditedDraft(draft);
-  }, [draft]);
+    if (result) {
+      if (activeTab === "story") {
+        setEditedDraft(result.draft || draft);
+      } else if (activeTab === "technical") {
+        const tech = result.variations?.find((v) => v.style.toLowerCase().includes("tech"))?.content || result.variations?.[1]?.content || result.draft;
+        setEditedDraft(tech || draft);
+      } else if (activeTab === "executive") {
+        const exec = result.variations?.find((v) => v.style.toLowerCase().includes("exec"))?.content || result.variations?.[2]?.content || result.draft;
+        setEditedDraft(exec || draft);
+      } else if (activeTab === "achievement") {
+        setEditedDraft(result.achievementParagraph || result.draft || draft);
+      }
+    } else {
+      setEditedDraft(draft);
+    }
+  }, [activeTab, draft, result]);
+
+  // Generate graphic on mount or analysis change
+  useEffect(() => {
+    if (analysis) {
+      const cardUrl = generateRepoSocialCard(analysis, user?.name || "Software Engineer", user?.profile?.targetRole || "Full Stack Developer");
+      if (cardUrl) setGraphicPreview(cardUrl);
+    }
+  }, [analysis, user]);
 
   const hasDraft = editedDraft.trim().length > 0;
 
+  const handleInsertBold = () => {
+    const textarea = document.getElementById("linkedin-github-textarea") as HTMLTextAreaElement;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = editedDraft.slice(start, end);
+    if (!selectedText) {
+      toast.info("Select text in the editor first to make it bold");
+      return;
+    }
+    const bolded = toUnicodeBold(selectedText);
+    const updated = editedDraft.slice(0, start) + bolded + editedDraft.slice(end);
+    setEditedDraft(updated);
+    toast.success("Converted selection to Bold Unicode!");
+  };
+
+  const handleInsertHashtag = (tag: string) => {
+    const formattedTag = tag.startsWith("#") ? tag : `#${tag}`;
+    if (!editedDraft.includes(formattedTag)) {
+      setEditedDraft((prev) => `${prev.trim()}\n\n${formattedTag}`);
+    }
+  };
+
+  const hashtags = result?.suggestedHashtags?.length
+    ? result.suggestedHashtags
+    : ["#SoftwareEngineering", "#FullStack", "#React", "#OpenSource", "#WebDev", "#Coding"];
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <svg className="h-8 w-8 text-blue-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-        </svg>
-        <div>
-          <p className="text-sm font-semibold">LinkedIn Post Ideas</p>
-          <p className="text-xs text-muted-foreground">Generate a post draft to share your project</p>
+    <div className="space-y-5">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/25">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
+            <Linkedin className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              LinkedIn Showcase Creator
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                AI Powered
+              </span>
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Generate recruiter-optimized post drafts and high-res social graphics for this project
+            </p>
+          </div>
         </div>
-      </div>
 
-      <p className="text-xs text-muted-foreground bg-muted/60 dark:bg-slate-800/50 border border-border/60 rounded-lg p-3">
-        <strong className="text-foreground">Note:</strong> This generates a draft for you to review and edit. 
-        The &quot;Share on LinkedIn&quot; button opens LinkedIn&apos;s share dialog &mdash; 
-        you must manually post from there. No automatic posting occurs.
-      </p>
+        <div className="flex items-center gap-2">
+          {hasDraft && (
+            <Link
+              to="/linkedin-posts"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-muted/60 hover:bg-muted text-foreground border border-border/50 transition flex items-center gap-1.5"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+              Full Creator Studio
+            </Link>
+          )}
 
-      {!hasDraft ? (
-        <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground mb-4">Click "Generate Post" to create a LinkedIn draft based on your project analysis.</p>
           <button
             onClick={onGenerate}
             disabled={generating}
-            className="btn-gradient btn-gradient-hover rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
+            className="btn-gradient btn-gradient-hover rounded-xl px-4 py-2 text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-50"
           >
             {generating ? (
               <>
-                <svg className="h-4 w-4 animate-spin inline-block mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating...
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating Post...
+              </>
+            ) : hasDraft ? (
+              <>
+                <RotateCw className="h-3.5 w-3.5" />
+                Regenerate AI Post
               </>
             ) : (
-              "Generate Post"
+              <>
+                <Wand2 className="h-3.5 w-3.5" />
+                Generate LinkedIn Post
+              </>
             )}
           </button>
         </div>
+      </div>
+
+      {!hasDraft && !generating ? (
+        <div className="text-center py-12 glass rounded-2xl p-6 border border-border/40">
+          <div className="mx-auto w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-3 border border-blue-500/20">
+            <Linkedin className="h-6 w-6" />
+          </div>
+          <h4 className="text-sm font-bold text-foreground">No LinkedIn draft generated yet</h4>
+          <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1 mb-5">
+            Click "Generate LinkedIn Post" to turn your code analysis, complexity metrics, and quality ratings into a viral, recruiter-focused LinkedIn post.
+          </p>
+          <button
+            onClick={onGenerate}
+            disabled={generating}
+            className="btn-gradient btn-gradient-hover rounded-xl px-5 py-2.5 text-xs font-bold shadow-lg shadow-blue-500/20"
+          >
+            Generate Post Draft Now
+          </button>
+        </div>
       ) : (
-        <div className="space-y-3">
-          <textarea
-            value={editedDraft}
-            onChange={(e) => setEditedDraft(e.target.value)}
-            className="w-full glass-input rounded-xl p-3 text-sm min-h-[100px] resize-y outline-none"
-            placeholder="Your LinkedIn post draft will appear here..."
-            rows={4}
-          />
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-4">
+          {/* Post Style Variation Switcher */}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-2">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-semibold text-muted-foreground mr-1">Style:</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("story")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-medium transition",
+                  activeTab === "story"
+                    ? "bg-blue-500/20 text-blue-300 border border-blue-500/40"
+                    : "hover:bg-muted/60 text-muted-foreground",
+                )}
+              >
+                🚀 Story &amp; Hook
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("technical")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-medium transition",
+                  activeTab === "technical"
+                    ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40"
+                    : "hover:bg-muted/60 text-muted-foreground",
+                )}
+              >
+                🛠️ Deep Technical
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("executive")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-medium transition",
+                  activeTab === "executive"
+                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                    : "hover:bg-muted/60 text-muted-foreground",
+                )}
+              >
+                ⚡ Executive Summary
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("achievement")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-medium transition",
+                  activeTab === "achievement"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    : "hover:bg-muted/60 text-muted-foreground",
+                )}
+              >
+                🏆 Achievement Highlight
+              </button>
+            </div>
+
+            {/* Toggle Preview vs Editor */}
+            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/40 text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode("preview")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1",
+                  viewMode === "preview"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Eye className="h-3 w-3" />
+                LinkedIn Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("editor")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1",
+                  viewMode === "editor"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Edit3 className="h-3 w-3" />
+                Edit Text
+              </button>
+            </div>
+          </div>
+
+          {/* Editor or Live Preview Card */}
+          {viewMode === "editor" ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleInsertBold}
+                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-muted hover:bg-muted/80 border border-border/50 text-foreground transition"
+                    title="Highlight text first, then click to make bold Unicode"
+                  >
+                    𝗕 Bold
+                  </button>
+                  <span className="text-[11px] text-muted-foreground">Select text and click Bold to format</span>
+                </div>
+                <span className="text-[11px] text-muted-foreground">
+                  {editedDraft.length} chars • {editedDraft.split(/\s+/).filter(Boolean).length} words
+                </span>
+              </div>
+
+              <textarea
+                id="linkedin-github-textarea"
+                value={editedDraft}
+                onChange={(e) => setEditedDraft(e.target.value)}
+                className="w-full glass-input rounded-2xl p-4 text-xs md:text-sm min-h-[220px] resize-y outline-none font-sans leading-relaxed text-foreground border border-border/60 focus:border-blue-500/50"
+                placeholder="Your LinkedIn post draft will appear here..."
+                rows={9}
+              />
+            </div>
+          ) : (
+            /* Real LinkedIn Feed Post Card Mockup */
+            <div className="rounded-2xl border border-border/60 bg-card/80 dark:bg-slate-900/90 shadow-md p-4 space-y-3">
+              {/* Author Header */}
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-sm">
+                    {user?.name ? user.name.slice(0, 2).toUpperCase() : "ME"}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      {user?.name || "Software Developer"}
+                      <span className="text-[10px] text-muted-foreground font-normal">• 1st</span>
+                    </p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1">
+                      {user?.profile?.targetRole || "Software Engineer"} • Campus to Career AI
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">Just now • 🌐</p>
+                  </div>
+                </div>
+
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  Feed Preview
+                </span>
+              </div>
+
+              {/* Formatted Post Text with Paragraphs */}
+              <div className="text-xs md:text-sm text-foreground whitespace-pre-line leading-relaxed font-normal pt-1 border-t border-border/20">
+                {editedDraft}
+              </div>
+
+              {/* Graphic Banner Attachment Card */}
+              {graphicPreview && (
+                <div className="rounded-xl overflow-hidden border border-border/50 bg-black/40 mt-3 relative group">
+                  <img
+                    src={graphicPreview}
+                    alt="LinkedIn Project Showcase Graphic"
+                    className="w-full max-h-72 object-cover"
+                  />
+                  <div className="absolute top-3 right-3 opacity-90 group-hover:opacity-100 transition">
+                    <a
+                      href={graphicPreview}
+                      download={`${analysis.repoFullName.replace("/", "-")}-linkedin-card.png`}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-black/80 hover:bg-black text-white border border-white/20 shadow-lg flex items-center gap-1.5 backdrop-blur-md"
+                    >
+                      <Download className="h-3.5 w-3.5 text-blue-400" />
+                      Download Graphic
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* GitHub Link Preview Card */}
+              <div className="p-3 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Github className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground truncate">{analysis.repoFullName}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{analysis.repoUrl}</p>
+                  </div>
+                </div>
+                <a
+                  href={analysis.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 text-blue-400 hover:underline flex items-center gap-1 text-[11px]"
+                >
+                  View Repo <ArrowUpRight className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Hashtag Suggestions */}
+          {hashtags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1 mr-1">
+                <Tag className="h-3 w-3 text-blue-400" />
+                Add Hashtags:
+              </span>
+              {hashtags.map((tag, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleInsertHashtag(tag)}
+                  className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 border border-blue-500/20 transition"
+                  title="Click to add to post"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Clear Sharing Instructions Box */}
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/10 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300">
+              <Info className="h-4 w-4 shrink-0 text-amber-500" />
+              <span>How LinkedIn Sharing Works (Important)</span>
+            </div>
+            <p className="text-[11px] text-amber-800/90 dark:text-amber-200/90 leading-relaxed">
+              LinkedIn&apos;s web security policy only links your GitHub card and doesn&apos;t allow websites to auto-populate text. When you click <strong>&quot;Copy &amp; Open LinkedIn&quot;</strong> below, your formatted multi-paragraph post is <strong>automatically copied to your clipboard</strong>. Simply press <strong>Ctrl + V</strong> (Paste) into LinkedIn&apos;s compose dialog!
+            </p>
+          </div>
+
+          {/* Action Toolbar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
             <button
-              onClick={onCopy}
-              disabled={!hasDraft}
-              className={`rounded-xl px-4 py-2 text-sm font-semibold transition flex items-center gap-2 ${
-                copySuccess 
-                  ? "bg-green-500/20 text-green-300" 
-                  : "glass hover:bg-white/10"
-              } disabled:opacity-50`}
+              type="button"
+              onClick={() => onCopy(editedDraft)}
+              className={cn(
+                "py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 border",
+                copySuccess
+                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                  : "bg-muted/80 hover:bg-muted text-foreground border-border/60",
+              )}
             >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              {copySuccess ? "Copied!" : "Copy"}
+              {copySuccess ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  Copied to Clipboard!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy Post Text
+                </>
+              )}
             </button>
+
+            {graphicPreview && (
+              <a
+                href={graphicPreview}
+                download={`${analysis.repoFullName.replace("/", "-")}-linkedin-card.png`}
+                className="py-2.5 px-4 rounded-xl text-xs font-bold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 transition flex items-center justify-center gap-2 text-center"
+              >
+                <Download className="h-4 w-4" />
+                Download Graphic Card
+              </a>
+            )}
+
             <button
-              onClick={onShare}
-              disabled={!hasDraft || !analysis.repoUrl}
-              className="bg-blue-500/20 text-blue-300 rounded-xl px-4 py-2 text-sm font-semibold hover:bg-blue-500/30 transition flex items-center gap-2 disabled:opacity-50"
+              type="button"
+              onClick={() => onShare(editedDraft)}
+              className="py-2.5 px-4 rounded-xl text-xs font-bold bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 sm:col-span-1"
             >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              Share on LinkedIn
+              <Share2 className="h-4 w-4" />
+              Copy &amp; Open LinkedIn
             </button>
           </div>
         </div>

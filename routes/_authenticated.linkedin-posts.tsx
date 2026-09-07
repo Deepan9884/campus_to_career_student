@@ -628,14 +628,18 @@ function LinkedInPostsPage() {
     toast.success("Draft removed");
   };
 
-  const handleShareOnLinkedIn = () => {
+  const handleShareOnLinkedIn = async () => {
     const targetUrl =
       sourceType === "github"
         ? repoUrl || "https://github.com"
         : "https://www.linkedin.com/feed/";
 
-    navigator.clipboard.writeText(activeDraftText);
-    toast.info("Post copied! Opening LinkedIn sharing dialog...");
+    try {
+      await navigator.clipboard.writeText(activeDraftText);
+      toast.success("Post draft copied to clipboard! Paste (Ctrl+V) into LinkedIn compose box.");
+    } catch {
+      toast.info("Opening LinkedIn... Please copy your draft text!");
+    }
 
     const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(targetUrl)}`;
     window.open(shareUrl, "_blank", "noopener,noreferrer");
