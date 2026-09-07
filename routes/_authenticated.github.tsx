@@ -1557,6 +1557,7 @@ function LinkedInPost({
   const [editedDraft, setEditedDraft] = useState(draft);
   const [graphicPreview, setGraphicPreview] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"preview" | "editor">("preview");
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     if (result) {
@@ -1607,6 +1608,11 @@ function LinkedInPost({
     if (!editedDraft.includes(formattedTag)) {
       setEditedDraft((prev) => `${prev.trim()}\n\n${formattedTag}`);
     }
+  };
+
+  const handleShareClick = () => {
+    onShare(editedDraft);
+    setShowShareModal(true);
   };
 
   const hashtags = result?.suggestedHashtags?.length
@@ -1946,12 +1952,126 @@ function LinkedInPost({
 
             <button
               type="button"
-              onClick={() => onShare(editedDraft)}
+              onClick={handleShareClick}
               className="py-2.5 px-4 rounded-xl text-xs font-bold bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 sm:col-span-1"
             >
               <Share2 className="h-4 w-4" />
               Copy &amp; Open LinkedIn
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Interactive LinkedIn Post Guidance Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card dark:bg-slate-900 border border-border/80 dark:border-white/15 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-5 text-foreground">
+            <div className="flex items-center justify-between pb-3 border-b border-border/40">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-[#0a66c2] text-white shadow-md shadow-blue-500/20">
+                  <Linkedin className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold">Ready to Post on LinkedIn!</h3>
+                  <p className="text-xs text-muted-foreground">3 Quick steps to publish your project showcase</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Step 1: Text Copied */}
+            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3">
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 mt-0.5">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-emerald-300">1. Full Post Text is on Your Clipboard!</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  All paragraphs, emoji, and hashtags are copied and ready to paste.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(editedDraft);
+                  toast.success("Post text copied again!");
+                }}
+                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition shrink-0"
+              >
+                Copy Again
+              </button>
+            </div>
+
+            {/* Step 2: Download Social Graphic */}
+            {graphicPreview && (
+              <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400">
+                    <ImageIcon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-indigo-300">2. Branded 1200x630 Graphic Banner</p>
+                    <p className="text-[11px] text-muted-foreground">Click below to download and attach to LinkedIn photo</p>
+                  </div>
+                </div>
+                <a
+                  href={graphicPreview}
+                  download={`${analysis.repoFullName.replace("/", "-")}-linkedin-card.png`}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5 shrink-0 transition"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download
+                </a>
+              </div>
+            )}
+
+            {/* Step 3: Paste in LinkedIn */}
+            <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-2">
+              <p className="text-xs font-bold text-blue-300 flex items-center gap-1.5">
+                <span>👉 3. Paste into LinkedIn Dialog</span>
+              </p>
+              <p className="text-xs text-foreground leading-relaxed">
+                In the opened LinkedIn composer dialog, click into the <strong>&quot;Share your thoughts...&quot;</strong> box and press:
+              </p>
+              <div className="flex items-center justify-center gap-2 py-1.5">
+                <kbd className="px-3 py-1.5 bg-muted border border-border text-foreground font-mono font-bold text-xs rounded-xl shadow-xs">
+                  Ctrl
+                </kbd>
+                <span className="text-xs font-bold text-muted-foreground">+</span>
+                <kbd className="px-3 py-1.5 bg-muted border border-border text-foreground font-mono font-bold text-xs rounded-xl shadow-xs">
+                  V
+                </kbd>
+                <span className="text-xs text-muted-foreground ml-2">(or Right-Click &rarr; Paste)</span>
+              </div>
+            </div>
+
+            {/* Action Controls */}
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:bg-muted transition"
+              >
+                Close Guide
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(analysis.repoUrl)}`;
+                  window.open(shareUrl, "_blank", "noopener,noreferrer");
+                }}
+                className="btn-gradient btn-gradient-hover px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-500/25"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Launch LinkedIn Window
+              </button>
+            </div>
           </div>
         </div>
       )}
