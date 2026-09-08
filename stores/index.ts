@@ -152,8 +152,13 @@ export const useAuth = create<AuthState>()(
         set({ isCheckingAuth: true });
         try {
           if (!getAccessToken()) {
+            if (typeof window !== "undefined" && !sessionStorage.getItem("cf_session_active")) {
+              set({ isCheckingAuth: false, isAuthenticated: false, user: null });
+              return;
+            }
             const token = await tryRefresh().catch(() => null);
             if (!token) {
+              setAccessToken(null);
               set({ isCheckingAuth: false, isAuthenticated: false, user: null });
               return;
             }

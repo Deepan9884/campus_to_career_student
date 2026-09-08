@@ -72,6 +72,11 @@ export function isAuthExempt(url?: string): boolean {
 }
 
 export function getRefreshedToken(): Promise<string | null> {
+  if (typeof window !== "undefined" && !sessionStorage.getItem("cf_session_active")) {
+    setAccessToken(null);
+    return Promise.resolve(null);
+  }
+
   if (!refreshPromise) {
     refreshPromise = (async () => {
       try {
@@ -108,7 +113,7 @@ export function clearSessionAndRedirect(): void {
   if (typeof window !== "undefined") {
     try {
       import("@/stores").then(({ useAuth }) => {
-        useAuth.setState({ user: null, isAuthenticated: false });
+        useAuth.setState({ user: null, isAuthenticated: false, isCheckingAuth: false });
       }).catch(() => {});
     } catch {}
     const pathname = window.location.pathname;
@@ -148,16 +153,20 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     }
   } else if (res.status === 401 && !options._retried) {
     options._retried = true;
-    try {
-      const newToken = await getRefreshedToken();
-      if (newToken) {
-        headers["Authorization"] = `Bearer ${newToken}`;
-        res = await fetch(url, { ...options, headers, credentials: "include" });
-      } else {
+    if (typeof window !== "undefined" && !sessionStorage.getItem("cf_session_active")) {
+      clearSessionAndRedirect();
+    } else {
+      try {
+        const newToken = await getRefreshedToken();
+        if (newToken) {
+          headers["Authorization"] = `Bearer ${newToken}`;
+          res = await fetch(url, { ...options, headers, credentials: "include" });
+        } else {
+          clearSessionAndRedirect();
+        }
+      } catch {
         clearSessionAndRedirect();
       }
-    } catch {
-      clearSessionAndRedirect();
     }
   }
 

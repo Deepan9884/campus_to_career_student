@@ -43,22 +43,22 @@ function closeEventSource() {
 
 /**
  * Try to obtain a fresh access token via silent refresh.
- * Retries up to 3 times with a short delay to handle Render cold-starts
- * (Render free tier can take 10-50s to wake up after inactivity).
+ * Only attempts refresh if an active session is indicated in sessionStorage.
  */
 async function ensureValidToken(): Promise<string | null> {
   let token = getAccessToken();
   if (token) return token;
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      await tryRefresh();
-      token = getAccessToken();
-      if (token) return token;
-    } catch {
-      // wait a bit before retrying (cold-start forgiveness)
-      await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
-    }
+  // If no active session exists, do NOT spam /api/auth/refresh
+  if (typeof window !== "undefined" && !sessionStorage.getItem("cf_session_active")) {
+    return null;
+  }
+
+  try {
+    const refreshed = await tryRefresh();
+    if (refreshed) return refreshed;
+  } catch {
+    // Refresh failed or unauthorized
   }
   return null;
 }
@@ -85,18 +85,10 @@ export function useNotificationSSE({
   const connectSSE = useCallback(async () => {
     if (isUnmountedRef.current) return;
 
-    // Get or refresh the access token (handles Render cold-start delays)
+    // Get or refresh the access token
     const token = await ensureValidToken();
     if (!token) {
-      // Couldn't get a token after retries — schedule a retry with backoff
-      const attempt = reconnectAttemptRef.current;
-      if (attempt >= MAX_RECONNECT_ATTEMPTS) {
-        reconnectAttemptRef.current = 0;
-        return;
-      }
-      const delay = Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS);
-      reconnectAttemptRef.current = attempt + 1;
-      reconnectTimeoutRef.current = setTimeout(connectSSE, delay);
+      // User is not authenticated — stop SSE connection attempts without retry loops
       return;
     }
 
@@ -111,30 +103,25 @@ export function useNotificationSSE({
       });
 
       if (ticketRes.status === 401) {
-        // Token expired between ensureValidToken and ticket fetch — try one more refresh
-        try {
-          await tryRefresh();
-          const freshToken = getAccessToken();
-          if (!freshToken) throw new Error("No token after refresh");
-          const retryRes = await fetch(`${BASE_URL}/notifications/ticket`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${freshToken}` },
-          });
-          if (retryRes.ok) {
-            const retryJson = await retryRes.json();
-            streamParam = retryJson.data?.ticket || freshToken;
-          } else {
-            // Ticket still failing — use fresh token directly as stream param
-            streamParam = freshToken;
+        // Token expired between ensureValidToken and ticket fetch — try one more refresh if session is active
+        if (typeof window !== "undefined" && sessionStorage.getItem("cf_session_active")) {
+          try {
+            const freshToken = await tryRefresh();
+            if (!freshToken) return;
+            const retryRes = await fetch(`${BASE_URL}/notifications/ticket`, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${freshToken}` },
+            });
+            if (retryRes.ok) {
+              const retryJson = await retryRes.json();
+              streamParam = retryJson.data?.ticket || freshToken;
+            } else {
+              streamParam = freshToken;
+            }
+          } catch {
+            return;
           }
-        } catch {
-          // Both refresh + retry failed — schedule backoff reconnect
-          const attempt = reconnectAttemptRef.current;
-          if (attempt < MAX_RECONNECT_ATTEMPTS) {
-            const delay = Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS);
-            reconnectAttemptRef.current = attempt + 1;
-            reconnectTimeoutRef.current = setTimeout(connectSSE, delay);
-          }
+        } else {
           return;
         }
       } else if (ticketRes.ok) {
@@ -143,7 +130,6 @@ export function useNotificationSSE({
           streamParam = ticketJson.data.ticket;
         }
       }
-      // If ticket endpoint is down (network error), we still fall back to the access token
     } catch {
       // Network error (Render cold-start, etc.) — fall back to access token
     }
@@ -175,22 +161,14 @@ export function useNotificationSSE({
 
       if (isUnmountedRef.current) return;
 
-      // Before scheduling a reconnect, attempt a token refresh so we don't
-      // hammer the server with repeated 401s if the access token expired.
-      try {
-        await tryRefresh();
-      } catch {
-        // Refresh failed — could be Render cold-start or session over
-        // Don't stop the loop — schedule a longer retry to let Render wake up
+      // If user session is no longer active, stop attempting reconnects
+      if (typeof window !== "undefined" && !sessionStorage.getItem("cf_session_active")) {
+        return;
       }
-
-      if (isUnmountedRef.current) return;
 
       const attempt = reconnectAttemptRef.current;
       if (attempt >= MAX_RECONNECT_ATTEMPTS) {
-        // Too many failures — reset and try again from scratch after a long delay
-        reconnectAttemptRef.current = 0;
-        reconnectTimeoutRef.current = setTimeout(connectSSE, 30_000);
+        // Stop reconnecting after max attempts instead of resetting to 0 and looping forever
         return;
       }
 
