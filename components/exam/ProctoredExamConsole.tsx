@@ -34,6 +34,15 @@ import {
   SlidersHorizontal,
   TrendingUp,
   Zap,
+  Undo2,
+  Redo2,
+  Minus,
+  Plus,
+  Sparkles,
+  WrapText,
+  GripHorizontal,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/stores";
@@ -42,7 +51,8 @@ import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCoun
 import { ProctoringBlockLockoutModal } from "@/components/proctoring/ProctoringBlockLockoutModal";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { executeCode } from "@/lib/quiz-api";
-import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
+import { MonacoCodeEditor, type CodeEditorControlsHandle } from "@/components/tests/MonacoCodeEditor";
+import { CompilerErrorBanner } from "@/components/tests/CompilerErrorBanner";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import type {
   QuizGenerationResult,
@@ -267,7 +277,77 @@ export function ProctoredExamConsole({
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showMatrixDrawer, setShowMatrixDrawer] = useState(false);
   const [isEditorExpanded, setIsEditorExpanded] = useState(false);
-  const [editorFontSize, setEditorFontSize] = useState(14);
+  const [editorFontSize, setEditorFontSize] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("c2c_exam_final_font_size");
+      return saved ? Math.min(24, Math.max(12, Number(saved))) : 15;
+    } catch {
+      return 15;
+    }
+  });
+  const [editorWordWrap, setEditorWordWrap] = useState<"on" | "off">(() => {
+    try {
+      const saved = localStorage.getItem("c2c_exam_final_word_wrap");
+      return saved === "off" ? "off" : "on";
+    } catch {
+      return "on";
+    }
+  });
+  const [consoleHeightPx, setConsoleHeightPx] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("c2c_exam_final_console_height");
+      return saved ? Math.min(600, Math.max(90, Number(saved))) : 220;
+    } catch {
+      return 220;
+    }
+  });
+  const [isConsoleCollapsed, setIsConsoleCollapsed] = useState(false);
+  const [isConsoleMaximized, setIsConsoleMaximized] = useState(false);
+  const [isDraggingVertical, setIsDraggingVertical] = useState(false);
+  const isDraggingVerticalRef = useRef(false);
+  const editorRef = useRef<CodeEditorControlsHandle | null>(null);
+
+  // Global mousemove & mouseup listeners for vertical console resizing
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingVerticalRef.current) {
+        const viewportHeight = window.innerHeight;
+        const newHeight = viewportHeight - e.clientY;
+        const clamped = Math.min(600, Math.max(90, newHeight));
+        setConsoleHeightPx(clamped);
+        try {
+          localStorage.setItem("c2c_exam_final_console_height", String(clamped));
+        } catch {}
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (isDraggingVerticalRef.current) {
+        isDraggingVerticalRef.current = false;
+        setIsDraggingVertical(false);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  const handleStartVerticalDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isDraggingVerticalRef.current = true;
+    setIsDraggingVertical(true);
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+  };
+  const [errorLine, setErrorLine] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLightMode, setIsLightMode] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [lastSavedTime, setLastSavedTime] = useState<string>("Draft restored");
@@ -517,9 +597,18 @@ export function ProctoredExamConsole({
       setExecutionResult(res);
 
       if (res.isCompilationError || res.compilationError) {
+        const errText = res.errorMessage || res.stderr || (res as any).output || "";
+        const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
+        const errLineNum = res.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+        if (errLineNum && !isNaN(errLineNum)) {
+          setErrorLine(errLineNum);
+        }
+        setErrorMessage(errText);
         setActiveTab("console");
-        toast.error("Compilation Error: Please check compiler output");
+        toast.error(`Compilation Error${errLineNum ? ` (Line ${errLineNum})` : ""}: Please check compiler output`);
       } else if (isCustom) {
+        setErrorLine(null);
+        setErrorMessage(null);
         setActiveTab("console");
         if (res.stderr) {
           toast.warning("Custom run completed with errors");
@@ -527,6 +616,8 @@ export function ProctoredExamConsole({
           toast.success("Custom run executed successfully!");
         }
       } else {
+        setErrorLine(null);
+        setErrorMessage(null);
         setActiveTab("testcases");
         if (res.success) {
           toast.success(`✓ All ${res.totalCount || testCasesToRun.length} test cases passed!`);
@@ -1190,7 +1281,7 @@ export function ProctoredExamConsole({
                       isLightMode ? "bg-slate-100 border-slate-200" : "bg-[#0e172e] border-slate-800"
                     } border-b px-4 flex items-center justify-between shrink-0`}
                   >
-                    {/* File Tab, Reset & Full-Width Expand */}
+                    {/* File Tab, Reset, Undo/Redo, Font Size & Full-Width Expand */}
                     <div className="flex items-center gap-2">
                       <div
                         className={`flex items-center gap-1.5 px-3 py-1 ${
@@ -1201,9 +1292,122 @@ export function ProctoredExamConsole({
                         <span>Solution.{LANGUAGE_CONFIGS[selectedLang]?.ext || "py"}</span>
                       </div>
 
+                      {/* Undo / Redo */}
+                      <div className="flex items-center border rounded-lg overflow-hidden border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
+                        <button
+                          type="button"
+                          onClick={() => editorRef.current?.undo()}
+                          className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
+                          title="Undo (Ctrl+Z)"
+                        >
+                          <Undo2 className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700" />
+                        <button
+                          type="button"
+                          onClick={() => editorRef.current?.redo()}
+                          className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
+                          title="Redo (Ctrl+Y)"
+                        >
+                          <Redo2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Format / Prettify Code */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          editorRef.current?.formatCode?.();
+                          toast.success("Code auto-formatted");
+                        }}
+                        className={`text-[11px] transition px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer ${
+                          isLightMode ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200" : "text-slate-400 hover:text-blue-400 hover:bg-slate-800"
+                        }`}
+                        title="Prettify / Format Code"
+                      >
+                        <Sparkles className="h-3 w-3 text-amber-400" />
+                        <span>Format</span>
+                      </button>
+
+                      {/* Word Wrap Toggle */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = editorWordWrap === "on" ? "off" : "on";
+                          setEditorWordWrap(next);
+                          try {
+                            localStorage.setItem("c2c_exam_final_word_wrap", next);
+                          } catch {}
+                          toast.info(`Word wrap ${next === "on" ? "enabled" : "disabled"}`);
+                        }}
+                        className={`text-[11px] transition px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer ${
+                          editorWordWrap === "on"
+                            ? isLightMode
+                              ? "bg-indigo-50 border border-indigo-200 text-indigo-700"
+                              : "bg-indigo-500/20 border border-indigo-500/40 text-indigo-300"
+                            : isLightMode
+                            ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200"
+                            : "text-slate-400 hover:text-blue-400 hover:bg-slate-800"
+                        }`}
+                        title="Toggle Word Wrap"
+                      >
+                        <WrapText className="h-3 w-3" />
+                        <span>{editorWordWrap === "on" ? "Wrap: On" : "Wrap: Off"}</span>
+                      </button>
+
+                      {/* Font Size Adjuster with Presets Dropdown */}
+                      <div className="flex items-center border rounded-lg overflow-hidden border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = Math.max(12, editorFontSize - 1);
+                            setEditorFontSize(next);
+                            try {
+                              localStorage.setItem("c2c_exam_final_font_size", String(next));
+                            } catch {}
+                          }}
+                          className="px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+                          title="Decrease Font Size (Ctrl + -)"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <select
+                          value={editorFontSize}
+                          onChange={(e) => {
+                            const next = Number(e.target.value);
+                            setEditorFontSize(next);
+                            try {
+                              localStorage.setItem("c2c_exam_final_font_size", String(next));
+                            } catch {}
+                          }}
+                          className="px-1 py-0.5 font-mono font-bold text-[10px] bg-transparent cursor-pointer focus:outline-none text-slate-700 dark:text-slate-200"
+                          title="Select Font Size"
+                        >
+                          {[12, 13, 14, 15, 16, 17, 18, 20, 22, 24].map((sz) => (
+                            <option key={sz} value={sz} className={isLightMode ? "bg-white text-slate-900" : "bg-[#0b1329] text-white"}>
+                              {sz}px
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = Math.min(24, editorFontSize + 1);
+                            setEditorFontSize(next);
+                            try {
+                              localStorage.setItem("c2c_exam_final_font_size", String(next));
+                            } catch {}
+                          }}
+                          className="px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+                          title="Increase Font Size (Ctrl + +)"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+
                       <button
                         onClick={handleClearCode}
-                        className="text-[11px] text-slate-400 hover:text-red-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1"
+                        className="text-[11px] text-slate-400 hover:text-red-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1 cursor-pointer"
                         title="Clear all code in editor"
                       >
                         <Trash2 className="h-3 w-3" /> Clear Code
@@ -1211,8 +1415,8 @@ export function ProctoredExamConsole({
 
                       <button
                         onClick={() => setIsEditorExpanded((prev) => !prev)}
-                        className="text-[11px] text-slate-400 hover:text-blue-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1"
-                        title={isEditorExpanded ? "Restore Split View" : "Maximize Code Editor"}
+                        className="text-[11px] text-slate-400 hover:text-blue-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1 cursor-pointer"
+                        title={isEditorExpanded ? "Restore Split View" : "Maximize Code Editor (Zen Mode)"}
                       >
                         {isEditorExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
                         <span>{isEditorExpanded ? "Split" : "Expand"}</span>
@@ -1248,46 +1452,75 @@ export function ProctoredExamConsole({
                   </div>
 
                   {/* Code Editor Body */}
-                  <div
-                    className={`flex-1 flex overflow-hidden relative font-mono ${
-                      isLightMode ? "bg-white" : "bg-[#080e1e]"
-                    }`}
-                  >
-                    {/* Line Numbers */}
-                    <div
-                      className={`w-12 ${
-                        isLightMode ? "bg-slate-50 border-slate-200 text-slate-400" : "bg-[#0b1329]/80 border-slate-800/80 text-slate-500"
-                      } border-r py-3 text-right pr-3 select-none text-xs space-y-1 font-mono shrink-0`}
-                    >
-                      {codeLines.map((_, i) => (
-                        <div key={i} className="leading-6">
-                          {i + 1}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Code Textarea with Smart Keystrokes */}
-                    <textarea
-                      value={currentAnswer}
-                      onChange={(e) => handleAnswerUpdate(e.target.value)}
-                      onKeyDown={(e) => handleCodeEditorKeyDown(e, currentAnswer, handleAnswerUpdate)}
-                      disabled={isBlocked || submitting}
+                  <div className="flex-1 relative overflow-hidden">
+                    <MonacoCodeEditor
+                      code={currentAnswer}
+                      onChange={(newVal) => {
+                        handleAnswerUpdate(newVal);
+                        if (errorLine) setErrorLine(null);
+                        if (errorMessage) setErrorMessage(null);
+                      }}
+                      language={selectedLang}
+                      isLight={isLightMode}
                       placeholder={LANGUAGE_CONFIGS[selectedLang]?.placeholder || `// Write your ${LANGUAGE_CONFIGS[selectedLang]?.label || selectedLang} solution here...`}
-                      spellCheck={false}
-                      className={`flex-1 p-3 bg-transparent text-xs ${
-                        isLightMode ? "text-slate-800" : "text-slate-100"
-                      } resize-none focus:outline-none font-mono leading-6 ${
-                        isBlocked ? "opacity-40 cursor-not-allowed" : ""
-                      }`}
-                      style={{ fontSize: `${editorFontSize}px` }}
+                      fontSize={editorFontSize}
+                      onFontSizeChange={(newSize) => {
+                        setEditorFontSize(newSize);
+                        try {
+                          localStorage.setItem("c2c_exam_final_font_size", String(newSize));
+                        } catch {}
+                      }}
+                      tabSize={4}
+                      wordWrap={editorWordWrap}
+                      isDragging={isDraggingVertical}
+                      editorRef={editorRef}
+                      errorLine={errorLine}
+                      errorMessage={errorMessage}
+                      onClearErrorLine={() => {
+                        setErrorLine(null);
+                        setErrorMessage(null);
+                      }}
+                      onRunCode={() => handleRunCode(false)}
+                      readOnly={isBlocked || submitting}
+                      isCopyPasteDisabled={true}
+                      onCopyPasteBlocked={() => {
+                        toast.warning("Clipboard operations are restricted during this proctored examination.");
+                      }}
                     />
                   </div>
 
-                  {/* Bottom Drawer: 3 Tabs (Test Cases, Custom Input Playground, Compiler Output) */}
+                  {/* Vertical Resizer Splitter */}
+                  {!isConsoleCollapsed && (
+                    <div
+                      onMouseDown={handleStartVerticalDrag}
+                      onDoubleClick={() => setConsoleHeightPx(220)}
+                      title="Drag up/down to resize Code Editor vs Console (Double-click to reset)"
+                      className="h-2.5 w-full flex items-center justify-center cursor-row-resize select-none shrink-0 group z-20 my-0.5"
+                    >
+                      <div
+                        className={`h-1 w-16 rounded-full transition-all duration-200 group-hover:w-32 group-hover:h-1.5 flex items-center justify-center ${
+                          isLightMode
+                            ? "bg-slate-300 group-hover:bg-blue-600 group-hover:shadow-[0_0_8px_rgba(37,99,235,0.5)]"
+                            : "bg-slate-700 group-hover:bg-cyan-400 group-hover:shadow-[0_0_12px_rgba(34,211,238,0.6)]"
+                        }`}
+                      >
+                        <GripHorizontal className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Bottom Drawer: 3 Tabs (Test Cases, Custom Input Playground, Compiler Output) (Adjustable Height) */}
                   <div
-                    className={`h-52 ${
+                    style={{
+                      height: isConsoleCollapsed
+                        ? "36px"
+                        : isConsoleMaximized
+                        ? "calc(100% - 90px)"
+                        : `${consoleHeightPx}px`,
+                    }}
+                    className={`${
                       isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0e172e] border-slate-800"
-                    } border-t flex flex-col shrink-0`}
+                    } border-t flex flex-col shrink-0 transition-all duration-150 overflow-hidden`}
                   >
                     {/* Drawer Tab Headers */}
                     <div
@@ -1333,27 +1566,58 @@ export function ProctoredExamConsole({
                         </button>
                       </div>
 
-                      {executionResult && (
-                        <div className="flex items-center gap-2 text-[11px]">
-                          {executionResult.isCompilationError || executionResult.compilationError ? (
-                            <span className="text-red-400 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30">
-                              <AlertTriangle className="h-3.5 w-3.5 text-red-400" /> Compilation Error
-                            </span>
-                          ) : executionResult.isRuntimeError ? (
-                            <span className="text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
-                              <AlertTriangle className="h-3.5 w-3.5 text-amber-400" /> Runtime Error
-                            </span>
-                          ) : executionResult.success ? (
-                            <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> All Tests Passed ({executionResult.passedCount ?? (executionResult.testCaseResults?.length || 0)}/{executionResult.totalCount ?? (executionResult.testCaseResults?.length || 0)})
-                            </span>
-                          ) : (
-                            <span className="text-red-400 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30">
-                              <XCircle className="h-3.5 w-3.5 text-red-400" /> {executionResult.passedCount ?? 0}/{executionResult.totalCount ?? (executionResult.testCaseResults?.length || 0)} Tests Passed
-                            </span>
-                          )}
+                      <div className="flex items-center gap-2">
+                        {executionResult && (
+                          <div className="flex items-center gap-2 text-[11px]">
+                            {executionResult.isCompilationError || executionResult.compilationError ? (
+                              <span className="text-red-400 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30">
+                                <AlertTriangle className="h-3.5 w-3.5 text-red-400" /> Compilation Error
+                              </span>
+                            ) : executionResult.isRuntimeError ? (
+                              <span className="text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                                <AlertTriangle className="h-3.5 w-3.5 text-amber-400" /> Runtime Error
+                              </span>
+                            ) : executionResult.success ? (
+                              <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> All Tests Passed ({executionResult.passedCount ?? (executionResult.testCaseResults?.length || 0)}/{executionResult.totalCount ?? (executionResult.testCaseResults?.length || 0)})
+                              </span>
+                            ) : (
+                              <span className="text-red-400 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/30">
+                                <XCircle className="h-3.5 w-3.5 text-red-400" /> {executionResult.passedCount ?? 0}/{executionResult.totalCount ?? (executionResult.testCaseResults?.length || 0)} Tests Passed
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-1 border-l pl-2 border-slate-300 dark:border-slate-700">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsConsoleMaximized(!isConsoleMaximized);
+                              setIsConsoleCollapsed(false);
+                            }}
+                            className={`p-1 rounded transition cursor-pointer ${
+                              isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-slate-800 text-slate-400"
+                            }`}
+                            title={isConsoleMaximized ? "Restore Console Height" : "Maximize Console Height"}
+                          >
+                            {isConsoleMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsConsoleCollapsed(!isConsoleCollapsed);
+                              setIsConsoleMaximized(false);
+                            }}
+                            className={`p-1 rounded transition cursor-pointer ${
+                              isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-slate-800 text-slate-400"
+                            }`}
+                            title={isConsoleCollapsed ? "Expand Console Panel" : "Collapse Console Panel"}
+                          >
+                            {isConsoleCollapsed ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          </button>
                         </div>
-                      )}
+                      </div>
                     </div>
 
                     {/* Tab 1: Official Test Cases */}
@@ -1364,25 +1628,13 @@ export function ProctoredExamConsole({
                         } space-y-2`}
                       >
                         {executionResult?.isCompilationError || executionResult?.compilationError ? (
-                          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-red-400 flex items-center gap-1.5 text-xs">
-                                <AlertTriangle className="h-4 w-4" /> Compilation / Syntax Error Detected
-                              </span>
-                              <button
-                                onClick={() => setActiveTab("console")}
-                                className="px-2.5 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] transition"
-                              >
-                                View Compiler Logs →
-                              </button>
-                            </div>
-                            <p className="text-slate-300 text-xs font-sans">
-                              Your code failed compilation or has syntax errors. Test cases could not be evaluated.
-                            </p>
-                            <pre className="p-2.5 bg-black/70 rounded-lg text-red-300 text-[11px] font-mono whitespace-pre-wrap max-h-24 overflow-y-auto border border-red-900/50">
-                              {executionResult.stderr || "SyntaxError: Check code syntax and indentation."}
-                            </pre>
-                          </div>
+                          <CompilerErrorBanner
+                            errorText={executionResult.stderr || executionResult.errorMessage || errorMessage || "Compilation error"}
+                            errorLine={errorLine}
+                            language={selectedLang}
+                            isLight={isLightMode}
+                            onJumpToLine={(line) => editorRef.current?.revealLine?.(line)}
+                          />
                         ) : executionResult?.testCaseResults && executionResult.testCaseResults.length > 0 ? (
                           <div className="space-y-2">
                             <div className="flex gap-2 border-b border-slate-800 pb-1.5 overflow-x-auto">
@@ -1528,6 +1780,15 @@ export function ProctoredExamConsole({
                           isLightMode ? "bg-slate-900 text-slate-200" : "bg-black text-slate-200"
                         } space-y-1.5`}
                       >
+                        {(executionResult?.isCompilationError || executionResult?.compilationError || executionResult?.stderr || errorMessage) && (
+                          <CompilerErrorBanner
+                            errorText={executionResult?.stderr || executionResult?.errorMessage || errorMessage || ""}
+                            errorLine={errorLine}
+                            language={selectedLang}
+                            isLight={isLightMode}
+                            onJumpToLine={(line) => editorRef.current?.revealLine?.(line)}
+                          />
+                        )}
                         {executionResult ? (
                           <>
                             {executionResult.isCompilationError || executionResult.compilationError ? (

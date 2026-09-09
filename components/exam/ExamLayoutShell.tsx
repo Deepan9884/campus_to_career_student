@@ -81,6 +81,7 @@ export function ExamLayoutShell({
     toggleProblemClosed,
     toggleConsoleClosed,
     toggleConsoleMaximized,
+    isDragging,
     handleStartHorizontalDrag,
     handleStartVerticalDrag,
     mainWorkspaceRef,
@@ -294,7 +295,7 @@ export function ExamLayoutShell({
                       ? "40%"
                       : `calc(100% - ${consoleHeightPx}px)`,
               }}
-              className="overflow-hidden"
+              className={cn("overflow-hidden relative", isDragging && "pointer-events-none select-none")}
             >
               {editorPanel}
             </div>

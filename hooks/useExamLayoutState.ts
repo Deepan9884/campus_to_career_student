@@ -120,6 +120,7 @@ export function useExamLayoutState(storagePrefix: string = "c2c_exam") {
   });
 
   // Drag state refs
+  const [isDragging, setIsDragging] = useState(false);
   const isDraggingHorizontalRef = useRef(false);
   const isDraggingVerticalRef = useRef(false);
   const mainWorkspaceRef = useRef<HTMLDivElement | null>(null);
@@ -212,6 +213,7 @@ export function useExamLayoutState(storagePrefix: string = "c2c_exam") {
       if (isDraggingHorizontalRef.current || isDraggingVerticalRef.current) {
         isDraggingHorizontalRef.current = false;
         isDraggingVerticalRef.current = false;
+        setIsDragging(false);
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
       }
@@ -230,6 +232,7 @@ export function useExamLayoutState(storagePrefix: string = "c2c_exam") {
     e.preventDefault();
     e.stopPropagation();
     isDraggingHorizontalRef.current = true;
+    setIsDragging(true);
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
   };
@@ -238,6 +241,7 @@ export function useExamLayoutState(storagePrefix: string = "c2c_exam") {
     e.preventDefault();
     e.stopPropagation();
     isDraggingVerticalRef.current = true;
+    setIsDragging(true);
     document.body.style.cursor = "row-resize";
     document.body.style.userSelect = "none";
   };
@@ -269,7 +273,8 @@ export function useExamLayoutState(storagePrefix: string = "c2c_exam") {
     saveEditorFontSize,
     saveEditorTabSize,
     
-    // Drag handlers
+    // Drag state & handlers
+    isDragging,
     handleStartHorizontalDrag,
     handleStartVerticalDrag,
     

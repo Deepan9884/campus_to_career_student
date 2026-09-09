@@ -37,13 +37,22 @@ import {
   AlertOctagon,
   Copy,
   Sparkles,
+  Undo2,
+  Redo2,
+  GripHorizontal,
+  ChevronUp,
+  ChevronDown,
+  WrapText,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/stores";
 import { useProctoringSession } from "@/hooks/useProctoringSession";
 import { FullscreenCountdownModal } from "@/components/proctoring/FullscreenCountdownModal";
-import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
+import { MonacoCodeEditor, type CodeEditorControlsHandle } from "./MonacoCodeEditor";
+import { CompilerErrorBanner } from "./CompilerErrorBanner";
 import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { executeCode } from "@/lib/quiz-api";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -74,7 +83,17 @@ const LANGUAGE_CONFIGS: Record<string, { label: string; ext: string; placeholder
     label: "Java",
     ext: "java",
     placeholder: "// write your code here",
-    defaultStarter: "// write your code here\n",
+    defaultStarter: `import java.util.*;
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // Write your solution here using Collections (ArrayList, HashMap, etc.)
+        
+    }
+}
+`,
   },
   cpp: {
     label: "C++",
@@ -90,107 +109,6 @@ const LANGUAGE_CONFIGS: Record<string, { label: string; ext: string; placeholder
   },
 };
 
-/**
- * Enhanced Code Editor Keystroke Handler (Tab indents, Enter auto-indents, auto-closing brackets)
- */
-function handleCodeEditorKeyDown(
-  e: React.KeyboardEvent<HTMLTextAreaElement>,
-  currentVal: string,
-  onUpdate: (val: string) => void
-) {
-  handleCodeTextareaKeyDown(e, currentVal, onUpdate, 4);
-}
-
-/**
- * Syntax colorizer helper for multi-language code preview overlay
- * Uses a single-pass tokenizer to ensure typed numbers, strings, and keywords never corrupt HTML attributes.
- */
-function highlightCodeTokens(code: string, language: string, isLight: boolean): string {
-  if (!code) return "";
-
-  const escapeHtml = (text: string) =>
-    text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-  const isPySql = language === "python" || language === "sql";
-  const commentPattern = isPySql
-    ? (language === "python" ? "(#.*$)" : "(--.*$)")
-    : "(//.*$)";
-
-  const PYTHON_KW = "\\b(def|class|return|if|elif|else|for|while|in|is|not|and|or|import|from|as|try|except|finally|with|lambda|yield|pass|break|continue|global|raise|async|await|len|range|print|int|str|float|list|dict|set|tuple|self)\\b";
-  const JS_KW = "\\b(function|const|let|var|return|if|else|for|while|do|switch|case|break|continue|default|import|export|from|as|class|extends|new|this|super|typeof|instanceof|in|of|try|catch|finally|throw|async|await|yield|console|document|window)\\b";
-  const CPP_JAVA_KW = "\\b(public|private|protected|static|final|const|void|int|double|float|char|long|short|bool|boolean|class|struct|enum|interface|extends|implements|new|this|return|if|else|for|while|do|switch|case|break|continue|try|catch|throw|auto|include|vector|string|map|set|pair|stack|queue|std|cout|cin|endl)\\b";
-  const SQL_KW = "\\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|FULL|ON|GROUP|BY|HAVING|ORDER|ASC|DESC|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|DROP|ALTER|PRIMARY|KEY|FOREIGN|REFERENCES|AS|DISTINCT|UNION|ALL|EXISTS|BETWEEN|LIKE|IN|IS|NULL|NOT|AND|OR|COUNT|SUM|AVG|MIN|MAX)\\b";
-
-  let kwPattern = PYTHON_KW;
-  if (language === "javascript" || language === "typescript") kwPattern = JS_KW;
-  else if (language === "cpp" || language === "java") kwPattern = CPP_JAVA_KW;
-  else if (language === "sql") kwPattern = SQL_KW;
-
-  const lines = code.split("\n");
-  const highlightedLines = lines.map((line) => {
-    if (!line) return "";
-
-    const tokenRegex = new RegExp(
-      [
-        commentPattern,                                                             // group 1: comment
-        '(".*?"|\'.*?\'|`.*?`)',                                                   // group 2: string
-        '\\b(\\d+(?:\\.\\d+)?|true|false|True|False|null|None|undefined|NULL)\\b', // group 3: numbers / booleans / null
-        kwPattern,                                                                  // group 4: keywords
-        '\\b([a-zA-Z_]\\w*)(?=\\s*\\()',                                           // group 5: function calls
-        '([{}()\\[\\]])',                                                          // group 6: brackets & curly braces
-      ].join("|"),
-      language === "sql" ? "gi" : "g"
-    );
-
-    let result = "";
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = tokenRegex.exec(line)) !== null) {
-      const textBefore = line.slice(lastIndex, match.index);
-      if (textBefore) {
-        result += escapeHtml(textBefore);
-      }
-
-      const matchedText = match[0];
-      const escapedMatched = escapeHtml(matchedText);
-
-      if (match[1]) {
-        // Comment
-        result += `<span class="${isLight ? "text-slate-400 italic" : "text-slate-500 italic font-mono"}">${escapedMatched}</span>`;
-        lastIndex = tokenRegex.lastIndex;
-        break; // Comment spans to end of line
-      } else if (match[2]) {
-        // String
-        result += `<span class="${isLight ? "text-emerald-700 font-semibold" : "text-emerald-400 font-semibold"}">${escapedMatched}</span>`;
-      } else if (match[3]) {
-        // Number / Boolean / Null
-        result += `<span class="${isLight ? "text-amber-700 font-bold" : "text-amber-400 font-bold"}">${escapedMatched}</span>`;
-      } else if (match[4]) {
-        // Keyword
-        result += `<span class="${isLight ? "text-purple-700 font-extrabold" : "text-purple-400 font-extrabold"}">${escapedMatched}</span>`;
-      } else if (match[5]) {
-        // Function call
-        result += `<span class="${isLight ? "text-blue-700 font-bold" : "text-sky-300 font-bold"}">${escapedMatched}</span>`;
-      } else if (match[6]) {
-        // Brackets & Curly Braces (highly visible golden amber in both modes)
-        result += `<span class="${isLight ? "text-amber-800 font-extrabold" : "text-amber-300 font-extrabold"}">${escapedMatched}</span>`;
-      } else {
-        result += escapedMatched;
-      }
-
-      lastIndex = tokenRegex.lastIndex;
-    }
-
-    if (lastIndex < line.length) {
-      result += escapeHtml(line.slice(lastIndex));
-    }
-
-    return result;
-  });
-
-  return highlightedLines.join("\n");
-}
 
 /**
  * Rich Formatted Problem Content renderer supporting code blocks, examples & inline tokens
@@ -367,7 +285,77 @@ export function ProctoredCodingTestConsole({
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showMatrixDrawer, setShowMatrixDrawer] = useState(false);
   const [isEditorExpanded, setIsEditorExpanded] = useState(false);
-  const [editorFontSize, setEditorFontSize] = useState(15);
+  const [editorFontSize, setEditorFontSize] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("c2c_coding_editor_font_size");
+      return saved ? Math.min(24, Math.max(12, Number(saved))) : 15;
+    } catch {
+      return 15;
+    }
+  });
+  const [editorWordWrap, setEditorWordWrap] = useState<"on" | "off">(() => {
+    try {
+      const saved = localStorage.getItem("c2c_coding_word_wrap");
+      return saved === "off" ? "off" : "on";
+    } catch {
+      return "on";
+    }
+  });
+  const [consoleHeightPx, setConsoleHeightPx] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("c2c_coding_console_height");
+      return saved ? Math.min(600, Math.max(90, Number(saved))) : 220;
+    } catch {
+      return 220;
+    }
+  });
+  const [isConsoleCollapsed, setIsConsoleCollapsed] = useState(false);
+  const [isConsoleMaximized, setIsConsoleMaximized] = useState(false);
+  const [isDraggingVertical, setIsDraggingVertical] = useState(false);
+  const isDraggingVerticalRef = useRef(false);
+  const editorRef = useRef<CodeEditorControlsHandle | null>(null);
+
+  // Global mousemove & mouseup listeners for vertical console resizing
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingVerticalRef.current) {
+        const viewportHeight = window.innerHeight;
+        const newHeight = viewportHeight - e.clientY;
+        const clamped = Math.min(600, Math.max(90, newHeight));
+        setConsoleHeightPx(clamped);
+        try {
+          localStorage.setItem("c2c_coding_console_height", String(clamped));
+        } catch {}
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (isDraggingVerticalRef.current) {
+        isDraggingVerticalRef.current = false;
+        setIsDraggingVertical(false);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  const handleStartVerticalDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isDraggingVerticalRef.current = true;
+    setIsDraggingVertical(true);
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+  };
+  const [errorLine, setErrorLine] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLightMode, setIsLightMode] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [lastSavedTime, setLastSavedTime] = useState<string>("Draft saved");
@@ -661,9 +649,18 @@ export function ProctoredCodingTestConsole({
       }));
 
       if (res.isCompilationError || res.compilationError) {
+        const errText = res.errorMessage || res.stderr || (res as any).output || "";
+        const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
+        const errLineNum = res.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+        if (errLineNum && !isNaN(errLineNum)) {
+          setErrorLine(errLineNum);
+        }
+        setErrorMessage(errText);
         setActiveTab("console");
-        toast.error("Compilation Error: Please check compiler logs");
+        toast.error(`Compilation Error${errLineNum ? ` (Line ${errLineNum})` : ""}: Please check compiler logs`);
       } else if (isCustom) {
+        setErrorLine(null);
+        setErrorMessage(null);
         setActiveTab("console");
         if (res.stderr) {
           toast.warning("Custom execution completed with stderr");
@@ -671,6 +668,8 @@ export function ProctoredCodingTestConsole({
           toast.success("Custom run executed successfully!");
         }
       } else {
+        setErrorLine(null);
+        setErrorMessage(null);
         setActiveTab("testcases");
         if (res.success) {
           toast.success(`✓ All ${res.totalCount || testCasesToRun.length} test cases passed!`);
@@ -1704,6 +1703,69 @@ export function ProctoredCodingTestConsole({
                     <span>Solution.{LANGUAGE_CONFIGS[selectedLang]?.ext || "py"}</span>
                   </div>
 
+                  {/* Undo / Redo */}
+                  <div className="flex items-center border rounded-lg overflow-hidden border-slate-200 dark:border-white/10 bg-white dark:bg-black/30 shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => editorRef.current?.undo()}
+                      className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
+                      title="Undo (Ctrl+Z)"
+                    >
+                      <Undo2 className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="w-px h-3.5 bg-slate-200 dark:bg-white/10" />
+                    <button
+                      type="button"
+                      onClick={() => editorRef.current?.redo()}
+                      className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
+                      title="Redo (Ctrl+Y)"
+                    >
+                      <Redo2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Format / Prettify Code */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      editorRef.current?.formatCode?.();
+                      toast.success("Code auto-formatted");
+                    }}
+                    className={`text-[11px] transition px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer ${
+                      isLightMode ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200" : "text-slate-400 hover:text-blue-400 hover:bg-white/[0.06]"
+                    }`}
+                    title="Prettify / Format Code"
+                  >
+                    <Sparkles className="h-3 w-3 text-amber-400" />
+                    <span>Format</span>
+                  </button>
+
+                  {/* Word Wrap Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = editorWordWrap === "on" ? "off" : "on";
+                      setEditorWordWrap(next);
+                      try {
+                        localStorage.setItem("c2c_coding_word_wrap", next);
+                      } catch {}
+                      toast.info(`Word wrap ${next === "on" ? "enabled" : "disabled"}`);
+                    }}
+                    className={`text-[11px] transition px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer ${
+                      editorWordWrap === "on"
+                        ? isLightMode
+                          ? "bg-indigo-50 border border-indigo-200 text-indigo-700"
+                          : "bg-indigo-500/20 border border-indigo-500/40 text-indigo-300"
+                        : isLightMode
+                        ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200"
+                        : "text-slate-400 hover:text-blue-400 hover:bg-white/[0.06]"
+                    }`}
+                    title="Toggle Word Wrap (Soft wrap long lines)"
+                  >
+                    <WrapText className="h-3 w-3" />
+                    <span>{editorWordWrap === "on" ? "Wrap: On" : "Wrap: Off"}</span>
+                  </button>
+
                   <button
                     onClick={handleClearCode}
                     className={`text-[11px] transition px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer ${
@@ -1719,32 +1781,61 @@ export function ProctoredCodingTestConsole({
                     className={`text-[11px] transition px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer ${
                       isLightMode ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200" : "text-slate-400 hover:text-blue-400 hover:bg-white/[0.06]"
                     }`}
-                    title={isEditorExpanded ? "Restore Split View" : "Maximize Code Editor"}
+                    title={isEditorExpanded ? "Restore Split View" : "Maximize Code Editor (Zen Mode)"}
                   >
                     {isEditorExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
                     <span>{isEditorExpanded ? "Split" : "Expand"}</span>
                   </button>
 
-                  {/* Font Size Adjuster */}
+                  {/* Font Size Adjuster with Presets Dropdown */}
                   <div
-                    className={`flex items-center gap-1 rounded-lg p-0.5 border text-xs ${
+                    className={`flex items-center gap-0.5 rounded-lg p-0.5 border text-xs ${
                       isLightMode ? "bg-slate-100 border-slate-300 text-slate-700" : "bg-black/30 border-white/10 text-slate-300"
                     }`}
                   >
                     <button
-                      onClick={() => setEditorFontSize((prev) => Math.max(12, prev - 1))}
+                      onClick={() => {
+                        const next = Math.max(12, editorFontSize - 1);
+                        setEditorFontSize(next);
+                        try {
+                          localStorage.setItem("c2c_coding_editor_font_size", String(next));
+                        } catch {}
+                      }}
                       className="px-1.5 py-0.5 rounded text-[11px] hover:bg-white/10 transition cursor-pointer"
-                      title="Decrease Font Size"
+                      title="Decrease Font Size (Ctrl + -)"
                     >
-                      A-
+                      <Minus className="w-3 h-3" />
                     </button>
-                    <span className="text-[10px] font-mono px-0.5 font-bold">{editorFontSize}px</span>
-                    <button
-                      onClick={() => setEditorFontSize((prev) => Math.min(22, prev + 1))}
-                      className="px-1.5 py-0.5 rounded text-[11px] hover:bg-white/10 transition cursor-pointer"
-                      title="Increase Font Size"
+                    <select
+                      value={editorFontSize}
+                      onChange={(e) => {
+                        const next = Number(e.target.value);
+                        setEditorFontSize(next);
+                        try {
+                          localStorage.setItem("c2c_coding_editor_font_size", String(next));
+                        } catch {}
+                      }}
+                      className="px-1 py-0.5 font-mono font-bold text-[10px] bg-transparent cursor-pointer focus:outline-none text-slate-700 dark:text-slate-200"
+                      title="Select Font Size"
                     >
-                      A+
+                      {[12, 13, 14, 15, 16, 17, 18, 20, 22, 24].map((sz) => (
+                        <option key={sz} value={sz} className={isLightMode ? "bg-white text-slate-900" : "bg-slate-900 text-white"}>
+                          {sz}px
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => {
+                        const next = Math.min(22, editorFontSize + 1);
+                        setEditorFontSize(next);
+                        try {
+                          localStorage.setItem("c2c_coding_editor_font_size", String(next));
+                        } catch {}
+                      }}
+                      className="px-1.5 py-0.5 rounded text-[11px] hover:bg-white/10 transition cursor-pointer"
+                      title="Increase Font Size (Ctrl + +)"
+                    >
+                      <Plus className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -1775,57 +1866,76 @@ export function ProctoredCodingTestConsole({
                 </div>
               </div>
 
-              {/* Code Editor Body with Real-time Syntax Highlighting Layer */}
-              <div
-                className={`flex-1 flex overflow-hidden relative font-mono ${
-                  isLightMode ? "bg-[#fafcff]" : "bg-[#060b18]"
-                }`}
-                style={{ fontSize: `${editorFontSize}px` }}
-              >
-                {/* Line Numbers */}
-                <div
-                  className={`w-12 ${
-                    isLightMode ? "bg-slate-50 border-slate-200 text-slate-400" : "bg-slate-950/80 border-white/[0.06] text-slate-500"
-                  } border-r py-3 text-right pr-3 select-none text-xs font-mono shrink-0`}
-                  style={{ fontSize: `${editorFontSize - 1}px` }}
-                >
-                  {codeLines.map((_, i) => (
-                    <div key={i} className="leading-7 font-mono font-bold">
-                      {i + 1}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Interactive Code Editor Container */}
-                <div className="flex-1 h-full relative overflow-hidden">
-                  <textarea
-                    value={currentAnswer}
-                    onChange={(e) => handleAnswerUpdate(e.target.value)}
-                    onKeyDown={(e) => handleCodeEditorKeyDown(e, currentAnswer, handleAnswerUpdate)}
-                    placeholder={LANGUAGE_CONFIGS[selectedLang]?.placeholder || `// write your code here`}
-                    spellCheck={false}
-                    autoCapitalize="off"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    className={`w-full h-full p-3 font-mono font-medium leading-7 resize-none focus:outline-none whitespace-pre m-0 caret-blue-500 selection:bg-indigo-500/30 ${
-                      isLightMode
-                        ? "bg-[#fafcff] text-slate-900 placeholder:text-slate-400"
-                        : "bg-[#060b18] text-slate-100 placeholder:text-slate-600"
-                    }`}
-                    style={{
-                      fontSize: `${editorFontSize}px`,
-                      tabSize: 4,
-                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-                    }}
-                  />
-                </div>
+              {/* Code Editor Body */}
+              <div className="flex-1 relative overflow-hidden">
+                <MonacoCodeEditor
+                  code={currentAnswer}
+                  onChange={(newVal) => {
+                    handleAnswerUpdate(newVal);
+                    if (errorLine) setErrorLine(null);
+                    if (errorMessage) setErrorMessage(null);
+                  }}
+                  language={selectedLang}
+                  isLight={isLightMode}
+                  placeholder={LANGUAGE_CONFIGS[selectedLang]?.placeholder || `// write your code here`}
+                  fontSize={editorFontSize}
+                  onFontSizeChange={(newSize) => {
+                    setEditorFontSize(newSize);
+                    try {
+                      localStorage.setItem("c2c_coding_editor_font_size", String(newSize));
+                    } catch {}
+                  }}
+                  tabSize={4}
+                  wordWrap={editorWordWrap}
+                  isDragging={isDraggingVertical}
+                  editorRef={editorRef}
+                  errorLine={errorLine}
+                  errorMessage={errorMessage}
+                  onClearErrorLine={() => {
+                    setErrorLine(null);
+                    setErrorMessage(null);
+                  }}
+                  onRunCode={() => handleRunCode(false)}
+                  readOnly={proctorState.isBlocked}
+                  isCopyPasteDisabled={true}
+                  onCopyPasteBlocked={() => {
+                    toast.warning("Copy & Paste is restricted during this examination.");
+                  }}
+                />
               </div>
 
-              {/* Bottom Drawer: Test Cases / Custom / Compiler Console */}
+              {/* Vertical Resizer Splitter */}
+              {!isConsoleCollapsed && (
+                <div
+                  onMouseDown={handleStartVerticalDrag}
+                  onDoubleClick={() => setConsoleHeightPx(220)}
+                  title="Drag up/down to resize Code Editor vs Console (Double-click to reset)"
+                  className="h-2.5 w-full flex items-center justify-center cursor-row-resize select-none shrink-0 group z-20 my-0.5"
+                >
+                  <div
+                    className={`h-1 w-16 rounded-full transition-all duration-200 group-hover:w-32 group-hover:h-1.5 flex items-center justify-center ${
+                      isLightMode
+                        ? "bg-slate-300 group-hover:bg-blue-600 group-hover:shadow-[0_0_8px_rgba(37,99,235,0.5)]"
+                        : "bg-slate-700 group-hover:bg-cyan-400 group-hover:shadow-[0_0_12px_rgba(34,211,238,0.6)]"
+                    }`}
+                  >
+                    <GripHorizontal className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Drawer: Test Cases / Custom / Compiler Console (Adjustable Height) */}
               <div
-                className={`h-52 ${
+                style={{
+                  height: isConsoleCollapsed
+                    ? "36px"
+                    : isConsoleMaximized
+                    ? "calc(100% - 90px)"
+                    : `${consoleHeightPx}px`,
+                }}
+                className={`${
                   isLightMode ? "bg-slate-50/95 border-slate-200" : "bg-slate-950/80 border-white/[0.08]"
-                } border-t flex flex-col shrink-0 backdrop-blur-2xl transition-colors`}
+                } border-t flex flex-col shrink-0 backdrop-blur-2xl transition-all duration-150 overflow-hidden`}
               >
                 {/* Drawer Tab Headers */}
                 <div
@@ -1877,23 +1987,54 @@ export function ProctoredCodingTestConsole({
                     </button>
                   </div>
 
-                  {currentExecResult && (
-                    <div className="flex items-center gap-2 text-[11px]">
-                      {currentExecResult.isCompilationError || currentExecResult.compilationError ? (
-                        <span className="text-red-500 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded-lg border border-red-500/30">
-                          <AlertTriangle className="h-3.5 w-3.5 text-red-500" /> Compilation Error
-                        </span>
-                      ) : currentExecResult.success ? (
-                        <span className="text-emerald-500 font-bold flex items-center gap-1 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/30">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> All Tests Passed ({currentExecResult.passedCount ?? 0}/{currentExecResult.totalCount ?? 0})
-                        </span>
-                      ) : (
-                        <span className="text-amber-500 font-bold flex items-center gap-1 bg-amber-500/10 px-2.5 py-0.5 rounded-lg border border-amber-500/30">
-                          <XCircle className="h-3.5 w-3.5 text-amber-500" /> {currentExecResult.passedCount ?? 0}/{currentExecResult.totalCount ?? 0} Tests Passed
-                        </span>
-                      )}
+                  <div className="flex items-center gap-2">
+                    {currentExecResult && (
+                      <div className="flex items-center gap-2 text-[11px]">
+                        {currentExecResult.isCompilationError || currentExecResult.compilationError ? (
+                          <span className="text-red-500 font-bold flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded-lg border border-red-500/30">
+                            <AlertTriangle className="h-3.5 w-3.5 text-red-500" /> Compilation Error
+                          </span>
+                        ) : currentExecResult.success ? (
+                          <span className="text-emerald-500 font-bold flex items-center gap-1 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/30">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> All Tests Passed ({currentExecResult.passedCount ?? 0}/{currentExecResult.totalCount ?? 0})
+                          </span>
+                        ) : (
+                          <span className="text-amber-500 font-bold flex items-center gap-1 bg-amber-500/10 px-2.5 py-0.5 rounded-lg border border-amber-500/30">
+                            <XCircle className="h-3.5 w-3.5 text-amber-500" /> {currentExecResult.passedCount ?? 0}/{currentExecResult.totalCount ?? 0} Tests Passed
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-1 border-l pl-2 border-slate-300 dark:border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsConsoleMaximized(!isConsoleMaximized);
+                          setIsConsoleCollapsed(false);
+                        }}
+                        className={`p-1 rounded transition cursor-pointer ${
+                          isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-white/10 text-slate-400"
+                        }`}
+                        title={isConsoleMaximized ? "Restore Console Height" : "Maximize Console Height"}
+                      >
+                        {isConsoleMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsConsoleCollapsed(!isConsoleCollapsed);
+                          setIsConsoleMaximized(false);
+                        }}
+                        className={`p-1 rounded transition cursor-pointer ${
+                          isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-white/10 text-slate-400"
+                        }`}
+                        title={isConsoleCollapsed ? "Expand Console Panel" : "Collapse Console Panel"}
+                      >
+                        {isConsoleCollapsed ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* Tab 1: Official Test Cases Runner (4 Cases: 2 Public + 2 Hidden) */}
@@ -1903,6 +2044,15 @@ export function ProctoredCodingTestConsole({
                       isLightMode ? "bg-white text-slate-800" : "bg-transparent text-slate-300"
                     }`}
                   >
+                    {(currentExecResult?.isCompilationError || currentExecResult?.compilationError) && (
+                      <CompilerErrorBanner
+                        errorText={currentExecResult?.stderr || currentExecResult?.errorMessage || errorMessage || "Compilation error"}
+                        errorLine={errorLine}
+                        language={selectedLang}
+                        isLight={isLightMode}
+                        onJumpToLine={(line) => editorRef.current?.revealLine?.(line)}
+                      />
+                    )}
                     {currentExecResult?.testCaseResults && currentExecResult.testCaseResults.length > 0 ? (
                       <div className="space-y-2">
                         <div className={`flex gap-2 border-b pb-2 overflow-x-auto ${isLightMode ? "border-slate-200" : "border-white/10"}`}>
@@ -2064,6 +2214,15 @@ export function ProctoredCodingTestConsole({
                       isLightMode ? "bg-slate-900 text-slate-200" : "bg-black text-slate-200"
                     }`}
                   >
+                    {(currentExecResult?.isCompilationError || currentExecResult?.compilationError || currentExecResult?.stderr || errorMessage) && (
+                      <CompilerErrorBanner
+                        errorText={currentExecResult?.stderr || currentExecResult?.errorMessage || errorMessage || ""}
+                        errorLine={errorLine}
+                        language={selectedLang}
+                        isLight={isLightMode}
+                        onJumpToLine={(line) => editorRef.current?.revealLine?.(line)}
+                      />
+                    )}
                     {currentExecResult ? (
                       <>
                         {currentExecResult.stderr && (

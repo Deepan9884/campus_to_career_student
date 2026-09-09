@@ -25,13 +25,20 @@ import {
   ArrowUpFromLine,
   Terminal,
   Info,
+  Undo2,
+  Redo2,
+  Minus,
+  Plus,
+  Sparkles,
+  WrapText,
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { executeCode } from "@/lib/quiz-api";
-import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
+import { MonacoCodeEditor, type CodeEditorControlsHandle } from "@/components/tests/MonacoCodeEditor";
+import { CompilerErrorBanner } from "@/components/tests/CompilerErrorBanner";
 import { PROGRAMMING_LANGUAGES_CURRICULUM } from "@/lib/super-dream-languages-data";
 import {
   getPracticeProblemsForSkill,
@@ -232,9 +239,19 @@ export function PracticeCodingConsole({
     }
   }, [activeProblemIdx, languageKey, currentProblem]);
 
-  // Editor Refs
-  const gutterRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  // Editor Refs & State
+  const editorControlsRef = useRef<CodeEditorControlsHandle | null>(null);
+  const [editorFontSize, setEditorFontSize] = useState<number>(14);
+  const [editorWordWrap, setEditorWordWrap] = useState<"on" | "off">(() => {
+    try {
+      const saved = localStorage.getItem("c2c_practice_word_wrap");
+      return saved === "off" ? "off" : "on";
+    } catch {
+      return "on";
+    }
+  });
+  const [errorLine, setErrorLine] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Problem navigation
   const handleSelectProblem = (idx: number) => {
@@ -282,11 +299,6 @@ export function PracticeCodingConsole({
       document.removeEventListener("contextmenu", handleContextMenu);
     };
   }, [open]);
-
-  // Code Editor Key handler
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    handleCodeTextareaKeyDown(e, code, setCode, 4);
-  };
 
   // Check if code is unedited starter template or empty
   const isCodeEmptyOrUnedited = (userCode: string): boolean => {
@@ -377,9 +389,19 @@ export function PracticeCodingConsole({
         allPass = mappedResults.every((t) => t.passed);
 
         if (res.isCompilationError || res.compilationError) {
-          setConsoleOutput(res.stderr || "Compilation / Syntax Error in code");
-          toast.error("Compilation error: Please fix syntax issues");
+          const errText = res.stderr || (res as any).output || res.errorMessage || "Compilation / Syntax Error in code";
+          const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
+          const errLineNum = res.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+          if (errLineNum && !isNaN(errLineNum)) {
+            setErrorLine(errLineNum);
+          }
+          setConsoleOutput(errText);
+          setErrorMessage(errText);
+          setActiveTab("console");
+          toast.error(`Compilation error${errLineNum ? ` (Line ${errLineNum})` : ""}: Please fix syntax issues`);
         } else {
+          setErrorLine(null);
+          setErrorMessage(null);
           setConsoleOutput(
             (res.stdout ? `${res.stdout}\n` : "") +
               (res.stderr ? `Compiler Notes / Errors:\n${res.stderr}\n\n` : "") +
@@ -776,7 +798,7 @@ export function PracticeCodingConsole({
     <div className="h-full flex flex-col">
       {/* Editor Header */}
       <div className={cn(
-        "flex items-center justify-between px-3 py-2 border-b",
+        "flex items-center justify-between px-3 py-2 border-b gap-2 shrink-0",
         isLightMode
           ? "bg-slate-50 border-slate-200 text-slate-700"
           : "bg-[#161c26] border-slate-800/80 text-slate-200"
@@ -785,59 +807,157 @@ export function PracticeCodingConsole({
           <FileCode className="w-4 h-4 text-indigo-400" />
           <span className="text-xs font-semibold uppercase">{languageKey}</span>
         </div>
-        <button
-          onClick={() => {
-            const starter =
-              currentProblem.starterCodes[languageKey] ||
-              currentProblem.starterCodes[Object.keys(currentProblem.starterCodes)[0]] ||
-              "// Write your code here";
-            setCode(starter);
-            toast.info("Reset to starter template");
-          }}
-          className={cn(
-            "px-2.5 py-1 rounded-md text-xs flex items-center gap-1 transition cursor-pointer border",
-            isLightMode
-              ? "bg-white hover:bg-slate-100 border-slate-200 text-slate-700"
-              : "bg-slate-800/90 hover:bg-slate-700 border-slate-700/80 text-slate-200"
-          )}
-        >
-          <RotateCcw className="w-3 h-3" /> Reset Template
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Undo / Redo */}
+          <div className="flex items-center border rounded-lg overflow-hidden border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
+            <button
+              type="button"
+              onClick={() => editorControlsRef.current?.undo()}
+              className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+            </button>
+            <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700" />
+            <button
+              type="button"
+              onClick={() => editorControlsRef.current?.redo()}
+              className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
+              title="Redo (Ctrl+Y)"
+            >
+              <Redo2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Format / Prettify Code */}
+          <button
+            type="button"
+            onClick={() => {
+              editorControlsRef.current?.formatCode?.();
+              toast.success("Code auto-formatted");
+            }}
+            className={cn(
+              "px-2.5 py-1 rounded-md text-xs flex items-center gap-1 transition cursor-pointer border",
+              isLightMode
+                ? "bg-white hover:bg-slate-100 border-slate-200 text-slate-700 shadow-xs"
+                : "bg-slate-800/90 hover:bg-slate-700 border-slate-700/80 text-slate-200"
+            )}
+            title="Prettify / Format Code"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Format</span>
+          </button>
+
+          {/* Word Wrap Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const next = editorWordWrap === "on" ? "off" : "on";
+              setEditorWordWrap(next);
+              try {
+                localStorage.setItem("c2c_practice_word_wrap", next);
+              } catch {}
+              toast.info(`Word wrap ${next === "on" ? "enabled" : "disabled"}`);
+            }}
+            className={cn(
+              "px-2.5 py-1 rounded-md text-xs flex items-center gap-1 transition cursor-pointer border",
+              editorWordWrap === "on"
+                ? isLightMode
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                  : "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                : isLightMode
+                ? "bg-white hover:bg-slate-100 border-slate-200 text-slate-700"
+                : "bg-slate-800/90 hover:bg-slate-700 border-slate-700/80 text-slate-200"
+            )}
+            title="Toggle Word Wrap"
+          >
+            <WrapText className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{editorWordWrap === "on" ? "Wrap: On" : "Wrap: Off"}</span>
+          </button>
+
+          {/* Font Size Scaler with Presets Dropdown */}
+          <div className="flex items-center border rounded-lg overflow-hidden border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setEditorFontSize((prev) => Math.max(12, prev - 1))}
+              className="px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              title="Decrease Font Size (Ctrl + -)"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+            <select
+              value={editorFontSize}
+              onChange={(e) => setEditorFontSize(Number(e.target.value))}
+              className="px-1 py-0.5 font-mono font-bold text-[10px] bg-transparent cursor-pointer focus:outline-none text-slate-700 dark:text-slate-200"
+              title="Select Font Size"
+            >
+              {[12, 13, 14, 15, 16, 17, 18, 20, 22].map((sz) => (
+                <option key={sz} value={sz} className={isLightMode ? "bg-white text-slate-900" : "bg-slate-900 text-white"}>
+                  {sz}px
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setEditorFontSize((prev) => Math.min(22, prev + 1))}
+              className="px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              title="Increase Font Size (Ctrl + +)"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              const starter =
+                currentProblem.starterCodes[languageKey] ||
+                currentProblem.starterCodes[Object.keys(currentProblem.starterCodes)[0]] ||
+                "// Write your code here";
+              setCode(starter);
+              if (errorLine) setErrorLine(null);
+              toast.info("Reset to starter template");
+            }}
+            className={cn(
+              "px-2.5 py-1 rounded-md text-xs flex items-center gap-1 transition cursor-pointer border",
+              isLightMode
+                ? "bg-white hover:bg-slate-100 border-slate-200 text-slate-700"
+                : "bg-slate-800/90 hover:bg-slate-700 border-slate-700/80 text-slate-200"
+            )}
+          >
+            <RotateCcw className="w-3 h-3" /> Reset Template
+          </button>
+        </div>
       </div>
 
       {/* Code Editor */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Line Numbers */}
-        <div
-          ref={gutterRef}
-          className={cn(
-            "w-12 border-r py-3 select-none font-mono text-xs text-right pr-3 overflow-hidden",
-            isLightMode
-              ? "bg-slate-50/90 border-slate-200 text-slate-400"
-              : "bg-[#10141d] border-slate-800/80 text-slate-500"
-          )}
-        >
-          {Array.from({ length: Math.max(1, code.split("\n").length) }, (_, i) => (
-            <div key={i}>{i + 1}</div>
-          ))}
-        </div>
-
-        {/* Code Textarea */}
-        <textarea
-          ref={textareaRef}
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={handleKeyDown}
-          spellCheck={false}
-          className={cn(
-            "flex-1 p-3 font-mono text-sm resize-none focus:outline-none",
-            isLightMode
-              ? "bg-white text-slate-900 selection:bg-indigo-100"
-              : "bg-[#0c1017] text-slate-100 selection:bg-indigo-950 caret-indigo-400"
-          )}
-          style={{
-            lineHeight: "1.6",
-            tabSize: 4,
+      <div className="flex-1 relative overflow-hidden">
+        <MonacoCodeEditor
+          code={code}
+          onChange={(newVal) => {
+            setCode(newVal);
+            if (errorLine) setErrorLine(null);
+            if (errorMessage) setErrorMessage(null);
+          }}
+          language={languageKey}
+          isLight={isLightMode}
+          placeholder="// Write your code here"
+          fontSize={editorFontSize}
+          onFontSizeChange={(newSize) => setEditorFontSize(newSize)}
+          tabSize={4}
+          wordWrap={editorWordWrap}
+          editorRef={editorControlsRef}
+          errorLine={errorLine}
+          errorMessage={errorMessage}
+          onClearErrorLine={() => {
+            setErrorLine(null);
+            setErrorMessage(null);
+          }}
+          onRunCode={() => handleRunCode(false)}
+          readOnly={isRunning || isSubmitting}
+          isCopyPasteDisabled={true}
+          onCopyPasteBlocked={() => {
+            toast.error("Copy-paste is disabled for coding practice. Please type your code.");
           }}
         />
       </div>
@@ -947,6 +1067,15 @@ export function PracticeCodingConsole({
       <div className="flex-1 overflow-y-auto p-3">
         {activeTab === "testcases" && (
           <div className="space-y-3">
+            {(errorLine || errorMessage) && (
+              <CompilerErrorBanner
+                errorText={errorMessage || consoleOutput || "Compilation error in code."}
+                errorLine={errorLine}
+                language={languageKey}
+                isLight={isLightMode}
+                onJumpToLine={(line) => editorControlsRef.current?.revealLine?.(line)}
+              />
+            )}
             {/* Case Selector Pills */}
             <div className={cn("flex items-center gap-1.5 border-b pb-2", isLightMode ? "border-slate-200" : "border-slate-800")}>
               {publicCases.map((tc, idx) => {
@@ -1154,14 +1283,25 @@ export function PracticeCodingConsole({
         )}
 
         {activeTab === "console" && (
-          <pre className={cn(
-            "text-xs font-mono whitespace-pre-wrap p-3 rounded-lg border overflow-x-auto",
-            isLightMode
-              ? "bg-slate-50 border-slate-200 text-slate-700"
-              : "bg-[#0b0e14] border-slate-800 text-slate-300"
-          )}>
-            {consoleOutput || "Compiler output & execution logs will appear here..."}
-          </pre>
+          <div className="space-y-3">
+            {(errorLine || errorMessage) && (
+              <CompilerErrorBanner
+                errorText={errorMessage || consoleOutput || "Compilation error in code."}
+                errorLine={errorLine}
+                language={languageKey}
+                isLight={isLightMode}
+                onJumpToLine={(line) => editorControlsRef.current?.revealLine?.(line)}
+              />
+            )}
+            <pre className={cn(
+              "text-xs font-mono whitespace-pre-wrap p-3 rounded-lg border overflow-x-auto",
+              isLightMode
+                ? "bg-slate-50 border-slate-200 text-slate-700"
+                : "bg-[#0b0e14] border-slate-800 text-slate-300"
+            )}>
+              {consoleOutput || "Compiler output & execution logs will appear here..."}
+            </pre>
+          </div>
         )}
       </div>
     </div>
