@@ -60,6 +60,8 @@ export interface CodeExecutionResult {
   isCompilationError?: boolean;
   compilationError?: boolean;
   isRuntimeError?: boolean;
+  errorLine?: number | null;
+  errorMessage?: string;
   passedCount?: number;
   totalCount?: number;
   testCaseResults: TestCaseResult[];

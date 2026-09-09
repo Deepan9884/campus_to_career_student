@@ -90,38 +90,81 @@ const LANGUAGE_CONFIGS: Record<
   python: {
     label: "Python 3",
     ext: "py",
-    placeholder: "# Write your code here",
-    defaultStarter: "# Write your code here\n",
+    placeholder: "# Write your solution here",
+    defaultStarter: `import sys
+
+def main():
+    # Read dynamic input from standard input (stdin)
+    # Write your code here
+    pass
+
+if __name__ == "__main__":
+    main()
+`,
   },
   java: {
     label: "Java",
     ext: "java",
-    placeholder: "// Write your code here",
-    defaultStarter: "// Write your code here\n",
+    placeholder: "// Write your solution here",
+    defaultStarter: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // Write your code here
+        
+    }
+}
+`,
   },
   cpp: {
     label: "C++",
     ext: "cpp",
-    placeholder: "// Write your code here",
-    defaultStarter: "// Write your code here\n",
+    placeholder: "// Write your solution here",
+    defaultStarter: `#include <iostream>
+using namespace std;
+
+int main() {
+    // Write your code here
+    
+    return 0;
+}
+`,
   },
   c: {
     label: "C",
     ext: "c",
-    placeholder: "// Write your code here",
-    defaultStarter: "// Write your code here\n",
+    placeholder: "// Write your solution here",
+    defaultStarter: `#include <stdio.h>
+
+int main() {
+    // Write your code here
+    
+    return 0;
+}
+`,
   },
   javascript: {
     label: "JavaScript",
     ext: "js",
-    placeholder: "// Write your code here",
-    defaultStarter: "// Write your code here\n",
+    placeholder: "// Write your solution here",
+    defaultStarter: `const fs = require('fs');
+
+function main() {
+    // Read dynamic input from standard input (stdin)
+    const input = fs.readFileSync(0, 'utf-8').trim();
+    // Write your code here
+    
+}
+
+main();
+`,
   },
   sql: {
     label: "SQL",
     ext: "sql",
-    placeholder: "-- Write your code here",
-    defaultStarter: "-- Write your code here\n",
+    placeholder: "-- Write your SQL query here",
+    defaultStarter: `-- Write your SQL query here\n`,
   },
 };
 
@@ -659,6 +702,8 @@ function CodeEditorWithGutter({
   fontSize = 15,
   tabSize = 4,
   editorRef,
+  errorLine,
+  onClearErrorLine,
 }: {
   code: string;
   onChange: (val: string) => void;
@@ -668,11 +713,14 @@ function CodeEditorWithGutter({
   fontSize?: number;
   tabSize?: number;
   editorRef?: React.MutableRefObject<CodeEditorControlsHandle | null>;
+  errorLine?: number | null;
+  onClearErrorLine?: () => void;
 }) {
   const lineCount = Math.max(1, code.split("\n").length);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
+  const errorOverlayRef = useRef<HTMLDivElement>(null);
   const [activeLine, setActiveLine] = useState(1);
   const historyManagerRef = useRef<EditorHistoryManager>(new EditorHistoryManager(code, 0, 0));
   const pendingCursorRef = useRef<{ start: number; end: number } | null>(null);
@@ -761,6 +809,10 @@ function CodeEditorWithGutter({
       preRef.current.scrollTop = scrollTop;
       preRef.current.scrollLeft = scrollLeft;
     }
+    if (errorOverlayRef.current) {
+      errorOverlayRef.current.scrollTop = scrollTop;
+      errorOverlayRef.current.scrollLeft = scrollLeft;
+    }
   };
 
   const updateActiveLine = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
@@ -772,6 +824,9 @@ function CodeEditorWithGutter({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (onClearErrorLine && errorLine) {
+      onClearErrorLine();
+    }
     const handled = handleCodeTextareaKeyDown(
       e,
       code,
@@ -817,26 +872,36 @@ function CodeEditorWithGutter({
           boxSizing: "border-box",
           paddingTop: "16px",
           paddingBottom: "16px",
-          paddingLeft: "8px",
-          paddingRight: "10px",
+          paddingLeft: "6px",
+          paddingRight: "8px",
           fontSize: `${Math.max(11, fontSize - 2)}px`,
           fontFamily: editorFontFamily,
         }}
       >
         {Array.from({ length: lineCount }).map((_, i) => {
-          const isCurr = activeLine === i + 1;
+          const lineNum = i + 1;
+          const isCurr = activeLine === lineNum;
+          const isErr = errorLine === lineNum;
           return (
             <div
               key={i}
-              className={`transition-colors ${
-                isCurr ? (isLight ? "text-indigo-600 font-extrabold" : "text-cyan-400 font-extrabold") : ""
+              className={`transition-colors flex items-center justify-end gap-1 px-1 rounded-sm ${
+                isErr
+                  ? "bg-rose-500/25 text-rose-500 font-black border-r-2 border-rose-500"
+                  : isCurr
+                  ? isLight
+                    ? "text-indigo-600 font-extrabold"
+                    : "text-cyan-400 font-extrabold"
+                  : ""
               }`}
               style={{
                 height: `${lineHeightPx}px`,
                 lineHeight: `${lineHeightPx}px`,
               }}
+              title={isErr ? `Syntax Error on Line ${lineNum}` : undefined}
             >
-              {i + 1}
+              {isErr && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse inline-block shrink-0" />}
+              <span>{lineNum}</span>
             </div>
           );
         })}
@@ -844,6 +909,26 @@ function CodeEditorWithGutter({
 
       {/* Code Editor Interactive Container (Pre Highlighted + Textarea) */}
       <div className="flex-1 h-full relative overflow-hidden">
+        {/* Layer 0: Error Line Highlight Overlay */}
+        {errorLine && errorLine >= 1 && errorLine <= lineCount && (
+          <div
+            ref={errorOverlayRef}
+            className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-10"
+          >
+            <div
+              className="absolute left-0 right-0 bg-rose-500/15 border-l-4 border-rose-500 flex items-center justify-end pr-4 pointer-events-none transition-all shadow-sm"
+              style={{
+                top: `${(errorLine - 1) * lineHeightPx + 16}px`,
+                height: `${lineHeightPx}px`,
+              }}
+            >
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded border border-rose-500/30">
+                Line {errorLine} Syntax / Compilation Error
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Layer 1: Syntax Highlighted Rendered Code */}
         <pre
           ref={preRef}
@@ -858,6 +943,9 @@ function CodeEditorWithGutter({
           ref={textareaRef}
           value={code}
           onChange={(e) => {
+            if (onClearErrorLine && errorLine) {
+              onClearErrorLine();
+            }
             const val = e.target.value;
             const start = e.target.selectionStart;
             const end = e.target.selectionEnd;
@@ -889,6 +977,16 @@ function CodeEditorWithGutter({
   );
 }
 
+function extractErrorLineFromStderr(stderr: string = ""): number | null {
+  if (!stderr) return null;
+  const m = stderr.match(/(?::\s*|\bline\s+)(\d+)/i);
+  if (m) {
+    const num = parseInt(m[1], 10);
+    return isNaN(num) ? null : num;
+  }
+  return null;
+}
+
 export function UnifiedExamConsole({
   examData,
   onClose,
@@ -915,6 +1013,7 @@ export function UnifiedExamConsole({
 
   const [hasStartedExam, setHasStartedExam] = useState(false);
   const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(() => isCurrentlyFullscreen());
+  const [errorLine, setErrorLine] = useState<number | null>(null);
 
   useEffect(() => {
     return addFullscreenChangeListener((isFS) => {
@@ -1564,11 +1663,18 @@ export function UnifiedExamConsole({
   const currentQ = allQuestions[safeIdx] || null;
 
   const getStarterForLang = (lang: string, q?: any) => {
-    if (q?.starterCodes?.[lang]) return q.starterCodes[lang];
+    const raw = q?.starterCodes?.[lang];
+    if (raw && raw.trim() !== "// Write your code here" && raw.trim() !== "# Write your code here" && raw.trim() !== "-- Write your code here") {
+      return raw;
+    }
     if (LANGUAGE_CONFIGS[lang]?.defaultStarter) return LANGUAGE_CONFIGS[lang].defaultStarter;
-    if (lang === "python") return "# Write your code here\n";
-    if (lang === "sql") return "-- Write your code here\n";
-    return "// Write your code here\n";
+    if (lang === "python") return LANGUAGE_CONFIGS.python?.defaultStarter || "# Write your solution here\n";
+    if (lang === "java") return LANGUAGE_CONFIGS.java?.defaultStarter || "// Write your solution here\n";
+    if (lang === "cpp") return LANGUAGE_CONFIGS.cpp?.defaultStarter || "// Write your solution here\n";
+    if (lang === "c") return LANGUAGE_CONFIGS.c?.defaultStarter || "// Write your solution here\n";
+    if (lang === "javascript") return LANGUAGE_CONFIGS.javascript?.defaultStarter || "// Write your solution here\n";
+    if (lang === "sql") return "-- Write your SQL query here\n";
+    return "// Write your solution here\n";
   };
 
   const getActiveLangForQuestion = (qId: string) => {
@@ -1585,8 +1691,13 @@ export function UnifiedExamConsole({
   const currentCodingCode = currentQ?.type === "coding" ? getCodeForQuestion(currentQ.id, currentActiveLang, currentQ) : "";
   const currentAnswer = currentQ?.type === "coding" ? currentCodingCode : (answers[currentQ?.id] ?? "");
 
+  useEffect(() => {
+    setErrorLine(null);
+  }, [safeIdx]);
+
   const handleLanguageChange = (newLang: string) => {
     setSelectedLang(newLang);
+    setErrorLine(null);
     if (currentQ?.id) {
       setQuestionLanguages((prev) => ({ ...prev, [currentQ.id]: newLang }));
       const codeForNewLang = getCodeForQuestion(currentQ.id, newLang, currentQ);
@@ -1601,6 +1712,7 @@ export function UnifiedExamConsole({
   };
 
   const handleCodeChange = (newCode: string) => {
+    if (errorLine !== null) setErrorLine(null);
     if (!currentQ?.id) return;
     const activeLang = getActiveLangForQuestion(currentQ.id);
     setCodingCodeByLang((prev) => ({
@@ -1718,6 +1830,7 @@ export function UnifiedExamConsole({
     }
 
     // Immediately clear previous execution results so stale results are never shown during run
+    setErrorLine(null);
     setExecutionResults((prev) => {
       const next = { ...prev };
       delete next[currentQ.id];
@@ -1745,9 +1858,16 @@ export function UnifiedExamConsole({
       setExecutionResults((prev) => ({ ...prev, [currentQ.id]: result }));
 
       if (result.isCompilationError || result.compilationError) {
-        toast.error(`Compilation / Syntax Error in ${LANGUAGE_CONFIGS[activeLang]?.label || activeLang}`);
+        const errText = result.errorMessage || result.stderr || result.output || "";
+        const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
+        const errLineNum = result.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+        if (errLineNum && !isNaN(errLineNum)) {
+          setErrorLine(errLineNum);
+        }
+        toast.error(`Compilation / Syntax Error in ${LANGUAGE_CONFIGS[activeLang]?.label || activeLang}${errLineNum ? ` (line ${errLineNum})` : ""}`);
         setActiveTab("console");
       } else {
+        setErrorLine(null);
         const passed = result.passedCount ?? 0;
         const total = result.totalCount ?? testCases.length;
         if (result.success || (passed === total && total > 0)) {
