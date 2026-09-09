@@ -2380,72 +2380,79 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 
 /* ==========================================================================
    Monaco Editor Margin & Gutter (CodeTantra Style)
-   Clean vertical separator and aligned line numbers
+   Clean vertical separator and generous breathing room for code text
    ========================================================================== */
 .monaco-editor .margin {
-  border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
+  background-color: transparent !important;
+  border-right: none !important;
 }
-.monaco-editor.campus-dark .margin,
-.monaco-editor.vs-dark .margin {
-  border-right-color: rgba(255, 255, 255, 0.08) !important;
-  background-color: #070b14 !important;
-}
-.monaco-editor.campus-light .margin,
-.monaco-editor.vs .margin {
-  border-right-color: rgba(0, 0, 0, 0.08) !important;
-  background-color: #f8fafc !important;
-}
+
 .monaco-editor .line-numbers {
   text-align: right !important;
-  padding-right: 8px !important;
+  padding-right: 12px !important;
   font-size: 12px !important;
   font-weight: 500 !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+
+.monaco-editor.campus-dark .line-numbers,
+.monaco-editor.vs-dark .line-numbers {
+  color: #64748b !important;
+  border-right-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.monaco-editor.campus-light .line-numbers,
+.monaco-editor.vs .line-numbers {
+  color: #94a3b8 !important;
+  border-right-color: rgba(0, 0, 0, 0.12) !important;
 }
 
 /* ==========================================================================
-   Monaco Editor Tab Arrow & Indentation (CodeTantra Style)
-   Renders prominent, crisp, bold vector arrows (--------->) spanning the tab stop.
-   No ink blobs, no drop shadows, no word space dots.
+   Monaco Editor Tab Arrow & Whitespace (CodeTantra Style)
+   Renders full-span vector arrows (────►) across tab stops and clean space dots
    ========================================================================== */
 
-/* Suppress space dots between words so normal text stays clean */
-.monaco-editor svg circle,
-.monaco-editor .invisible.space {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-}
-
-/* Tab Arrow SVG: Crisp, bold vector line and prominent arrowhead */
+/* Tab Arrow SVG: Long vector arrow spanning full tab stop */
 .monaco-editor svg {
   overflow: visible !important;
 }
 
 .monaco-editor svg path {
-  fill: none !important;
-  stroke-width: 2.2px !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-  transform: scaleY(1.55) scaleX(1.05) !important;
-  transform-origin: right center !important;
-  filter: none !important;
-  opacity: 0.92 !important;
+  transform-box: fill-box !important;
+  transform-origin: left center !important;
+  transform: scaleX(3.5) scaleY(1.3) !important;
+  stroke: none !important;
+  opacity: 0.82 !important;
 }
 
-/* Dark mode Tab Vector Arrow (High contrast slate-400) */
+/* Dark mode Tab Vector Arrow */
 .monaco-editor.campus-dark svg path,
 .monaco-editor.vs-dark svg path {
-  stroke: #94a3b8 !important;
-  fill: none !important;
-  filter: none !important;
+  fill: #94a3b8 !important;
+  stroke: none !important;
 }
 
-/* Light mode Tab Vector Arrow (Bold slate-600 with strong contrast) */
+/* Light mode Tab Vector Arrow */
 .monaco-editor.campus-light svg path,
 .monaco-editor.vs svg path {
-  stroke: #475569 !important;
-  fill: none !important;
-  filter: none !important;
+  fill: #475569 !important;
+  stroke: none !important;
+}
+
+/* Space dots: Clean, reliable, visible dots between words and spaces */
+.monaco-editor svg circle {
+  r: 1.6px !important;
+  opacity: 0.7 !important;
+}
+
+.monaco-editor.campus-dark svg circle,
+.monaco-editor.vs-dark svg circle {
+  fill: #94a3b8 !important;
+}
+
+.monaco-editor.campus-light svg circle,
+.monaco-editor.vs svg circle {
+  fill: #64748b !important;
 }
 
 /* Text-Based Tab Arrow Fallback (When using font glyphs) */
@@ -2456,7 +2463,7 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
   font-size: 1.15em !important;
   text-shadow: none !important;
   filter: none !important;
-  opacity: 0.9 !important;
+  opacity: 0.85 !important;
 }
 
 .monaco-editor.campus-dark .mwh,

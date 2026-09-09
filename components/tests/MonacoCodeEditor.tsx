@@ -121,7 +121,7 @@ export function MonacoCodeEditor({
         "editor.lineHighlightBackground": "#1e293b50",
         "editorLineNumber.foreground": "#475569",
         "editorLineNumber.activeForeground": "#38bdf8",
-        "editorGutter.background": "#060911",
+        "editorGutter.background": "#090d16",
         "editor.selectionBackground": "#3b82f640",
         "editor.inactiveSelectionBackground": "#3b82f620",
         "scrollbarSlider.background": "#33415540",
@@ -129,8 +129,8 @@ export function MonacoCodeEditor({
         "scrollbarSlider.activeBackground": "#38bdf860",
         "editorBracketMatch.background": "#38bdf830",
         "editorBracketMatch.border": "#38bdf8",
-        "editorIndentGuide.background1": "transparent",
-        "editorIndentGuide.activeBackground1": "#38bdf840",
+        "editorIndentGuide.background1": "#334155",
+        "editorIndentGuide.activeBackground1": "#38bdf8",
         "editorWhitespace.foreground": "#94a3b8",
       },
     });
@@ -158,7 +158,7 @@ export function MonacoCodeEditor({
         "editor.lineHighlightBackground": "#eff6ff",
         "editorLineNumber.foreground": "#94a3b8",
         "editorLineNumber.activeForeground": "#2563eb",
-        "editorGutter.background": "#f8fafc",
+        "editorGutter.background": "#ffffff",
         "editor.selectionBackground": "#bfdbfe80",
         "editor.inactiveSelectionBackground": "#bfdbfe40",
         "scrollbarSlider.background": "#cbd5e160",
@@ -166,9 +166,9 @@ export function MonacoCodeEditor({
         "scrollbarSlider.activeBackground": "#64748b80",
         "editorBracketMatch.background": "#e0e7ff",
         "editorBracketMatch.border": "#4f46e5",
-        "editorIndentGuide.background1": "transparent",
-        "editorIndentGuide.activeBackground1": "#94a3b840",
-        "editorWhitespace.foreground": "#475569",
+        "editorIndentGuide.background1": "#cbd5e1",
+        "editorIndentGuide.activeBackground1": "#6366f1",
+        "editorWhitespace.foreground": "#64748b",
       },
     });
   };
@@ -458,19 +458,19 @@ export function MonacoCodeEditor({
             domReadOnly: Boolean(readOnly),
             fontSize,
             lineHeight: computedLineHeight,
-            letterSpacing: 0.8,
+            letterSpacing: 0,
             fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, Menlo, Monaco, monospace",
             fontWeight: "400",
             fontLigatures: true,
             lineNumbers: "on",
-            lineNumbersMinChars: 4,
-            lineDecorationsWidth: 20,
+            lineNumbersMinChars: 3,
+            lineDecorationsWidth: 16,
             glyphMargin: false,
             folding: true,
             minimap: { enabled: Boolean(minimap) },
             scrollBeyondLastLine: false,
             automaticLayout: true,
-            tabSize: tabSize || 4,
+            tabSize: 4,
             insertSpaces: false,
             detectIndentation: false,
             useTabStops: true,
@@ -487,12 +487,12 @@ export function MonacoCodeEditor({
               bracketPairs: false,
               bracketPairsHorizontal: false,
               highlightActiveBracketPair: true,
-              indentation: false,
-              highlightActiveIndentation: false,
+              indentation: true,
+              highlightActiveIndentation: true,
             },
             renderLineHighlight: "all",
             overviewRulerBorder: false,
-            renderWhitespace: "boundary",
+            renderWhitespace: "all",
             experimentalWhitespaceRendering: "svg",
             fixedOverflowWidgets: true,
             contextmenu: !isCopyPasteDisabled,
@@ -527,7 +527,7 @@ export function MonacoCodeEditor({
               : "bg-[#060911] border-slate-800 text-slate-400"
           }`}
         >
-          {/* Left: Position & Spaces */}
+          {/* Left: Position */}
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 font-medium">
               Ln {cursorPos.line}, Col {cursorPos.col}
@@ -535,13 +535,11 @@ export function MonacoCodeEditor({
                 <span className="text-indigo-500 font-semibold">({cursorPos.selLen} selected)</span>
               )}
             </span>
-            <span className="opacity-40">|</span>
-            <span>Tab: 4sp</span>
             <span className="opacity-40 hidden sm:inline">|</span>
             <span className="hidden sm:inline">UTF-8</span>
           </div>
 
-          {/* Right: Language Badge, Word Wrap & Shortcut Hint */}
+          {/* Right: Language Badge & Shortcut Hint */}
           <div className="flex items-center gap-2.5">
             <span
               className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
@@ -549,16 +547,6 @@ export function MonacoCodeEditor({
               }`}
             >
               {language || "code"}
-            </span>
-
-            <span className="opacity-40 hidden md:inline">|</span>
-
-            <span
-              className="hidden md:flex items-center gap-1 opacity-75 cursor-default"
-              title={wordWrap === "on" ? "Word wrap is active" : "Word wrap is disabled"}
-            >
-              <WrapText className="w-3 h-3" />
-              <span>{wordWrap === "on" ? "Wrap" : "No Wrap"}</span>
             </span>
 
             {onRunCode && (

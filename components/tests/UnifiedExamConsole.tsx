@@ -3009,35 +3009,6 @@ export function UnifiedExamConsole({
                         </button>
                       </div>
 
-                      {/* Tab Space / Indentation Width Selector */}
-                      <div className="flex items-center border rounded-lg overflow-hidden shrink-0 border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
-                        <span className="px-2 py-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">
-                          Tab Space
-                        </span>
-                        <select
-                          value={editorTabSize}
-                          onChange={(e) => {
-                            const next = Number(e.target.value);
-                            setEditorTabSize(next);
-                            try {
-                              localStorage.setItem("c2c_exam_editor_tab_size", String(next));
-                            } catch {}
-                          }}
-                          className="px-2 py-0.5 font-mono font-bold text-[11px] bg-transparent cursor-pointer focus:outline-none text-slate-700 dark:text-slate-200"
-                          title="Select Tab Indentation Width (4, 6, or 8 spaces)"
-                        >
-                          <option value={4} className={isLightMode ? "bg-white text-slate-900" : "bg-[#1e1e1e] text-white"}>
-                            4 spaces
-                          </option>
-                          <option value={6} className={isLightMode ? "bg-white text-slate-900" : "bg-[#1e1e1e] text-white"}>
-                            6 spaces (Wide)
-                          </option>
-                          <option value={8} className={isLightMode ? "bg-white text-slate-900" : "bg-[#1e1e1e] text-white"}>
-                            8 spaces (Extra Wide)
-                          </option>
-                        </select>
-                      </div>
-
                       {/* Restore Question Button (When Question Panel is closed) */}
                       {isProblemClosed && (
                         <button
@@ -3319,7 +3290,7 @@ export function UnifiedExamConsole({
                                 const allPassed = totalPassed === totalCount && totalCount > 0;
 
                                 const activeTC = allResults[selectedTestCaseIdx] || allResults[0];
-                                const isActiveHidden = Boolean(activeTC?.isHidden || selectedTestCaseIdx >= sampleResults.length);
+                                const isActiveHidden = Boolean((activeTC as any)?.isHidden || selectedTestCaseIdx >= sampleResults.length);
                                 const expOut = getExpectedOutput(activeTC, selectedTestCaseIdx, currentQ);
                                 const actOut = activeTC?.actualOutput || (activeTC?.passed ? expOut : activeTC?.error || "(No output produced)");
 
