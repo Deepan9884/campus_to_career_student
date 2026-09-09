@@ -58,6 +58,67 @@ export function getMonacoLanguage(lang: string): string {
   return "plaintext";
 }
 
+/**
+ * Patches Monaco's internal WhitespaceOverlay to render:
+ * 1. Full-span CodeTantra-style vector arrows (line + arrowhead) proportional to letter height and stroke
+ * 2. Vertically centered space dots aligned with lowercase letters
+ */
+function patchMonacoWhitespaceOverlay(editor: any) {
+  try {
+    const view = editor?._modelData?.view;
+    if (!view?._viewParts) return;
+
+    for (const part of view._viewParts) {
+      if (Array.isArray(part._dynamicOverlays)) {
+        for (const overlay of part._dynamicOverlays) {
+          if (typeof overlay._renderArrow === "function") {
+            const proto = Object.getPrototypeOf(overlay);
+            const targets = [overlay];
+            if (proto && proto !== Object.prototype) targets.push(proto);
+
+            const customRenderArrow = function (lineHeight: number, spaceWidth: number, left: number) {
+              const tabCols = 4;
+              const totalWidth = spaceWidth * tabCols;
+              const dy = Math.round(lineHeight * 0.57);
+              const strokeWidth = Math.max(1.8, Math.round(spaceWidth * 0.16 * 10) / 10);
+              const endX = left + totalWidth - Math.max(3, spaceWidth * 0.25);
+              const startX = left + 2;
+              const arrowLen = Math.max(6, spaceWidth * 0.6);
+              const arrowH = Math.max(4, spaceWidth * 0.35);
+
+              return (
+                `<line x1="${startX.toFixed(1)}" y1="${dy}" x2="${(endX - 2).toFixed(1)}" y2="${dy}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />` +
+                `<polygon points="${endX.toFixed(1)},${dy} ${(endX - arrowLen).toFixed(1)},${(dy - arrowH).toFixed(1)} ${(endX - arrowLen + 1).toFixed(1)},${dy} ${(endX - arrowLen).toFixed(1)},${(dy + arrowH).toFixed(1)}" fill="currentColor" />`
+              );
+            };
+
+            const origApply = overlay._applyRenderWhitespace;
+            const customApply = function (ctx: any, lineNumber: number, selections: any, lineData: any) {
+              const html = origApply.call(this, ctx, lineNumber, selections, lineData);
+              if (!html || typeof html !== "string") return html;
+
+              const lineHeight = ctx.getLineHeightForLineNumber(lineNumber);
+              const properCy = (lineHeight * 0.57).toFixed(2);
+              const oldCy = (lineHeight / 2).toFixed(2);
+
+              return html
+                .replace(new RegExp('cy="' + oldCy + '"', "g"), 'cy="' + properCy + '"')
+                .replace(new RegExp('r="[0-9.]+"', "g"), 'r="1.8"');
+            };
+
+            for (const target of targets) {
+              target._renderArrow = customRenderArrow;
+              target._applyRenderWhitespace = customApply;
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Whitespace overlay patch notice:", err);
+  }
+}
+
 export function MonacoCodeEditor({
   code,
   onChange,
@@ -302,6 +363,10 @@ export function MonacoCodeEditor({
     if (errorLine) {
       updateErrorMarker(editor, monaco, errorLine, errorMessage);
     }
+
+    // Patch whitespace overlay to render full-span CodeTantra tab arrows and centered space dots
+    patchMonacoWhitespaceOverlay(editor);
+    editor.render(true);
   };
 
   // Helper to update squiggly line, line highlight, and point cursor on error
@@ -359,6 +424,8 @@ export function MonacoCodeEditor({
         fontSize,
         lineHeight: computedLineHeight,
       });
+      patchMonacoWhitespaceOverlay(editorInstanceRef.current);
+      editorInstanceRef.current.render(true);
     }
   }, [fontSize, computedLineHeight]);
 
