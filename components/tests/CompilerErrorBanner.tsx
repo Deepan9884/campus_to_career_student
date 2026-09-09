@@ -39,65 +39,198 @@ export function parseCompilerError(errorText: string, language: string = ""): Pa
     };
   }
 
-  const clean = errorText.trim();
-  const lang = language.toLowerCase();
+  const clean = String(errorText).trim();
+  const lowerErr = clean.toLowerCase();
+  const normLang = String(language || "").toLowerCase().trim();
 
+  // 1. Language Resolution (Priority: explicit language prop > heuristic patterns in error text)
+  let detectedLang: "java" | "cpp" | "c" | "python" | "javascript" | "sql" | "general" = "general";
+
+  if (normLang.includes("java") && !normLang.includes("script")) {
+    detectedLang = "java";
+  } else if (normLang.includes("cpp") || normLang.includes("c++")) {
+    detectedLang = "cpp";
+  } else if (normLang === "c" || normLang.startsWith("c ") || normLang.endsWith(" c")) {
+    detectedLang = "c";
+  } else if (normLang.includes("python") || normLang === "py") {
+    detectedLang = "python";
+  } else if (normLang.includes("javascript") || normLang.includes("typescript") || normLang === "js" || normLang === "ts") {
+    detectedLang = "javascript";
+  } else if (normLang.includes("sql")) {
+    detectedLang = "sql";
+  } else {
+    // Infer language from compiler signatures only if language was not provided
+    if (/\b(?:[A-Za-z0-9_.-]+\.java|javac|cannot find symbol|public class\s+\w+)\b/i.test(clean)) {
+      detectedLang = "java";
+    } else if (/\b(?:[A-Za-z0-9_.-]+\.(?:cpp|cc|cxx|hpp)|g\+\+|clang\+\+)\b/i.test(clean)) {
+      detectedLang = "cpp";
+    } else if (/\b(?:[A-Za-z0-9_.-]+\.[ch]|gcc|clang)\b/i.test(clean)) {
+      detectedLang = "c";
+    } else if (
+      /File\s+"[^"]*",\s*line\s+\d+/i.test(clean) ||
+      /Traceback \(most recent call last\):/i.test(clean) ||
+      /(?:SyntaxError|IndentationError|TabError|NameError|ZeroDivisionError):/i.test(clean)
+    ) {
+      detectedLang = "python";
+    } else if (/\.(?:js|ts|jsx|tsx)\b/i.test(clean) || /node:internal/i.test(clean)) {
+      detectedLang = "javascript";
+    }
+  }
+
+  // 2. Line & Column Extraction
   let line: number | null = null;
   let column: number | null = null;
-  let errorType = "Compilation Error";
   let summary = "";
+
+  // A. File:Line:Col or File:Line (e.g., Main.java:20:5: error: ... or solution.cpp:20:5: error: ...)
+  const fileLineMatch = clean.match(/(?:[A-Za-z0-9_.-]+\.[A-Za-z0-9]+):(\d+)(?::(\d+))?:\s*(?:error:)?\s*([^\r\n]+)/i);
+  if (fileLineMatch) {
+    line = parseInt(fileLineMatch[1], 10);
+    if (fileLineMatch[2]) column = parseInt(fileLineMatch[2], 10);
+    summary = fileLineMatch[3]?.trim() || "";
+  }
+
+  // B. Backend sanitized format: "Line 20: error: ';' expected" or "Line 20: ';' expected"
+  if (!line) {
+    const linePrefixMatch = clean.match(/^Line\s+(\d+)(?::(\d+))?(?::\s*(?:error:)?\s*([^\r\n]+))?/im);
+    if (linePrefixMatch) {
+      line = parseInt(linePrefixMatch[1], 10);
+      if (linePrefixMatch[2]) column = parseInt(linePrefixMatch[2], 10);
+      if (linePrefixMatch[3]) summary = linePrefixMatch[3].trim();
+    }
+  }
+
+  // C. Python traceback format: File "solution.py", line 20
+  if (!line) {
+    const pyFileLineMatch = clean.match(/File\s+"[^"]*",\s*line\s+(\d+)/i);
+    if (pyFileLineMatch) {
+      line = parseInt(pyFileLineMatch[1], 10);
+    }
+  }
+
+  // D. Generic fallback: "line 20" or ":20:"
+  if (!line) {
+    const genericMatch = clean.match(/(?:line\s*|:)(\d+)(?::|\s|,|$)/i);
+    if (genericMatch) {
+      line = parseInt(genericMatch[1], 10);
+    }
+  }
+
+  // 3. Error Type Classification
+  let errorType = "Compilation Error";
+
+  switch (detectedLang) {
+    case "java": {
+      if (
+        lowerErr.includes("';' expected") ||
+        lowerErr.includes("')' expected") ||
+        lowerErr.includes("'(' expected") ||
+        lowerErr.includes("'}' expected") ||
+        lowerErr.includes("'{' expected") ||
+        lowerErr.includes("illegal start of expression") ||
+        lowerErr.includes("not a statement") ||
+        lowerErr.includes("reached end of file while parsing") ||
+        lowerErr.includes("syntax error")
+      ) {
+        errorType = "Java Syntax Error";
+      } else if (lowerErr.includes("cannot find symbol")) {
+        errorType = "Java Symbol Error";
+      } else if (lowerErr.includes("incompatible types")) {
+        errorType = "Java Type Error";
+      } else if (
+        lowerErr.includes("class, interface, or enum expected") ||
+        lowerErr.includes("is public, should be declared in a file named")
+      ) {
+        errorType = "Java Structure Error";
+      } else {
+        errorType = "Java Compiler Error";
+      }
+      break;
+    }
+
+    case "cpp": {
+      if (lowerErr.includes("expected ';'") || lowerErr.includes("syntax error") || lowerErr.includes("expected primary-expression")) {
+        errorType = "C++ Syntax Error";
+      } else if (lowerErr.includes("was not declared in this scope")) {
+        errorType = "C++ Identifier Error";
+      } else if (lowerErr.includes("undefined reference")) {
+        errorType = "C++ Linker Error";
+      } else {
+        errorType = "C++ Compiler Error";
+      }
+      break;
+    }
+
+    case "c": {
+      if (lowerErr.includes("expected ';'") || lowerErr.includes("syntax error")) {
+        errorType = "C Syntax Error";
+      } else if (lowerErr.includes("undeclared") || lowerErr.includes("was not declared")) {
+        errorType = "C Identifier Error";
+      } else if (lowerErr.includes("undefined reference")) {
+        errorType = "C Linker Error";
+      } else {
+        errorType = "C Compiler Error";
+      }
+      break;
+    }
+
+    case "python": {
+      const pyTypeMatch = clean.match(/((?:SyntaxError|IndentationError|TabError|NameError|TypeError|ValueError|IndexError|ZeroDivisionError|AttributeError|KeyError):[^\r\n]+)/i);
+      if (pyTypeMatch) {
+        const parts = pyTypeMatch[1].split(":");
+        const excName = parts[0]?.trim() || "Python Error";
+        if (excName === "SyntaxError") errorType = "Python Syntax Error";
+        else if (excName === "IndentationError") errorType = "Python Indentation Error";
+        else if (excName === "NameError") errorType = "Python Name Error";
+        else errorType = `Python ${excName}`;
+        if (!summary) summary = parts.slice(1).join(":").trim() || pyTypeMatch[1];
+      } else if (lowerErr.includes("syntax") || lowerErr.includes("invalid syntax")) {
+        errorType = "Python Syntax Error";
+      } else {
+        errorType = "Python Error";
+      }
+      break;
+    }
+
+    case "javascript": {
+      if (lowerErr.includes("syntaxerror") || lowerErr.includes("unexpected token")) {
+        errorType = "JavaScript Syntax Error";
+      } else if (lowerErr.includes("referenceerror")) {
+        errorType = "JavaScript Reference Error";
+      } else if (lowerErr.includes("typeerror")) {
+        errorType = "JavaScript Type Error";
+      } else {
+        errorType = "JavaScript Error";
+      }
+      break;
+    }
+
+    case "sql": {
+      errorType = "SQL Syntax Error";
+      break;
+    }
+
+    default: {
+      if (normLang) {
+        const titleCase = normLang.charAt(0).toUpperCase() + normLang.slice(1);
+        errorType = `${titleCase} Compiler Error`;
+      } else {
+        errorType = "Compilation Error";
+      }
+      break;
+    }
+  }
+
+  // 4. Summary fallback
+  if (!summary) {
+    const firstLine = clean.split("\n").map((l) => l.trim()).find(Boolean) || "Compilation error";
+    summary = firstLine;
+  }
+
+  // 5. Smart Diagnostic Tips
   let smartTip: string | null = null;
 
-  // 1. Java Parser: Main.java:5: error: cannot find symbol ...
-  const javaMatch = clean.match(/(?:[A-Za-z0-9_.-]+\.java):(\d+)(?::(\d+))?:\s*(?:error:)?\s*([^\r\n]+)/i);
-  if (javaMatch) {
-    line = parseInt(javaMatch[1], 10);
-    column = javaMatch[2] ? parseInt(javaMatch[2], 10) : null;
-    summary = javaMatch[3]?.trim() || "Compilation error";
-    errorType = "Java Compiler Error";
-  }
-
-  // 2. C / C++: solution.cpp:7:5: error: expected ';' before 'return'
-  const cppMatch = clean.match(/(?:[A-Za-z0-9_.-]+\.(?:cpp|c|cc|cxx|h)):(\d+)(?::(\d+))?:\s*(?:error:)?\s*([^\r\n]+)/i);
-  if (cppMatch && !javaMatch) {
-    line = parseInt(cppMatch[1], 10);
-    column = cppMatch[2] ? parseInt(cppMatch[2], 10) : null;
-    summary = cppMatch[3]?.trim() || "C++ compilation error";
-    errorType = "C/C++ Compiler Error";
-  }
-
-  // 3. Python: File "solution.py", line 4
-  const pyMatch = clean.match(/File\s+"[^"]*",\s*line\s+(\d+)/i) || clean.match(/line\s+(\d+)/i);
-  const pyTypeMatch = clean.match(/((?:SyntaxError|IndentationError|TabError|NameError|TypeError|ValueError|IndexError|ZeroDivisionError|AttributeError):[^\r\n]+)/i);
-  if ((pyMatch || pyTypeMatch) && (lang.includes("python") || (!javaMatch && !cppMatch))) {
-    if (pyMatch) line = parseInt(pyMatch[1], 10);
-    if (pyTypeMatch) {
-      const parts = pyTypeMatch[1].split(":");
-      errorType = parts[0]?.trim() || "Python Error";
-      summary = parts.slice(1).join(":").trim() || pyTypeMatch[1];
-    } else {
-      errorType = "Python Syntax Error";
-      summary = clean.split("\n")[0];
-    }
-  }
-
-  // 4. Fallback line match: "line 5" or ":5:"
-  if (!line) {
-    const genericLineMatch = clean.match(/(?:line\s*|:)(\d+)(?::|\s|,|$)/i);
-    if (genericLineMatch) {
-      line = parseInt(genericLineMatch[1], 10);
-    }
-  }
-
-  if (!summary) {
-    summary = clean.split("\n")[0] || "Compilation / execution error";
-  }
-
-  // === SMART DIAGNOSTIC HINTS ===
-  const lowerErr = clean.toLowerCase();
-
-  // Java Collections & I/O Hints
-  if (lang.includes("java") || javaMatch) {
+  if (detectedLang === "java") {
     if (
       lowerErr.includes("cannot find symbol") &&
       (lowerErr.includes("arraylist") ||
@@ -125,6 +258,8 @@ export function parseCompilerError(errorText: string, language: string = ""): Pa
         lowerErr.includes("stringtokenizer"))
     ) {
       smartTip = 'Add "import java.io.*;" at the top of your Java file to use standard I/O classes.';
+    } else if (lowerErr.includes("cannot find symbol")) {
+      smartTip = "Variable or method not found. Check spelling, case sensitivity, or ensure the variable is declared and in scope.";
     } else if (
       lowerErr.includes("main method not found") ||
       lowerErr.includes("please define the main method")
@@ -133,19 +268,46 @@ export function parseCompilerError(errorText: string, language: string = ""): Pa
     } else if (lowerErr.includes("class") && lowerErr.includes("is public, should be declared in a file named")) {
       smartTip = 'Only one public class is allowed per file. Define auxiliary classes as package-private (e.g. "class Pair { ... }").';
     } else if (lowerErr.includes("';' expected")) {
-      smartTip = 'Missing semicolon (;) at the end of the statement on the indicated line.';
+      smartTip = "Missing semicolon (;) at the end of the statement on the indicated line.";
+    } else if (lowerErr.includes("')' expected") || lowerErr.includes("'(' expected")) {
+      smartTip = "Unmatched parentheses. Check that all opening '(' have matching closing ')'.";
+    } else if (lowerErr.includes("'}' expected") || lowerErr.includes("'{' expected")) {
+      smartTip = "Unmatched curly braces. Check your block structure and ensure all '{' have matching '}'.";
+    } else if (lowerErr.includes("incompatible types")) {
+      smartTip = "Type mismatch. Ensure you are not assigning a value of an incompatible type without explicit type casting.";
+    } else if (lowerErr.includes("illegal start of expression") || lowerErr.includes("not a statement")) {
+      smartTip = "Syntax error or misplaced code token. Check the previous line for a missing semicolon (;) or unclosed brace.";
+    } else if (lowerErr.includes("reached end of file while parsing")) {
+      smartTip = "Missing closing brace '}' at the end of your Java class or method.";
     }
-  } else if (lang.includes("cpp") || lang.includes("c++") || cppMatch) {
-    if (lowerErr.includes("was not declared in this scope") && (lowerErr.includes("vector") || lowerErr.includes("string") || lowerErr.includes("map") || lowerErr.includes("sort"))) {
+  } else if (detectedLang === "cpp" || detectedLang === "c") {
+    if (
+      lowerErr.includes("was not declared in this scope") &&
+      (lowerErr.includes("vector") || lowerErr.includes("string") || lowerErr.includes("map") || lowerErr.includes("sort"))
+    ) {
       smartTip = 'Make sure to include appropriate headers (e.g. #include <vector>, #include <algorithm>) and "using namespace std;".';
     } else if (lowerErr.includes("undefined reference to `main'") || lowerErr.includes("undefined reference to 'main'")) {
-      smartTip = 'A complete C++ program with "int main()" is required to run test cases.';
+      smartTip = 'A complete program with "int main()" is required to run test cases.';
+    } else if (lowerErr.includes("expected ';'") || lowerErr.includes("expected ';' before")) {
+      smartTip = "Missing semicolon (;) at the end of the statement on the indicated line.";
     }
-  } else if (lang.includes("python") || pyMatch) {
+  } else if (detectedLang === "python") {
     if (lowerErr.includes("indentationerror")) {
-      smartTip = 'Python is indentation-sensitive. Ensure you are using consistent 4-space indentation without mixing tabs.';
+      smartTip = "Python is indentation-sensitive. Ensure you are using consistent 4-space indentation without mixing tabs.";
     } else if (lowerErr.includes("nameerror")) {
-      smartTip = 'Variable or function used before declaration. Check spelling and scope.';
+      smartTip = "Variable or function used before declaration. Check spelling and scope.";
+    } else if (lowerErr.includes("syntaxerror")) {
+      smartTip = "Python syntax error. Check for missing colons (:) at the end of if/for/def/while, unmatched parentheses, or quotes.";
+    } else if (lowerErr.includes("zerodivisionerror")) {
+      smartTip = "Division by zero occurred during execution. Add a check before dividing.";
+    } else if (lowerErr.includes("indexerror")) {
+      smartTip = "List index out of range. Check list boundaries before accessing.";
+    }
+  } else if (detectedLang === "javascript") {
+    if (lowerErr.includes("syntaxerror")) {
+      smartTip = "JavaScript syntax error. Check for missing brackets, parentheses, or misplaced punctuation.";
+    } else if (lowerErr.includes("referenceerror")) {
+      smartTip = "Variable or function not defined. Verify declaration and scope.";
     }
   }
 
