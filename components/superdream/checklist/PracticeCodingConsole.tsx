@@ -298,19 +298,32 @@ export function PracticeCodingConsole({
     ).trim();
     if (starterTemplate && userCode.trim() === starterTemplate) return true;
 
-    // Check if only boilerplate comments / empty function remains
-    const clean = userCode
+    // Strip comments
+    const withoutComments = userCode
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/(\/\/|#|--).*$/gm, "")
-      .replace(/^\s*(#include|import|from|package|using\s+namespace)[^\n;]*;?/gm, "")
-      .replace(/\b(pass|return\s+0;?)\b/g, "")
-      .replace(/[a-zA-Z0-9_]+\s*\(\s*\);?/g, "")
-      .replace(/\{[^{}]*\}/g, "")
-      .replace(/\{[^{}]*\}/g, "")
-      .replace(/\b(int|void|func|function|class|def)\b[^\n{:]*[:{]?/g, "")
-      .replace(/\s+/g, "");
+      .replace(/""".*?"""/gs, "")
+      .replace(/'''.*?'''/gs, "")
+      .trim();
 
-    return clean.length === 0;
+    if (!withoutComments) return true;
+
+    const stripped = withoutComments.replace(/\s+/g, " ").toLowerCase();
+    const trivialPatterns = [
+      "pass",
+      "pass;",
+      "return 0;",
+      "return 0",
+      "return;",
+      "return null;",
+      "return null",
+      "return false;",
+      "return true;",
+      "write your code here",
+    ];
+    if (trivialPatterns.includes(stripped)) return true;
+
+    return false;
   };
 
   // Run Code
