@@ -742,7 +742,7 @@ export function UnifiedExamConsole({
 
   useEffect(() => {
     setSelectedTestCaseIdx(0);
-  }, [currentQuestionIdx]);
+  }, [currentIdx]);
   const [editorFontSize, setEditorFontSize] = useState<number>(() => {
     try {
       const saved = localStorage.getItem("c2c_exam_editor_font_size");
