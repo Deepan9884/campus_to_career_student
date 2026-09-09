@@ -1,3 +1,4 @@
+import { formatMathText } from "@/lib/formatMathText";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -944,6 +945,9 @@ export function UnifiedExamConsole({
           list.push({
             ...q,
             id: q.questionId || q.id || q._id || `mcq-${sIdx}-${qIdx}`,
+            question: formatMathText(q.question || q.questionText || ""),
+            options: Array.isArray(q.options) ? q.options.map((o: any) => typeof o === "string" ? formatMathText(o) : o) : q.options,
+            explanation: q.explanation ? formatMathText(q.explanation) : q.explanation,
             type: "mcq",
             sectionIndex: sIdx,
             sectionTitle: secTitle,
@@ -962,6 +966,10 @@ export function UnifiedExamConsole({
           list.push({
             ...c,
             id: c.id || c.questionId || c._id || `coding-${sIdx}-${cIdx}`,
+            title: formatMathText(c.title || ""),
+            problemStatement: formatMathText(c.problemStatement || c.description || ""),
+            description: formatMathText(c.description || c.problemStatement || ""),
+            constraints: Array.isArray(c.constraints) ? c.constraints.map((con: any) => typeof con === "string" ? formatMathText(con) : con) : c.constraints,
             type: "coding",
             sectionIndex: sIdx,
             sectionTitle: secTitle,
@@ -977,6 +985,13 @@ export function UnifiedExamConsole({
             list.push({
               ...item,
               id: item.id || item.questionId || item._id || `${inferredType}-${sIdx}-${itemIdx}`,
+              question: item.question || item.questionText ? formatMathText(item.question || item.questionText) : item.question,
+              options: Array.isArray(item.options) ? item.options.map((o: any) => typeof o === "string" ? formatMathText(o) : o) : item.options,
+              title: item.title ? formatMathText(item.title) : item.title,
+              problemStatement: item.problemStatement ? formatMathText(item.problemStatement) : item.problemStatement,
+              description: item.description ? formatMathText(item.description) : item.description,
+              constraints: Array.isArray(item.constraints) ? item.constraints.map((con: any) => typeof con === "string" ? formatMathText(con) : con) : item.constraints,
+              explanation: item.explanation ? formatMathText(item.explanation) : item.explanation,
               type: inferredType,
               sectionIndex: sIdx,
               sectionTitle: secTitle,
@@ -994,6 +1009,9 @@ export function UnifiedExamConsole({
           list.push({
             ...q,
             id: q.questionId || q.id || q._id || `root-mcq-${idx}`,
+            question: formatMathText(q.question || q.questionText || ""),
+            options: Array.isArray(q.options) ? q.options.map((o: any) => typeof o === "string" ? formatMathText(o) : o) : q.options,
+            explanation: q.explanation ? formatMathText(q.explanation) : q.explanation,
             type: "mcq",
             sectionIndex: 0,
             sectionTitle: "Multiple Choice Questions",
@@ -1006,6 +1024,10 @@ export function UnifiedExamConsole({
           list.push({
             ...c,
             id: c.id || c.questionId || c._id || `root-coding-${idx}`,
+            title: formatMathText(c.title || ""),
+            problemStatement: formatMathText(c.problemStatement || c.description || ""),
+            description: formatMathText(c.description || c.problemStatement || ""),
+            constraints: Array.isArray(c.constraints) ? c.constraints.map((con: any) => typeof con === "string" ? formatMathText(con) : con) : c.constraints,
             type: "coding",
             sectionIndex: 0,
             sectionTitle: "Coding Challenges",
@@ -1020,6 +1042,13 @@ export function UnifiedExamConsole({
           list.push({
             ...item,
             id: item.id || item.questionId || item._id || `root-${inferredType}-${idx}`,
+            question: item.question || item.questionText ? formatMathText(item.question || item.questionText) : item.question,
+            options: Array.isArray(item.options) ? item.options.map((o: any) => typeof o === "string" ? formatMathText(o) : o) : item.options,
+            title: item.title ? formatMathText(item.title) : item.title,
+            problemStatement: item.problemStatement ? formatMathText(item.problemStatement) : item.problemStatement,
+            description: item.description ? formatMathText(item.description) : item.description,
+            constraints: Array.isArray(item.constraints) ? item.constraints.map((con: any) => typeof con === "string" ? formatMathText(con) : con) : item.constraints,
+            explanation: item.explanation ? formatMathText(item.explanation) : item.explanation,
             type: inferredType,
             sectionIndex: 0,
             sectionTitle: isCoding ? "Coding Challenges" : "General Questions",
