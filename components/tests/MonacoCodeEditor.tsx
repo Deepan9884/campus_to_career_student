@@ -98,12 +98,12 @@ function patchMonacoWhitespaceOverlay(editor: any) {
               if (!html || typeof html !== "string") return html;
 
               const lineHeight = ctx.getLineHeightForLineNumber(lineNumber);
-              const properCy = (lineHeight * 0.57).toFixed(2);
-              const oldCy = (lineHeight / 2).toFixed(2);
+              const properCy = (lineHeight * 0.57).toFixed(1);
+              const dotR = Math.max(2.2, Math.min(3.2, Math.round(lineHeight * 0.1 * 10) / 10)).toFixed(1);
 
               return html
-                .replace(new RegExp('cy="' + oldCy + '"', "g"), 'cy="' + properCy + '"')
-                .replace(new RegExp('r="[0-9.]+"', "g"), 'r="1.8"');
+                .replace(/(<circle\b[^>]*?\bcy=")[0-9.]+/g, `$1${properCy}`)
+                .replace(/(<circle\b[^>]*?\br=")[0-9.]+/g, `$1${dotR}`);
             };
 
             for (const target of targets) {
@@ -559,7 +559,7 @@ export function MonacoCodeEditor({
             },
             renderLineHighlight: "all",
             overviewRulerBorder: false,
-            renderWhitespace: "all",
+            renderWhitespace: "boundary",
             experimentalWhitespaceRendering: "svg",
             fixedOverflowWidgets: true,
             contextmenu: !isCopyPasteDisabled,

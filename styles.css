@@ -2461,7 +2461,7 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 
 /* Space dots: Clean, reliable, visible dots */
 .monaco-editor svg circle {
-  opacity: 0.65 !important;
+  opacity: 0.8 !important;
 }
 
 /* Text-Based Tab Arrow Fallback (When using font glyphs) */
