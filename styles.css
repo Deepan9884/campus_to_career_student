@@ -2373,25 +2373,17 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 
 /* Active matching bracket highlight */
 .monaco-editor .bracket-match {
-  font-weight: 800 !important;
-  border-bottom-width: 2.5px !important;
+  font-weight: 700 !important;
+  border-bottom-width: 2px !important;
   border-radius: 2px !important;
 }
 
-/* Visible active indentation guide lines */
-.monaco-editor .lines-content .cigr {
-  opacity: 0.8 !important;
-}
-.monaco-editor .lines-content .ciga {
-  opacity: 1 !important;
-}
-
 /* ==========================================================================
-   Monaco Editor Margin & Gutter Breathing Room
-   Ensures code text is never cramped against the line numbers
+   Monaco Editor Margin & Gutter (CodeTantra Style)
+   Clean vertical separator and aligned line numbers
    ========================================================================== */
 .monaco-editor .margin {
-  border-right: 1px solid rgba(148, 163, 184, 0.15) !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
 .monaco-editor.campus-dark .margin,
 .monaco-editor.vs-dark .margin {
@@ -2405,18 +2397,15 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 }
 .monaco-editor .line-numbers {
   text-align: right !important;
-  padding-right: 16px !important;
-  font-size: 0.88em !important;
+  padding-right: 8px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
-}
-.monaco-editor .lines-content {
-  padding-left: 14px !important;
 }
 
 /* ==========================================================================
-   Monaco Editor Tab Shadow Arrow & Indentation Styling
-   Renders tab stops with an unmistakable, luminous shadow arrow (→),
-   keeping regular text spaces clean and distraction-free.
+   Monaco Editor Tab Arrow & Indentation (CodeTantra Style)
+   Renders crisp, subtle vector arrows (--------->) spanning the tab stop.
+   No ink blobs, no drop shadows, no word space dots.
    ========================================================================== */
 
 /* Suppress space dots between words so normal text stays clean */
@@ -2427,61 +2416,64 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
   visibility: hidden !important;
 }
 
-/* Tab Arrow SVG: Bold, Prominent, Luminous Shadow Arrow */
+/* Tab Arrow SVG: Crisp, clean vector line and arrowhead */
 .monaco-editor svg {
   overflow: visible !important;
 }
 
 .monaco-editor svg path {
-  stroke-width: 2.8px !important;
+  fill: none !important;
+  stroke-width: 1.2px !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
-  transform: scale(1.8) !important;
-  transform-origin: center center !important;
-  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  opacity: 0.55 !important;
 }
 
-/* Dark mode Tab Shadow Arrow (Luminous Cyan/Sky Blue) */
+/* Dark mode Tab Vector Arrow (Clean muted slate) */
 .monaco-editor.campus-dark svg path,
 .monaco-editor.vs-dark svg path {
-  stroke: #38bdf8 !important;
-  fill: #38bdf8 !important;
-  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 1)) drop-shadow(0 0 12px rgba(56, 189, 248, 0.8)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9)) !important;
+  stroke: #64748b !important;
+  fill: none !important;
+  filter: none !important;
 }
 
-/* Light mode Tab Shadow Arrow (Vibrant Indigo) */
+/* Light mode Tab Vector Arrow (Subtle slate gray matching CodeTantra) */
 .monaco-editor.campus-light svg path,
 .monaco-editor.vs svg path {
-  stroke: #4f46e5 !important;
-  fill: #4f46e5 !important;
-  filter: drop-shadow(0 0 5px rgba(79, 70, 229, 0.9)) drop-shadow(0 0 10px rgba(79, 70, 229, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+  stroke: #94a3b8 !important;
+  fill: none !important;
+  filter: none !important;
 }
 
 /* Text-Based Tab Arrow Fallback (When using font glyphs) */
 .monaco-editor .mwh,
 .monaco-editor .invisible.tab,
 .monaco-editor [class*="tab"] {
-  font-weight: 900 !important;
-  font-size: 1.35em !important;
-  display: inline-block !important;
-  opacity: 1 !important;
+  font-weight: 400 !important;
+  font-size: 1em !important;
+  text-shadow: none !important;
+  filter: none !important;
+  opacity: 0.55 !important;
 }
 
 .monaco-editor.campus-dark .mwh,
 .monaco-editor.campus-dark .invisible.tab,
 .monaco-editor.vs-dark .mwh,
 .monaco-editor.vs-dark .invisible.tab {
-  color: #38bdf8 !important;
-  text-shadow: 0 0 8px rgba(56, 189, 248, 1), 0 0 16px rgba(56, 189, 248, 0.7) !important;
-  filter: drop-shadow(0 0 4px #38bdf8) !important;
+  color: #64748b !important;
+  text-shadow: none !important;
+  filter: none !important;
 }
 
 .monaco-editor.campus-light .mwh,
 .monaco-editor.campus-light .invisible.tab,
 .monaco-editor.vs .mwh,
 .monaco-editor.vs .invisible.tab {
-  color: #4f46e5 !important;
-  text-shadow: 0 0 6px rgba(79, 70, 229, 0.9), 0 0 12px rgba(79, 70, 229, 0.5) !important;
-  filter: drop-shadow(0 0 3px #4f46e5) !important;
+  color: #94a3b8 !important;
+  text-shadow: none !important;
+  filter: none !important;
 }
+
 
