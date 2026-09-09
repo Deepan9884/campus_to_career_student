@@ -60,8 +60,6 @@ import {
   Plus,
   ArrowUpFromLine,
   AlertCircle,
-  Columns,
-  WrapText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MonacoCodeEditor, type CodeEditorControlsHandle } from "./MonacoCodeEditor";
@@ -99,12 +97,12 @@ const LANGUAGE_CONFIGS: Record<
     defaultStarter: `import sys
 
 def main():
-    # Read dynamic input from standard input (stdin)
-    # Write your code here
-    pass
+	# Read dynamic input from standard input (stdin)
+	# Write your code here
+	pass
 
 if __name__ == "__main__":
-    main()
+	main()
 `,
   },
   java: {
@@ -115,11 +113,11 @@ if __name__ == "__main__":
 import java.io.*;
 
 public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        // Write your solution here using Collections (ArrayList, HashMap, etc.)
-        
-    }
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		// Write your solution here using Collections (ArrayList, HashMap, etc.)
+		
+	}
 }
 `,
   },
@@ -131,9 +129,9 @@ public class Main {
 using namespace std;
 
 int main() {
-    // Write your code here
-    
-    return 0;
+	// Write your code here
+	
+	return 0;
 }
 `,
   },
@@ -144,9 +142,9 @@ int main() {
     defaultStarter: `#include <stdio.h>
 
 int main() {
-    // Write your code here
-    
-    return 0;
+	// Write your code here
+	
+	return 0;
 }
 `,
   },
@@ -157,10 +155,10 @@ int main() {
     defaultStarter: `const fs = require('fs');
 
 function main() {
-    // Read dynamic input from standard input (stdin)
-    const input = fs.readFileSync(0, 'utf-8').trim();
-    // Write your code here
-    
+	// Read dynamic input from standard input (stdin)
+	const input = fs.readFileSync(0, 'utf-8').trim();
+	// Write your code here
+	
 }
 
 main();
@@ -744,9 +742,9 @@ export function UnifiedExamConsole({
   const [editorFontSize, setEditorFontSize] = useState<number>(() => {
     try {
       const saved = localStorage.getItem("c2c_exam_editor_font_size");
-      return saved ? Math.min(24, Math.max(12, Number(saved))) : 15;
+      return saved ? Math.min(24, Math.max(12, Number(saved))) : 16;
     } catch {
-      return 15;
+      return 16;
     }
   });
   const [editorTabSize, setEditorTabSize] = useState<number>(() => {
@@ -1246,7 +1244,8 @@ export function UnifiedExamConsole({
   const getStarterForLang = (lang: string, q?: any) => {
     const raw = q?.starterCodes?.[lang];
     if (raw && raw.trim() !== "// Write your code here" && raw.trim() !== "# Write your code here" && raw.trim() !== "-- Write your code here") {
-      return raw;
+      // Normalize leading 4-space indentation into tabs so shadow arrows render cleanly
+      return raw.split("\n").map((l: string) => l.replace(/^( {4})+/g, (m: string) => "\t".repeat(m.length / 4))).join("\n");
     }
     if (LANGUAGE_CONFIGS[lang]?.defaultStarter) return LANGUAGE_CONFIGS[lang].defaultStarter;
     if (lang === "python") return LANGUAGE_CONFIGS.python?.defaultStarter || "# Write your solution here\n";
@@ -2698,7 +2697,7 @@ export function UnifiedExamConsole({
                               ? "bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 border-slate-200 shadow-xs"
                               : "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border-slate-700"
                           }`}
-                          title="Close Problem Description (Expand Code Editor to 100% width)"
+                          title="Close Question Description (Expand Code Editor to 100% width)"
                         >
                           <PanelLeftClose className="w-3.5 h-3.5" />
                         </button>
@@ -2711,7 +2710,7 @@ export function UnifiedExamConsole({
                         <div className={`p-3.5 rounded-xl border text-center ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-slate-900 border-slate-800"}`}>
                           <img
                             src={currentQ.diagramUrl}
-                            alt="Problem diagram"
+                            alt="Question diagram"
                             className="max-h-56 mx-auto object-contain rounded-lg"
                             onError={(e) => ((e.target as HTMLElement).style.display = "none")}
                           />
@@ -2730,8 +2729,8 @@ export function UnifiedExamConsole({
                   <div
                     onMouseDown={handleStartHorizontalDrag}
                     onDoubleClick={() => setLeftPanelWidthPercent(44)}
-                    title="Drag left/right to resize Problem Description vs Code Editor (Double-click to reset)"
-                    className="w-3 flex items-center justify-center cursor-col-resize select-none shrink-0 group z-20"
+                    title="Drag left/right to resize Question Description vs Code Editor (Double-click to reset)"
+                    className="w-3 bg-transparent hover:bg-indigo-500/20 active:bg-indigo-500/40 cursor-col-resize flex items-center justify-center transition-colors group z-20 select-none -mx-1.5 shrink-0"
                   >
                     <div
                       className={`w-1 h-14 rounded-full transition-all duration-200 group-hover:h-28 group-hover:w-1.5 flex items-center justify-center ${
@@ -2775,7 +2774,7 @@ export function UnifiedExamConsole({
                         : "bg-[#060911] border-slate-800 text-slate-100"
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto min-w-0">
+                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                       {/* Language Selector */}
                       <div
                         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold shrink-0 ${
@@ -2811,7 +2810,7 @@ export function UnifiedExamConsole({
                           title="Undo (Ctrl+Z)"
                         >
                           <Undo2 className="w-3.5 h-3.5" />
-                          <span className="text-[11px] font-semibold">Undo</span>
+                          <span className="hidden sm:inline text-[11px] font-semibold">Undo</span>
                         </button>
                         <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700" />
                         <button
@@ -2821,55 +2820,9 @@ export function UnifiedExamConsole({
                           title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
                         >
                           <Redo2 className="w-3.5 h-3.5" />
-                          <span className="text-[11px] font-semibold">Redo</span>
+                          <span className="hidden sm:inline text-[11px] font-semibold">Redo</span>
                         </button>
                       </div>
-
-                      {/* Format / Prettify Code */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          editorControlsRef.current?.formatCode?.();
-                          toast.success("Code auto-formatted");
-                        }}
-                        className={`px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
-                          isLightMode
-                            ? "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs"
-                            : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border-slate-700"
-                        }`}
-                        title="Prettify / Format Code (Shift+Alt+F)"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                        <span className="text-[11px]">Format</span>
-                      </button>
-
-                      {/* Word Wrap Toggle */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const next = editorWordWrap === "on" ? "off" : "on";
-                          setEditorWordWrap(next);
-                          try {
-                            localStorage.setItem("c2c_exam_word_wrap", next);
-                          } catch {}
-                          toast.info(`Word wrap ${next === "on" ? "enabled" : "disabled"}`);
-                        }}
-                        className={`px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
-                          editorWordWrap === "on"
-                            ? isLightMode
-                              ? "bg-indigo-50 border-indigo-200 text-indigo-700 font-bold"
-                              : "bg-indigo-500/20 border-indigo-500/40 text-indigo-300 font-bold"
-                            : isLightMode
-                            ? "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs"
-                            : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border-slate-700"
-                        }`}
-                        title="Toggle Word Wrap (Soft wrap lines)"
-                      >
-                        <WrapText className="w-3.5 h-3.5" />
-                        <span className="text-[11px]">{editorWordWrap === "on" ? "Wrap: On" : "Wrap: Off"}</span>
-                      </button>
-
-                      <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-0.5 shrink-0 hidden md:block" />
 
                       {/* Font Size Scaler with Presets Dropdown */}
                       <div className="flex items-center border rounded-lg overflow-hidden shrink-0 border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
@@ -2921,82 +2874,7 @@ export function UnifiedExamConsole({
                         </button>
                       </div>
 
-                      {/* Tab Size Switcher */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const next = editorTabSize === 4 ? 2 : 4;
-                          setEditorTabSize(next);
-                          try {
-                            localStorage.setItem("c2c_exam_editor_tab_size", String(next));
-                          } catch {}
-                          toast.info(`Indentation spacing set to ${next} spaces`);
-                        }}
-                        className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold shrink-0 transition cursor-pointer shadow-xs min-w-[70px] text-center"
-                        title="Click to toggle indentation width (4 spaces or 2 spaces)"
-                      >
-                        Tab: {editorTabSize} sp
-                      </button>
-
-                      {/* 50/50 Split Reset Button */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLeftPanelWidthPercent(50);
-                          setConsoleHeightPx(220);
-                          setIsProblemClosed(false);
-                          setIsConsoleClosed(false);
-                          setIsConsoleMaximized(false);
-                          setIsZenMode(false);
-                          try {
-                            localStorage.setItem("c2c_exam_left_width", "50");
-                            localStorage.setItem("c2c_exam_console_height", "220");
-                            localStorage.setItem("c2c_exam_problem_closed", "false");
-                            localStorage.setItem("c2c_exam_console_closed", "false");
-                          } catch {}
-                          toast.info("Layout reset to balanced 50/50 split");
-                        }}
-                        className={`px-2 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
-                          isLightMode
-                            ? "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs"
-                            : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border-slate-700"
-                        }`}
-                        title="Reset Layout to Balanced 50/50 Split"
-                      >
-                        <Columns className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="hidden 2xl:inline text-[11px]">50/50</span>
-                      </button>
-
-                      {/* Zen Mode Button */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextZen = !isZenMode;
-                          setIsZenMode(nextZen);
-                          if (nextZen) {
-                            setIsProblemClosed(true);
-                            setIsConsoleClosed(true);
-                            toast.info("Zen Mode enabled (Full width code editor)");
-                          } else {
-                            setIsProblemClosed(false);
-                            setIsConsoleClosed(false);
-                            toast.info("Zen Mode disabled (Split panels restored)");
-                          }
-                        }}
-                        className={`px-2 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
-                          isZenMode
-                            ? "bg-indigo-600 text-white border-indigo-700 shadow-sm"
-                            : isLightMode
-                            ? "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs"
-                            : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border-slate-700"
-                        }`}
-                        title={isZenMode ? "Exit Zen Mode (Restore Problem and Console panels)" : "Zen Mode (Maximize code editor to full width)"}
-                      >
-                        {isZenMode ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-                        <span className="hidden sm:inline text-[11px] font-bold">{isZenMode ? "Exit Zen" : "Zen"}</span>
-                      </button>
-
-                      {/* Restore Problem Button (When Problem Panel is closed) */}
+                      {/* Restore Question Button (When Question Panel is closed) */}
                       {isProblemClosed && (
                         <button
                           type="button"
@@ -3009,10 +2887,10 @@ export function UnifiedExamConsole({
                               ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 shadow-xs"
                               : "bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-500/40"
                           }`}
-                          title="Open Problem Description Panel"
+                          title="Open Question Description Panel"
                         >
                           <BookOpen className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">Problem</span>
+                          <span className="hidden sm:inline">Question</span>
                         </button>
                       )}
 

@@ -89,7 +89,7 @@ export function MonacoCodeEditor({
 
   const monacoLang = getMonacoLanguage(language);
   const themeName = isLight ? "campus-light" : "campus-dark";
-  const computedLineHeight = Math.max(18, Math.round(fontSize * 1.55));
+  const computedLineHeight = Math.max(22, Math.round(fontSize * 1.7));
 
   // Prevent SSR crashes in TanStack Start
   useEffect(() => {
@@ -137,6 +137,7 @@ export function MonacoCodeEditor({
         "editorBracketMatch.border": "#38bdf8",
         "editorIndentGuide.background1": "#1e293b",
         "editorIndentGuide.activeBackground1": "#38bdf880",
+        "editorWhitespace.foreground": "#38bdf8",
       },
     });
 
@@ -179,6 +180,7 @@ export function MonacoCodeEditor({
         "editorBracketMatch.border": "#4f46e5",
         "editorIndentGuide.background1": "#e2e8f0",
         "editorIndentGuide.activeBackground1": "#6366f190",
+        "editorWhitespace.foreground": "#4f46e5",
       },
     });
   };
@@ -458,6 +460,7 @@ export function MonacoCodeEditor({
             domReadOnly: Boolean(readOnly),
             fontSize,
             lineHeight: computedLineHeight,
+            letterSpacing: 0.6,
             fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Monaco, Consolas, monospace",
             fontWeight: "500",
             fontLigatures: true,
@@ -468,8 +471,8 @@ export function MonacoCodeEditor({
             minimap: { enabled: Boolean(minimap) },
             scrollBeyondLastLine: false,
             automaticLayout: true,
-            tabSize: Number(tabSize) || 4,
-            insertSpaces: true,
+            tabSize: 4,
+            insertSpaces: false,
             detectIndentation: false,
             useTabStops: true,
             wordWrap,
@@ -494,10 +497,11 @@ export function MonacoCodeEditor({
             },
             renderLineHighlight: "all",
             overviewRulerBorder: false,
-            renderWhitespace: "none",
+            renderWhitespace: "all",
+            experimentalWhitespaceRendering: "svg",
             fixedOverflowWidgets: true,
             contextmenu: !isCopyPasteDisabled,
-            padding: { top: 12, bottom: 12 },
+            padding: { top: 14, bottom: 14 },
             scrollbar: {
               vertical: "visible",
               horizontal: "auto",
@@ -537,7 +541,7 @@ export function MonacoCodeEditor({
               )}
             </span>
             <span className="opacity-40">|</span>
-            <span>Spaces: {tabSize}</span>
+            <span>Tab: 4sp</span>
             <span className="opacity-40 hidden sm:inline">|</span>
             <span className="hidden sm:inline">UTF-8</span>
           </div>
