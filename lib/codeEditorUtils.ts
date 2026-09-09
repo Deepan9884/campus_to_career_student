@@ -105,10 +105,10 @@ export class EditorHistoryManager {
 }
 
 /**
- * Format leading indentation and tabs with subtle, professional shadow arrow markers
- * (e.g. "→   " for 4 spaces / tabs) that line up character-by-character with the monospaced textarea.
+ * Format leading indentation and tabs preserving exact monospace whitespace.
+ * Keeping exact whitespace ensures character-by-character advance widths match 1-to-1 with the textarea.
  */
-export function formatIndentationGuides(line: string, isLight: boolean, tabSize: number = 4): {
+export function formatIndentationGuides(line: string, _isLight?: boolean, _tabSize: number = 4): {
   guideHtml: string;
   codeRemainder: string;
 } {
@@ -119,28 +119,8 @@ export function formatIndentationGuides(line: string, isLight: boolean, tabSize:
 
   const leadingWhitespace = match[1];
   const codeRemainder = line.slice(leadingWhitespace.length);
-  const arrowColor = isLight ? "#94a3b8" : "#475569";
-  const guideClass = "select-none pointer-events-none";
 
-  let guideHtml = "";
-  let i = 0;
-  while (i < leadingWhitespace.length) {
-    if (leadingWhitespace[i] === "\t") {
-      guideHtml += `<span class="${guideClass}" style="color: ${arrowColor}; opacity: 0.5; font-weight: 300;">&rarr;&nbsp;&nbsp;&nbsp;</span>`;
-      i += 1;
-    } else if (leadingWhitespace.slice(i, i + tabSize) === " ".repeat(tabSize)) {
-      guideHtml += `<span class="${guideClass}" style="color: ${arrowColor}; opacity: 0.5; font-weight: 300;">&rarr;&nbsp;&nbsp;&nbsp;</span>`;
-      i += tabSize;
-    } else if (leadingWhitespace.slice(i, i + 2) === "  ") {
-      guideHtml += `<span class="${guideClass}" style="color: ${arrowColor}; opacity: 0.4; font-weight: 300;">&middot;&nbsp;</span>`;
-      i += 2;
-    } else {
-      guideHtml += "&nbsp;";
-      i += 1;
-    }
-  }
-
-  return { guideHtml, codeRemainder };
+  return { guideHtml: leadingWhitespace, codeRemainder };
 }
 
 /**
@@ -308,7 +288,16 @@ export function handleCodeTextareaKeyDown(
       return true;
     }
 
-    // Case C: Insert pair and place pointer right in the middle!
+    // Case C: For quotes, avoid auto-pairing if preceded or followed by an alphanumeric character (e.g. typing in a word or contraction)
+    if (
+      QUOTE_PAIRS[opening] &&
+      (/[a-zA-Z0-9_]/.test(currentVal[selectionStart - 1] || "") ||
+       /[a-zA-Z0-9_]/.test(currentVal[selectionStart] || ""))
+    ) {
+      return false; // let native quote typing handle it
+    }
+
+    // Case D: Insert pair and place pointer right in the middle!
     e.preventDefault();
     const nextVal = currentVal.slice(0, selectionStart) + opening + closing + currentVal.slice(selectionEnd);
     applyChange(nextVal, selectionStart + 1);

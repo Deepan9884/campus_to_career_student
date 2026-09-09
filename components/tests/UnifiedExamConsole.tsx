@@ -178,30 +178,31 @@ function highlightCodeTokens(code: string, language: string, isLight: boolean, t
   );
 
   // Theme color palettes (LeetCode/VSCode grade)
+  // Strictly color-only so that character glyph advance widths match the interactive textarea 1-to-1
   const c = isLight
     ? {
-        comment: "color: #94a3b8; font-style: italic;",
-        str: "color: #16a34a; font-weight: 500;",
-        num: "color: #d97706; font-weight: 600;",
-        kw: "color: #9333ea; font-weight: 700;",
-        type: "color: #0284c7; font-weight: 600;",
-        func: "color: #2563eb; font-weight: 600;",
-        b1: "color: #d97706; font-weight: bold;", // {}
-        b2: "color: #9333ea; font-weight: bold;", // ()
-        b3: "color: #2563eb; font-weight: bold;", // []
-        op: "color: #0d9488; font-weight: 600;",
+        comment: "color: #94a3b8;",
+        str: "color: #16a34a;",
+        num: "color: #d97706;",
+        kw: "color: #9333ea;",
+        type: "color: #0284c7;",
+        func: "color: #2563eb;",
+        b1: "color: #d97706;", // {}
+        b2: "color: #9333ea;", // ()
+        b3: "color: #2563eb;", // []
+        op: "color: #0d9488;",
       }
     : {
-        comment: "color: #64748b; font-style: italic;",
-        str: "color: #4ade80; font-weight: 500;",
-        num: "color: #fb923c; font-weight: 600;",
-        kw: "color: #c084fc; font-weight: 700;",
-        type: "color: #38bdf8; font-weight: 600;",
-        func: "color: #60a5fa; font-weight: 600;",
-        b1: "color: #fbbf24; font-weight: bold;", // {}
-        b2: "color: #c084fc; font-weight: bold;", // ()
-        b3: "color: #38bdf8; font-weight: bold;", // []
-        op: "color: #2dd4bf; font-weight: 600;",
+        comment: "color: #64748b;",
+        str: "color: #4ade80;",
+        num: "color: #fb923c;",
+        kw: "color: #c084fc;",
+        type: "color: #38bdf8;",
+        func: "color: #60a5fa;",
+        b1: "color: #fbbf24;", // {}
+        b2: "color: #c084fc;", // ()
+        b3: "color: #38bdf8;", // []
+        op: "color: #2dd4bf;",
       };
 
   const lines = code.split("\n");
@@ -209,9 +210,10 @@ function highlightCodeTokens(code: string, language: string, isLight: boolean, t
     if (!line) return "";
 
     const { guideHtml, codeRemainder } = formatIndentationGuides(line, isLight, tabSize);
-    if (!codeRemainder) return guideHtml;
+    const escapedGuide = escapeHtml(guideHtml);
+    if (!codeRemainder) return escapedGuide;
 
-    let result = guideHtml;
+    let result = escapedGuide;
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
@@ -642,6 +644,8 @@ export interface CodeEditorControlsHandle {
   canRedo: () => boolean;
 }
 
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+
 /**
  * Standard Professional Code Editor with syntax font, line-numbers gutter, tab-indentation, and font-size controls
  */
@@ -670,6 +674,43 @@ function CodeEditorWithGutter({
   const gutterRef = useRef<HTMLDivElement>(null);
   const [activeLine, setActiveLine] = useState(1);
   const historyManagerRef = useRef<EditorHistoryManager>(new EditorHistoryManager(code, 0, 0));
+  const pendingCursorRef = useRef<{ start: number; end: number } | null>(null);
+
+  const lineHeightPx = Math.round(fontSize * 1.6);
+  const editorFontFamily = "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+
+  // Shared exact CSS styles between <pre> and <textarea> to ensure 100% pixel-perfect caret alignment
+  const sharedEditorStyle: React.CSSProperties = {
+    fontSize: `${fontSize}px`,
+    lineHeight: `${lineHeightPx}px`,
+    fontFamily: editorFontFamily,
+    fontWeight: 500,
+    fontStyle: "normal",
+    letterSpacing: "0px",
+    wordSpacing: "0px",
+    tabSize,
+    MozTabSize: tabSize,
+    boxSizing: "border-box",
+    padding: "16px",
+    margin: 0,
+    border: "none",
+    outline: "none",
+    whiteSpace: "pre",
+    wordBreak: "normal",
+    overflowWrap: "normal",
+    fontVariantLigatures: "none",
+    WebkitFontSmoothing: "antialiased",
+    MozOsxFontSmoothing: "grayscale",
+  };
+
+  // Guarantee cursor position remains exact across React state reconciliations
+  useIsomorphicLayoutEffect(() => {
+    if (pendingCursorRef.current && textareaRef.current) {
+      const { start, end } = pendingCursorRef.current;
+      textareaRef.current.setSelectionRange(start, end);
+      pendingCursorRef.current = null;
+    }
+  }, [code]);
 
   // Reset history stack when language template resets
   useEffect(() => {
@@ -687,6 +728,7 @@ function CodeEditorWithGutter({
               textareaRef.current.value = prev.value;
               textareaRef.current.selectionStart = prev.selectionStart;
               textareaRef.current.selectionEnd = prev.selectionEnd;
+              pendingCursorRef.current = { start: prev.selectionStart, end: prev.selectionEnd };
               onChange(prev.value);
               updateActiveLine({ currentTarget: textareaRef.current } as any);
             }
@@ -699,6 +741,7 @@ function CodeEditorWithGutter({
               textareaRef.current.value = next.value;
               textareaRef.current.selectionStart = next.selectionStart;
               textareaRef.current.selectionEnd = next.selectionEnd;
+              pendingCursorRef.current = { start: next.selectionStart, end: next.selectionEnd };
               onChange(next.value);
               updateActiveLine({ currentTarget: textareaRef.current } as any);
             }
@@ -728,7 +771,21 @@ function CodeEditorWithGutter({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const handled = handleCodeTextareaKeyDown(e, code, onChange, tabSize, historyManagerRef.current);
+    const handled = handleCodeTextareaKeyDown(
+      e,
+      code,
+      (nextVal) => {
+        if (textareaRef.current) {
+          pendingCursorRef.current = {
+            start: textareaRef.current.selectionStart,
+            end: textareaRef.current.selectionEnd,
+          };
+        }
+        onChange(nextVal);
+      },
+      tabSize,
+      historyManagerRef.current
+    );
     if (handled) {
       setTimeout(() => {
         if (textareaRef.current) {
@@ -752,10 +809,18 @@ function CodeEditorWithGutter({
       {/* Line Numbers Gutter */}
       <div
         ref={gutterRef}
-        className={`w-14 py-4 px-2 select-none overflow-hidden text-right font-mono font-bold leading-relaxed shrink-0 border-r transition-colors duration-200 ${
+        className={`w-14 select-none overflow-hidden text-right font-mono font-bold shrink-0 border-r transition-colors duration-200 ${
           isLight ? "bg-slate-50 border-slate-200 text-slate-400" : "bg-[#060911] border-slate-800/80 text-slate-600"
         }`}
-        style={{ fontSize: `${Math.max(11, fontSize - 2)}px` }}
+        style={{
+          boxSizing: "border-box",
+          paddingTop: "16px",
+          paddingBottom: "16px",
+          paddingLeft: "8px",
+          paddingRight: "10px",
+          fontSize: `${Math.max(11, fontSize - 2)}px`,
+          fontFamily: editorFontFamily,
+        }}
       >
         {Array.from({ length: lineCount }).map((_, i) => {
           const isCurr = activeLine === i + 1;
@@ -765,6 +830,10 @@ function CodeEditorWithGutter({
               className={`transition-colors ${
                 isCurr ? (isLight ? "text-indigo-600 font-extrabold" : "text-cyan-400 font-extrabold") : ""
               }`}
+              style={{
+                height: `${lineHeightPx}px`,
+                lineHeight: `${lineHeightPx}px`,
+              }}
             >
               {i + 1}
             </div>
@@ -778,12 +847,8 @@ function CodeEditorWithGutter({
         <pre
           ref={preRef}
           aria-hidden="true"
-          className="absolute inset-0 p-4 font-mono font-medium leading-relaxed whitespace-pre overflow-hidden pointer-events-none select-none m-0"
-          style={{
-            fontSize: `${fontSize}px`,
-            tabSize,
-            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-          }}
+          className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none bg-transparent"
+          style={sharedEditorStyle}
           dangerouslySetInnerHTML={{ __html: highlightedHtml + "\n" }}
         />
 
@@ -792,8 +857,12 @@ function CodeEditorWithGutter({
           ref={textareaRef}
           value={code}
           onChange={(e) => {
-            onChange(e.target.value);
-            historyManagerRef.current.push(e.target.value, e.target.selectionStart, e.target.selectionEnd, false);
+            const val = e.target.value;
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            pendingCursorRef.current = { start, end };
+            onChange(val);
+            historyManagerRef.current.push(val, start, end, false);
             updateActiveLine(e);
           }}
           onSelect={updateActiveLine}
@@ -806,13 +875,12 @@ function CodeEditorWithGutter({
           autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
-          className={`absolute inset-0 w-full h-full p-4 font-mono font-medium leading-relaxed focus:outline-none resize-none whitespace-pre m-0 bg-transparent text-transparent caret-indigo-600 dark:caret-cyan-400 selection:bg-indigo-500/30 selection:text-transparent ${
+          className={`absolute inset-0 w-full h-full resize-none bg-transparent text-transparent selection:bg-indigo-500/30 selection:text-transparent ${
             isLight ? "placeholder:text-slate-400" : "placeholder:text-slate-600"
           }`}
           style={{
-            fontSize: `${fontSize}px`,
-            tabSize,
-            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+            ...sharedEditorStyle,
+            caretColor: isLight ? "#4f46e5" : "#22d3ee",
           }}
         />
       </div>
