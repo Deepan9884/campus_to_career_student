@@ -2350,5 +2350,38 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
   color: inherit !important;
 }
 
+/* ==========================================================================
+   Monaco Editor Pro Developer Typography & Bracket Styling
+   Ensures brackets ({}, (), []) and indentation guides are bold, distinct,
+   and readable (not small, thin, or toy-like)
+   ========================================================================== */
+.monaco-editor {
+  font-feature-settings: "liga" 1, "calt" 1, "zero" 1 !important;
+  text-rendering: optimizeLegibility !important;
+}
 
+/* Bold and prominent bracket pair colorization */
+.monaco-editor .bracket-highlighting-0,
+.monaco-editor .bracket-highlighting-1,
+.monaco-editor .bracket-highlighting-2,
+.monaco-editor .bracket-highlighting-3,
+.monaco-editor .bracket-highlighting-4,
+.monaco-editor .bracket-highlighting-5 {
+  font-weight: 700 !important;
+  font-size: 1.05em !important;
+}
 
+/* Active matching bracket highlight */
+.monaco-editor .bracket-match {
+  font-weight: 800 !important;
+  border-bottom-width: 2.5px !important;
+  border-radius: 2px !important;
+}
+
+/* Visible active indentation guide lines */
+.monaco-editor .lines-content .cigr {
+  opacity: 0.8 !important;
+}
+.monaco-editor .lines-content .ciga {
+  opacity: 1 !important;
+}

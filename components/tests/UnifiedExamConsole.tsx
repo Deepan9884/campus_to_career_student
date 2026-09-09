@@ -2811,7 +2811,7 @@ export function UnifiedExamConsole({
                           title="Undo (Ctrl+Z)"
                         >
                           <Undo2 className="w-3.5 h-3.5" />
-                          <span className="hidden xl:inline text-[11px] font-semibold">Undo</span>
+                          <span className="text-[11px] font-semibold">Undo</span>
                         </button>
                         <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700" />
                         <button
@@ -2821,30 +2821,7 @@ export function UnifiedExamConsole({
                           title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
                         >
                           <Redo2 className="w-3.5 h-3.5" />
-                          <span className="hidden xl:inline text-[11px] font-semibold">Redo</span>
-                        </button>
-                      </div>
-
-                      {/* Undo / Redo Actions */}
-                      <div className="flex items-center border rounded-lg overflow-hidden shrink-0 border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
-                        <button
-                          type="button"
-                          onClick={() => editorControlsRef.current?.undo()}
-                          className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
-                          title="Undo (Ctrl+Z)"
-                        >
-                          <Undo2 className="w-3.5 h-3.5" />
-                          <span className="hidden xl:inline text-[11px] font-semibold">Undo</span>
-                        </button>
-                        <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700" />
-                        <button
-                          type="button"
-                          onClick={() => editorControlsRef.current?.redo()}
-                          className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center gap-1 text-xs cursor-pointer"
-                          title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
-                        >
-                          <Redo2 className="w-3.5 h-3.5" />
-                          <span className="hidden xl:inline text-[11px] font-semibold">Redo</span>
+                          <span className="text-[11px] font-semibold">Redo</span>
                         </button>
                       </div>
 
@@ -2855,15 +2832,15 @@ export function UnifiedExamConsole({
                           editorControlsRef.current?.formatCode?.();
                           toast.success("Code auto-formatted");
                         }}
-                        className={`px-2 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 transition cursor-pointer shrink-0 ${
+                        className={`px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
                           isLightMode
                             ? "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs"
                             : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border-slate-700"
                         }`}
-                        title="Prettify / Format Code"
+                        title="Prettify / Format Code (Shift+Alt+F)"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                        <span className="hidden xl:inline text-[11px]">Format</span>
+                        <span className="text-[11px]">Format</span>
                       </button>
 
                       {/* Word Wrap Toggle */}
@@ -2877,11 +2854,11 @@ export function UnifiedExamConsole({
                           } catch {}
                           toast.info(`Word wrap ${next === "on" ? "enabled" : "disabled"}`);
                         }}
-                        className={`px-2 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1 transition cursor-pointer shrink-0 ${
+                        className={`px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 ${
                           editorWordWrap === "on"
                             ? isLightMode
-                              ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-                              : "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                              ? "bg-indigo-50 border-indigo-200 text-indigo-700 font-bold"
+                              : "bg-indigo-500/20 border-indigo-500/40 text-indigo-300 font-bold"
                             : isLightMode
                             ? "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs"
                             : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border-slate-700"
@@ -2889,8 +2866,10 @@ export function UnifiedExamConsole({
                         title="Toggle Word Wrap (Soft wrap lines)"
                       >
                         <WrapText className="w-3.5 h-3.5" />
-                        <span className="hidden xl:inline text-[11px]">{editorWordWrap === "on" ? "Wrap: On" : "Wrap: Off"}</span>
+                        <span className="text-[11px]">{editorWordWrap === "on" ? "Wrap: On" : "Wrap: Off"}</span>
                       </button>
+
+                      <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-0.5 shrink-0 hidden md:block" />
 
                       {/* Font Size Scaler with Presets Dropdown */}
                       <div className="flex items-center border rounded-lg overflow-hidden shrink-0 border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 shadow-xs">
@@ -2917,7 +2896,7 @@ export function UnifiedExamConsole({
                               localStorage.setItem("c2c_exam_editor_font_size", String(next));
                             } catch {}
                           }}
-                          className="px-1 py-0.5 font-mono font-bold text-[11px] bg-transparent cursor-pointer focus:outline-none text-slate-700 dark:text-slate-200"
+                          className="px-1.5 py-0.5 font-mono font-bold text-[11px] bg-transparent cursor-pointer focus:outline-none text-slate-700 dark:text-slate-200"
                           title="Select Font Size"
                         >
                           {[12, 13, 14, 15, 16, 17, 18, 20, 22, 24].map((sz) => (
@@ -2951,12 +2930,12 @@ export function UnifiedExamConsole({
                           try {
                             localStorage.setItem("c2c_exam_editor_tab_size", String(next));
                           } catch {}
-                          toast.info(`Tab spacing set to ${next} spaces`);
+                          toast.info(`Indentation spacing set to ${next} spaces`);
                         }}
-                        className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold shrink-0 transition cursor-pointer shadow-xs"
-                        title="Click to toggle indentation width (4 or 2 spaces)"
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold shrink-0 transition cursor-pointer shadow-xs min-w-[70px] text-center"
+                        title="Click to toggle indentation width (4 spaces or 2 spaces)"
                       >
-                        Tab: {editorTabSize}
+                        Tab: {editorTabSize} sp
                       </button>
 
                       {/* 50/50 Split Reset Button */}
@@ -3287,115 +3266,232 @@ export function UnifiedExamConsole({
                               />
                             )}
                             {currentExec?.testCaseResults ? (
-                              <>
-                                <div className="flex items-center justify-between font-bold text-xs mb-2">
-                                  <div className="flex items-center gap-2">
+                              <div className="space-y-3">
+                                {/* Top Results & Hidden Cases Indicator Bar */}
+                                <div
+                                  className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+                                    currentExec.success
+                                      ? isLightMode
+                                        ? "bg-emerald-50/80 border-emerald-200"
+                                        : "bg-emerald-500/10 border-emerald-500/30"
+                                      : isLightMode
+                                      ? "bg-rose-50/70 border-rose-200"
+                                      : "bg-rose-500/10 border-rose-500/30"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2.5">
                                     {currentExec.success ? (
-                                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
                                     ) : (
-                                      <XCircle className="w-4 h-4 text-rose-500" />
+                                      <XCircle className="w-5 h-5 text-rose-500 shrink-0" />
                                     )}
-                                    <span>
-                                      Test Results: {currentExec.passedCount}/{currentExec.totalCount || currentExec.testCaseResults.length} Passed
-                                    </span>
-                                  </div>
-                                  {currentExec.isCompilationError && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20 font-sans font-semibold">
-                                      Compilation Error
-                                    </span>
-                                  )}
-                                </div>
-                                {currentExec.testCaseResults.map((tc: any, i: number) => {
-                                  const expOut = getExpectedOutput(tc, i, currentQ);
-                                  const actOut = tc.actualOutput || (tc.passed ? expOut : tc.error || "(No output produced)");
-
-                                  return (
-                                    <div
-                                      key={i}
-                                      className={`p-3 rounded-xl border transition-all ${
-                                        tc.passed
-                                          ? isLightMode
-                                            ? "bg-emerald-50/70 border-emerald-200"
-                                            : "bg-emerald-500/10 border-emerald-500/30"
-                                          : isLightMode
-                                          ? "bg-rose-50/70 border-rose-200"
-                                          : "bg-rose-500/10 border-rose-500/30"
-                                      }`}
-                                    >
-                                      <div className="flex items-center justify-between gap-2 mb-2 font-bold text-xs">
-                                        <div className="flex items-center gap-2">
-                                          {tc.passed ? (
-                                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                          ) : (
-                                            <XCircle className="w-4 h-4 text-rose-500" />
-                                          )}
-                                          <span>Test Case {i + 1}</span>
-                                          <span
-                                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                                              tc.passed
-                                                ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
-                                                : "bg-rose-500/20 text-rose-700 dark:text-rose-300"
-                                            }`}
-                                          >
-                                            {tc.status || (tc.passed ? "Passed" : "Failed")}
-                                          </span>
-                                        </div>
-                                        {tc.input && (
-                                          <span
-                                            className={`text-[11px] font-mono font-normal px-2 py-0.5 rounded border ${
-                                              isLightMode
-                                                ? "bg-white border-slate-200 text-slate-600"
-                                                : "bg-[#090d16] border-slate-800 text-slate-400"
-                                            }`}
-                                          >
-                                            Input: {tc.input.length > 35 ? tc.input.slice(0, 35) + "..." : tc.input}
-                                          </span>
-                                        )}
+                                    <div>
+                                      <div className="font-bold text-xs flex items-center gap-2">
+                                        <span>
+                                          Sample Cases: {currentExec.passedCount}/{currentExec.testCaseResults.length} Passed
+                                        </span>
+                                        <span
+                                          className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                                            currentExec.success
+                                              ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+                                              : "bg-rose-500/20 text-rose-700 dark:text-rose-300"
+                                          }`}
+                                        >
+                                          {currentExec.success ? "All Samples Passed" : "Samples Incomplete"}
+                                        </span>
                                       </div>
-
-                                      <div className="grid grid-cols-2 gap-2 text-xs">
-                                        <div>
-                                          <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
-                                            Expected Output
-                                          </span>
-                                          <pre className={`p-2 rounded-lg border font-mono text-[11px] overflow-x-auto ${
-                                            isLightMode ? "bg-white border-slate-200 text-slate-800" : "bg-[#060911] border-slate-800 text-slate-200"
-                                          }`}>
-                                            {expOut}
-                                          </pre>
-                                        </div>
-                                        <div>
-                                          <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
-                                            Actual Output
-                                          </span>
-                                          <pre
-                                            className={`p-2 rounded-lg border font-mono text-[11px] overflow-x-auto ${
-                                              tc.passed
-                                              ? isLightMode
-                                              ? "bg-white border-emerald-200 text-emerald-700"
-                                              : "bg-[#060911] border-emerald-500/30 text-emerald-400"
-                                            : isLightMode
-                                            ? "bg-white border-rose-200 text-rose-700"
-                                            : "bg-[#060911] border-rose-500/30 text-rose-400"
-                                        }`}
-                                      >
-                                        {actOut}
-                                      </pre>
+                                      <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5 flex-wrap">
+                                        <span className="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                                          <Lock className="w-3 h-3" />
+                                          2 Hidden Evaluation Cases
+                                        </span>
+                                        <span>— Validated on final &ldquo;Submit Test&rdquo; (boundary limits & scale).</span>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              );
-                            })}
-                          </>
-                        ) : (
-                          <div className={`text-center py-6 ${isLightMode ? "text-slate-500" : "text-slate-400"}`}>
-                            <Play className="w-5 h-5 mx-auto mb-2 opacity-60" />
-                            <p>Click &ldquo;Run Code&rdquo; to test your solution against example test cases.</p>
+
+                                {/* Test Case Pill Selectors */}
+                                <div className={`flex items-center gap-1.5 border-b pb-2 overflow-x-auto ${
+                                  isLightMode ? "border-slate-200" : "border-slate-800"
+                                }`}>
+                                  {/* Sample Test Cases */}
+                                  {currentExec.testCaseResults.map((tc: any, i: number) => (
+                                    <button
+                                      key={`sample-${i}`}
+                                      type="button"
+                                      onClick={() => setSelectedTestCaseIdx(i)}
+                                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition shrink-0 cursor-pointer ${
+                                        selectedTestCaseIdx === i
+                                          ? tc.passed
+                                            ? "bg-emerald-500/20 text-emerald-600 border border-emerald-500/50 shadow-xs"
+                                            : "bg-rose-500/20 text-rose-600 border border-rose-500/50 shadow-xs"
+                                          : tc.passed
+                                          ? isLightMode
+                                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                            : "bg-emerald-500/5 text-emerald-400 border border-emerald-500/20"
+                                          : isLightMode
+                                          ? "bg-slate-100 text-slate-600 border border-slate-200"
+                                          : "bg-slate-900/60 text-slate-400 border border-slate-800"
+                                      }`}
+                                    >
+                                      {tc.passed ? (
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                                      ) : (
+                                        <XCircle className="w-3.5 h-3.5 text-rose-500" />
+                                      )}
+                                      <span>Case {i + 1} (Sample)</span>
+                                    </button>
+                                  ))}
+
+                                  {/* Hidden Evaluation Cases */}
+                                  {[1, 2].map((hIdx) => {
+                                    const totalIndex = currentExec.testCaseResults.length + hIdx - 1;
+                                    const isSelected = selectedTestCaseIdx === totalIndex;
+                                    return (
+                                      <button
+                                        key={`hidden-${hIdx}`}
+                                        type="button"
+                                        onClick={() => setSelectedTestCaseIdx(totalIndex)}
+                                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition shrink-0 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-amber-500/20 text-amber-600 border border-amber-500/50 shadow-xs"
+                                            : isLightMode
+                                            ? "bg-amber-50/50 text-amber-700 border border-amber-200/80 hover:bg-amber-100/50"
+                                            : "bg-amber-500/5 text-amber-400/80 border border-amber-500/20 hover:bg-amber-500/10"
+                                        }`}
+                                      >
+                                        <Lock className="w-3 h-3 text-amber-500" />
+                                        <span>Case {totalIndex + 1} (Hidden)</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                {/* Active Case Detail View */}
+                                {selectedTestCaseIdx < currentExec.testCaseResults.length ? (
+                                  (() => {
+                                    const tc = currentExec.testCaseResults[selectedTestCaseIdx];
+                                    const expOut = getExpectedOutput(tc, selectedTestCaseIdx, currentQ);
+                                    const actOut = tc.actualOutput || (tc.passed ? expOut : tc.error || "(No output produced)");
+
+                                    return (
+                                      <div
+                                        className={`p-3.5 rounded-xl border space-y-3 ${
+                                          tc.passed
+                                            ? isLightMode
+                                              ? "bg-emerald-50/70 border-emerald-200"
+                                              : "bg-emerald-500/10 border-emerald-500/30"
+                                            : isLightMode
+                                            ? "bg-rose-50/70 border-rose-200"
+                                            : "bg-rose-500/10 border-rose-500/30"
+                                        }`}
+                                      >
+                                        <div className="flex items-center justify-between gap-2 font-bold text-xs">
+                                          <div className="flex items-center gap-2">
+                                            {tc.passed ? (
+                                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                            ) : (
+                                              <XCircle className="w-4 h-4 text-rose-500" />
+                                            )}
+                                            <span>Test Case {selectedTestCaseIdx + 1} (Sample)</span>
+                                            <span
+                                              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                                tc.passed
+                                                  ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+                                                  : "bg-rose-500/20 text-rose-700 dark:text-rose-300"
+                                              }`}
+                                            >
+                                              {tc.status || (tc.passed ? "Passed" : "Failed")}
+                                            </span>
+                                          </div>
+                                          {tc.input && (
+                                            <span
+                                              className={`text-[11px] font-mono px-2 py-0.5 rounded border ${
+                                                isLightMode
+                                                  ? "bg-white border-slate-200 text-slate-600"
+                                                  : "bg-[#090d16] border-slate-800 text-slate-400"
+                                              }`}
+                                            >
+                                              Input: {tc.input.length > 35 ? tc.input.slice(0, 35) + "..." : tc.input}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                          <div>
+                                            <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
+                                              Expected Output
+                                            </span>
+                                            <pre
+                                              className={`p-2.5 rounded-lg border font-mono text-[11px] overflow-x-auto ${
+                                                isLightMode
+                                                  ? "bg-white border-slate-200 text-slate-800"
+                                                  : "bg-[#060911] border-slate-800 text-slate-200"
+                                              }`}
+                                            >
+                                              {expOut}
+                                            </pre>
+                                          </div>
+                                          <div>
+                                            <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
+                                              Actual Output
+                                            </span>
+                                            <pre
+                                              className={`p-2.5 rounded-lg border font-mono text-[11px] overflow-x-auto ${
+                                                tc.passed
+                                                  ? isLightMode
+                                                    ? "bg-white border-emerald-200 text-emerald-700"
+                                                    : "bg-[#060911] border-emerald-500/30 text-emerald-400"
+                                                  : isLightMode
+                                                  ? "bg-white border-rose-200 text-rose-700"
+                                                  : "bg-[#060911] border-rose-500/30 text-rose-400"
+                                              }`}
+                                            >
+                                              {actOut}
+                                            </pre>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })()
+                                ) : (
+                                  /* Hidden Test Case Card */
+                                  <div
+                                    className={`p-4 rounded-xl border border-dashed text-center space-y-2.5 ${
+                                      isLightMode
+                                        ? "bg-amber-50/60 border-amber-300 text-slate-800"
+                                        : "bg-amber-950/20 border-amber-500/40 text-amber-100"
+                                    }`}
+                                  >
+                                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-500">
+                                      <Lock className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <h4 className="font-bold text-xs text-amber-700 dark:text-amber-300">
+                                        Hidden Evaluation Test Case #{selectedTestCaseIdx + 1}
+                                      </h4>
+                                      <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1 leading-relaxed">
+                                        This test case evaluates boundary limits, edge conditions, scale constraints, and algorithm time complexity.
+                                        It is automatically evaluated when you submit your exam.
+                                      </p>
+                                    </div>
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20">
+                                      <ShieldCheck className="w-3.5 h-3.5" />
+                                      <span>Auto-Graded on Final Submission</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className={`text-center py-6 ${isLightMode ? "text-slate-500" : "text-slate-400"}`}>
+                                <Play className="w-5 h-5 mx-auto mb-2 opacity-60" />
+                                <p>Click &ldquo;Run Code&rdquo; to test your solution against example test cases.</p>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
+                        ) : (
+                          <div className="space-y-3">
                         <label className="block text-xs font-bold text-muted-foreground uppercase">
                           Standard Input (stdin)
                         </label>
