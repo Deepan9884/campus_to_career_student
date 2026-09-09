@@ -2404,7 +2404,7 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 
 /* ==========================================================================
    Monaco Editor Tab Arrow & Indentation (CodeTantra Style)
-   Renders crisp, subtle vector arrows (--------->) spanning the tab stop.
+   Renders prominent, crisp, bold vector arrows (--------->) spanning the tab stop.
    No ink blobs, no drop shadows, no word space dots.
    ========================================================================== */
 
@@ -2416,33 +2416,34 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
   visibility: hidden !important;
 }
 
-/* Tab Arrow SVG: Crisp, clean vector line and arrowhead */
+/* Tab Arrow SVG: Crisp, bold vector line and prominent arrowhead */
 .monaco-editor svg {
   overflow: visible !important;
 }
 
 .monaco-editor svg path {
   fill: none !important;
-  stroke-width: 1.2px !important;
+  stroke-width: 2.2px !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
-  transform: none !important;
+  transform: scaleY(1.55) scaleX(1.05) !important;
+  transform-origin: right center !important;
   filter: none !important;
-  opacity: 0.55 !important;
+  opacity: 0.92 !important;
 }
 
-/* Dark mode Tab Vector Arrow (Clean muted slate) */
+/* Dark mode Tab Vector Arrow (High contrast slate-400) */
 .monaco-editor.campus-dark svg path,
 .monaco-editor.vs-dark svg path {
-  stroke: #64748b !important;
+  stroke: #94a3b8 !important;
   fill: none !important;
   filter: none !important;
 }
 
-/* Light mode Tab Vector Arrow (Subtle slate gray matching CodeTantra) */
+/* Light mode Tab Vector Arrow (Bold slate-600 with strong contrast) */
 .monaco-editor.campus-light svg path,
 .monaco-editor.vs svg path {
-  stroke: #94a3b8 !important;
+  stroke: #475569 !important;
   fill: none !important;
   filter: none !important;
 }
@@ -2451,18 +2452,18 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 .monaco-editor .mwh,
 .monaco-editor .invisible.tab,
 .monaco-editor [class*="tab"] {
-  font-weight: 400 !important;
-  font-size: 1em !important;
+  font-weight: 700 !important;
+  font-size: 1.15em !important;
   text-shadow: none !important;
   filter: none !important;
-  opacity: 0.55 !important;
+  opacity: 0.9 !important;
 }
 
 .monaco-editor.campus-dark .mwh,
 .monaco-editor.campus-dark .invisible.tab,
 .monaco-editor.vs-dark .mwh,
 .monaco-editor.vs-dark .invisible.tab {
-  color: #64748b !important;
+  color: #94a3b8 !important;
   text-shadow: none !important;
   filter: none !important;
 }
@@ -2471,7 +2472,7 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 .monaco-editor.campus-light .invisible.tab,
 .monaco-editor.vs .mwh,
 .monaco-editor.vs .invisible.tab {
-  color: #94a3b8 !important;
+  color: #475569 !important;
   text-shadow: none !important;
   filter: none !important;
 }
