@@ -2408,89 +2408,43 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 }
 
 /* ==========================================================================
-   Monaco Editor Tab Arrow & Whitespace (CodeTantra Style)
-   Renders full-span vector arrows (────►) across tab stops and clean space dots
+   Monaco Editor Whitespace (CodeTantra Style)
+   Tab arrows: full-span ──────► via <line> shaft + <polygon> head
+   Space dots: properly sized <circle> aligned to lowercase letter center
    ========================================================================== */
 
-/* Tab Arrow SVG: Long vector arrow spanning full tab stop */
+/* SVG container must not clip the wider tab arrows */
 .monaco-editor svg {
   overflow: visible !important;
 }
 
+/* Shaft (line element): needs stroke, not fill */
 .monaco-editor svg line {
+  fill: none !important;
   stroke-linecap: round !important;
+  stroke-linejoin: round !important;
 }
 
-.monaco-editor svg polygon {
+/* Arrowhead (polygon) and space dot (circle): inherit fill from SVG parent color attribute */
+.monaco-editor svg polygon,
+.monaco-editor svg circle {
   shape-rendering: geometricPrecision !important;
 }
 
-/* Light mode colors: Slate-600 */
-.monaco-editor.campus-light svg,
-.monaco-editor.vs svg {
-  color: #475569 !important;
-  fill: #475569 !important;
+/* Space dots: slightly transparent so they read as hints, not code */
+.monaco-editor svg circle {
+  opacity: 0.75 !important;
 }
 
-.monaco-editor.campus-light svg line {
-  stroke: #475569 !important;
+/* ── Light mode: editorWhitespace uses #64748b (Slate-500) ── */
+.monaco-editor.campus-light svg line,
+.monaco-editor.vs svg line {
+  stroke: #64748b !important;
 }
 
-.monaco-editor.campus-light svg polygon,
-.monaco-editor.campus-light svg path,
-.monaco-editor.campus-light svg circle {
-  fill: #475569 !important;
-}
-
-/* Dark mode colors: Slate-400 */
-.monaco-editor.campus-dark svg,
-.monaco-editor.vs-dark svg {
-  color: #94a3b8 !important;
-  fill: #94a3b8 !important;
-}
-
-.monaco-editor.campus-dark svg line {
+/* ── Dark mode: editorWhitespace uses #94a3b8 (Slate-400) ── */
+.monaco-editor.campus-dark svg line,
+.monaco-editor.vs-dark svg line {
   stroke: #94a3b8 !important;
 }
-
-.monaco-editor.campus-dark svg polygon,
-.monaco-editor.campus-dark svg path,
-.monaco-editor.campus-dark svg circle {
-  fill: #94a3b8 !important;
-}
-
-/* Space dots: Clean, reliable, visible dots */
-.monaco-editor svg circle {
-  opacity: 0.8 !important;
-}
-
-/* Text-Based Tab Arrow Fallback (When using font glyphs) */
-.monaco-editor .mwh,
-.monaco-editor .invisible.tab,
-.monaco-editor [class*="tab"] {
-  font-weight: 700 !important;
-  font-size: 1.15em !important;
-  text-shadow: none !important;
-  filter: none !important;
-  opacity: 0.85 !important;
-}
-
-.monaco-editor.campus-dark .mwh,
-.monaco-editor.campus-dark .invisible.tab,
-.monaco-editor.vs-dark .mwh,
-.monaco-editor.vs-dark .invisible.tab {
-  color: #94a3b8 !important;
-  text-shadow: none !important;
-  filter: none !important;
-}
-
-.monaco-editor.campus-light .mwh,
-.monaco-editor.campus-light .invisible.tab,
-.monaco-editor.vs .mwh,
-.monaco-editor.vs .invisible.tab {
-  color: #475569 !important;
-  text-shadow: none !important;
-  filter: none !important;
-}
-
 
