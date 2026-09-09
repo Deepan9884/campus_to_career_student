@@ -190,6 +190,15 @@ export function MonacoCodeEditor({
     editorInstanceRef.current = editor;
     monacoInstanceRef.current = monaco;
 
+    // Ensure model defaults to hard tabs for clear tab-stop rendering
+    const model = editor.getModel();
+    if (model) {
+      model.updateOptions({
+        tabSize: 4,
+        insertSpaces: false,
+      });
+    }
+
     // Connect imperative handles for top toolbar
     if (editorRef) {
       editorRef.current = {
@@ -383,6 +392,7 @@ export function MonacoCodeEditor({
   useEffect(() => {
     if (editorInstanceRef.current) {
       editorInstanceRef.current.updateOptions({ tabSize });
+      editorInstanceRef.current.getModel()?.updateOptions({ tabSize, insertSpaces: false });
     }
   }, [tabSize]);
 
@@ -465,8 +475,9 @@ export function MonacoCodeEditor({
             fontWeight: "500",
             fontLigatures: true,
             lineNumbers: "on",
-            lineNumbersMinChars: 3,
-            glyphMargin: true,
+            lineNumbersMinChars: 4,
+            lineDecorationsWidth: 28,
+            glyphMargin: false,
             folding: true,
             minimap: { enabled: Boolean(minimap) },
             scrollBeyondLastLine: false,
@@ -497,11 +508,11 @@ export function MonacoCodeEditor({
             },
             renderLineHighlight: "all",
             overviewRulerBorder: false,
-            renderWhitespace: "all",
+            renderWhitespace: "boundary",
             experimentalWhitespaceRendering: "svg",
             fixedOverflowWidgets: true,
             contextmenu: !isCopyPasteDisabled,
-            padding: { top: 14, bottom: 14 },
+            padding: { top: 16, bottom: 16 },
             scrollbar: {
               vertical: "visible",
               horizontal: "auto",

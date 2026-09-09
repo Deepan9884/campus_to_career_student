@@ -1267,7 +1267,9 @@ export function UnifiedExamConsole({
 
   const getCodeForQuestion = (qId: string, lang: string, q?: any) => {
     const savedCode = codingCodeByLang[qId]?.[lang];
-    if (savedCode !== undefined) return savedCode;
+    if (savedCode !== undefined) {
+      return savedCode.replace(/^( {4})+/gm, (m: string) => "\t".repeat(m.length / 4));
+    }
     return getStarterForLang(lang, q);
   };
 
