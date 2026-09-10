@@ -6,10 +6,8 @@ import { calculateStudentChecklistScores } from "@/lib/super-dream-checklist";
 import {
   SOFTWARE_DEV_CATEGORIES,
   INITIAL_ALLOCATED_PROJECTS,
-  INITIAL_DEVOPS_DELIVERABLES,
   AllocatedProject,
   SoftwareDevCategoryConfig,
-  DevOpsMetricDeliverable,
   fetchGithubRepoMetadata,
 } from "@/lib/super-dream-software-dev-data";
 import {
@@ -20,7 +18,6 @@ import {
   Cloud,
   Users,
   Globe,
-  Cpu,
   Github,
   ExternalLink,
   Play,
@@ -32,16 +29,11 @@ import {
   X,
   Code2,
   Upload,
-  Atom,
-  GitBranch,
-  Box,
   ChevronRight,
   ArrowRight,
   Image as ImageIcon,
   Check,
   RefreshCw,
-  ShieldCheck,
-  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -66,9 +58,6 @@ export function Section4SoftwareDev() {
 
   // Selected Category Modal for Project Management
   const [activeCategoryModal, setActiveCategoryModal] = useState<SoftwareDevCategoryConfig | null>(null);
-
-  // Selected DevOps Deliverable Modal
-  const [activeDevOpsModal, setActiveDevOpsModal] = useState<DevOpsMetricDeliverable | null>(null);
 
   // Preview Lightboxes
   const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
@@ -156,23 +145,6 @@ export function Section4SoftwareDev() {
         return Globe;
       default:
         return Code2;
-    }
-  };
-
-  const getDevOpsIcon = (iconName: string) => {
-    switch (iconName) {
-      case "Code2":
-        return Code2;
-      case "Server":
-        return Server;
-      case "GitBranch":
-        return GitBranch;
-      case "Box":
-        return Box;
-      case "Cpu":
-        return Cpu;
-      default:
-        return Cpu;
     }
   };
 
@@ -278,7 +250,7 @@ export function Section4SoftwareDev() {
       <SectionHeaderMetrics
         sectionId={4}
         title="4. Software Development"
-        subtitle="12 Official Placement Deliverables: Click any project panel to view attached GitHub repos, project photos, optional working URLs, and video demos."
+        subtitle="7 Core Enterprise Project Categories: Click any project panel to view attached GitHub repos, project photos, optional working URLs, and video demos."
         readinessScore={summary.readinessScore}
         completedTasks={summary.completedTasks}
         totalTasks={summary.totalTasks}
@@ -470,85 +442,6 @@ export function Section4SoftwareDev() {
                     >
                       Manage Projects <ChevronRight className="w-3.5 h-3.5" />
                     </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Section B: 5 Core Engineering & DevOps Quotas */}
-        <div className="space-y-2 pt-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--foreground)]/80 font-mono flex items-center gap-2">
-              <Cpu className="w-3.5 h-3.5 text-[var(--accent)]" />
-              <span>Engineering & DevOps Infrastructure Metrics (5 Categories)</span>
-            </h3>
-            <span className="text-[10px] font-mono text-[var(--muted-foreground)]">
-              Click any panel to inspect live endpoints & workloads
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-            {INITIAL_DEVOPS_DELIVERABLES.map((item, idx) => {
-              const matchingChecklistItem = studentChecklist.section4SoftwareDev.find((d) => d.id === item.id);
-              const currentVal = matchingChecklistItem ? matchingChecklistItem.current : item.current;
-              const percent = Math.min(100, Math.round((currentVal / item.target) * 100));
-              const isCompleted = currentVal >= item.target;
-              const Icon = getDevOpsIcon(item.iconName);
-
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => setActiveDevOpsModal(item)}
-                  className={cn(
-                    "panel-card rounded-2xl p-3.5 cursor-pointer relative overflow-hidden flex flex-col justify-between gap-3",
-                    isCompleted && "border-[var(--success)]/30 shadow-[0_0_20px_rgba(134,239,172,0.10)]"
-                  )}
-                >
-                  <div className="space-y-2 relative z-10">
-                    <div className="flex items-start justify-between gap-1">
-                      <div
-                        className="w-8 h-8 rounded-xl grid place-items-center shrink-0 shadow-sm"
-                        style={{ background: `${item.color}15`, border: `1px solid ${item.color}30`, color: item.color }}
-                      >
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <span
-                        className={cn(
-                          "text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border",
-                          isCompleted
-                            ? "bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/30"
-                            : "bg-white/[0.06] text-[var(--foreground)] border-white/[0.10]"
-                        )}
-                      >
-                        {currentVal}/{item.target}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-mono text-[var(--muted-foreground)] block">#{idx + 8}</span>
-                      <h4 className="text-xs font-semibold text-[var(--foreground)] line-clamp-1 tracking-tight">
-                        {item.title}
-                      </h4>
-                    </div>
-
-                    <div className="w-full bg-white/[0.06] rounded-full h-1 overflow-hidden border border-white/[0.08]">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${percent}%`,
-                          background: isCompleted
-                            ? "linear-gradient(90deg, #86EFAC, #6EE7B7)"
-                            : `linear-gradient(90deg, ${item.color}99, ${item.color})`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-1.5 border-t border-white/[0.08] text-[10px] font-medium flex items-center justify-between relative z-10" style={{ color: item.color }}>
-                    <span>{percent}% Complete</span>
-                    <span className="flex items-center gap-0.5">Details →</span>
                   </div>
                 </div>
               );
@@ -1060,148 +953,6 @@ export function Section4SoftwareDev() {
           </div>
         </div>
       )}
-
-      {/* ────────────────────────────────────────────────────────────────────── */}
-      {/* DEVOPS DELIVERABLES DRAWER / MODAL */}
-      {/* ────────────────────────────────────────────────────────────────────── */}
-      {activeDevOpsModal && (() => {
-        const matchingChecklistItem = studentChecklist.section4SoftwareDev.find((d) => d.id === activeDevOpsModal.id);
-        const currentVal = matchingChecklistItem ? matchingChecklistItem.current : activeDevOpsModal.current;
-        const targetVal = matchingChecklistItem?.target || activeDevOpsModal.target;
-        const isVerified = matchingChecklistItem?.verified || false;
-        const isCompleted = currentVal >= targetVal;
-        const percent = Math.min(100, Math.round((currentVal / Math.max(1, targetVal)) * 100));
-
-        return (
-          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xl flex items-center justify-center p-3 sm:p-5 overflow-y-auto font-[var(--font-sans)]">
-            <div className="panel-card text-[var(--foreground)] w-full max-w-2xl rounded-3xl border border-white/[0.18] shadow-[0_25px_80px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col max-h-[90vh]">
-              <div className="p-5 bg-white/[0.02] border-b border-white/[0.08] flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/25 grid place-items-center shadow-sm">
-                    <Cpu className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-[var(--foreground)] tracking-tight">{activeDevOpsModal.title}</h3>
-                    <span className="text-xs text-[var(--muted-foreground)] font-medium">
-                      Official Target: {targetVal} {activeDevOpsModal.unit}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setActiveDevOpsModal(null)}
-                  className="p-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[var(--muted-foreground)] hover:text-white transition cursor-pointer active:scale-95"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="p-5 sm:p-6 space-y-4 overflow-y-auto">
-                <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">{activeDevOpsModal.description}</p>
-
-                {/* Live Catalog List */}
-                <div className="space-y-2.5">
-                  <span className="text-xs font-semibold text-[var(--foreground)] block tracking-tight">
-                    Catalog & Verification Telemetry
-                  </span>
-                  {activeDevOpsModal.catalog && activeDevOpsModal.catalog.length > 0 ? (
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                      {activeDevOpsModal.catalog.map((entry, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3 rounded-2xl panel-slot flex items-center justify-between text-xs border border-white/[0.08]"
-                        >
-                          <div>
-                            <p className="font-semibold text-xs text-[var(--foreground)]">{entry.name}</p>
-                            <span className="text-[11px] text-[var(--muted-foreground)]">{entry.sublabel}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.10] text-[var(--foreground)] font-medium">
-                              {entry.tag}
-                            </span>
-                            <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/25 font-semibold">
-                              {entry.status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-4 rounded-2xl panel-slot border border-white/[0.08] text-center space-y-2">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-600 dark:text-cyan-400 text-xs font-semibold">
-                        <Atom className="w-4 h-4 animate-[spin_10s_linear_infinite]" />
-                        <span>Continuous Repository Telemetry Active</span>
-                      </div>
-                      <p className="text-[11px] text-[var(--muted-foreground)] max-w-md mx-auto leading-relaxed">
-                        Connect your GitHub repositories in Section A above. The platform scans repository controllers, routing tables, and configurations for verified {activeDevOpsModal.unit.toLowerCase()} and forwards telemetry for faculty sign-off.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Verified Telemetry & Official Status (No Self-Evaluation) */}
-                <div className="p-4.5 rounded-2xl panel-slot space-y-3.5 border border-white/[0.12]">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-[var(--primary)]" />
-                      <span className="text-[var(--foreground)] font-semibold text-xs tracking-tight">Verified Deliverable Telemetry</span>
-                    </div>
-                    <span
-                      className={cn(
-                        "text-[10px] font-mono px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1 border",
-                        isVerified || isCompleted
-                          ? "bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/25"
-                          : "bg-white/[0.06] text-[var(--muted-foreground)] border-white/[0.10]"
-                      )}
-                    >
-                      {isVerified || isCompleted ? (
-                        <>
-                          <ShieldCheck className="w-3 h-3" />
-                          <span>Faculty / Repo Verified</span>
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-3 h-3 text-[var(--warning)]" />
-                          <span>Audit Controlled</span>
-                        </>
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-[var(--muted-foreground)] font-medium">Audited Deliverables Count</span>
-                      <span className="font-mono font-bold text-sm text-[var(--foreground)]">
-                        {currentVal} <span className="text-xs font-normal text-[var(--muted-foreground)]">/ {targetVal} {activeDevOpsModal.unit}</span>
-                      </span>
-                    </div>
-                    <div className="w-full bg-white/[0.06] rounded-full h-2 overflow-hidden border border-white/[0.08]">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all duration-500",
-                          isCompleted ? "bg-[var(--success)]" : "bg-[var(--primary)]"
-                        )}
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[var(--muted-foreground)]">
-                      <span>Placement Standard: {targetVal} {activeDevOpsModal.unit}</span>
-                      <span className="font-semibold text-[var(--foreground)]">{percent}% achieved</span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-start gap-2.5 text-[11px] text-[var(--muted-foreground)] leading-relaxed">
-                    <Lock className="w-3.5 h-3.5 text-[var(--primary)] shrink-0 mt-0.5" />
-                    <span>
-                      <strong className="text-[var(--foreground)] font-semibold">Self-Evaluation Disabled:</strong> To guarantee absolute academic and placement integrity, students cannot self-increment deliverables. Metrics are verified exclusively through automated Git repository audits and faculty evaluation.
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* ────────────────────────────────────────────────────────────────────── */}
       {/* SCREENSHOT LIGHTBOX MODAL */}
