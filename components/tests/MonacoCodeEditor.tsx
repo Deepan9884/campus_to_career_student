@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { Loader2, Zap, WrapText } from "lucide-react";
 
@@ -58,6 +58,18 @@ export function getMonacoLanguage(lang: string): string {
   return "plaintext";
 }
 
+/** Detect Safari browser (including iOS Safari & WebKit) */
+function detectSafari(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  return /Safari/.test(ua) && !/Chrome/.test(ua) && !/Chromium/.test(ua);
+}
+
+/** Detect Mac OS (for shortcut hint display) */
+function detectMac(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
+}
 
 
 export function MonacoCodeEditor({
@@ -88,6 +100,10 @@ export function MonacoCodeEditor({
   const editorInstanceRef = useRef<any>(null);
   const monacoInstanceRef = useRef<any>(null);
   const decorationsRef = useRef<string[]>([]);
+
+  // Detect Safari and Mac once on mount (stable references)
+  const isSafari = useMemo(() => detectSafari(), []);
+  const isMac = useMemo(() => detectMac(), []);
 
   const monacoLang = getMonacoLanguage(language);
   const themeName = isLight ? "campus-light" : "campus-dark";
@@ -238,6 +254,16 @@ export function MonacoCodeEditor({
         onRunCode();
       });
     }
+
+    // Ctrl+Y / Cmd+Y Redo support (especially for Mac users and cross-platform muscle memory)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyY, () => {
+      editor.trigger("keyboard", "redo", null);
+    });
+
+    // Harmless Ctrl+S / Cmd+S save prevention (prevents browser "Save Page As" dialog)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      // Intentionally consumed without side-effects
+    });
 
     // Ctrl/Cmd + Plus / Equal to Zoom In
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Equal, () => {
@@ -463,7 +489,8 @@ export function MonacoCodeEditor({
             letterSpacing: 0,
             fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, Menlo, Monaco, monospace",
             fontWeight: "400",
-            fontLigatures: true,
+            // Disable ligatures on Safari — shaping is slower on WebKit
+            fontLigatures: !isSafari,
             lineNumbers: "on",
             lineNumbersMinChars: 3,
             lineDecorationsWidth: 16,
@@ -478,10 +505,12 @@ export function MonacoCodeEditor({
             useTabStops: true,
             wordWrap,
             cursorBlinking: "smooth",
-            cursorSmoothCaretAnimation: "on",
+            // Disable smooth caret animation on Safari — GPU compositing is expensive on WebKit
+            cursorSmoothCaretAnimation: isSafari ? "off" : "on",
             cursorStyle: "line",
             cursorWidth: 2,
-            smoothScrolling: true,
+            // Disable smooth scrolling on Safari for better performance
+            smoothScrolling: !isSafari,
             formatOnPaste: !isCopyPasteDisabled,
             suggestOnTriggerCharacters: true,
             matchBrackets: "always",
@@ -495,7 +524,8 @@ export function MonacoCodeEditor({
             renderLineHighlight: "all",
             overviewRulerBorder: false,
             renderWhitespace: "boundary",
-            experimentalWhitespaceRendering: "svg",
+            // SVG whitespace rendering is slow on Safari — fall back to font-glyph mode
+            experimentalWhitespaceRendering: isSafari ? "font" : "svg",
             fixedOverflowWidgets: true,
             contextmenu: !isCopyPasteDisabled,
             padding: { top: 12, bottom: 12 },
@@ -556,7 +586,7 @@ export function MonacoCodeEditor({
                 <span className="opacity-40 hidden lg:inline">|</span>
                 <span className="hidden lg:flex items-center gap-1 text-[10px] opacity-75">
                   <Zap className="w-2.5 h-2.5 text-amber-500" />
-                  <span>Ctrl+Enter to Run</span>
+                  <span>{isMac ? "⌘+Enter to Run" : "Ctrl+Enter to Run"}</span>
                 </span>
               </>
             )}

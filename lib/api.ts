@@ -25,9 +25,13 @@ export function setAccessToken(token: string | null) {
       if (token) {
         sessionStorage.setItem("cf_session_active", "1");
         sessionStorage.setItem("cf_access_token", token);
+        // Also persist in localStorage as Safari ITP / private browsing fallback.
+        // The flag only marks session existence, not the token itself (which stays in sessionStorage).
+        localStorage.setItem("cf_session_active_fallback", "1");
       } else {
         sessionStorage.removeItem("cf_session_active");
         sessionStorage.removeItem("cf_access_token");
+        localStorage.removeItem("cf_session_active_fallback");
       }
     } catch {}
   }
@@ -72,9 +76,15 @@ export function isAuthExempt(url?: string): boolean {
 }
 
 export function getRefreshedToken(): Promise<string | null> {
-  if (typeof window !== "undefined" && !sessionStorage.getItem("cf_session_active")) {
-    setAccessToken(null);
-    return Promise.resolve(null);
+  if (typeof window !== "undefined") {
+    // Check both sessionStorage and the localStorage fallback (for Safari ITP/private mode)
+    const sessionActive =
+      sessionStorage.getItem("cf_session_active") ||
+      localStorage.getItem("cf_session_active_fallback");
+    if (!sessionActive) {
+      setAccessToken(null);
+      return Promise.resolve(null);
+    }
   }
 
   if (!refreshPromise) {
@@ -108,6 +118,19 @@ export async function tryRefresh(): Promise<string | null> {
   return getRefreshedToken();
 }
 
+/** Whether the current page is an active exam / test session that should not be force-redirected. */
+function isActiveExamRoute(): boolean {
+  if (typeof window === "undefined") return false;
+  const p = window.location.pathname;
+  return (
+    p.includes("/exam") ||
+    p.includes("/test") ||
+    p.includes("/assessment") ||
+    p.includes("/quiz") ||
+    p.includes("/coding")
+  );
+}
+
 export function clearSessionAndRedirect(): void {
   setAccessToken(null);
   if (typeof window !== "undefined") {
@@ -117,6 +140,14 @@ export function clearSessionAndRedirect(): void {
       }).catch(() => {});
     } catch {}
     const pathname = window.location.pathname;
+    // Never auto-redirect during an active exam — show a toast warning instead.
+    // The student must manually re-authenticate after the exam.
+    if (isActiveExamRoute()) {
+      console.warn("[Auth] Session expired during exam — suppressing redirect to avoid disrupting the student.");
+      // Attempt a background silent refresh instead of kicking the student out
+      getRefreshedToken().catch(() => {});
+      return;
+    }
     if (
       pathname !== "/login" &&
       pathname !== "/register" &&

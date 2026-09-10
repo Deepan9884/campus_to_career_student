@@ -53,6 +53,7 @@ import { stopAllCameraStreams } from "@/lib/cameraManager";
 import { executeCode } from "@/lib/quiz-api";
 import { MonacoCodeEditor, type CodeEditorControlsHandle } from "@/components/tests/MonacoCodeEditor";
 import { CompilerErrorBanner } from "@/components/tests/CompilerErrorBanner";
+import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import type {
   QuizGenerationResult,

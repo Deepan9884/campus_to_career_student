@@ -70,12 +70,14 @@ export interface ProctoringSessionState {
 const BLOCKED_STANDALONE_KEYS = new Set([
   "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
   "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
-  "Meta", "OS", "Windows", "ContextMenu", "PrintScreen", "Snapshot", "Insert", "Pause", "ScrollLock", "Help",
+  "OS", "Windows", "ContextMenu", "PrintScreen", "Snapshot", "Insert", "Pause", "ScrollLock", "Help",
 ]);
 
 // Whitelisted text editing keystrokes when focused inside code/text editor
-const ALLOWED_EDITOR_CTRL_KEYS = new Set(["z", "Z", "y", "Y", "a", "A", "f", "F", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete"]);
+const ALLOWED_EDITOR_CTRL_KEYS = new Set(["z", "Z", "y", "Y", "a", "A", "f", "F", "s", "S", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete"]);
 const ALLOWED_COPY_PASTE_KEYS = new Set(["c", "C", "v", "V", "x", "X", "Insert"]);
+
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
 
 // Whitelisted hardware brightness & display adjustment keys
 const ALLOWED_BRIGHTNESS_KEYS = new Set([
@@ -97,16 +99,43 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
     return false;
   }
 
-  // Strictly block Windows / Meta key press and any OS combination (Win, Win+G, Win+Alt+R, Win+Shift+S, Win+Tab, etc.)
+  const target = e.target as HTMLElement | null;
+  const isInsideTextInput = Boolean(
+    target && (
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable ||
+      target.closest(".monaco-editor") !== null ||
+      target.closest(".monaco-mouse-cursor-text") !== null
+    )
+  );
+
+  // Permit editing shortcuts inside active editor:
+  // Undo: Ctrl+Z / Cmd+Z
+  // Redo: Ctrl+Y / Cmd+Y / Ctrl+Shift+Z / Cmd+Shift+Z
+  // Select All: Ctrl+A / Cmd+A
+  // Find: Ctrl+F / Cmd+F
+  // Harmless Save: Ctrl+S / Cmd+S (muscle memory)
+  // Run Code: Ctrl+Enter / Cmd+Enter
+  // Zoom & cursor navigation
+  if (isInsideTextInput && (e.ctrlKey || e.metaKey)) {
+    const allowedEditKeys = ["z", "Z", "y", "Y", "a", "A", "f", "F", "s", "S", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete", "=", "-", "0"];
+    if (allowedEditKeys.includes(e.key)) return false;
+    if (e.shiftKey && (e.key === "z" || e.key === "Z")) return false;
+  }
+
+  // Strictly block Windows key press on Windows / Linux (Win, Win+G, Win+Alt+R, Win+Shift+S, Win+Tab, etc.)
+  // On Mac, Meta IS the Command modifier key used for all standard editing.
   const isMetaOrWinKey =
-    e.key === "Meta" ||
-    e.key === "OS" ||
-    e.key === "Windows" ||
-    e.code === "MetaLeft" ||
-    e.code === "MetaRight" ||
-    e.code === "OSLeft" ||
-    e.code === "OSRight" ||
-    e.metaKey;
+    (!IS_MAC && (
+      e.key === "Meta" ||
+      e.key === "OS" ||
+      e.key === "Windows" ||
+      e.code === "MetaLeft" ||
+      e.code === "MetaRight" ||
+      e.code === "OSLeft" ||
+      e.code === "OSRight"
+    ));
 
   if (isMetaOrWinKey) {
     return true;
@@ -160,9 +189,6 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
   // ContextMenu key
   if (e.key === "ContextMenu" || e.code === "ContextMenu") return true;
 
-  const target = e.target as HTMLElement | null;
-  const isInsideTextInput = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable || target.closest(".monaco-editor"));
-
   // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), Select All (Ctrl+A), and Find (Ctrl+F) ONLY inside active code/text inputs
   if (isInsideTextInput && (e.ctrlKey || e.metaKey) && ["z", "Z", "y", "Y", "a", "A", "f", "F"].includes(e.key)) {
     return false;
@@ -172,6 +198,7 @@ function isBlockedShortcut(e: KeyboardEvent, allowCopyPaste = false): boolean {
   if (allowCopyPaste && isInsideTextInput && (e.ctrlKey || e.metaKey) && ALLOWED_COPY_PASTE_KEYS.has(e.key)) {
     return false;
   }
+
 
   // Block specific dangerous browser navigation Ctrl combinations (reload, new tab, close, print, save, etc.)
   const FORBIDDEN_CTRL_KEYS = new Set([
@@ -558,6 +585,35 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   useEffect(() => {
     if (!enabled) return;
 
+    // Debounce timer: only count a blur as a violation if the window stays
+    // blurred for >500ms. This prevents Monaco autocomplete popups, IME windows,
+    // system keyboard pickers, and focus-flicker from triggering false violations.
+    let blurTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function clearBlurTimer() {
+      if (blurTimer !== null) {
+        clearTimeout(blurTimer);
+        blurTimer = null;
+      }
+    }
+
+    function isFocusInsideMonaco(): boolean {
+      try {
+        const active = document.activeElement;
+        if (!active) return false;
+        // Monaco editor itself, suggest widgets, hover widgets, context menus
+        return (
+          active.closest(".monaco-editor") !== null ||
+          active.closest(".monaco-editor-overlaymessage") !== null ||
+          active.closest(".editor-widget") !== null ||
+          active.closest(".suggest-widget") !== null ||
+          active.closest(".monaco-scrollable-element") !== null
+        );
+      } catch {
+        return false;
+      }
+    }
+
     function handleVisibility() {
       if (document.hidden && isStartedRef.current && !isBlockedRef.current) {
         const now = Date.now();
@@ -572,17 +628,36 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
           setState((prev) => ({ ...prev, isFullscreen: false }));
         }
       } else if (!document.hidden && isCurrentlyFullscreen()) {
+        clearBlurTimer();
         clearFullscreenCountdown();
         setState((prev) => ({ ...prev, isFullscreen: true }));
       }
     }
 
     function handleWindowBlur() {
-      if (isStartedRef.current && !isBlockedRef.current) {
-        const now = Date.now();
-        if (startTimestampRef.current > 0 && now - startTimestampRef.current < 5000) {
-          return;
-        }
+      if (!isStartedRef.current || isBlockedRef.current) return;
+      const now = Date.now();
+      if (startTimestampRef.current > 0 && now - startTimestampRef.current < 5000) {
+        return;
+      }
+
+      // If document still has focus (e.g. Safari internal focus transition / editor clicks), skip!
+      if (typeof document !== "undefined" && document.hasFocus && document.hasFocus()) {
+        return;
+      }
+
+      // If focus is still within a Monaco widget (autocomplete, hover, IME) don't count it
+      if (isFocusInsideMonaco()) return;
+
+      // Debounce: only fire violation if the blur persists for >500ms
+      clearBlurTimer();
+      blurTimer = setTimeout(() => {
+        blurTimer = null;
+        // Re-check: if focus came back, document has focus, or is in Monaco, skip
+        if (typeof document !== "undefined" && document.hasFocus && document.hasFocus()) return;
+        if (!document.hidden && isFocusInsideMonaco()) return;
+        if (!isStartedRef.current || isBlockedRef.current) return;
+
         sendViolation("tab_switch");
         if (!isCurrentlyFullscreen()) {
           if (fullscreenCountdownRef.current === null) {
@@ -590,10 +665,11 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
           }
           setState((prev) => ({ ...prev, isFullscreen: false }));
         }
-      }
+      }, 500);
     }
 
     function handleWindowFocus() {
+      clearBlurTimer();
       if (isCurrentlyFullscreen()) {
         clearFullscreenCountdown();
         setState((prev) => ({ ...prev, isFullscreen: true }));
@@ -604,6 +680,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     window.addEventListener("blur", handleWindowBlur);
     window.addEventListener("focus", handleWindowFocus);
     return () => {
+      clearBlurTimer();
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("blur", handleWindowBlur);
       window.removeEventListener("focus", handleWindowFocus);
@@ -613,6 +690,8 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
   // ── 3. Strict Keyboard Lockdown, Screenshot Detection & Anti-Copy ─────────
   useEffect(() => {
     if (!enabled) return;
+
+    const IS_MAC = typeof navigator !== "undefined" && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
     async function wipeClipboard() {
       if (!copyPasteDisabled) return;
@@ -662,28 +741,36 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
           (target.tagName === "INPUT" ||
             target.tagName === "TEXTAREA" ||
             target.isContentEditable ||
-            target.closest(".monaco-editor"))
+            target.closest(".monaco-editor") !== null ||
+            target.closest(".monaco-mouse-cursor-text") !== null)
       );
 
-      // Always permit Undo (Ctrl+Z), Redo (Ctrl+Y / Ctrl+Shift+Z), Select All (Ctrl+A), and Find (Ctrl+F) inside active code/text inputs
+      // Always permit Undo (Ctrl+Z / Cmd+Z), Redo (Ctrl+Y / Cmd+Y / Ctrl+Shift+Z / Cmd+Shift+Z), Select All (Ctrl+A / Cmd+A), Find (Ctrl+F / Cmd+F), Save (Ctrl+S / Cmd+S), Enter (Run) inside active code/text inputs
       if (
         isInsideTextInput &&
         (e.ctrlKey || e.metaKey) &&
-        ["z", "Z", "y", "Y", "a", "A", "f", "F"].includes(e.key)
+        ["z", "Z", "y", "Y", "a", "A", "f", "F", "s", "S", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Backspace", "Delete", "=", "-", "0"].includes(e.key)
       ) {
+        if (e.key === "s" || e.key === "S") {
+          // Harmless save muscle memory: prevent browser "Save Page" dialog without penalizing student
+          e.preventDefault();
+          e.stopPropagation();
+        }
         return; // Allow!
       }
 
-      // Check Windows / Meta keys and OS combinations (Win, Win+G, Win+Alt+R, etc.)
+      // Check Windows / Meta keys on Windows/Linux (Win, Win+G, Win+Alt+R, etc.)
+      // On Mac, Meta IS the Command modifier. We do NOT penalize holding Command.
       const isMetaOrWinKey =
-        e.key === "Meta" ||
-        e.key === "OS" ||
-        e.key === "Windows" ||
-        e.code === "MetaLeft" ||
-        e.code === "MetaRight" ||
-        e.code === "OSLeft" ||
-        e.code === "OSRight" ||
-        (!isInsideTextInput && e.metaKey);
+        (!IS_MAC && (
+          e.key === "Meta" ||
+          e.key === "OS" ||
+          e.key === "Windows" ||
+          e.code === "MetaLeft" ||
+          e.code === "MetaRight" ||
+          e.code === "OSLeft" ||
+          e.code === "OSRight"
+        ));
 
       if (isMetaOrWinKey) {
         e.preventDefault();
@@ -747,14 +834,15 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       }
 
       const isMetaOrWinKey =
-        e.key === "Meta" ||
-        e.key === "OS" ||
-        e.key === "Windows" ||
-        e.code === "MetaLeft" ||
-        e.code === "MetaRight" ||
-        e.code === "OSLeft" ||
-        e.code === "OSRight" ||
-        e.metaKey;
+        (!IS_MAC && (
+          e.key === "Meta" ||
+          e.key === "OS" ||
+          e.key === "Windows" ||
+          e.code === "MetaLeft" ||
+          e.code === "MetaRight" ||
+          e.code === "OSLeft" ||
+          e.code === "OSRight"
+        ));
 
       if (isMetaOrWinKey) {
         e.preventDefault();
