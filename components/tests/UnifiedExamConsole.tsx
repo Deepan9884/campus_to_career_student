@@ -981,9 +981,10 @@ export function UnifiedExamConsole({
         keyboard_shortcut: "Restricted keyboard shortcut or screenshot attempt detected",
         eye_tracking_violation: "4 Eye Gaze warnings converted to 1 Violation Strike",
       };
-      toast.error(`🚨 Violation Strike ${count}/${tabSwitchLimit}: ${typeLabels[type] || type}`, {
-        duration: 6000,
-        id: `proctor-strike-${count}-${Date.now()}`,
+      const strikeText = tabSwitchLimit && tabSwitchLimit < 99 ? `Strike ${count}/${tabSwitchLimit}` : `Strike ${count}`;
+      toast.error(`Security Warning (${strikeText}): ${typeLabels[type] || type}`, {
+        duration: 4000,
+        id: `proctor-strike-${type}`,
       });
     },
   });
@@ -1112,7 +1113,7 @@ export function UnifiedExamConsole({
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        toast.warning("System shortcut key is restricted.");
+        toast.warning("System shortcut keys are restricted during the assessment.", { id: "os-shortcut-restrict", duration: 3000 });
         return;
       }
 
@@ -1121,7 +1122,7 @@ export function UnifiedExamConsole({
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        toast.warning("Windows shortcut combinations (e.g. Win+G, Win+S) are restricted.");
+        toast.warning("Windows shortcut combinations (e.g. Win+G, Win+S) are restricted.", { id: "os-shortcut-restrict", duration: 3000 });
         return;
       }
 
@@ -1130,7 +1131,7 @@ export function UnifiedExamConsole({
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        toast.warning("Screenshots are strictly prohibited during the assessment.");
+        toast.warning("Screenshots are strictly prohibited during the assessment.", { id: "screenshot-restrict", duration: 3000 });
         return;
       }
 
@@ -1139,7 +1140,7 @@ export function UnifiedExamConsole({
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        toast.warning("Alt shortcuts are restricted during the assessment.");
+        toast.warning("Alt shortcuts are restricted during the assessment.", { id: "alt-combo-restrict", duration: 3000 });
         return;
       }
 

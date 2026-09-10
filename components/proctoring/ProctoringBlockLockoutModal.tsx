@@ -205,108 +205,108 @@ export function ProctoringBlockLockoutModal({
       : "Proctoring security violations (e.g. repeated tab switching, camera absence, or fullscreen exit) were detected. Access has been temporarily suspended for 30 minutes.");
 
   return (
-    <div className="fixed inset-0 z-[999999] bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6 select-none font-sans animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[999999] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 select-none font-sans animate-in fade-in duration-200">
       <div
-        className={`max-w-lg w-full bg-white dark:bg-slate-900 border ${
+        className={`max-w-lg w-full bg-white border ${
           isSuperDream
-            ? "border-amber-400/60 dark:border-amber-500/40 shadow-amber-500/10"
-            : "border-rose-200 dark:border-rose-900/60 shadow-rose-500/10"
-        } rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center text-slate-900 dark:text-slate-100 relative overflow-hidden`}
+            ? "border-amber-300/80 shadow-amber-500/10"
+            : "border-slate-200/90 shadow-slate-900/15"
+        } rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 text-center text-slate-900 relative overflow-hidden`}
       >
         {/* Top Accent Gradient Bar */}
         <div
           className={`absolute top-0 left-0 right-0 h-1.5 ${
             isSuperDream
-              ? "bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-600"
+              ? "bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600"
               : "bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600"
           }`}
         />
 
         {/* Security Shield Icon with Track Badge */}
-        <div className="relative mx-auto w-20 h-20 pt-2">
+        <div className="relative mx-auto w-16 h-16 pt-1">
           <div
-            className={`w-18 h-18 rounded-3xl mx-auto flex items-center justify-center ${
+            className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center border shadow-sm ${
               isSuperDream
-                ? "bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700/60 text-amber-600 dark:text-amber-400 shadow-xl shadow-amber-500/15"
-                : "bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 shadow-xl shadow-rose-500/10"
+                ? "bg-amber-50 border-amber-200 text-amber-600"
+                : "bg-rose-50 border-rose-200 text-rose-600"
             }`}
           >
             {isSuperDream ? (
-              <Crown className="h-9 w-9 animate-pulse text-amber-500" />
+              <Crown className="h-7 w-7 text-amber-600" />
             ) : (
-              <ShieldAlert className="h-9 w-9 animate-pulse" />
+              <ShieldAlert className="h-7 w-7 text-rose-600" />
             )}
           </div>
           <div
-            className={`absolute bottom-0 right-2 p-1.5 rounded-full ${
+            className={`absolute bottom-0 right-2 p-1 rounded-full ${
               isSuperDream ? "bg-amber-600" : "bg-rose-600"
-            } text-white shadow-md border-2 border-white dark:border-slate-900`}
+            } text-white shadow border-2 border-white`}
           >
-            <Lock className="h-3.5 w-3.5" />
+            <Lock className="h-3 w-3" />
           </div>
         </div>
 
         {/* Title & Subtitle */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
               isSuperDream
-                ? "bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300"
-                : "bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300"
+                ? "bg-amber-50 border border-amber-200 text-amber-800"
+                : "bg-rose-50 border border-rose-200 text-rose-800"
             }`}
           >
             {isSuperDream ? (
-              <Sparkles className="h-3 w-3 text-amber-500" />
+              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
             ) : (
-              <AlertTriangle className="h-3 w-3 text-rose-500" />
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-600" />
             )}
             <span>{modalSubtitle}</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             {modalTitle}
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+          <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
             {modalMessage}
           </p>
         </div>
 
         {/* ── TIMER BANNER: ONLY COMES IN CLASSIC! ────────────────────────── */}
         {!isSuperDream ? (
-          <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 sm:p-5 space-y-3">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 space-y-3 text-slate-900 shadow-sm">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
               <span className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4 text-rose-500 animate-spin" style={{ animationDuration: "10s" }} />
                 Auto-Unblock Timer:
               </span>
-              <span className="text-[11px] font-mono uppercase bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded-md font-bold">
+              <span className="text-[11px] font-mono uppercase bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold border border-rose-200">
                 30 Mins Lockout
               </span>
             </div>
 
-            <div className="text-3xl sm:text-4xl font-black font-mono tracking-wider text-rose-600 dark:text-rose-400">
+            <div className="text-3xl sm:text-4xl font-extrabold font-mono tracking-wider text-rose-600">
               {formatTime(remainingSeconds)}
             </div>
 
             {/* Progress bar */}
-            <div className="w-full bg-slate-200 dark:bg-slate-700/60 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
               <div
                 className="bg-gradient-to-r from-rose-500 to-amber-500 h-full transition-all duration-1000 ease-linear rounded-full"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
 
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500">
               Access automatically restores when the countdown finishes (Classic 30-Min Auto-Unblock).
             </p>
           </div>
         ) : (
           /* ── SUPER DREAM MENTOR AUTHORITY NOTICE (NO TIMER) ─────────────── */
-          <div className="bg-amber-500/10 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-700/50 rounded-2xl p-4 space-y-2 text-left">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-900 dark:text-amber-300">
-              <Crown className="h-4 w-4 text-amber-500 shrink-0" />
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-1.5 text-left">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
+              <Crown className="h-4 w-4 text-amber-600 shrink-0" />
               <span>Super Dream Strict Integrity Policy</span>
             </div>
-            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-700 leading-relaxed">
               Auto-unblock timers are strictly disabled for all Super Dream track assessments. Your session is held in lock until authorized.
             </p>
           </div>
@@ -314,22 +314,22 @@ export function ProctoringBlockLockoutModal({
 
         {/* Mentor Authority Card */}
         <div
-          className={`border rounded-2xl p-4 text-left space-y-2.5 ${
+          className={`border rounded-xl p-4 text-left space-y-2 ${
             isSuperDream
-              ? "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800/50"
-              : "bg-blue-50/60 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/40"
+              ? "bg-indigo-50/60 border-indigo-200 text-slate-800"
+              : "bg-slate-50 border-slate-200 text-slate-800"
           }`}
         >
           <div
             className={`flex items-center gap-2 text-xs font-bold ${
               isSuperDream
-                ? "text-indigo-950 dark:text-indigo-300"
-                : "text-blue-900 dark:text-blue-300"
+                ? "text-indigo-950"
+                : "text-slate-900"
             }`}
           >
             <UserCheck
               className={`h-4 w-4 shrink-0 ${
-                isSuperDream ? "text-indigo-600 dark:text-indigo-400" : "text-blue-600 dark:text-blue-400"
+                isSuperDream ? "text-indigo-600" : "text-slate-700"
               }`}
             />
             <span>
@@ -339,7 +339,7 @@ export function ProctoringBlockLockoutModal({
             </span>
           </div>
 
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+          <p className="text-xs text-slate-600 leading-relaxed font-normal">
             {isSuperDream ? (
               <>
                 Only your mentor, <strong>{mentorName}</strong>, can review your session violations telemetry and unblock your Super Dream access from the Mentor Portal.
@@ -352,7 +352,7 @@ export function ProctoringBlockLockoutModal({
           </p>
 
           {mentorEmail && (
-            <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-400 pt-1">
+            <div className="flex items-center gap-2 text-xs text-indigo-700 pt-1">
               <Mail className="h-3.5 w-3.5 shrink-0" />
               <a
                 href={`mailto:${mentorEmail}?subject=${encodeURIComponent(
@@ -362,7 +362,7 @@ export function ProctoringBlockLockoutModal({
                 )}&body=${encodeURIComponent(
                   `Hello ${mentorName},\n\nMy assessment access was suspended due to a proctoring violation. Please review my proctoring log and unblock my test access.\n\nThank you!`
                 )}`}
-                className="underline hover:text-blue-600 transition truncate"
+                className="underline hover:text-indigo-900 transition truncate font-medium"
               >
                 {mentorEmail}
               </a>
@@ -375,11 +375,7 @@ export function ProctoringBlockLockoutModal({
           <button
             onClick={() => queryServerStatus(true)}
             disabled={isChecking || isAutoUnblocking}
-            className={`w-full py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition active:scale-98 disabled:opacity-50 text-white shadow-lg ${
-              isSuperDream
-                ? "bg-gradient-to-r from-amber-600 via-indigo-600 to-purple-600 hover:brightness-110 shadow-indigo-500/25"
-                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-indigo-500/25"
-            }`}
+            className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition active:scale-[0.99] disabled:opacity-50 text-white bg-slate-900 hover:bg-slate-800 shadow-md"
           >
             {isChecking || isAutoUnblocking ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -392,7 +388,7 @@ export function ProctoringBlockLockoutModal({
           {onClose && (
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-2xl font-bold text-xs transition border cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-700 flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl font-medium text-xs transition border cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200 flex items-center justify-center gap-2"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Exit Assessment</span>
@@ -401,7 +397,7 @@ export function ProctoringBlockLockoutModal({
         </div>
 
         {/* Real-time Listening Indicator */}
-        <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
           <span className="relative flex h-2 w-2">
             <span
               className={`animate-ping absolute inline-flex h-full w-full rounded-full ${

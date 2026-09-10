@@ -143,6 +143,9 @@ function RootComponent() {
           position="top-right"
           duration={3500}
           closeButton
+          richColors
+          theme="light"
+          visibleToasts={3}
         />
       </GoogleOAuthProvider>
     </QueryClientProvider>
