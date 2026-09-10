@@ -545,7 +545,7 @@ export const useSuperDream = create<SuperDreamState>()(
           actionType: "rating_updated",
           sectionId: 2,
           title: `Updated CS Subject Rating (${id})`,
-          details: `Rated ${rating}/5 Stars • ${remarks || "Self-evaluation updated"}`,
+          details: `Rated ${rating}/5 Stars • ${remarks || "Coursework notes updated"}`,
         });
       },
 
