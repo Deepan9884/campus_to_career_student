@@ -1405,6 +1405,39 @@ export function UnifiedExamConsole({
     return "Valid solution output";
   };
 
+  // Helper to adapt LeetCode parameter inputs (e.g. nums = [1, 1, 2]) into standard stdin (1 1 2)
+  const cleanStdinInput = (raw: any): string => {
+    if (!raw) return "";
+    let str = String(raw).trim();
+    str = str.replace(/^(?:Input\s*:\s*)+/i, "").trim();
+    const varRegex = /(?:^|,|\n)\s*([a-zA-Z_]\w*)\s*=\s*(\[[^\]]*\]|'[^']*'|"[^"]*"|[^,\n]+)/g;
+    const matches = [...str.matchAll(varRegex)];
+    if (matches.length > 0) {
+      const parts: string[] = [];
+      for (const m of matches) {
+        const val = m[2].trim();
+        if (val.startsWith("[") && val.endsWith("]")) {
+          const inner = val.slice(1, -1).trim();
+          const items = inner.length > 0
+            ? inner.split(",").map((x) => x.trim().replace(/^['"]|['"]$/g, "")).filter(Boolean)
+            : [];
+          parts.push(items.join(" "));
+        } else {
+          parts.push(val.replace(/^['"]|['"]$/g, ""));
+        }
+      }
+      return parts.join("\n");
+    }
+    if (str.startsWith("[") && str.endsWith("]")) {
+      const inner = str.slice(1, -1).trim();
+      const items = inner.length > 0
+        ? inner.split(",").map((x) => x.trim().replace(/^['"]|['"]$/g, "")).filter(Boolean)
+        : [];
+      return items.join(" ");
+    }
+    return String(raw).trim();
+  };
+
   // Helper to ensure 2 sample + 2 hidden evaluation test cases are resolved and executed
   const resolveFullTestCases = (question: any): any[] => {
     const raw = Array.isArray(question?.testCases) ? [...question.testCases] : [];
@@ -1415,6 +1448,7 @@ export function UnifiedExamConsole({
       return raw.map((tc, idx) => ({
         ...tc,
         id: tc.id || `tc-${idx + 1}`,
+        input: cleanStdinInput(tc.input),
         isHidden: Boolean(tc.isHidden ?? idx >= 2),
         expectedOutput: getExpectedOutput(tc, idx, question),
       }));
@@ -1424,6 +1458,7 @@ export function UnifiedExamConsole({
       return raw.map((tc, idx) => ({
         ...tc,
         id: tc.id || `tc-${idx + 1}`,
+        input: cleanStdinInput(tc.input),
         isHidden: tc.isHidden !== undefined ? Boolean(tc.isHidden) : idx >= 2,
         expectedOutput: getExpectedOutput(tc, idx, question),
       }));
@@ -1438,13 +1473,13 @@ export function UnifiedExamConsole({
     if (titleLower.includes("median of two sorted") || problemLower.includes("median of the two sorted arrays")) {
       extraHiddenCases = [
         {
-          input: "nums1 = [0,0], nums2 = [0,0]",
+          input: "0 0\n0 0",
           expectedOutput: "0.00000",
           description: "Duplicate zero arrays boundary",
           isHidden: true,
         },
         {
-          input: "nums1 = [1,3], nums2 = [2,7]",
+          input: "1 3\n2 7",
           expectedOutput: "2.50000",
           description: "Even partition split scale verification",
           isHidden: true,
@@ -1483,13 +1518,13 @@ export function UnifiedExamConsole({
     } else if (raw.length >= 2) {
       extraHiddenCases = [
         {
-          input: raw[0].input,
+          input: cleanStdinInput(raw[0].input),
           expectedOutput: getExpectedOutput(raw[0], 0, question),
           description: "Boundary edge condition evaluation",
           isHidden: true,
         },
         {
-          input: raw[1].input,
+          input: cleanStdinInput(raw[1].input),
           expectedOutput: getExpectedOutput(raw[1], 1, question),
           description: "Scale & time complexity verification",
           isHidden: true,
@@ -1498,13 +1533,13 @@ export function UnifiedExamConsole({
     } else if (raw.length === 1) {
       extraHiddenCases = [
         {
-          input: raw[0].input,
+          input: cleanStdinInput(raw[0].input),
           expectedOutput: getExpectedOutput(raw[0], 0, question),
           description: "Boundary limit evaluation",
           isHidden: true,
         },
         {
-          input: raw[0].input,
+          input: cleanStdinInput(raw[0].input),
           expectedOutput: getExpectedOutput(raw[0], 0, question),
           description: "Algorithmic scale verification",
           isHidden: true,
@@ -1520,6 +1555,7 @@ export function UnifiedExamConsole({
     const baseSampleCases = raw.map((tc, idx) => ({
       ...tc,
       id: tc.id || `tc-${idx + 1}`,
+      input: cleanStdinInput(tc.input),
       isHidden: false,
       expectedOutput: getExpectedOutput(tc, idx, question),
     }));
@@ -1552,21 +1588,37 @@ export function UnifiedExamConsole({
       return next;
     });
 
+    const isCustomRun = activeTab === "custom";
     setIsRunningCode(true);
-    setActiveTab("testcases");
+    if (!isCustomRun) {
+      setActiveTab("testcases");
+    }
 
     try {
-      const resolvedTestCases = resolveFullTestCases(currentQ);
-      const testCases = resolvedTestCases.map((tc: any, i: number) => ({
-        ...tc,
-        expectedOutput: getExpectedOutput(tc, i, currentQ),
-      }));
+      let testCasesToRun: any[] = [];
+      if (isCustomRun) {
+        testCasesToRun = [
+          {
+            id: "custom-1",
+            input: customInput,
+            expectedOutput: "(Custom Run)",
+            description: "Custom Playground Run",
+          },
+        ];
+      } else {
+        const resolvedTestCases = resolveFullTestCases(currentQ);
+        testCasesToRun = resolvedTestCases.map((tc: any, i: number) => ({
+          ...tc,
+          input: cleanStdinInput(tc.input),
+          expectedOutput: getExpectedOutput(tc, i, currentQ),
+        }));
+      }
 
       const result = await executeCode({
         code: codeToRun,
         language: activeLang,
-        testCases,
-        customInput: activeTab === "custom" ? customInput : undefined,
+        testCases: testCasesToRun,
+        customInput: isCustomRun ? customInput : undefined,
         questionText: currentQ.problemStatement || currentQ.title,
       });
 
@@ -1582,11 +1634,20 @@ export function UnifiedExamConsole({
         setErrorMessage(errText);
         toast.error(`Compilation / Syntax Error in ${LANGUAGE_CONFIGS[activeLang]?.label || activeLang}${errLineNum ? ` (line ${errLineNum})` : ""}`);
         setActiveTab("console");
+      } else if (isCustomRun) {
+        setErrorLine(null);
+        setErrorMessage(null);
+        setActiveTab("console");
+        if (result.isRuntimeError || (result as any).stderr) {
+          toast.warning("Custom run completed with runtime output/errors");
+        } else {
+          toast.success("Custom input executed successfully!");
+        }
       } else {
         setErrorLine(null);
         setErrorMessage(null);
         const passed = result.passedCount ?? 0;
-        const total = result.totalCount ?? testCases.length;
+        const total = result.totalCount ?? testCasesToRun.length;
         if (result.success || (passed === total && total > 0)) {
           toast.success(`All ${total} test cases passed! (Including hidden cases)`);
         } else if (result.isRuntimeError) {

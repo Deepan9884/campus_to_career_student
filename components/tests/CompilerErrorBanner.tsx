@@ -100,11 +100,11 @@ export function parseCompilerError(errorText: string, language: string = ""): Pa
     }
   }
 
-  // C. Python traceback format: File "solution.py", line 20
+  // C. Python traceback format: File "solution.py", line 20 (pick LAST frame — innermost exception site)
   if (!line) {
-    const pyFileLineMatch = clean.match(/File\s+"[^"]*",\s*line\s+(\d+)/i);
-    if (pyFileLineMatch) {
-      line = parseInt(pyFileLineMatch[1], 10);
+    const pyFileLineMatches = [...clean.matchAll(/File\s+"[^"]*",\s*line\s+(\d+)/gi)];
+    if (pyFileLineMatches.length > 0) {
+      line = parseInt(pyFileLineMatches[pyFileLineMatches.length - 1][1], 10);
     }
   }
 
