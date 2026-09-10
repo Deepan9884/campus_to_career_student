@@ -71,6 +71,79 @@ function detectMac(): boolean {
   return /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
 }
 
+/**
+ * Patches Monaco's internal WhitespaceOverlay to render:
+ * 1. Full-span CodeTantra-style vector arrows (──────►) across tab stops with visible stroke and arrowhead
+ * 2. Clearly visible, properly sized space dots (diameter ~5.6px - 8.4px, not tiny 1px specks) aligned to lowercase letter center
+ */
+function patchMonacoWhitespaceOverlay(editor: any) {
+  try {
+    const view = editor?._modelData?.view;
+    if (!view) return;
+
+    const overlays: any[] = [];
+    if (Array.isArray(view._viewParts)) {
+      for (const part of view._viewParts) {
+        if (typeof part?._renderArrow === "function" || typeof part?._applyRenderWhitespace === "function") {
+          overlays.push(part);
+        }
+        if (Array.isArray(part?._dynamicOverlays)) {
+          for (const overlay of part._dynamicOverlays) {
+            if (typeof overlay?._renderArrow === "function" || typeof overlay?._applyRenderWhitespace === "function") {
+              overlays.push(overlay);
+            }
+          }
+        }
+      }
+    }
+
+    for (const overlay of overlays) {
+      const proto = Object.getPrototypeOf(overlay);
+      const targets = [overlay];
+      if (proto && proto !== Object.prototype) targets.push(proto);
+
+      // Custom CodeTantra full-span vector arrow (──────►)
+      const customRenderArrow = function (lineHeight: number, spaceWidth: number, left: number) {
+        const model = editor?.getModel ? editor.getModel() : null;
+        const tabCols = model?.getOptions ? model.getOptions().tabSize : 4;
+        const totalWidth = spaceWidth * tabCols;
+        const dy = Math.round(lineHeight * 0.56);
+        const strokeWidth = Math.max(1.8, Math.round(spaceWidth * 0.18 * 10) / 10);
+        const endX = left + totalWidth - Math.max(3, Math.round(spaceWidth * 0.2));
+        const startX = left + 2;
+        const arrowLen = Math.max(7.5, Math.round(spaceWidth * 0.75));
+        const arrowH = Math.max(4.5, Math.round(spaceWidth * 0.45));
+
+        return (
+          `<line x1="${startX.toFixed(1)}" y1="${dy}" x2="${(endX - 2).toFixed(1)}" y2="${dy}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />` +
+          `<polygon points="${endX.toFixed(1)},${dy} ${(endX - arrowLen).toFixed(1)},${(dy - arrowH).toFixed(1)} ${(endX - arrowLen + 1).toFixed(1)},${dy} ${(endX - arrowLen).toFixed(1)},${(dy + arrowH).toFixed(1)}" fill="currentColor" />`
+        );
+      };
+
+      const origApply = overlay._applyRenderWhitespace;
+      const customApply = function (this: any, ctx: any, lineNumber: number, selections: any, lineData: any) {
+        const html = origApply.call(this, ctx, lineNumber, selections, lineData);
+        if (!html || typeof html !== "string") return html;
+
+        const lineHeight = ctx.getLineHeightForLineNumber ? ctx.getLineHeightForLineNumber(lineNumber) : 26;
+        const properCy = (lineHeight * 0.56).toFixed(1);
+        // Clearly visible, prominent space dot (dotR = 2.8px to 4.2px based on lineHeight)
+        const dotR = Math.max(2.8, Math.min(4.2, Math.round(lineHeight * 0.12 * 10) / 10)).toFixed(1);
+
+        return html
+          .replace(/(<circle\b[^>]*?\bcy=")[0-9.]+/g, `$1${properCy}`)
+          .replace(/(<circle\b[^>]*?\br=")[0-9.]+/g, `$1${dotR}`);
+      };
+
+      for (const target of targets) {
+        target._renderArrow = customRenderArrow;
+        target._applyRenderWhitespace = customApply;
+      }
+    }
+  } catch (err) {
+    console.warn("Whitespace overlay patch notice:", err);
+  }
+}
 
 export function MonacoCodeEditor({
   code,
@@ -330,6 +403,14 @@ export function MonacoCodeEditor({
     if (errorLine) {
       updateErrorMarker(editor, monaco, errorLine, errorMessage);
     }
+
+    // Patch whitespace overlay to render full-span CodeTantra tab arrows and enlarged space dots
+    patchMonacoWhitespaceOverlay(editor);
+    setTimeout(() => {
+      patchMonacoWhitespaceOverlay(editor);
+      editor.render(true);
+    }, 60);
+    editor.render(true);
   };
 
   // Helper to update squiggly line, line highlight, and point cursor on error
@@ -387,6 +468,8 @@ export function MonacoCodeEditor({
         fontSize,
         lineHeight: computedLineHeight,
       });
+      patchMonacoWhitespaceOverlay(editorInstanceRef.current);
+      editorInstanceRef.current.render(true);
     }
   }, [fontSize, computedLineHeight]);
 
@@ -409,6 +492,8 @@ export function MonacoCodeEditor({
     if (editorInstanceRef.current) {
       editorInstanceRef.current.updateOptions({ tabSize });
       editorInstanceRef.current.getModel()?.updateOptions({ tabSize, insertSpaces: false });
+      patchMonacoWhitespaceOverlay(editorInstanceRef.current);
+      editorInstanceRef.current.render(true);
     }
   }, [tabSize]);
 
@@ -524,8 +609,8 @@ export function MonacoCodeEditor({
             renderLineHighlight: "all",
             overviewRulerBorder: false,
             renderWhitespace: "boundary",
-            // SVG whitespace rendering is slow on Safari — fall back to font-glyph mode
-            experimentalWhitespaceRendering: isSafari ? "font" : "svg",
+            // Renders full-span CodeTantra vector tab arrows and clearly visible space dots
+            experimentalWhitespaceRendering: "svg",
             fixedOverflowWidgets: true,
             contextmenu: !isCopyPasteDisabled,
             padding: { top: 12, bottom: 12 },

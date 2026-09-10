@@ -2431,20 +2431,68 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
   shape-rendering: geometricPrecision !important;
 }
 
-/* Space dots: slightly transparent so they read as hints, not code */
+/* Space dots: prominent and clearly visible (not tiny or faint) */
 .monaco-editor svg circle {
-  opacity: 0.75 !important;
+  opacity: 0.85 !important;
 }
 
-/* ── Light mode: editorWhitespace uses #64748b (Slate-500) ── */
+/* ── Light mode: Slate-600 for sharp contrast ── */
+.monaco-editor.campus-light svg,
+.monaco-editor.vs svg {
+  color: #475569 !important;
+  fill: #475569 !important;
+}
+
 .monaco-editor.campus-light svg line,
 .monaco-editor.vs svg line {
-  stroke: #64748b !important;
+  stroke: #475569 !important;
 }
 
-/* ── Dark mode: editorWhitespace uses #94a3b8 (Slate-400) ── */
+.monaco-editor.campus-light svg polygon,
+.monaco-editor.campus-light svg circle,
+.monaco-editor.vs svg polygon,
+.monaco-editor.vs svg circle {
+  fill: #475569 !important;
+}
+
+/* ── Dark mode: Slate-400 for clean dark mode readability ── */
+.monaco-editor.campus-dark svg,
+.monaco-editor.vs-dark svg {
+  color: #94a3b8 !important;
+  fill: #94a3b8 !important;
+}
+
 .monaco-editor.campus-dark svg line,
 .monaco-editor.vs-dark svg line {
   stroke: #94a3b8 !important;
 }
+
+.monaco-editor.campus-dark svg polygon,
+.monaco-editor.campus-dark svg circle,
+.monaco-editor.vs-dark svg polygon,
+.monaco-editor.vs-dark svg circle {
+  fill: #94a3b8 !important;
+}
+
+/* Text-Based Whitespace Fallback (When using font glyphs) */
+.monaco-editor .mwh {
+  font-weight: 800 !important;
+  font-size: 1.35em !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.85 !important;
+}
+
+.monaco-editor.campus-light .mwh,
+.monaco-editor.vs .mwh {
+  color: #475569 !important;
+}
+
+.monaco-editor.campus-dark .mwh,
+.monaco-editor.vs-dark .mwh {
+  color: #94a3b8 !important;
+}
+
 
