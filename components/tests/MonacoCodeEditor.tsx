@@ -74,7 +74,8 @@ function detectMac(): boolean {
 /**
  * Patches Monaco's internal WhitespaceOverlay to render:
  * 1. Full-span CodeTantra-style vector arrows (──────►) across tab stops with visible stroke and arrowhead
- * 2. Clearly visible, properly sized space dots (diameter ~5.6px - 8.4px, not tiny 1px specks) aligned to lowercase letter center
+ * 2. Clearly visible, properly sized space dots (diameter ~7px - 12px, not tiny 1px specks) aligned to lowercase letter center
+ * 3. Handles both Monaco SVG overlay and font-glyph div.mwh fallback modes
  */
 function patchMonacoWhitespaceOverlay(editor: any) {
   try {
@@ -82,22 +83,33 @@ function patchMonacoWhitespaceOverlay(editor: any) {
     if (!view) return;
 
     const overlays: any[] = [];
-    if (Array.isArray(view._viewParts)) {
-      for (const part of view._viewParts) {
-        if (typeof part?._renderArrow === "function" || typeof part?._applyRenderWhitespace === "function") {
-          overlays.push(part);
-        }
-        if (Array.isArray(part?._dynamicOverlays)) {
-          for (const overlay of part._dynamicOverlays) {
-            if (typeof overlay?._renderArrow === "function" || typeof overlay?._applyRenderWhitespace === "function") {
-              overlays.push(overlay);
-            }
+    const visited = new Set();
+
+    // Recursively discover any WhitespaceOverlay instance in view
+    const findOverlays = (obj: any) => {
+      if (!obj || typeof obj !== "object" || visited.has(obj)) return;
+      visited.add(obj);
+      if (typeof obj._applyRenderWhitespace === "function" || typeof obj._renderArrow === "function") {
+        overlays.push(obj);
+      }
+      if (Array.isArray(obj)) {
+        for (const item of obj) findOverlays(item);
+      } else {
+        for (const key of Object.keys(obj)) {
+          if ((key.startsWith("_") || key === "viewParts" || key === "dynamicOverlays") && obj[key] && typeof obj[key] === "object") {
+            findOverlays(obj[key]);
           }
         }
       }
-    }
+    };
+    findOverlays(view);
 
     for (const overlay of overlays) {
+      // Force renderWithSVG on options if present
+      if (overlay._options) {
+        overlay._options.renderWithSVG = true;
+      }
+
       const proto = Object.getPrototypeOf(overlay);
       const targets = [overlay];
       if (proto && proto !== Object.prototype) targets.push(proto);
@@ -107,32 +119,61 @@ function patchMonacoWhitespaceOverlay(editor: any) {
         const model = editor?.getModel ? editor.getModel() : null;
         const tabCols = model?.getOptions ? model.getOptions().tabSize : 4;
         const totalWidth = spaceWidth * tabCols;
-        const dy = Math.round(lineHeight * 0.56);
-        const strokeWidth = Math.max(1.8, Math.round(spaceWidth * 0.18 * 10) / 10);
+        const dy = Math.round(lineHeight * 0.55);
+        const strokeWidth = Math.max(2.2, Math.round(spaceWidth * 0.22 * 10) / 10);
         const endX = left + totalWidth - Math.max(3, Math.round(spaceWidth * 0.2));
         const startX = left + 2;
-        const arrowLen = Math.max(7.5, Math.round(spaceWidth * 0.75));
-        const arrowH = Math.max(4.5, Math.round(spaceWidth * 0.45));
+        const arrowLen = Math.max(8.5, Math.round(spaceWidth * 0.85));
+        const arrowH = Math.max(5.2, Math.round(spaceWidth * 0.5));
+        const headBaseX = endX - arrowLen;
 
         return (
-          `<line x1="${startX.toFixed(1)}" y1="${dy}" x2="${(endX - 2).toFixed(1)}" y2="${dy}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />` +
-          `<polygon points="${endX.toFixed(1)},${dy} ${(endX - arrowLen).toFixed(1)},${(dy - arrowH).toFixed(1)} ${(endX - arrowLen + 1).toFixed(1)},${dy} ${(endX - arrowLen).toFixed(1)},${(dy + arrowH).toFixed(1)}" fill="currentColor" />`
+          `<line x1="${startX.toFixed(1)}" y1="${dy}" x2="${(headBaseX + 1.5).toFixed(1)}" y2="${dy}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />` +
+          `<polygon points="${endX.toFixed(1)},${dy} ${headBaseX.toFixed(1)},${(dy - arrowH).toFixed(1)} ${(headBaseX + 1.5).toFixed(1)},${dy} ${headBaseX.toFixed(1)},${(dy + arrowH).toFixed(1)}" fill="currentColor" />`
         );
       };
 
       const origApply = overlay._applyRenderWhitespace;
       const customApply = function (this: any, ctx: any, lineNumber: number, selections: any, lineData: any) {
-        const html = origApply.call(this, ctx, lineNumber, selections, lineData);
+        if (this._options) {
+          this._options.renderWithSVG = true;
+        }
+        const html = origApply ? origApply.call(this, ctx, lineNumber, selections, lineData) : "";
         if (!html || typeof html !== "string") return html;
 
         const lineHeight = ctx.getLineHeightForLineNumber ? ctx.getLineHeightForLineNumber(lineNumber) : 26;
-        const properCy = (lineHeight * 0.56).toFixed(1);
-        // Clearly visible, prominent space dot (dotR = 2.8px to 4.2px based on lineHeight)
-        const dotR = Math.max(2.8, Math.min(4.2, Math.round(lineHeight * 0.12 * 10) / 10)).toFixed(1);
+        const properCy = (lineHeight * 0.55).toFixed(1);
+        const spaceWidth = (this._options && this._options.spaceWidth) || Math.round(lineHeight * 0.6);
+        // Prominent, clearly visible space dot (dotR = 3.5px to 6.2px based on lineHeight)
+        const dotR = Math.max(3.5, Math.min(6.2, Math.round(lineHeight * 0.145 * 10) / 10)).toFixed(1);
 
-        return html
+        // Branch 1: If SVG output was produced, scale the circle dots
+        let out = html
           .replace(/(<circle\b[^>]*?\bcy=")[0-9.]+/g, `$1${properCy}`)
           .replace(/(<circle\b[^>]*?\br=")[0-9.]+/g, `$1${dotR}`);
+
+        // Branch 2: If div.mwh fallback was produced, replace glyphs with full-span SVG arrow & prominent SVG dot
+        const model = editor?.getModel ? editor.getModel() : null;
+        const tabCols = model?.getOptions ? model.getOptions().tabSize : 4;
+        const totalWidth = spaceWidth * tabCols;
+        const dy = Math.round(lineHeight * 0.55);
+        const strokeWidth = Math.max(2.2, Math.round(spaceWidth * 0.22 * 10) / 10);
+        const endX = totalWidth - Math.max(3, Math.round(spaceWidth * 0.2));
+        const startX = 2;
+        const arrowLen = Math.max(8.5, Math.round(spaceWidth * 0.85));
+        const arrowH = Math.max(5.2, Math.round(spaceWidth * 0.5));
+        const headBaseX = endX - arrowLen;
+
+        const svgArrow = `<svg style="position:absolute;left:0;top:0;width:${totalWidth}px;height:${lineHeight}px;overflow:visible;pointer-events:none;" viewBox="0 0 ${totalWidth} ${lineHeight}"><line x1="${startX.toFixed(1)}" y1="${dy}" x2="${(headBaseX + 1.5).toFixed(1)}" y2="${dy}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" /><polygon points="${endX.toFixed(1)},${dy} ${headBaseX.toFixed(1)},${(dy - arrowH).toFixed(1)} ${(headBaseX + 1.5).toFixed(1)},${dy} ${headBaseX.toFixed(1)},${(dy + arrowH).toFixed(1)}" fill="currentColor" /></svg>`;
+
+        const svgDot = `<svg style="position:absolute;left:0;top:0;width:${spaceWidth}px;height:${lineHeight}px;overflow:visible;pointer-events:none;" viewBox="0 0 ${spaceWidth} ${lineHeight}"><circle cx="${(spaceWidth / 2).toFixed(1)}" cy="${properCy}" r="${dotR}" fill="currentColor" /></svg>`;
+
+        // Replace tab arrow glyph inside div.mwh
+        out = out.replace(/(<div\s+class="mwh"[^>]*>)[→\u2192\uFFEB￫](<\/div>)/g, `$1${svgArrow}$2`);
+        // Replace middle dot glyph inside div.mwh
+        out = out.replace(/(<div\s+class="mwh"[^>]*>)[·\u00B7\u2E31⸱](<\/div>)/g, `$1${svgDot}$2`);
+
+        return out;
       };
 
       for (const target of targets) {
@@ -404,12 +445,27 @@ export function MonacoCodeEditor({
       updateErrorMarker(editor, monaco, errorLine, errorMessage);
     }
 
+    // Ensure whitespace options are explicitly set on editor
+    editor.updateOptions({
+      renderWhitespace: "boundary",
+      experimentalWhitespaceRendering: "svg",
+    });
+
+    // Re-patch on layout changes (e.g. window resize or panel drag)
+    editor.onDidLayoutChange(() => {
+      patchMonacoWhitespaceOverlay(editor);
+    });
+
     // Patch whitespace overlay to render full-span CodeTantra tab arrows and enlarged space dots
     patchMonacoWhitespaceOverlay(editor);
     setTimeout(() => {
       patchMonacoWhitespaceOverlay(editor);
       editor.render(true);
     }, 60);
+    setTimeout(() => {
+      patchMonacoWhitespaceOverlay(editor);
+      editor.render(true);
+    }, 180);
     editor.render(true);
   };
 
@@ -467,6 +523,8 @@ export function MonacoCodeEditor({
       editorInstanceRef.current.updateOptions({
         fontSize,
         lineHeight: computedLineHeight,
+        renderWhitespace: "boundary",
+        experimentalWhitespaceRendering: "svg",
       });
       patchMonacoWhitespaceOverlay(editorInstanceRef.current);
       editorInstanceRef.current.render(true);
@@ -490,7 +548,11 @@ export function MonacoCodeEditor({
   // Dynamically update tab size
   useEffect(() => {
     if (editorInstanceRef.current) {
-      editorInstanceRef.current.updateOptions({ tabSize });
+      editorInstanceRef.current.updateOptions({
+        tabSize,
+        renderWhitespace: "boundary",
+        experimentalWhitespaceRendering: "svg",
+      });
       editorInstanceRef.current.getModel()?.updateOptions({ tabSize, insertSpaces: false });
       patchMonacoWhitespaceOverlay(editorInstanceRef.current);
       editorInstanceRef.current.render(true);

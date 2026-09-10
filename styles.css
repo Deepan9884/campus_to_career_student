@@ -2474,15 +2474,16 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
   fill: #94a3b8 !important;
 }
 
-/* Text-Based Whitespace Fallback (When using font glyphs) */
+/* Whitespace Overlay & Fallback Styling */
 .monaco-editor .mwh {
-  font-weight: 800 !important;
-  font-size: 1.35em !important;
-  line-height: 1 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  opacity: 0.85 !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  display: inline-block !important;
+  opacity: 0.9 !important;
+}
+
+.monaco-editor .mwh svg {
+  overflow: visible !important;
 }
 
 .monaco-editor.campus-light .mwh,
@@ -2492,6 +2493,18 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 
 .monaco-editor.campus-dark .mwh,
 .monaco-editor.vs-dark .mwh {
+  color: #94a3b8 !important;
+}
+
+/* Inline whitespace token styling if rendered in view lines */
+.monaco-editor .mtkw {
+  font-weight: 700 !important;
+  opacity: 0.85 !important;
+  color: #475569 !important;
+}
+
+.monaco-editor.campus-dark .mtkw,
+.monaco-editor.vs-dark .mtkw {
   color: #94a3b8 !important;
 }
 
