@@ -886,9 +886,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       }
     }
 
-    if (copyPasteDisabled) {
-      window.addEventListener("focus", handleWindowFocus);
-    }
     window.addEventListener("keydown", handleKeyDown, { capture: true, passive: false });
     window.addEventListener("keyup", handleKeyUp, { capture: true, passive: false });
     document.addEventListener("keydown", handleKeyDown, { capture: true, passive: false });
@@ -905,7 +902,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     }
 
     return () => {
-      window.removeEventListener("focus", handleWindowFocus);
       window.removeEventListener("keydown", handleKeyDown, { capture: true } as any);
       window.removeEventListener("keyup", handleKeyUp, { capture: true } as any);
       document.removeEventListener("keydown", handleKeyDown, { capture: true } as any);
