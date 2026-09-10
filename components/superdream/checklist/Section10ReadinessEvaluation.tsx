@@ -187,7 +187,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                 : "text-[var(--muted-foreground)] hover:text-white hover:bg-white/[0.06]"
             )}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <Brain className="w-3.5 h-3.5 text-purple-400" />
             <span>AI SWOT & Sprint</span>
           </button>
         </div>
@@ -782,8 +782,8 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
           <div className="panel-card rounded-3xl p-6 border border-purple-500/30 bg-gradient-to-br from-purple-950/20 via-slate-900/90 to-purple-950/20 shadow-[0_15px_50px_rgba(0,0,0,0.5)] flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full bg-purple-500/20 text-[var(--accent)] border border-purple-500/40 text-[10px] font-mono font-bold uppercase flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[var(--accent)]" /> AI Strategic Advisor
+                <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 text-[10px] font-mono font-bold uppercase flex items-center gap-1">
+                  <Brain className="w-3.5 h-3.5 text-purple-400" /> AI Strategic Advisor
                 </span>
                 <h3 className="text-base font-semibold text-[var(--foreground)] tracking-tight">
                   Super Dream Placement SWOT & 30-Day Sprint

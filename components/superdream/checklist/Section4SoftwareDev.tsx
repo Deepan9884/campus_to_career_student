@@ -32,7 +32,7 @@ import {
   X,
   Code2,
   Upload,
-  Sparkles,
+  Atom,
   GitBranch,
   Box,
   ChevronRight,
@@ -1127,11 +1127,11 @@ export function Section4SoftwareDev() {
                       ))}
                     </div>
                   ) : (
-                    <div className="p-4 rounded-2xl panel-slot border border-white/[0.08] text-center space-y-1.5">
-                      <p className="text-xs text-[var(--foreground)] font-medium flex items-center justify-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
+                    <div className="p-4 rounded-2xl panel-slot border border-white/[0.08] text-center space-y-2">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-600 dark:text-cyan-400 text-xs font-semibold">
+                        <Atom className="w-4 h-4 animate-[spin_10s_linear_infinite]" />
                         <span>Continuous Repository Telemetry Active</span>
-                      </p>
+                      </div>
                       <p className="text-[11px] text-[var(--muted-foreground)] max-w-md mx-auto leading-relaxed">
                         Connect your GitHub repositories in Section A above. The platform scans repository controllers, routing tables, and configurations for verified {activeDevOpsModal.unit.toLowerCase()} and forwards telemetry for faculty sign-off.
                       </p>
