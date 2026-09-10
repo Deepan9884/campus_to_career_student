@@ -122,7 +122,12 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
               <img
                 src="/logo.png"
                 alt="Campus to Career"
-                className="h-10 md:h-12 w-auto max-w-[220px] object-contain drop-shadow-sm"
+                className="block dark:hidden h-10 md:h-12 w-auto max-w-[220px] object-contain drop-shadow-sm"
+              />
+              <img
+                src="/logo-dark.png"
+                alt="Campus to Career"
+                className="hidden dark:block h-10 md:h-12 w-auto max-w-[220px] object-contain drop-shadow-sm"
               />
             </Link>
           </div>
@@ -183,7 +188,12 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
                 <img
                   src="/logo.png"
                   alt="Campus to Career"
-                  className="h-9 w-auto max-w-[180px] object-contain drop-shadow-xs"
+                  className="block dark:hidden h-9 w-auto max-w-[180px] object-contain drop-shadow-xs"
+                />
+                <img
+                  src="/logo-dark.png"
+                  alt="Campus to Career"
+                  className="hidden dark:block h-9 w-auto max-w-[180px] object-contain drop-shadow-xs"
                 />
               </Link>
             </div>

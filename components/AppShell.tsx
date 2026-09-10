@@ -52,7 +52,6 @@ import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { getBadges } from "@/lib/badges-api";
 import type { BadgeId, EarnedBadge } from "@/types/badges";
-import { BrandLogo } from "@/components/BrandLogo";
 import { InteractiveAppBackground } from "@/components/InteractiveAppBackground";
 
 import { AmbientLightingCustomizer } from "@/components/AmbientLightingCustomizer";
@@ -513,7 +512,7 @@ export function AppShell() {
         ) : (
           /* Standard Sidebar Header */
           <div className="flex items-center justify-between w-full">
-            <BrandLogo collapsed={sidebarCollapsed} />
+            <Brand collapsed={sidebarCollapsed} />
             <button
               onClick={toggleSidebar}
               className="p-1.5 rounded-lg hover:bg-white/10 text-foreground/70 hover:text-foreground transition shrink-0"
@@ -761,14 +760,9 @@ function Brand({ collapsed }: { collapsed?: boolean }) {
     return (
       <Link to="/dashboard" className="flex items-center justify-center py-1 w-full" title="Campus to Career">
         <img
-          src="/logo-dark.png"
+          src="/logo-icon.png"
           alt="Campus to Career"
-          className="hidden dark:block h-8 w-auto object-contain"
-        />
-        <img
-          src="/logo.png"
-          alt="Campus to Career"
-          className="block dark:hidden h-8 w-auto object-contain"
+          className="h-8 w-8 object-contain transition-transform hover:scale-105 drop-shadow-xs"
         />
       </Link>
     );

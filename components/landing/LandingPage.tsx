@@ -276,7 +276,12 @@ export const LandingPage: React.FC = () => {
             <img
               src="/logo.png"
               alt="Campus to Career"
-              className="h-9 md:h-10 w-auto object-contain transition-transform hover:scale-[1.02]"
+              className="block dark:hidden h-9 md:h-10 w-auto object-contain transition-transform hover:scale-[1.02]"
+            />
+            <img
+              src="/logo-dark.png"
+              alt="Campus to Career"
+              className="hidden dark:block h-9 md:h-10 w-auto object-contain transition-transform hover:scale-[1.02]"
             />
           </div>
 
