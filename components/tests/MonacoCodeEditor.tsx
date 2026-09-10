@@ -144,15 +144,16 @@ function patchMonacoWhitespaceOverlay(editor: any) {
         const lineHeight = ctx.getLineHeightForLineNumber ? ctx.getLineHeightForLineNumber(lineNumber) : 26;
         const properCy = (lineHeight * 0.55).toFixed(1);
         const spaceWidth = (this._options && this._options.spaceWidth) || Math.round(lineHeight * 0.6);
-        // Prominent, clearly visible space dot (dotR = 3.5px to 6.2px based on lineHeight)
-        const dotR = Math.max(3.5, Math.min(6.2, Math.round(lineHeight * 0.145 * 10) / 10)).toFixed(1);
+        // Subtle, crisp space dot (dotR = 1.3px to 1.8px) matching CodeTantra and VS Code
+        const dotR = Math.max(1.3, Math.min(1.8, Math.round(lineHeight * 0.065 * 10) / 10)).toFixed(1);
 
-        // Branch 1: If SVG output was produced, scale the circle dots
+        // Branch 1: If SVG output was produced, scale the circle dots and ensure subtle opacity
         let out = html
           .replace(/(<circle\b[^>]*?\bcy=")[0-9.]+/g, `$1${properCy}`)
-          .replace(/(<circle\b[^>]*?\br=")[0-9.]+/g, `$1${dotR}`);
+          .replace(/(<circle\b[^>]*?\br=")[0-9.]+/g, `$1${dotR}`)
+          .replace(/(<circle\b[^>]*?)(?:\s+fill-opacity="[^"]*")?(\s*\/?>)/g, `$1 fill-opacity="0.55"$2`);
 
-        // Branch 2: If div.mwh fallback was produced, replace glyphs with full-span SVG arrow & prominent SVG dot
+        // Branch 2: If div.mwh fallback was produced, replace glyphs with full-span SVG arrow & subtle SVG dot
         const model = editor?.getModel ? editor.getModel() : null;
         const tabCols = model?.getOptions ? model.getOptions().tabSize : 4;
         const totalWidth = spaceWidth * tabCols;
@@ -166,7 +167,7 @@ function patchMonacoWhitespaceOverlay(editor: any) {
 
         const svgArrow = `<svg style="position:absolute;left:0;top:0;width:${totalWidth}px;height:${lineHeight}px;overflow:visible;pointer-events:none;" viewBox="0 0 ${totalWidth} ${lineHeight}"><line x1="${startX.toFixed(1)}" y1="${dy}" x2="${(headBaseX + 1.5).toFixed(1)}" y2="${dy}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" /><polygon points="${endX.toFixed(1)},${dy} ${headBaseX.toFixed(1)},${(dy - arrowH).toFixed(1)} ${(headBaseX + 1.5).toFixed(1)},${dy} ${headBaseX.toFixed(1)},${(dy + arrowH).toFixed(1)}" fill="currentColor" /></svg>`;
 
-        const svgDot = `<svg style="position:absolute;left:0;top:0;width:${spaceWidth}px;height:${lineHeight}px;overflow:visible;pointer-events:none;" viewBox="0 0 ${spaceWidth} ${lineHeight}"><circle cx="${(spaceWidth / 2).toFixed(1)}" cy="${properCy}" r="${dotR}" fill="currentColor" /></svg>`;
+        const svgDot = `<svg style="position:absolute;left:0;top:0;width:${spaceWidth}px;height:${lineHeight}px;overflow:visible;pointer-events:none;" viewBox="0 0 ${spaceWidth} ${lineHeight}"><circle cx="${(spaceWidth / 2).toFixed(1)}" cy="${properCy}" r="${dotR}" fill="currentColor" fill-opacity="0.55" /></svg>`;
 
         // Replace tab arrow glyph inside div.mwh
         out = out.replace(/(<div\s+class="mwh"[^>]*>)[→\u2192\uFFEB￫](<\/div>)/g, `$1${svgArrow}$2`);

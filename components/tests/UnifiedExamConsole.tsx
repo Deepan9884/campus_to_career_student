@@ -1172,11 +1172,13 @@ export function UnifiedExamConsole({
 
     const handleCopyPasteBlock = (e: ClipboardEvent) => {
       if (!isCopyPasteDisabled) return;
-      try {
-        if (typeof navigator !== "undefined" && navigator.clipboard) {
-          navigator.clipboard.writeText("").catch(() => {});
-        }
-      } catch {}
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.clipboardData) {
+        try {
+          e.clipboardData.setData("text/plain", "");
+        } catch {}
+      }
     };
 
     const handleContextMenu = (e: MouseEvent) => {
@@ -1360,49 +1362,48 @@ export function UnifiedExamConsole({
       }
     }
 
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard) {
-        await navigator.clipboard.writeText("");
-      }
-    } catch {}
-
     setHasStartedExam(true);
     toast.success("Proctored Assessment started! Anti-cheat lockdown active.");
   };
 
+  // Helper to sanitize expected output strings (e.g. "2, nums = [1,2,_]" -> "2")
+  const cleanExpectedOutput = (raw: any): string => {
+    if (!raw) return "";
+    let str = String(raw).trim();
+    str = str.replace(/^(?:Output\s*:\s*)+/i, "").trim();
+    str = str.replace(/,\s*[a-zA-Z_]\w*\s*=\s*\[[^\]]*\]/gi, "").trim();
+    str = str.replace(/,\s*[a-zA-Z_]\w*\s*=\s*[^,\n\r]+/gi, "").trim();
+    str = str.replace(/,\s*(?:where|with|hence|and)\b.*$/gi, "").trim();
+    return str;
+  };
+
   // Helper to resolve test case expected output from object, problem statement, or examples
   const getExpectedOutput = (tc: any, idx: number, question: any): string => {
+    let result = "Valid solution output";
     if (tc?.expectedOutput && String(tc.expectedOutput).trim() !== "" && tc.expectedOutput !== "...") {
-      return String(tc.expectedOutput).trim();
-    }
-    if (tc?.expected && String(tc.expected).trim() !== "" && tc.expected !== "...") {
-      return String(tc.expected).trim();
-    }
-    if (tc?.output && String(tc.output).trim() !== "" && tc.output !== "...") {
-      return String(tc.output).trim();
-    }
-    
-    const qTc = question?.testCases?.[idx];
-    if (qTc?.expectedOutput && String(qTc.expectedOutput).trim() !== "" && qTc.expectedOutput !== "...") {
-      return String(qTc.expectedOutput).trim();
-    }
-    if (qTc?.output && String(qTc.output).trim() !== "" && qTc.output !== "...") {
-      return String(qTc.output).trim();
-    }
-    if (qTc?.expected && String(qTc.expected).trim() !== "" && qTc.expected !== "...") {
-      return String(qTc.expected).trim();
-    }
-
-    // Extract from problemStatement (e.g. Example 1: ... Output: "1211")
-    if (question?.problemStatement) {
-      const text = String(question.problemStatement);
-      const allOutputs = Array.from(text.matchAll(/Output:\s*([^\n\r]+)/gi)) as RegExpMatchArray[];
-      if (allOutputs[idx] && allOutputs[idx][1]) {
-        return allOutputs[idx][1].replace(/[`*"]/g, "").trim();
+      result = String(tc.expectedOutput).trim();
+    } else if (tc?.expected && String(tc.expected).trim() !== "" && tc.expected !== "...") {
+      result = String(tc.expected).trim();
+    } else if (tc?.output && String(tc.output).trim() !== "" && tc.output !== "...") {
+      result = String(tc.output).trim();
+    } else {
+      const qTc = question?.testCases?.[idx];
+      if (qTc?.expectedOutput && String(qTc.expectedOutput).trim() !== "" && qTc.expectedOutput !== "...") {
+        result = String(qTc.expectedOutput).trim();
+      } else if (qTc?.output && String(qTc.output).trim() !== "" && qTc.output !== "...") {
+        result = String(qTc.output).trim();
+      } else if (qTc?.expected && String(qTc.expected).trim() !== "" && qTc.expected !== "...") {
+        result = String(qTc.expected).trim();
+      } else if (question?.problemStatement) {
+        const text = String(question.problemStatement);
+        const allOutputs = Array.from(text.matchAll(/Output:\s*([^\n\r]+)/gi)) as RegExpMatchArray[];
+        if (allOutputs[idx] && allOutputs[idx][1]) {
+          result = allOutputs[idx][1].replace(/[`*"]/g, "").trim();
+        }
       }
     }
 
-    return "Valid solution output";
+    return cleanExpectedOutput(result);
   };
 
   // Helper to adapt LeetCode parameter inputs (e.g. nums = [1, 1, 2]) into standard stdin (1 1 2)
@@ -3664,7 +3665,7 @@ export function UnifiedExamConsole({
       )}
 
       {/* ── FULLSCREEN LOCKDOWN OVERLAY ── */}
-      {hasStartedExam && isFullscreenEnforced && proctorState.fullscreenCountdown !== null && (
+      {hasStartedExam && isFullscreenEnforced && (!proctorState.isFullscreen || proctorState.fullscreenCountdown !== null) && (
         <FullscreenCountdownModal
           countdown={proctorState.fullscreenCountdown}
           violationCount={proctorState.violationCount}

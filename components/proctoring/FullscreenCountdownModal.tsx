@@ -46,13 +46,15 @@ export function FullscreenCountdownModal({
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold uppercase tracking-wider">
             <AlertTriangle className="h-3.5 w-3.5" />
-            {violationCount && violationCount > 0 ? "Security Violation Warning" : "Fullscreen Required"}
+            {currentSeconds === 0 ? "Session Locked — Fullscreen Mandatory" : violationCount && violationCount > 0 ? "Security Violation Warning" : "Fullscreen Required"}
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Fullscreen Mode Required
+            {currentSeconds === 0 ? "Assessment Window Locked" : "Fullscreen Mode Required"}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-            {violationCount && violationCount > 0
+            {currentSeconds === 0
+              ? "You are currently outside full-screen mode. The exam is locked and protected. Click below to return to fullscreen and resume."
+              : violationCount && violationCount > 0
               ? "You exited full-screen mode during an active examination. Please re-enter fullscreen immediately."
               : "Fullscreen mode is required for this examination. Please return to fullscreen before the grace period expires."}
           </p>
@@ -61,15 +63,19 @@ export function FullscreenCountdownModal({
         {/* Countdown Timer Display & Urgency Bar */}
         <div className="bg-slate-950/80 rounded-2xl p-5 border border-amber-500/30 space-y-3 shadow-inner">
           <div className="flex items-center justify-between text-xs font-semibold">
-            <span className="text-slate-400 uppercase tracking-wider">Auto-Lockout Countdown</span>
+            <span className="text-slate-400 uppercase tracking-wider">
+              {currentSeconds === 0 ? "Proctoring Lockdown State" : "Auto-Lockout Countdown"}
+            </span>
             <span
               className={`font-mono text-xs px-2 py-0.5 rounded-full ${
-                currentSeconds <= 5
+                currentSeconds === 0
+                  ? "bg-red-600/30 text-red-300 border border-red-500/50 font-bold animate-pulse"
+                  : currentSeconds <= 5
                   ? "bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse"
                   : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
               }`}
             >
-              {currentSeconds <= 5 ? "Critical" : "Grace Period"}
+              {currentSeconds === 0 ? "Session Locked" : currentSeconds <= 5 ? "Critical" : "Grace Period"}
             </span>
           </div>
 
@@ -81,7 +87,9 @@ export function FullscreenCountdownModal({
             >
               {currentSeconds < 10 ? `0${currentSeconds}` : currentSeconds}
             </span>
-            <span className="text-slate-400 text-sm font-bold">seconds remaining</span>
+            <span className="text-slate-400 text-sm font-bold">
+              {currentSeconds === 0 ? "seconds (Locked)" : "seconds remaining"}
+            </span>
           </div>
 
           {/* Dynamic Progress Bar */}
@@ -97,11 +105,19 @@ export function FullscreenCountdownModal({
           </div>
 
           <p className="text-[11px] text-slate-400">
-            Re-enter fullscreen before the timer reaches <strong>0s</strong> or your examination will be{" "}
-            <strong className="text-red-400 underline decoration-red-500/50 underline-offset-2">
-              immediately blocked & disqualified
-            </strong>
-            .
+            {currentSeconds === 0 ? (
+              <span className="text-rose-300 font-semibold">
+                Screen is locked until you re-enter fullscreen mode. Press the button below to resume.
+              </span>
+            ) : (
+              <>
+                Re-enter fullscreen before the timer reaches <strong>0s</strong> or your examination will be{" "}
+                <strong className="text-red-400 underline decoration-red-500/50 underline-offset-2">
+                  immediately blocked & disqualified
+                </strong>
+                .
+              </>
+            )}
           </p>
         </div>
 
@@ -113,7 +129,7 @@ export function FullscreenCountdownModal({
             className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-sm sm:text-base py-3.5 rounded-2xl shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2.5 transition-all duration-150 transform active:scale-[0.98] border border-amber-300/40"
           >
             <Maximize className="h-5 w-5" />
-            Re-enter Fullscreen Now ({currentSeconds}s)
+            {currentSeconds > 0 ? `Re-enter Fullscreen Now (${currentSeconds}s)` : "Resume Exam in Fullscreen"}
           </button>
 
           {typeof violationCount === "number" && violationCount > 0 ? (

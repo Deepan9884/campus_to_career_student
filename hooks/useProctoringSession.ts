@@ -479,8 +479,9 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
   // ── 1. Fullscreen Tracking, System Keyboard Lock & 15-Second Grace Countdown ────
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !fullscreenEnforced) {
       clearFullscreenCountdown();
+      setState((prev) => ({ ...prev, isFullscreen: true }));
       return;
     }
 
@@ -538,6 +539,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     }
 
     function handleFSChange() {
+      if (!fullscreenEnforced) return;
       const isFS = isCurrentlyFullscreen();
       setState((prev) => ({ ...prev, isFullscreen: isFS }));
 
@@ -546,13 +548,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         clearFullscreenCountdown();
         requestSystemKeyboardLock();
       } else if (isStartedRef.current && !isBlockedRef.current) {
-        const now = Date.now();
-        // Warm-up check: suppress fullscreen exits occurring within first 5s of starting
-        if (startTimestampRef.current > 0 && now - startTimestampRef.current < 5000) {
-          console.log("[Proctoring] Fullscreen exit during initial 5s warm-up; suppressing countdown and violation");
-          return;
-        }
-
         // Left fullscreen during active exam -> release keyboard lock, start 15s grace countdown, and warn
         releaseSystemKeyboardLock();
         startFullscreenCountdown();
@@ -569,6 +564,8 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
     setState((prev) => ({ ...prev, isFullscreen: initialFS }));
     if (initialFS) {
       requestSystemKeyboardLock();
+    } else if (isStartedRef.current && !isBlockedRef.current) {
+      startFullscreenCountdown();
     }
 
     return () => {
@@ -579,7 +576,17 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       clearFullscreenCountdown();
       releaseSystemKeyboardLock();
     };
-  }, [enabled, sendViolation, startFullscreenCountdown, clearFullscreenCountdown]);
+  }, [enabled, fullscreenEnforced, sendViolation, startFullscreenCountdown, clearFullscreenCountdown]);
+
+  // Synchronize fullscreen requirement immediately when exam is started
+  useEffect(() => {
+    if (!enabled || !fullscreenEnforced || !isStarted) return;
+    const isFS = isCurrentlyFullscreen();
+    setState((prev) => ({ ...prev, isFullscreen: isFS }));
+    if (!isFS && !isBlockedRef.current && fullscreenCountdownRef.current === null) {
+      startFullscreenCountdown();
+    }
+  }, [enabled, fullscreenEnforced, isStarted, startFullscreenCountdown]);
 
   // ── 2. Tab Visibility & Focus Blur Detection ──────────────────────────────
   useEffect(() => {
@@ -621,16 +628,18 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
           return;
         }
         sendViolation("tab_switch");
-        if (!isCurrentlyFullscreen()) {
+        if (fullscreenEnforced && !isCurrentlyFullscreen()) {
           if (fullscreenCountdownRef.current === null) {
             startFullscreenCountdown();
           }
           setState((prev) => ({ ...prev, isFullscreen: false }));
         }
-      } else if (!document.hidden && isCurrentlyFullscreen()) {
+      } else if (!document.hidden) {
         clearBlurTimer();
-        clearFullscreenCountdown();
-        setState((prev) => ({ ...prev, isFullscreen: true }));
+        if (fullscreenEnforced && isCurrentlyFullscreen()) {
+          clearFullscreenCountdown();
+          setState((prev) => ({ ...prev, isFullscreen: true }));
+        }
       }
     }
 
@@ -659,7 +668,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         if (!isStartedRef.current || isBlockedRef.current) return;
 
         sendViolation("tab_switch");
-        if (!isCurrentlyFullscreen()) {
+        if (fullscreenEnforced && !isCurrentlyFullscreen()) {
           if (fullscreenCountdownRef.current === null) {
             startFullscreenCountdown();
           }
@@ -670,7 +679,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     function handleWindowFocus() {
       clearBlurTimer();
-      if (isCurrentlyFullscreen()) {
+      if (fullscreenEnforced && isCurrentlyFullscreen()) {
         clearFullscreenCountdown();
         setState((prev) => ({ ...prev, isFullscreen: true }));
       }
@@ -693,25 +702,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
 
     const IS_MAC = typeof navigator !== "undefined" && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
-    async function wipeClipboard() {
-      if (!copyPasteDisabled) return;
-      try {
-        if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText("");
-        }
-      } catch {}
-    }
-
-    if (isStarted && copyPasteDisabled) {
-      wipeClipboard();
-    }
-
-    function handleWindowFocus() {
-      if (isStartedRef.current && !isBlockedRef.current && copyPasteDisabled) {
-        wipeClipboard();
-      }
-    }
-
     function handleKeyDown(e: KeyboardEvent) {
       if (!isStartedRef.current || isBlockedRef.current) return;
 
@@ -725,7 +715,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        wipeClipboard();
         playClipboardAlertTone();
         toast.error("Screenshot Blocked: Screenshots and screen captures are strictly prohibited during the assessment.", {
           id: `proctor-screenshot-${Date.now()}`,
@@ -776,7 +765,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        wipeClipboard();
         playClipboardAlertTone();
         toast.error("System Shortcut Blocked: Windows key, Game Bar (Win+G), and OS shortcuts are disabled during proctored exams.", {
           id: `proctor-winkey-${Date.now()}`,
@@ -799,7 +787,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        wipeClipboard();
         try {
           window.getSelection()?.removeAllRanges();
         } catch {}
@@ -828,7 +815,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        wipeClipboard();
         sendViolation("keyboard_shortcut");
         return;
       }
@@ -875,7 +861,6 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
         window.getSelection()?.removeAllRanges();
       } catch {}
 
-      wipeClipboard();
       playClipboardAlertTone();
       toast.error("Clipboard Sanitized: Copying and pasting is disabled. All copied data has been cleared from clipboard.", {
         id: `proctor-clip-${Date.now()}`,
@@ -1011,8 +996,13 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
           cameraReady: true,
           mediaStream: stream,
           cameraError: null,
-          aiStatus: "loading_model",
+          aiStatus: aiFaceDetection ? "loading_model" : "active",
         }));
+
+        // If AI face/object detection is disabled by admin, keep camera stream active but skip AI models
+        if (!aiFaceDetection) {
+          return;
+        }
 
         // 3. Load Singleton Neural Detector
         try {
@@ -1346,7 +1336,7 @@ export function useProctoringSession(options: ProctoringSessionOptions): Proctor
       // Ensure webcam hardware stream is completely closed
       stopAllCameraStreams();
     };
-  }, [enabled, moduleId, cameraAttempt]);
+  }, [enabled, webcamRequired, aiFaceDetection, moduleId, cameraAttempt]);
 
   return state;
 }
