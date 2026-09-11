@@ -478,16 +478,12 @@ export function AppShell() {
                 {!sidebarCollapsed && (
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-[13px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
+                      <p className="text-[13.5px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
                         SUPER DREAM
                       </p>
                       <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 uppercase tracking-wider">
                         PRO
                       </span>
-                    </div>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <img src="/eec-logo.webp" alt="" className="w-3.5 h-3.5 object-contain shrink-0" />
-                      <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate font-medium">Easwari Engineering</p>
                     </div>
                   </div>
                 )}
@@ -639,10 +635,6 @@ export function AppShell() {
                   </div>
                   <div className="min-w-0">
                     <span className="font-bold text-foreground text-sm block leading-tight">Super Dream Workspace</span>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <img src="/eec-logo.webp" alt="" className="w-3 h-3 object-contain shrink-0" />
-                      <span className="text-xs text-muted-foreground font-medium">Easwari Engineering</span>
-                    </div>
                   </div>
                 </div>
               ) : (

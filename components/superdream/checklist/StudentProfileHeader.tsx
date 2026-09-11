@@ -66,7 +66,6 @@ export function StudentProfileHeader({ onOpenPrintModal }: StudentProfileHeaderP
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <img src="/eec-logo.webp" alt="" className="w-4 h-4 object-contain shrink-0" />
               <span className="text-xs font-semibold tracking-wider uppercase text-[var(--foreground)]">
                 Easwari Engineering College
               </span>
