@@ -448,7 +448,7 @@ export function Section3CodingDsa() {
                   </div>
                 </div>
 
-                {/* URL Input + Connect Button */}
+                {/* URL Input */}
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <input
@@ -457,38 +457,14 @@ export function Section3CodingDsa() {
                       onChange={(e) =>
                         setInputUrls((prev) => ({ ...prev, [key]: e.target.value }))
                       }
+                      onBlur={() => handleSavePlatformUrl(key)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSavePlatformUrl(key);
+                      }}
                       placeholder={config.urlPlaceholder}
                       className="w-full px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.10] text-xs text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)]/40 font-mono"
                     />
                   </div>
-
-                  <button
-                    onClick={() => handleSavePlatformUrl(key)}
-                    disabled={platformLoading[key]}
-                    className="px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-[var(--foreground)] text-xs font-medium transition border border-white/[0.12] cursor-pointer shrink-0 disabled:opacity-50 flex items-center gap-1.5"
-                  >
-                    {platformLoading[key] ? (
-                      <>
-                        <RefreshCw className="w-3 h-3 animate-spin text-[var(--primary)]" />
-                        <span>Fetching...</span>
-                      </>
-                    ) : (
-                      <span>Save & Sync</span>
-                    )}
-                  </button>
-                </div>
-
-                {/* Mini Stats Tag */}
-                <div className="flex items-center justify-between text-[10px] font-mono text-[var(--muted-foreground)] pt-0.5">
-                  <span>
-                    Solved: <strong className="text-[var(--foreground)]">{stats?.totalSolved || 0}</strong>
-                  </span>
-                  <span>
-                    {config.ratingLabel}: <strong className="text-[var(--warning)]">{stats?.contestRating || 0}</strong>
-                  </span>
-                  <span>
-                    Streak: <strong className="text-[var(--success)]/90">{stats?.streakDays || 0}d</strong>
-                  </span>
                 </div>
               </div>
             );

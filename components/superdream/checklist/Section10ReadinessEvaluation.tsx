@@ -222,10 +222,7 @@ export function Section10ReadinessEvaluation({ onOpenPrintModal }: Section10Prop
                   <AiStatusBadge compact />
                 </div>
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--foreground)] tracking-tight">
-                  {tier.tierName}{" "}
-                  <span className="text-[var(--warning)] font-bold text-lg sm:text-2xl">
-                    ({tier.packageRange})
-                  </span>
+                  {tier.tierName}
                 </h3>
                 <p className="text-xs sm:text-sm text-[var(--muted-foreground)] max-w-2xl leading-relaxed">
                   {tier.recommendation}

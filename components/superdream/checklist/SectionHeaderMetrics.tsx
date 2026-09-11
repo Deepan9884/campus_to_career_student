@@ -1,8 +1,6 @@
 import React from "react";
-import { GlassCard } from "@/components/GlassCard";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
-import { CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
-import { useSuperDream } from "@/stores/superDreamStore";
+import { CheckCircle2 } from "lucide-react";
 
 interface SectionHeaderMetricsProps {
   sectionId: number;
@@ -108,8 +106,6 @@ function calculateTileCPercentage(val: string | number, sectionId: number, compl
 
 export function SectionHeaderMetrics({
   sectionId,
-  title,
-  subtitle,
   readinessScore,
   completedTasks,
   totalTasks,
@@ -117,10 +113,7 @@ export function SectionHeaderMetrics({
   recommendedStatLabel,
   recommendedStatValue,
   recommendedStatSub,
-  statusColor,
-  onBackToRoadmap,
 }: SectionHeaderMetricsProps) {
-  const { setActiveSectionId } = useSuperDream();
 
   const safeReadinessScore = Number.isFinite(readinessScore) ? Math.max(0, Math.min(100, Math.round(readinessScore))) : 0;
   const safeCompletedTasks = Number.isFinite(completedTasks) ? Math.max(0, Math.round(completedTasks)) : 0;
@@ -154,55 +147,6 @@ export function SectionHeaderMetrics({
 
   return (
     <div className="space-y-4">
-      {/* Navigation Banner */}
-      <GlassCard
-        variant="liquid"
-        className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden rounded-2xl"
-      >
-        <div className="pointer-events-none absolute -top-8 right-0 w-48 h-48 rounded-full bg-[var(--primary)]/08 blur-3xl" />
-        <div className="space-y-1 z-10">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => (onBackToRoadmap ? onBackToRoadmap() : setActiveSectionId(0))}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--primary)] transition cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Track Road
-            </button>
-            <span className="text-white/20 text-xs">•</span>
-            <span
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full font-[var(--font-mono)]"
-              style={{
-                background: statusColor ? `${statusColor}18` : "rgba(167,139,250,0.12)",
-                border: `1px solid ${statusColor ? `${statusColor}35` : "rgba(167,139,250,0.22)"}`,
-                color: statusColor || "var(--primary)",
-              }}
-            >
-              Section {sectionId} / 10
-            </span>
-          </div>
-          <h2 className="text-lg sm:text-xl font-[var(--font-display)] text-[var(--foreground)] flex items-center gap-2">
-            {title}
-          </h2>
-          <p className="text-xs text-[var(--muted-foreground)] max-w-3xl leading-relaxed">{subtitle}</p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0 z-10">
-          <button
-            onClick={() => setActiveSectionId(sectionId > 1 ? sectionId - 1 : 10)}
-            className="px-3 py-1.5 rounded-full text-xs font-medium transition cursor-pointer flex items-center gap-1.5 active:scale-95"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "var(--foreground)" }}
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Prev
-          </button>
-          <button
-            onClick={() => setActiveSectionId(sectionId < 10 ? sectionId + 1 : 1)}
-            className="px-3 py-1.5 rounded-full text-xs font-medium transition cursor-pointer flex items-center gap-1.5 active:scale-95 btn-gradient btn-gradient-hover"
-          >
-            Next <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </GlassCard>
-
       {/* 3 Metric Tiles with Crystal-Clear High-Contrast Styling */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Tile A: Readiness — Violet */}

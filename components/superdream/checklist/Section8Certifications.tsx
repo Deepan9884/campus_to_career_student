@@ -423,20 +423,6 @@ export function Section8Certifications() {
                         </span>
                       </div>
                     </div>
-
-                    <span
-                      className={cn(
-                        "px-2.5 py-0.5 rounded-full text-xs font-mono font-medium flex items-center gap-1 shrink-0 border",
-                        isCompleted
-                          ? "bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/30"
-                          : isInProgress
-                          ? "bg-[var(--warning)]/15 text-[var(--warning)] border-[var(--warning)]/30"
-                          : "bg-white/[0.05] text-[var(--muted-foreground)] border-white/[0.08]"
-                      )}
-                    >
-                      {isCompleted && <CheckCircle2 className="w-3 h-3 text-[var(--success)]" />}
-                      <span>{item.status}</span>
-                    </span>
                   </div>
 
                   {/* Live Credential Link / PDF Upload Box */}

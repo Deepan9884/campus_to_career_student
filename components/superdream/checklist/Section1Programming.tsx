@@ -426,21 +426,20 @@ const visitedLinks = item.visitedLinks || [];
                     </div>
                   </div>
 
-                  <span
-                    className={cn(
-                      "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-sm border",
-                      isMastered
-                        ? "bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/30"
-                        : isInProgress
-                        ? "bg-[var(--warning)]/15 text-[var(--warning)] border-[var(--warning)]/30"
-                        : "bg-white/[0.05] text-[var(--muted-foreground)] border-white/[0.08]"
-                    )}
-                  >
-                    {isMastered && <CheckCircle2 className="w-3.5 h-3.5 text-[var(--success)]" />}
-                    {isInProgress && <Clock className="w-3.5 h-3.5 text-[var(--warning)]" />}
-                    {!isMastered && !isInProgress && <XCircle className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />}
-                    <span>{isMastered ? "Mastered" : isInProgress ? "In Progress" : "Not Started"}</span>
-                  </span>
+                  {(isMastered || isInProgress) && (
+                    <span
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-sm border",
+                        isMastered
+                          ? "bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/30"
+                          : "bg-[var(--warning)]/15 text-[var(--warning)] border-[var(--warning)]/30"
+                      )}
+                    >
+                      {isMastered && <CheckCircle2 className="w-3.5 h-3.5 text-[var(--success)]" />}
+                      {isInProgress && <Clock className="w-3.5 h-3.5 text-[var(--warning)]" />}
+                      <span>{isMastered ? "Mastered" : "In Progress"}</span>
+                    </span>
+                  )}
                 </div>
 
                 {/* Free Learning Portals Links (GFG, CodeChef, HackerRank) */}
