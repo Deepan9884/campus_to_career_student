@@ -6,6 +6,7 @@ import { useAuth } from "@/stores";
 import { ApiError } from "@/lib/api";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { sanitizeDisplayName } from "@/lib/userUtils";
+import AuthBackground from "../components/AuthBackground";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — Campus to Career AI" }] }),
@@ -57,7 +58,10 @@ function LoginPage() {
   };
 
   return (
-    <AuthShell>
+    <div style={{ position: "relative", minHeight: "100vh" }}>
+      <AuthBackground />
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <AuthShell>
       <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome back</h1>
       <p className="text-slate-500 mt-1 text-sm">Sign in to continue your prep journey.</p>
       <form onSubmit={handle} className="mt-6 space-y-4">
@@ -161,6 +165,8 @@ function LoginPage() {
         />
       </form>
     </AuthShell>
+      </div>
+    </div>
   );
 }
 

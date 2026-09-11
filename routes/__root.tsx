@@ -138,17 +138,31 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GoogleOAuthProvider clientId={googleClientId}>
-        <Outlet />
-        <Toaster
-          position="top-right"
-          duration={3500}
-          closeButton
-          richColors
-          theme="light"
-          visibleToasts={3}
-        />
-      </GoogleOAuthProvider>
+      {googleClientId ? (
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <Outlet />
+          <Toaster
+            position="top-right"
+            duration={3500}
+            closeButton
+            richColors
+            theme="light"
+            visibleToasts={3}
+          />
+        </GoogleOAuthProvider>
+      ) : (
+        <>
+          <Outlet />
+          <Toaster
+            position="top-right"
+            duration={3500}
+            closeButton
+            richColors
+            theme="light"
+            visibleToasts={3}
+          />
+        </>
+      )}
     </QueryClientProvider>
   );
 }
