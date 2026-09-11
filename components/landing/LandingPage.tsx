@@ -382,15 +382,15 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section id="hero" className="relative z-10 pt-4 md:pt-6 pb-2 px-3 md:px-6 max-w-7xl mx-auto overflow-hidden">
+      <section id="hero" className="relative z-10 pt-6 md:pt-10 pb-6 px-3 md:px-6 max-w-7xl mx-auto overflow-hidden">
         <HeroParticles />
 
-        <div className="text-center max-w-3xl mx-auto space-y-2">
+        <div className="text-center max-w-3xl mx-auto space-y-2.5">
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.05 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white"
           >
             Become <span className="text-ember-gradient">Internship-Ready</span> in Weeks, Not Months.
           </motion.h1>
@@ -399,7 +399,7 @@ export const LandingPage: React.FC = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="text-xs sm:text-sm text-slate-600 dark:text-[#93A0B5] font-normal leading-relaxed max-w-xl mx-auto"
+            className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-[#93A0B5] font-normal leading-relaxed max-w-xl mx-auto"
           >
             ATS-scored resumes, AI mock interviews, GitHub code reviews, and milestone roadmaps.
           </motion.p>
@@ -408,18 +408,18 @@ export const LandingPage: React.FC = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.15 }}
-            className="flex items-center justify-center gap-3 pt-1"
+            className="flex items-center justify-center gap-3 pt-1.5"
           >
             <button
               onClick={handleRegisterClick}
-              className="px-6 py-2 rounded-xl btn-gradient btn-gradient-hover text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-500/25"
+              className="px-6 py-2.5 rounded-xl btn-gradient btn-gradient-hover text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5"
             >
               <span>{isAuthenticated ? "Go to Workspace" : "Start Free"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => scrollToSection("resume")}
-              className="px-5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-400/50 text-slate-800 shadow-sm dark:bg-[#131B2E] dark:hover:bg-[#1B2740] dark:border-[#2F4B6B] dark:hover:border-indigo-500/30 dark:text-[#F2F4F7] text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition-all"
+              className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-400/50 text-slate-800 shadow-sm dark:bg-[#131B2E] dark:hover:bg-[#1B2740] dark:border-[#2F4B6B] dark:hover:border-indigo-500/30 dark:text-[#F2F4F7] text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition-all"
             >
               <span>Explore Features</span>
               <ArrowRight className="w-3.5 h-3.5 rotate-90 text-indigo-500 dark:text-indigo-400" />
@@ -429,28 +429,28 @@ export const LandingPage: React.FC = () => {
 
         {/* ── FEATURED SPOTLIGHT MOVING PANELS SHOWCASE ── */}
         <div
-          className="mt-4 relative w-full overflow-hidden"
+          className="mt-6 md:mt-8 relative w-full overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           {/* Left / Right Floating Navigation Arrows */}
           <button
             onClick={prevDeck}
-            className="hidden md:flex absolute left-4 lg:left-12 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-2xl bg-white/90 hover:bg-slate-50 border border-slate-200 hover:border-indigo-400 text-slate-600 hover:text-indigo-600 shadow-lg shadow-slate-200/50 dark:bg-[#111827]/90 dark:hover:bg-[#1A2438] dark:border-[#2F4B6B]/70 dark:hover:border-indigo-500/50 dark:text-[#93A0B5] dark:hover:text-indigo-400 transition-all backdrop-blur-md cursor-pointer"
+            className="hidden md:flex absolute left-2 lg:left-6 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-2xl bg-white/90 hover:bg-slate-50 border border-slate-200 hover:border-indigo-400 text-slate-600 hover:text-indigo-600 shadow-lg shadow-slate-200/50 dark:bg-[#111827]/90 dark:hover:bg-[#1A2438] dark:border-[#2F4B6B]/70 dark:hover:border-indigo-500/50 dark:text-[#93A0B5] dark:hover:text-indigo-400 transition-all backdrop-blur-md cursor-pointer"
             title="Previous feature"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={nextDeck}
-            className="hidden md:flex absolute right-4 lg:right-12 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-2xl bg-white/90 hover:bg-slate-50 border border-slate-200 hover:border-indigo-400 text-slate-600 hover:text-indigo-600 shadow-lg shadow-slate-200/50 dark:bg-[#111827]/90 dark:hover:bg-[#1A2438] dark:border-[#2F4B6B]/70 dark:hover:border-indigo-500/50 dark:text-[#93A0B5] dark:hover:text-indigo-400 transition-all backdrop-blur-md cursor-pointer"
+            className="hidden md:flex absolute right-2 lg:right-6 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-2xl bg-white/90 hover:bg-slate-50 border border-slate-200 hover:border-indigo-400 text-slate-600 hover:text-indigo-600 shadow-lg shadow-slate-200/50 dark:bg-[#111827]/90 dark:hover:bg-[#1A2438] dark:border-[#2F4B6B]/70 dark:hover:border-indigo-500/50 dark:text-[#93A0B5] dark:hover:text-indigo-400 transition-all backdrop-blur-md cursor-pointer"
             title="Next feature"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
 
           {/* Cards Track (Center Stage) */}
-          <div className="relative flex items-center justify-center min-h-[310px] sm:min-h-[330px] md:min-h-[350px] px-2">
+          <div className="relative flex items-center justify-center min-h-[440px] sm:min-h-[500px] md:min-h-[550px] lg:min-h-[580px] px-2">
             {SECTIONS.map((panel, idx) => {
               const Icon = panel.icon;
               const isCenter = idx === activeDeckIndex;
@@ -470,16 +470,16 @@ export const LandingPage: React.FC = () => {
                     }
                   }}
                   animate={{
-                    scale: isCenter ? 1 : 0.82,
-                    opacity: isCenter ? 1 : 0.6,
+                    scale: isCenter ? 1 : 0.84,
+                    opacity: isCenter ? 1 : 0.55,
                     filter: isCenter
-                      ? "brightness(1) drop-shadow(0 20px 35px rgba(99,102,241,0.14))"
+                      ? "brightness(1) drop-shadow(0 25px 45px rgba(99,102,241,0.16))"
                       : "brightness(0.96) blur(0.5px)",
-                    x: isCenter ? 0 : isLeft ? -360 : 360,
+                    x: isCenter ? 0 : isLeft ? -480 : 480,
                     zIndex: isCenter ? 30 : 10,
                   }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className={`absolute w-[92vw] max-w-[680px] p-3.5 rounded-2xl cursor-pointer transition-all border ${
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  className={`absolute w-[94vw] max-w-[820px] lg:max-w-[880px] p-4 sm:p-5 md:p-6 rounded-3xl cursor-pointer transition-all border ${
                     isCenter
                       ? "bg-white/98 border-indigo-300 shadow-2xl"
                       : "bg-slate-50/90 border-slate-200/90 shadow-md pointer-events-auto"
@@ -488,28 +488,28 @@ export const LandingPage: React.FC = () => {
                     isCenter
                       ? {
                           boxShadow:
-                            "0 20px 50px -10px rgba(99,102,241,0.18), 0 10px 25px -5px rgba(0,0,0,0.06), inset 0 1px 0 0 rgba(255,255,255,0.9)",
+                            "0 25px 60px -12px rgba(99,102,241,0.2), 0 12px 30px -6px rgba(0,0,0,0.08), inset 0 1px 0 0 rgba(255,255,255,0.9)",
                         }
                       : {}
                   }
                 >
                   {/* Card Header */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2.5">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center space-x-3">
                       <div
-                        className={`p-1.5 rounded-xl ${
+                        className={`p-2 rounded-xl ${
                           isCenter
                             ? "bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/30"
                             : "bg-slate-200/80 text-slate-500 dark:bg-[#1B2740] dark:text-[#93A0B5]"
                         }`}
                       >
-                        <Icon className="w-3.5 h-3.5" />
+                        <Icon className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                           {panel.badge}
                         </span>
-                        <h3 className="text-xs md:text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                        <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 dark:text-white line-clamp-1">
                           {panel.title}
                         </h3>
                       </div>
@@ -521,33 +521,33 @@ export const LandingPage: React.FC = () => {
                         e.stopPropagation();
                         setPreviewModalPanel(panel);
                       }}
-                      className="text-[9px] px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 dark:bg-[#1B2740] dark:hover:bg-[#233354] dark:border-[#2F4B6B] dark:text-slate-300 dark:hover:text-white flex items-center gap-1 transition-colors"
+                      className="text-xs px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 dark:bg-[#1B2740] dark:hover:bg-[#233354] dark:border-[#2F4B6B] dark:text-slate-300 dark:hover:text-white flex items-center gap-1.5 transition-colors font-medium"
                       title="Test live interactive sandbox"
                     >
-                      <Eye className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                      <Eye className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                       <span>Sandbox</span>
                     </button>
                   </div>
 
-                  <p className="text-[11px] text-slate-600 dark:text-[#93A0B5] line-clamp-1 mb-2">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-[#93A0B5] line-clamp-1 mb-3">
                     {panel.subtitle}
                   </p>
 
                   {/* Feature Image with High Fidelity */}
-                  <div className="relative rounded-xl overflow-hidden border border-slate-200/90 bg-slate-100 h-36 sm:h-40 md:h-44 group shadow-inner">
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200/90 bg-slate-100 h-52 sm:h-64 md:h-76 lg:h-80 group shadow-inner">
                     <img
                       src={panel.imagePath}
                       alt={panel.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent flex items-end p-2.5">
-                      <div className="flex flex-wrap gap-1.5">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent flex items-end p-3 sm:p-4">
+                      <div className="flex flex-wrap gap-2">
                         {panel.highlights.slice(0, 2).map((h, i) => (
                           <span
                             key={i}
-                            className="text-[9px] font-semibold bg-white/95 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200/80 backdrop-blur-md flex items-center gap-1 shadow-sm"
+                            className="text-[10px] sm:text-xs font-semibold bg-white/95 text-slate-800 px-3 py-1 rounded-lg border border-slate-200/80 backdrop-blur-md flex items-center gap-1.5 shadow-sm"
                           >
-                            <Check className="h-2.5 w-2.5 text-indigo-600 shrink-0" />
+                            <Check className="h-3 w-3 text-indigo-600 shrink-0" />
                             <span>{h}</span>
                           </span>
                         ))}
@@ -556,12 +556,12 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   {/* Card Footer Indicator */}
-                  <div className="flex items-center justify-between pt-1.5 mt-1.5 border-t border-slate-100 text-[11px] text-indigo-600 font-semibold">
-                    <span className="flex items-center gap-1">
-                      <Flame className="w-3 h-3 text-indigo-600" /> Live module
+                  <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-slate-100 text-xs sm:text-sm text-indigo-600 font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-indigo-600" /> Live module
                     </span>
-                    <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                      Explore Feature <ArrowRight className="w-3 h-3" />
+                    <span className="flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
+                      Explore Feature <ArrowRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
                 </motion.div>
@@ -570,13 +570,13 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Dots Indicator */}
-          <div className="flex items-center justify-center space-x-1.5 mt-2">
+          <div className="flex items-center justify-center space-x-2 mt-4">
             {SECTIONS.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveDeckIndex(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  idx === activeDeckIndex ? "w-6 bg-indigo-600 dark:bg-indigo-500 shadow-md shadow-indigo-500/40" : "w-1.5 bg-slate-300 dark:bg-[#2F4B6B]"
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  idx === activeDeckIndex ? "w-8 bg-indigo-600 dark:bg-indigo-500 shadow-md shadow-indigo-500/40" : "w-2 bg-slate-300 dark:bg-[#2F4B6B]"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
@@ -587,7 +587,7 @@ export const LandingPage: React.FC = () => {
 
 
       {/* ── DETAILED FEATURE SECTIONS ── */}
-      <section className="relative z-10 py-16 px-4 md:px-8 max-w-7xl mx-auto space-y-28">
+      <section className="relative z-10 pt-8 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-24">
         {SECTIONS.map((sec, idx) => {
           const isEven = idx % 2 === 0;
 
