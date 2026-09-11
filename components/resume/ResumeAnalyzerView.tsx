@@ -20,7 +20,9 @@ import {
   ArrowRight,
   Bot,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { uploadResume, getResumeHistory, getResumeById, deleteResume } from "@/lib/resume-api";
@@ -238,8 +240,8 @@ export function ResumeAnalyzerView({
                 >
                   <FileText className={`h-4 w-4 shrink-0 ${isSelected ? "text-indigo-400" : "text-muted-foreground"}`} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium text-slate-200">{r.filename}</p>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-100">{r.filename}</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">
                       {new Date(r.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -248,21 +250,29 @@ export function ResumeAnalyzerView({
                       })}
                     </p>
                   </div>
-                  <span
-                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      r.status === "completed"
-                        ? (r.atsScore ?? 0) >= 70
-                          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                  {r.status === "completed" ? (
+                    <span
+                      className={cn(
+                        "text-xs font-bold px-2.5 py-0.5 rounded-full border shadow-xs",
+                        (r.atsScore ?? 0) >= 70
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
                           : (r.atsScore ?? 0) >= 40
-                            ? "bg-indigo-500/15 text-indigo-300 border border-indigo-500/20"
-                            : "bg-red-500/15 text-red-300 border border-red-500/20"
-                        : r.status === "failed"
-                          ? "bg-red-500/15 text-red-400"
-                          : "bg-yellow-500/15 text-yellow-400"
-                    }`}
-                  >
-                    {r.status === "completed" ? `${r.atsScore}%` : r.status}
-                  </span>
+                            ? "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30"
+                            : "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30"
+                      )}
+                    >
+                      {r.atsScore}%
+                    </span>
+                  ) : r.status === "processing" ? (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/35 shadow-xs">
+                      <Loader2 className="h-3 w-3 animate-spin text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>Processing...</span>
+                    </span>
+                  ) : (
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30">
+                      Failed
+                    </span>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

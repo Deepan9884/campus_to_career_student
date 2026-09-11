@@ -701,15 +701,15 @@ const [analyzing, setAnalyzing] = useState(false);
                           <p className="text-sm font-medium">{item.repoFullName}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span
-                              className={`text-[10px] px-2 py-0.5 rounded-full ${
+                              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                                 item.status === "completed"
-                                  ? "bg-green-500/20 text-green-300"
+                                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30"
                                   : item.status === "processing"
-                                    ? "bg-yellow-500/20 text-yellow-300"
-                                    : "bg-red-500/20 text-red-300"
+                                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/35"
+                                    : "bg-rose-500/15 text-rose-600 dark:text-rose-300 border-rose-500/30"
                               }`}
                             >
-                              {item.status}
+                              {item.status === "processing" ? "Processing..." : item.status}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(item.createdAt).toLocaleDateString()}
