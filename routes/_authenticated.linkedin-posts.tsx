@@ -678,10 +678,6 @@ function LinkedInPostsPage() {
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-semibold">
-              <Linkedin className="h-3.5 w-3.5" />
-              Recruiter-Ready Super Content Engine
-            </div>
             <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight flex items-center gap-3 text-foreground">
               LinkedIn Post Creator
             </h1>
