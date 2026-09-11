@@ -1629,8 +1629,23 @@ export function UnifiedExamConsole({
       if (result.isCompilationError || result.compilationError) {
         const errText = result.errorMessage || result.stderr || (result as any).output || "";
         const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
-        const errLineNum = result.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+        let errLineNum = result.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+        const codeLines = codeToRun.split("\n");
+        const totalCodeLines = codeLines.length;
+
+        // Ensure errorLine never points beyond total lines in the editor
         if (errLineNum && !isNaN(errLineNum)) {
+          if (errLineNum > totalCodeLines || errLineNum < 1) {
+            let found = totalCodeLines;
+            for (let li = totalCodeLines - 1; li >= 0; li--) {
+              const t = codeLines[li].trim();
+              if (t && !t.startsWith("//") && !t.endsWith(";") && !t.endsWith("{") && !t.endsWith("}")) {
+                found = li + 1;
+                break;
+              }
+            }
+            errLineNum = found;
+          }
           setErrorLine(errLineNum);
         }
         setErrorMessage(errText);

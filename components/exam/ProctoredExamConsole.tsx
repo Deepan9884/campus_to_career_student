@@ -600,8 +600,22 @@ export function ProctoredExamConsole({
       if (res.isCompilationError || res.compilationError) {
         const errText = res.errorMessage || res.stderr || (res as any).output || "";
         const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
-        const errLineNum = res.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+        let errLineNum = res.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
+        const codeLines = code.split("\n");
+        const totalCodeLines = codeLines.length;
+
         if (errLineNum && !isNaN(errLineNum)) {
+          if (errLineNum > totalCodeLines || errLineNum < 1) {
+            let found = totalCodeLines;
+            for (let li = totalCodeLines - 1; li >= 0; li--) {
+              const t = codeLines[li].trim();
+              if (t && !t.startsWith("//") && !t.endsWith(";") && !t.endsWith("{") && !t.endsWith("}")) {
+                found = li + 1;
+                break;
+              }
+            }
+            errLineNum = found;
+          }
           setErrorLine(errLineNum);
         }
         setErrorMessage(errText);
