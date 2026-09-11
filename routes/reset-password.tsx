@@ -144,7 +144,7 @@ function ResetPasswordPage() {
               type={show ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="New password (min 6 characters)"
               className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-indigo-600 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition-all"
             />
             <button
@@ -163,7 +163,7 @@ function ResetPasswordPage() {
               type={show ? "text" : "password"}
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Confirm new password"
               className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-indigo-600 rounded-xl pl-10 pr-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition-all"
             />
           </div>
@@ -171,7 +171,7 @@ function ResetPasswordPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl py-2.5 text-sm font-bold text-white disabled:opacity-60 flex items-center justify-center gap-2 shadow-md shadow-indigo-500/25 hover:shadow-lg transition-all cursor-pointer"
+          className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl py-3 text-sm font-bold text-white disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all cursor-pointer"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Reset password
         </button>
