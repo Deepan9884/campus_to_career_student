@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2 } from "lucide-react";
+import { Linkedin, Github, Compass } from "lucide-react";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
@@ -57,30 +57,30 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
 
             {/* Value Proposition Cards - Utilizing Horizontal Space Well */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white">
-                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
-                  <CheckCircle2 className="w-4 h-4" />
+              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-blue-200 hover:bg-white min-h-[54px]">
+                <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 shrink-0">
+                  <Linkedin className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-semibold text-slate-800 leading-snug">
-                  Instant ATS Resume Diagnosis
+                  LinkedIn Post Generator
                 </span>
               </div>
 
-              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white">
-                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
-                  <CheckCircle2 className="w-4 h-4" />
+              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-slate-300 hover:bg-white min-h-[54px]">
+                <div className="p-1.5 rounded-lg bg-slate-100 text-slate-800 shrink-0">
+                  <Github className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-semibold text-slate-800 leading-snug">
-                  Live Voice AI Mock Coach
+                  GitHub Analyzer
                 </span>
               </div>
 
-              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white">
-                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
-                  <CheckCircle2 className="w-4 h-4" />
+              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white min-h-[54px]">
+                <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                  <Compass className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-semibold text-slate-800 leading-snug">
-                  GitHub Audit & Rank
+                  Learning Roadmap
                 </span>
               </div>
             </div>
