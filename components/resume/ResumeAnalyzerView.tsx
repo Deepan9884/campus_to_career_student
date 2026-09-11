@@ -26,7 +26,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { uploadResume, getResumeHistory, getResumeById, deleteResume } from "@/lib/resume-api";
-import { AiStatusBadge } from "@/components/ui/AiStatusBadge";
 import { ComprehensiveResumeReport } from "./ComprehensiveResumeReport";
 import type { Resume, Pagination } from "@/types/resume";
 
@@ -780,14 +779,6 @@ export function ResumeAnalyzerView({
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-base leading-tight text-foreground">ATS Analysis & Feedback</h3>
-                          {display && (
-                            <AiStatusBadge
-                              aiProvider={(display as any).aiProvider}
-                              isFallback={(display as any).isFallback}
-                              model={(display as any).model}
-                              compact
-                            />
-                          )}
                         </div>
                         {display?.filename && (
                           <p className="text-xs text-muted-foreground truncate max-w-xs md:max-w-md mt-0.5">
