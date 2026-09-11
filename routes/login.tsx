@@ -159,17 +159,6 @@ function LoginPage() {
             navigate({ to: "/dashboard" });
           }}
         />
-
-        {/* Mentor / Faculty Portal Cross-Link */}
-        <div className="pt-3 border-t border-slate-100 text-center">
-          <a
-            href={import.meta.env.VITE_ADMIN_APP_URL || "http://localhost:8081"}
-            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:underline inline-flex items-center gap-1.5 transition"
-          >
-            <span>Are you a Faculty Mentor? Go to Mentor Portal</span>
-            <span>&rarr;</span>
-          </a>
-        </div>
       </form>
     </AuthShell>
   );

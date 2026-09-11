@@ -94,12 +94,12 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Right Side: Auth Form Clean White Card */}
-        <div className="lg:col-span-6 xl:col-span-5 flex items-center justify-center p-6 sm:p-10 lg:p-12">
+        <div className="lg:col-span-6 xl:col-span-5 flex items-center justify-center p-6 sm:p-8 lg:p-10 xl:p-12">
           <div
-            className="rounded-3xl p-7 sm:p-9 w-full max-w-md border border-slate-200/90 shadow-2xl backdrop-blur-xl bg-white/95 text-slate-900 relative"
+            className="rounded-3xl p-8 sm:p-10 xl:p-11 w-full max-w-[490px] xl:max-w-[510px] border border-slate-200/90 shadow-2xl backdrop-blur-xl bg-white/95 text-slate-900 relative"
             style={{
               boxShadow:
-                "0 25px 60px -15px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.9), 0 8px 24px -4px rgba(99, 102, 241, 0.08)",
+                "0 25px 60px -15px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.9), 0 10px 30px -5px rgba(99, 102, 241, 0.08)",
             }}
           >
             {/* Mobile Brand Logo */}
