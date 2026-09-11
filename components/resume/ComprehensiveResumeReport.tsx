@@ -99,56 +99,82 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
   const [activeTab, setActiveTab] = useState<"overview" | "internships" | "projects" | "events" | "keywords" | "improvements">("overview");
   const [projectFilter, setProjectFilter] = useState<"all" | "personal" | "academic">("all");
 
-  // Fallback synthesis for existing resumes or partial AI schemas
-  const internships = display.internships || [];
-  const projects = display.projects || [];
-  const events = display.eventsAndCompetitions || [];
+  // Factual extraction filter: strip out any legacy mock/hallucinated items not present in candidate's resume text
+  const rawTextLower = (display.extractedText || "").toLowerCase();
+  const KNOWN_FICTITIOUS_PATTERNS = [
+    "campus to career ai placement platform",
+    "real-time collaborative code editor",
+    "distributed file storage system",
+    "smart india hackathon (sih)",
+    "college annual coding marathon",
+    "smart india hackathon",
+    "tech solutions inc.",
+  ];
+
+  const isFictitious = (titleOrName?: string) => {
+    if (!titleOrName) return false;
+    const lower = titleOrName.toLowerCase().trim();
+    return KNOWN_FICTITIOUS_PATTERNS.some((pat) => lower.includes(pat)) && !rawTextLower.includes(lower);
+  };
+
+  const internships = (display.internships || []).filter((i) => !isFictitious(i.company) && !isFictitious(i.role));
+  const projects = (display.projects || []).filter((p) => !isFictitious(p.title));
+  const events = (display.eventsAndCompetitions || []).filter((e) => !isFictitious(e.name));
   const totalInternshipMonths = internships.reduce((acc, curr) => acc + (curr.durationMonths || 0), 0);
   const personalProjectsCount = projects.filter((p) => p.projectType === "personal").length;
   const academicProjectsCount = projects.filter((p) => p.projectType !== "personal").length;
 
-  const pillars = display.scoreBreakdown?.pillars || {
+  const rawPillars = display.scoreBreakdown?.pillars;
+  const pillars = {
     internshipsAndWork: {
-      score: internships.length > 0 ? 80 : 50,
+      score: internships.length > 0 ? (rawPillars?.internshipsAndWork?.score ?? 80) : 40,
       weight: 25,
       totalMonths: totalInternshipMonths,
       count: internships.length,
       summary: internships.length > 0
-        ? `${internships.length} internship role(s) detected with ${totalInternshipMonths} months duration.`
-        : "No direct internships detected; strengthen through personal projects and open-source.",
+        ? (rawPillars?.internshipsAndWork?.summary || `${internships.length} internship role(s) detected with ${totalInternshipMonths} months duration.`)
+        : "No direct internships detected on resume.",
     },
     projectsAndPersonal: {
-      score: projects.length > 0 ? 85 : 65,
+      score: projects.length > 0 ? (rawPillars?.projectsAndPersonal?.score ?? 80) : 55,
       weight: 25,
       personalCount: personalProjectsCount,
       academicCount: academicProjectsCount,
       summary: projects.length > 0
-        ? `${projects.length} project(s) evaluated (${personalProjectsCount} personal, ${academicProjectsCount} coursework).`
-        : "Found standard coursework projects; building self-driven personal projects is recommended.",
+        ? (rawPillars?.projectsAndPersonal?.summary || `${projects.length} project(s) evaluated (${personalProjectsCount} personal, ${academicProjectsCount} coursework).`)
+        : "No independent projects detected on resume.",
     },
-    skillsAndKeywords: {
-      score: Math.min(100, Math.round(((display.keywordBreakdown?.matched?.length || 1) / Math.max(1, (display.keywordBreakdown?.matched?.length || 1) + (display.keywordBreakdown?.missing?.length || 0))) * 100)) || 80,
+    skillsAndKeywords: rawPillars?.skillsAndKeywords || {
+      score: Math.min(100, Math.round(((display.keywordBreakdown?.matched?.length || 1) / Math.max(1, (display.keywordBreakdown?.matched?.length || 1) + (display.keywordBreakdown?.missing?.length || 0))) * 100)) || 75,
       weight: 25,
       matchedCount: display.keywordBreakdown?.matched?.length || 0,
       missingCount: display.keywordBreakdown?.missing?.length || 0,
       summary: `${display.keywordBreakdown?.matched?.length || 0} matching skills detected for ${display.inferredTargetRole || "target role"}.`,
     },
     eventsAndHackathons: {
-      score: events.length > 0 ? 80 : 45,
+      score: events.length > 0 ? (rawPillars?.eventsAndHackathons?.score ?? 75) : 35,
       weight: 15,
       count: events.length,
       summary: events.length > 0
-        ? `${events.length} competition(s) and technical event(s) recorded.`
-        : "No hackathon or competitive coding participation detected.",
+        ? (rawPillars?.eventsAndHackathons?.summary || `${events.length} competition(s) and technical event(s) recorded.`)
+        : "No competitive hackathons or coding contests detected on resume.",
     },
-    formatAndStructure: {
-      score: 82,
+    formatAndStructure: rawPillars?.formatAndStructure || {
+      score: 75,
       weight: 10,
       hasMetrics: Boolean(internships.some((i) => i.metricsIdentified) || display.extractedText?.match(/\d+%/)),
       readability: "Good",
       summary: "Clean formatting and parseable section hierarchy.",
     },
   };
+
+  const compositeScore = Math.round(
+    ((pillars.internshipsAndWork.score ?? 40) * 0.25) +
+    ((pillars.projectsAndPersonal.score ?? 55) * 0.25) +
+    ((pillars.skillsAndKeywords.score ?? 75) * 0.25) +
+    ((pillars.eventsAndHackathons.score ?? 35) * 0.15) +
+    ((pillars.formatAndStructure.score ?? 75) * 0.10)
+  );
 
   const filteredProjects = projects.filter((p) => {
     if (projectFilter === "personal") return p.projectType === "personal";
@@ -161,9 +187,9 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
       {/* ── 1. Top Multi-Pillar Scoreboard ── */}
       <div className="grid lg:grid-cols-[auto_1fr] gap-6 items-center p-5 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 min-w-0">
         <div className="flex flex-col items-center justify-center p-2 text-center shrink-0 min-w-[144px]">
-          <ScoreRing score={display.atsScore ?? 0} size={144} stroke={12} label="Composite ATS" />
+          <ScoreRing score={compositeScore} size={144} stroke={12} label="Composite ATS" />
           <span className="text-[11px] font-semibold mt-1.5 px-2.5 py-0.5 rounded-full bg-[color:var(--color-primary)]/10 text-[color:var(--color-primary)] border border-[color:var(--color-primary)]/20">
-            {(display.atsScore ?? 0) >= 75 ? "Placement Ready" : (display.atsScore ?? 0) >= 55 ? "Review Ready" : "Needs Polish"}
+            {compositeScore >= 75 ? "Placement Ready" : compositeScore >= 55 ? "Review Ready" : "Needs Polish"}
           </span>
           <span className="text-[10px] text-muted-foreground mt-1">
             Weighted across 5 Pillars
