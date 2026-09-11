@@ -10,6 +10,7 @@ import {
   Calendar,
   CheckCircle2,
   ArrowRight,
+  Zap,
   ChevronLeft,
   ChevronRight,
   Menu,
