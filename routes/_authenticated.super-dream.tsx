@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useSuperDream } from "@/stores/superDreamStore";
 import { SuperDreamIntroAnimation } from "@/components/superdream/SuperDreamIntroAnimation";
 import { StudentProfileHeader } from "@/components/superdream/checklist/StudentProfileHeader";
@@ -62,17 +63,28 @@ function SuperDreamPage() {
         onClose={() => setPrintModalOpen(false)}
       />
 
-      {/* Official Header: Easwari Engineering College Student Profile */}
-      <StudentProfileHeader onOpenPrintModal={() => setPrintModalOpen(true)} />
-
-
-
       {/* Main Content Area */}
       <div className="min-h-[500px]">
         {/* Phase A: Track Road and 10 Sections */}
         {activeTab === "track-road" && (
           <div className="space-y-6">
-            {activeSectionId === 0 && <TrackRoadNavigator />}
+            {activeSectionId === 0 && (
+              <>
+                <StudentProfileHeader onOpenPrintModal={() => setPrintModalOpen(true)} />
+                <TrackRoadNavigator />
+              </>
+            )}
+            {activeSectionId > 0 && (
+              <div className="flex items-center justify-between pb-1">
+                <button
+                  onClick={() => setActiveSectionId(0)}
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition cursor-pointer px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] active:scale-95"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-[var(--primary)]" />
+                  <span>Back to Track Road</span>
+                </button>
+              </div>
+            )}
             {activeSectionId === 1 && <Section1Programming />}
             {activeSectionId === 2 && <Section2CsFundamentals />}
             {activeSectionId === 3 && <Section3CodingDsa />}
