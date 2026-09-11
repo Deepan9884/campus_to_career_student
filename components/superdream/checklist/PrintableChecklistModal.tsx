@@ -206,12 +206,15 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
             >
               Official Placement Readiness Audit Dossier.pdf
             </h3>
-            <span
-              className="text-[11.5px] font-medium block truncate modal-subtitle"
-              style={{ color: "#cbd5e1" }}
-            >
-              Easwari Engineering College • Certified Technical Audit
-            </span>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <img src="/eec-logo.webp" alt="" className="w-3.5 h-3.5 object-contain shrink-0" />
+              <span
+                className="text-[11.5px] font-medium block truncate modal-subtitle"
+                style={{ color: "#cbd5e1" }}
+              >
+                Easwari Engineering College • Certified Technical Audit
+              </span>
+            </div>
           </div>
         </div>
 
@@ -293,8 +296,8 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
             {/* Document Institutional Header */}
             <div className="border-b-2 border-slate-900 pb-5 space-y-2">
               <div className="flex items-center justify-between gap-4">
-                <div className="w-14 h-14 rounded-full border-2 border-slate-900 grid place-items-center shrink-0 bg-slate-50">
-                  <Building2 className="w-7 h-7 text-slate-900" />
+                <div className="w-16 h-16 rounded-full border-2 border-slate-900 p-1.5 grid place-items-center shrink-0 bg-white shadow-xs overflow-hidden">
+                  <img src="/eec-logo.webp" alt="Easwari Engineering College" className="w-full h-full object-contain" />
                 </div>
 
                 <div className="text-center flex-1 space-y-1">
@@ -927,7 +930,10 @@ export function PrintableChecklistModal({ open, onClose }: PrintableModalProps) 
               {/* Verification Key Bar */}
               <div className="pt-4 border-t border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between text-[9px] text-slate-500 font-mono gap-2">
                 <span>Security Hash: {authHash}</span>
-                <span>Easwari Engineering College • ISO 9001:2015 Certified Institution</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <img src="/eec-logo.webp" alt="" className="w-3 h-3 object-contain inline shrink-0" />
+                  Easwari Engineering College • ISO 9001:2015 Certified Institution
+                </span>
                 <span>Generated on: {formattedDate}</span>
               </div>
             </div>

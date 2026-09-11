@@ -465,30 +465,36 @@ export function AppShell() {
       >
         {isSuperDreamActive ? (
           /* Super Dream Sidebar Header */
-          <div className="w-full space-y-3">
+          <div className="w-full space-y-2.5">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2.5 py-1">
-                <div
-                  className="w-10 h-10 rounded-xl grid place-items-center shrink-0 shadow-sm"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(167,139,250,0.25) 0%, rgba(249,168,212,0.2) 100%)",
-                    border: "1px solid rgba(167,139,250,0.35)",
-                  }}
-                >
-                  <Crown className="w-5 h-5 text-[var(--primary)]" />
+                <div className="w-10 h-10 rounded-xl p-1 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/15 grid place-items-center shrink-0 shadow-xs">
+                  <img
+                    src="/eec-logo.webp"
+                    alt="Easwari Engineering College"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 {!sidebarCollapsed && (
                   <div className="min-w-0">
-                    <p className="text-sm font-extrabold tracking-wide text-[var(--foreground)] truncate">
-                      SUPER DREAM
-                    </p>
-                    <p className="text-xs text-[var(--muted-foreground)] truncate">Easwari Engineering</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-[13px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
+                        SUPER DREAM
+                      </p>
+                      <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 uppercase tracking-wider">
+                        PRO
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <img src="/eec-logo.webp" alt="" className="w-3.5 h-3.5 object-contain shrink-0" />
+                      <p className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate font-medium">Easwari Engineering</p>
+                    </div>
                   </div>
                 )}
               </div>
               <button
                 onClick={toggleSidebar}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition shrink-0"
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition shrink-0"
                 title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
                 {sidebarCollapsed ? <ChevronRight className="h-4.5 w-4.5" /> : <ChevronLeft className="h-4.5 w-4.5" />}
@@ -500,12 +506,11 @@ export function AppShell() {
               onClick={handleExitSuperDream}
               title={sidebarCollapsed ? "Exit Workspace" : undefined}
               className={cn(
-                "flex w-full items-center gap-2.5 rounded-xl text-[13px] font-semibold transition cursor-pointer",
-                sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5"
+                "flex w-full items-center gap-2.5 rounded-xl text-[12.5px] font-semibold transition cursor-pointer bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border border-slate-200/80 dark:border-white/10",
+                sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2"
               )}
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "var(--muted-foreground)" }}
             >
-              <LogOut className="h-4 w-4 shrink-0" />
+              <LogOut className="h-3.5 w-3.5 shrink-0" />
               {!sidebarCollapsed && <span>Exit Workspace</span>}
             </button>
           </div>
@@ -596,14 +601,11 @@ export function AppShell() {
             data-tour="app-tour-btn"
             title={sidebarCollapsed ? (isSuperDreamActive ? "Super Dream Tour" : "App Tour") : undefined}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl text-[13.5px] transition cursor-pointer",
-              sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
-              isSuperDreamActive
-                ? "text-amber-500 dark:text-amber-300 hover:bg-amber-500/10 font-bold"
-                : "text-slate-700 dark:text-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-foreground font-semibold"
+              "flex w-full items-center gap-3 rounded-xl text-[13px] font-semibold transition cursor-pointer text-slate-600 dark:text-[var(--muted-foreground)] hover:bg-black/5 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white",
+              sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5"
             )}
           >
-            <HelpCircle className={cn("h-4.5 w-4.5 shrink-0", isSuperDreamActive ? "text-amber-500 dark:text-amber-400" : "text-slate-700 dark:text-foreground")} />
+            <HelpCircle className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
             {!sidebarCollapsed && <span>{isSuperDreamActive ? "Super Dream Tour" : "App Tour"}</span>}
           </button>
 
@@ -631,11 +633,17 @@ export function AppShell() {
           <aside className="absolute left-0 top-0 h-full w-72 glass-strong p-4 flex flex-col animate-in slide-in-from-left">
             <div className="flex items-center justify-between">
               {isSuperDreamActive ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded bg-indigo-500/10 border border-indigo-500/20 grid place-items-center text-indigo-400 font-bold text-xs">
-                    SD
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/15 grid place-items-center shrink-0 shadow-xs">
+                    <img src="/eec-logo.webp" alt="Easwari" className="w-7 h-7 object-contain" />
                   </div>
-                  <span className="font-bold text-white text-sm">Super Dream Workspace</span>
+                  <div className="min-w-0">
+                    <span className="font-bold text-foreground text-sm block leading-tight">Super Dream Workspace</span>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <img src="/eec-logo.webp" alt="" className="w-3 h-3 object-contain shrink-0" />
+                      <span className="text-xs text-muted-foreground font-medium">Easwari Engineering</span>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <Brand />
@@ -651,9 +659,9 @@ export function AppShell() {
             {isSuperDreamActive && (
               <button
                 onClick={handleExitSuperDream}
-                className="mt-3 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800"
+                className="mt-3 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 transition"
               >
-                <LogOut className="h-4 w-4 text-slate-400" /> Exit Workspace
+                <LogOut className="h-3.5 w-3.5 text-slate-500" /> Exit Workspace
               </button>
             )}
 
@@ -711,12 +719,9 @@ export function AppShell() {
                 setMobileOpen(false);
                 handleOpenTour();
               }}
-              className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition mb-1",
-                isSuperDreamActive ? "text-amber-300 hover:bg-amber-500/10 font-medium" : "hover:bg-white/10"
-              )}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition mb-1 text-[var(--muted-foreground)] hover:bg-white/10 hover:text-[var(--foreground)] font-medium"
             >
-              <HelpCircle className={cn("h-4 w-4", isSuperDreamActive ? "text-amber-400" : "")} />
+              <HelpCircle className="h-4 w-4 text-slate-400" />
               <span>{isSuperDreamActive ? "Super Dream Tour" : "App Tour"}</span>
             </button>
 

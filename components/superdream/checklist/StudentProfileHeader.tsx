@@ -61,12 +61,12 @@ export function StudentProfileHeader({ onOpenPrintModal }: StudentProfileHeaderP
       {/* College Institutional Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.08] pb-3 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl grid place-items-center shrink-0 shadow-sm"
-            style={{ background: "linear-gradient(135deg, rgba(167,139,250,0.25) 0%, rgba(249,168,212,0.15) 100%)", border: "1px solid rgba(167,139,250,0.3)" }}>
-            <span className="text-[var(--primary)] font-extrabold text-[11px] tracking-wider">EEC</span>
+          <div className="w-11 h-11 rounded-xl p-1 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/15 grid place-items-center shrink-0 shadow-xs">
+            <img src="/eec-logo.webp" alt="Easwari Engineering College" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="flex items-center gap-2">
+              <img src="/eec-logo.webp" alt="" className="w-4 h-4 object-contain shrink-0" />
               <span className="text-xs font-semibold tracking-wider uppercase text-[var(--foreground)]">
                 Easwari Engineering College
               </span>

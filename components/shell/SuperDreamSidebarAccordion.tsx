@@ -14,70 +14,6 @@ export interface SuperDreamSidebarAccordionProps {
   onNavigate: (tab: SuperDreamTab, sectionId?: number) => void;
 }
 
-interface BranchTheme {
-  iconBg: string;
-  iconBorder: string;
-  iconColor: string;
-  badgeBg: string;
-  badgeText: string;
-  badgeBorder: string;
-  activeBorder: string;
-  activeBg: string;
-  glow: string;
-  indicatorColor: string;
-}
-
-const BRANCH_THEMES: Record<string, BranchTheme> = {
-  coding: {
-    iconBg: "bg-emerald-500/10 dark:bg-emerald-500/15",
-    iconBorder: "border-emerald-500/25",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-    badgeBg: "bg-emerald-500/10 dark:bg-emerald-500/20",
-    badgeText: "text-emerald-700 dark:text-emerald-300",
-    badgeBorder: "border-emerald-500/30",
-    activeBorder: "border-emerald-500/30 dark:border-emerald-500/40",
-    activeBg: "bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08]",
-    glow: "rgba(16, 185, 129, 0.35)",
-    indicatorColor: "bg-emerald-500",
-  },
-  certifications: {
-    iconBg: "bg-amber-500/10 dark:bg-amber-500/15",
-    iconBorder: "border-amber-500/25",
-    iconColor: "text-amber-600 dark:text-amber-400",
-    badgeBg: "bg-amber-500/10 dark:bg-amber-500/20",
-    badgeText: "text-amber-700 dark:text-amber-300",
-    badgeBorder: "border-amber-500/30",
-    activeBorder: "border-amber-500/30 dark:border-amber-500/40",
-    activeBg: "bg-amber-500/[0.04] dark:bg-amber-500/[0.08]",
-    glow: "rgba(245, 158, 11, 0.35)",
-    indicatorColor: "bg-amber-500",
-  },
-  portfolio: {
-    iconBg: "bg-cyan-500/10 dark:bg-cyan-500/15",
-    iconBorder: "border-cyan-500/25",
-    iconColor: "text-cyan-600 dark:text-cyan-400",
-    badgeBg: "bg-cyan-500/10 dark:bg-cyan-500/20",
-    badgeText: "text-cyan-700 dark:text-cyan-300",
-    badgeBorder: "border-cyan-500/30",
-    activeBorder: "border-cyan-500/30 dark:border-cyan-500/40",
-    activeBg: "bg-cyan-500/[0.04] dark:bg-cyan-500/[0.08]",
-    glow: "rgba(6, 182, 212, 0.35)",
-    indicatorColor: "bg-cyan-500",
-  },
-  interview: {
-    iconBg: "bg-purple-500/10 dark:bg-purple-500/15",
-    iconBorder: "border-purple-500/25",
-    iconColor: "text-purple-600 dark:text-purple-400",
-    badgeBg: "bg-purple-500/10 dark:bg-purple-500/20",
-    badgeText: "text-purple-700 dark:text-purple-300",
-    badgeBorder: "border-purple-500/30",
-    activeBorder: "border-purple-500/30 dark:border-purple-400/40",
-    activeBg: "bg-purple-500/[0.04] dark:bg-purple-500/[0.08]",
-    glow: "rgba(167, 139, 250, 0.35)",
-    indicatorColor: "bg-purple-500",
-  },
-};
-
 export function SuperDreamSidebarAccordion({
   sidebarCollapsed,
   activeTab,
@@ -98,19 +34,19 @@ export function SuperDreamSidebarAccordion({
   }, [studentChecklist]);
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {/* ── Top Hub Buttons ─────────────────────────────────────────── */}
-      <div className="space-y-1.5 pb-1 border-b border-border/60">
+      <div className="space-y-1 pb-1.5 border-b border-slate-200/80 dark:border-white/10">
         {/* Section 0 Overview Button */}
         <button
           onClick={() => onNavigate("track-road", 0)}
-          title={sidebarCollapsed ? "Track Road (Sec 0)" : undefined}
+          title={sidebarCollapsed ? "Track Road Overview" : undefined}
           className={cn(
-            "group relative flex w-full items-center justify-between gap-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-left cursor-pointer select-none",
+            "group relative flex w-full items-center justify-between gap-2.5 rounded-xl text-[13px] font-medium transition-all text-left cursor-pointer select-none",
             sidebarCollapsed ? "justify-center p-2" : "px-3 py-2",
             activeTab === "track-road" && activeSectionId === 0
-              ? "bg-purple-500/10 dark:bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 shadow-sm shadow-purple-500/10"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
+              ? "bg-indigo-50/90 dark:bg-white/10 text-indigo-900 dark:text-white font-semibold border border-indigo-200/80 dark:border-white/15 shadow-xs"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 border border-transparent"
           )}
         >
           <div className="flex items-center gap-2.5 min-w-0">
@@ -118,8 +54,8 @@ export function SuperDreamSidebarAccordion({
               className={cn(
                 "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105",
                 activeTab === "track-road" && activeSectionId === 0
-                  ? "bg-purple-500/20 border-purple-500/40 text-purple-600 dark:text-purple-300"
-                  : "bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400"
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                  : "bg-slate-100 dark:bg-white/5 border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400"
               )}
             >
               <Compass className="h-4 w-4 shrink-0" />
@@ -132,7 +68,14 @@ export function SuperDreamSidebarAccordion({
           </div>
 
           {!sidebarCollapsed && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 shrink-0">
+            <span
+              className={cn(
+                "text-[10px] font-semibold px-2 py-0.5 rounded-md border shrink-0 transition-colors",
+                activeTab === "track-road" && activeSectionId === 0
+                  ? "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60"
+                  : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200/70 dark:border-white/10"
+              )}
+            >
               Overview
             </span>
           )}
@@ -143,11 +86,11 @@ export function SuperDreamSidebarAccordion({
           onClick={() => onNavigate("tests")}
           title={sidebarCollapsed ? "Proctored Tests Arena" : undefined}
           className={cn(
-            "group relative flex w-full items-center justify-between gap-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-left cursor-pointer select-none",
+            "group relative flex w-full items-center justify-between gap-2.5 rounded-xl text-[13px] font-medium transition-all text-left cursor-pointer select-none",
             sidebarCollapsed ? "justify-center p-2" : "px-3 py-2",
             activeTab === "tests"
-              ? "bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shadow-sm shadow-emerald-500/10"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
+              ? "bg-indigo-50/90 dark:bg-white/10 text-indigo-900 dark:text-white font-semibold border border-indigo-200/80 dark:border-white/15 shadow-xs"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/5 border border-transparent"
           )}
         >
           <div className="flex items-center gap-2.5 min-w-0">
@@ -155,8 +98,8 @@ export function SuperDreamSidebarAccordion({
               className={cn(
                 "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105",
                 activeTab === "tests"
-                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-600 dark:text-emerald-300"
-                  : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                  : "bg-slate-100 dark:bg-white/5 border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400"
               )}
             >
               <ShieldCheck className="h-4 w-4 shrink-0" />
@@ -169,7 +112,14 @@ export function SuperDreamSidebarAccordion({
           </div>
 
           {!sidebarCollapsed && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 shrink-0">
+            <span
+              className={cn(
+                "text-[10px] font-semibold px-2 py-0.5 rounded-md border shrink-0 transition-colors",
+                activeTab === "tests"
+                  ? "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60"
+                  : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200/70 dark:border-white/10"
+              )}
+            >
               Arena
             </span>
           )}
@@ -177,7 +127,7 @@ export function SuperDreamSidebarAccordion({
       </div>
 
       {/* ── 4 Major Progressive Branches ────────────────────────────── */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {SUPER_DREAM_BRANCHES.map((branch) => {
           const BranchIcon = branch.icon;
           const isExpanded = expandedBranch === branch.id;
@@ -187,15 +137,13 @@ export function SuperDreamSidebarAccordion({
               (item.sectionId === undefined || activeSectionId === item.sectionId)
           );
 
-          const theme = BRANCH_THEMES[branch.id] || BRANCH_THEMES.coding;
-
           return (
             <div
               key={branch.id}
               className={cn(
                 "rounded-2xl transition-all duration-200",
                 !sidebarCollapsed && isExpanded
-                  ? "bg-muted/30 dark:bg-white/[0.02] border border-border/70 p-1 shadow-2xs"
+                  ? "bg-slate-50/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/10 p-1 shadow-2xs"
                   : "border border-transparent"
               )}
             >
@@ -204,26 +152,26 @@ export function SuperDreamSidebarAccordion({
                 onClick={() => toggleBranch(branch.id)}
                 title={sidebarCollapsed ? branch.title : undefined}
                 className={cn(
-                  "group flex w-full items-center justify-between gap-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 text-left cursor-pointer select-none",
+                  "group flex w-full items-center justify-between gap-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 text-left cursor-pointer select-none",
                   sidebarCollapsed ? "justify-center p-2" : "px-2.5 py-2",
                   isBranchActive && !isExpanded
-                    ? `${theme.activeBg} text-foreground border ${theme.activeBorder} shadow-2xs`
-                    : "text-foreground hover:bg-muted/70 border border-transparent"
+                    ? "bg-slate-100/90 dark:bg-white/[0.06] text-slate-900 dark:text-white font-semibold border border-slate-200/90 dark:border-white/15 shadow-2xs"
+                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white border border-transparent"
                 )}
               >
                 <div className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
                   <div
                     className={cn(
                       "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105 shadow-2xs",
-                      theme.iconBg,
-                      theme.iconBorder,
-                      theme.iconColor
+                      isBranchActive
+                        ? "bg-indigo-600 dark:bg-indigo-500 text-white border-indigo-600 dark:border-indigo-400"
+                        : "bg-slate-100 dark:bg-white/5 border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-400"
                     )}
                   >
                     <BranchIcon className="h-4 w-4 shrink-0" />
                   </div>
                   {!sidebarCollapsed && (
-                    <span className="font-semibold tracking-tight truncate text-[13px] text-foreground">
+                    <span className="font-medium tracking-tight truncate text-[13px] text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white">
                       {branch.title}
                     </span>
                   )}
@@ -231,21 +179,21 @@ export function SuperDreamSidebarAccordion({
 
                 {!sidebarCollapsed && (
                   <div className="flex items-center gap-2 shrink-0 ml-auto">
-                    {/* Item count badge with branch theme */}
+                    {/* Item count badge */}
                     <span
                       className={cn(
-                        "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border shrink-0 transition-colors",
-                        theme.badgeBg,
-                        theme.badgeText,
-                        theme.badgeBorder
+                        "text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border shrink-0 transition-colors",
+                        isBranchActive
+                          ? "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/60"
+                          : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200/70 dark:border-white/10"
                       )}
                     >
                       {branch.items.length}
                     </span>
                     <ChevronDown
                       className={cn(
-                        "h-3.5 w-3.5 text-muted-foreground/80 transition-transform duration-200 shrink-0 group-hover:text-foreground",
-                        isExpanded && "rotate-180"
+                        "h-3.5 w-3.5 text-slate-400 transition-transform duration-200 shrink-0 group-hover:text-slate-600 dark:group-hover:text-slate-200",
+                        isExpanded && "rotate-180 text-slate-700 dark:text-slate-300"
                       )}
                     />
                   </div>
@@ -262,12 +210,7 @@ export function SuperDreamSidebarAccordion({
                 >
                   {/* Vertical Guide Rail Line */}
                   {!sidebarCollapsed && (
-                    <div
-                      className="pointer-events-none absolute left-0 top-1.5 bottom-1.5 w-[1.5px] rounded-full"
-                      style={{
-                        background: `linear-gradient(to bottom, ${theme.glow}, transparent 96%)`,
-                      }}
-                    />
+                    <div className="pointer-events-none absolute left-0 top-1.5 bottom-1.5 w-[1.5px] rounded-full bg-slate-200 dark:bg-white/10" />
                   )}
 
                   {branch.items.map((subItem) => {
@@ -294,13 +237,13 @@ export function SuperDreamSidebarAccordion({
                           "group relative flex w-full items-center justify-between gap-2 rounded-xl text-[12.5px] transition-all duration-150 cursor-pointer text-left select-none",
                           sidebarCollapsed ? "justify-center p-2" : "px-2.5 py-1.5",
                           isSubActive
-                            ? "bg-primary/10 dark:bg-primary/20 text-primary font-bold border border-primary/25 shadow-xs"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50 font-medium hover:translate-x-0.5"
+                            ? "bg-indigo-50/90 dark:bg-white/10 text-indigo-900 dark:text-white font-semibold border border-indigo-200/80 dark:border-white/15 shadow-xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/5 font-medium hover:translate-x-0.5"
                         )}
                       >
-                        {/* Active Left Neon Indicator Bar */}
+                        {/* Active Left Indicator Bar */}
                         {isSubActive && !sidebarCollapsed && (
-                          <span className="absolute -left-[15px] top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-primary shadow-[0_0_8px_var(--primary)]" />
+                          <span className="absolute -left-[15px] top-1.5 bottom-1.5 w-[2.5px] rounded-r-full bg-indigo-600 dark:bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
                         )}
 
                         <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -308,10 +251,10 @@ export function SuperDreamSidebarAccordion({
                           {num ? (
                             <span
                               className={cn(
-                                "w-5 h-5 rounded-md flex items-center justify-center text-[10.5px] font-mono font-bold shrink-0 transition-colors",
+                                "w-5 h-5 rounded-md flex items-center justify-center text-[10.5px] font-mono font-medium shrink-0 transition-colors border",
                                 isSubActive
-                                  ? "bg-primary text-primary-foreground shadow-2xs"
-                                  : "bg-muted text-muted-foreground group-hover:bg-foreground/10 group-hover:text-foreground"
+                                  ? "bg-indigo-600 text-white font-bold border-indigo-600 shadow-2xs"
+                                  : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200/60 dark:border-white/10 group-hover:text-slate-900 dark:group-hover:text-white"
                               )}
                             >
                               {num}
@@ -321,8 +264,8 @@ export function SuperDreamSidebarAccordion({
                               className={cn(
                                 "w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors",
                                 isSubActive
-                                  ? "text-primary font-bold"
-                                  : "text-muted-foreground/80 group-hover:text-foreground"
+                                  ? "text-indigo-600 dark:text-indigo-300 font-bold"
+                                  : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200"
                               )}
                             >
                               <SubIcon className="h-3.5 w-3.5" />
@@ -342,15 +285,15 @@ export function SuperDreamSidebarAccordion({
                             className={cn(
                               "text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md shrink-0 transition-colors flex items-center gap-1",
                               score >= 80
-                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/50"
                                 : score > 0
-                                ? "bg-muted/80 text-muted-foreground border border-border/50"
-                                : "opacity-0 group-hover:opacity-100 text-muted-foreground/60"
+                                ? "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-white/10"
+                                : "opacity-0 group-hover:opacity-100 text-slate-400"
                             )}
                           >
                             {score >= 80 ? (
                               <>
-                                <CheckCircle2 className="h-2.5 w-2.5" />
+                                <CheckCircle2 className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
                                 <span>{score}%</span>
                               </>
                             ) : (
@@ -361,7 +304,7 @@ export function SuperDreamSidebarAccordion({
 
                         {/* Extra Custom Badge (if any) */}
                         {!sidebarCollapsed && subItem.badge && !score && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-semibold uppercase shrink-0">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 font-medium uppercase shrink-0 border border-slate-200/60 dark:border-white/10">
                             {subItem.badge}
                           </span>
                         )}
