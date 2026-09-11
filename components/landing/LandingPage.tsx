@@ -10,10 +10,6 @@ import {
   Calendar,
   CheckCircle2,
   ArrowRight,
-  Zap,
-  Target,
-  MessageCircle,
-  Building2,
   ChevronLeft,
   ChevronRight,
   Menu,
@@ -608,25 +604,6 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── STATS COUNTER STRIP ── */}
-      <section className="relative z-10 py-7 bg-white/80 dark:bg-[#131B2E]/60 border-y border-slate-200 dark:border-[#2F4B6B]/40 backdrop-blur-xl shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { icon: Zap, value: "10,000+", label: "Resumes Analyzed", ember: true },
-            { icon: Target, value: "98.4%", label: "ATS Match Accuracy", ember: true },
-            { icon: MessageCircle, value: "50,000+", label: "Mock Interview Answers", ember: false },
-            { icon: Building2, value: "500+", label: "Campus Placement Drives", ember: false },
-          ].map((stat, i) => (
-            <div key={i} className="flex flex-col items-center space-y-1">
-              <stat.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mb-1 opacity-90" />
-              <div className={`text-2xl md:text-3xl font-extrabold font-mono ${stat.ember ? "text-indigo-600 dark:text-indigo-400" : "text-slate-900 dark:text-white"}`}>
-                {stat.value}
-              </div>
-              <div className="text-xs text-slate-600 dark:text-[#93A0B5] mt-0.5">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ── DETAILED FEATURE SECTIONS ── */}
       <section className="relative z-10 py-16 px-4 md:px-8 max-w-7xl mx-auto space-y-28">
