@@ -296,43 +296,7 @@ export function AmbientLightingCustomizer({ open, onClose }: AmbientLightingCust
                 </div>
               </div>
 
-              {/* 2. Glass Panels Toggle Switch */}
-              <div className="p-3.5 rounded-2xl panel-slot border border-white/10 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-300 border border-purple-400/30 grid place-items-center shrink-0">
-                    <Layers className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--foreground)]">
-                      Liquid Glass Surfaces
-                    </h4>
-                    <p className="text-[11px] text-[var(--muted-foreground)]">
-                      {glassPanelsEnabled
-                        ? "Refractive surfaces paired with dynamic ambient backgrounds"
-                        : "Flat solid surfaces with plain background compatibility"}
-                    </p>
-                  </div>
-                </div>
-
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={glassPanelsEnabled}
-                    onChange={(e) => {
-                      setGlassPanelsEnabled(e.target.checked);
-                      toast.success(
-                        e.target.checked
-                          ? "Liquid Glass enabled (dynamic background active)"
-                          : "Flat solid surfaces enabled"
-                      );
-                    }}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
-                </label>
-              </div>
-
-              {/* 3. Background Type Selector */}
+              {/* 2. Background Type Selector */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">
