@@ -1576,8 +1576,8 @@ export function UnifiedExamConsole({
   const handleRunCode = async () => {
     if (!currentQ || currentQ.type !== "coding") return;
     const activeLang = getActiveLangForQuestion(currentQ.id);
-    const codeToRun = (getCodeForQuestion(currentQ.id, activeLang, currentQ) || "").trim();
-    if (!codeToRun) {
+    const codeToRun = (getCodeForQuestion(currentQ.id, activeLang, currentQ) || "").replace(/\s+$/, "");
+    if (!codeToRun.trim()) {
       toast.error("Please write code before executing");
       return;
     }
@@ -1633,8 +1633,23 @@ export function UnifiedExamConsole({
         const codeLines = codeToRun.split("\n");
         const totalCodeLines = codeLines.length;
 
-        // Ensure errorLine never points beyond total lines in the editor
+        // Ensure errorLine never points beyond total lines or on an empty line
         if (errLineNum && !isNaN(errLineNum)) {
+          if (errLineNum >= 1 && errLineNum <= totalCodeLines) {
+            const currentLineContent = (codeLines[errLineNum - 1] || "").trim();
+            const isMissingTerminator = (t: string) =>
+              Boolean(t && !t.startsWith("//") && !t.startsWith("/*") && !t.endsWith(";") && !t.endsWith("{") && !t.endsWith("}") && !t.endsWith(":") && !t.startsWith("class ") && !t.startsWith("public class ") && !/main\s*\(/i.test(t));
+
+            if (!currentLineContent || currentLineContent.startsWith("//") || currentLineContent === "}" || currentLineContent === "{") {
+              // Check line directly below (errLineNum + 1)
+              if (errLineNum < totalCodeLines && isMissingTerminator(codeLines[errLineNum].trim())) {
+                errLineNum = errLineNum + 1;
+              } else if (errLineNum > 1 && isMissingTerminator(codeLines[errLineNum - 2].trim())) {
+                errLineNum = errLineNum - 1;
+              }
+            }
+          }
+
           if (errLineNum > totalCodeLines || errLineNum < 1) {
             let found = totalCodeLines;
             for (let li = totalCodeLines - 1; li >= 0; li--) {

@@ -622,9 +622,9 @@ export function ProctoredCodingTestConsole({
   // Run Code online compiler execution
   const handleRunCode = async (isCustom = false) => {
     if (!currentQ) return;
-    const activeCode = currentAnswer.trim();
+    const activeCode = currentAnswer.replace(/\s+$/, "");
 
-    if (!activeCode) {
+    if (!activeCode.trim()) {
       toast.error("Please write your solution in the editor before running.");
       return;
     }
@@ -652,10 +652,24 @@ export function ProctoredCodingTestConsole({
         const errText = res.errorMessage || res.stderr || (res as any).output || "";
         const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
         let errLineNum = res.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
-        const codeLines = code.split("\n");
+        const codeLines = activeCode.split("\n");
         const totalCodeLines = codeLines.length;
 
         if (errLineNum && !isNaN(errLineNum)) {
+          if (errLineNum >= 1 && errLineNum <= totalCodeLines) {
+            const currentLineContent = (codeLines[errLineNum - 1] || "").trim();
+            const isMissingTerminator = (t: string) =>
+              Boolean(t && !t.startsWith("//") && !t.startsWith("/*") && !t.endsWith(";") && !t.endsWith("{") && !t.endsWith("}") && !t.endsWith(":") && !t.startsWith("class ") && !t.startsWith("public class ") && !/main\s*\(/i.test(t));
+
+            if (!currentLineContent || currentLineContent.startsWith("//") || currentLineContent === "}" || currentLineContent === "{") {
+              if (errLineNum < totalCodeLines && isMissingTerminator(codeLines[errLineNum].trim())) {
+                errLineNum = errLineNum + 1;
+              } else if (errLineNum > 1 && isMissingTerminator(codeLines[errLineNum - 2].trim())) {
+                errLineNum = errLineNum - 1;
+              }
+            }
+          }
+
           if (errLineNum > totalCodeLines || errLineNum < 1) {
             let found = totalCodeLines;
             for (let li = totalCodeLines - 1; li >= 0; li--) {

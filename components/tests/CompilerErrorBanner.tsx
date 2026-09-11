@@ -318,12 +318,18 @@ export function parseCompilerError(errorText: string, language: string = ""): Pa
  * Renders error text with prominent, enlarged badges for punctuation symbols (;, :, {}, (), [])
  * so candidates can immediately spot missing or misplaced punctuation.
  */
-export function HighlightedSyntaxSymbols({ text }: { text: string }) {
+export function HighlightedSyntaxSymbols({
+  text,
+  variant = "rose",
+}: {
+  text: string;
+  variant?: "rose" | "amber";
+}) {
   if (!text) return null;
 
-  // Regex to split on quoted symbols like ';', ':', '{', '}', '(', ')', '[', ']'
-  // or parenthesized symbols like (;), (:)
-  const tokenRegex = /('(?:;|:|\{|\}|\(|\)|\[|\]|,|\.)'|\((?:;|:|\{|\}|\(|\)|\[|\])\)|(?:\b(?:semicolon|colon)\s*\((?:;|:)\))|[;:]+)/g;
+  // Regex to match quoted or parenthesized punctuation tokens:
+  // e.g. ';', ':', '{', '}', '(', ')', '[', ']', (;)
+  const tokenRegex = /('(?:;|:|\{|\}|\(|\)|\[|\]|,|\.)'|\((?:;|:|\{|\}|\(|\)|\[|\])\)|(?<=\s|^)[;:]+(?=\s|$))/g;
   const parts = text.split(tokenRegex);
 
   return (
@@ -333,21 +339,22 @@ export function HighlightedSyntaxSymbols({ text }: { text: string }) {
 
         const matchQuoted = part.match(/^'([;:{}()[\].,])'$/);
         const matchParen = part.match(/^\(([;:{}()[\]])\)$/);
-        const matchWordWithSymbol = part.match(/\((;)\)/) || part.match(/\((:)\)/);
-
         const symbolToHighlight = matchQuoted
           ? matchQuoted[1]
           : matchParen
           ? matchParen[1]
-          : matchWordWithSymbol
-          ? matchWordWithSymbol[1]
           : (part === ";" || part === ":") ? part : null;
 
         if (symbolToHighlight) {
+          const badgeClass =
+            variant === "amber"
+              ? "inline-flex items-center justify-center min-w-[20px] h-[18px] px-1.5 mx-0.5 rounded font-mono font-bold text-xs bg-amber-200/80 dark:bg-amber-800/40 text-amber-950 dark:text-amber-100 border border-amber-300 dark:border-amber-700 shadow-2xs align-baseline"
+              : "inline-flex items-center justify-center min-w-[22px] h-[20px] px-1.5 mx-0.5 rounded-md bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/35 text-rose-700 dark:text-rose-300 font-mono font-bold text-xs shadow-2xs align-baseline";
+
           return (
             <kbd
               key={idx}
-              className="inline-flex items-center justify-center min-w-[28px] h-[24px] px-2 mx-1 rounded-md bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/35 text-rose-700 dark:text-rose-300 font-mono font-black text-sm tracking-normal shadow-xs align-middle select-all"
+              className={badgeClass}
               title={`Punctuation symbol: ${symbolToHighlight}`}
             >
               {symbolToHighlight}
@@ -485,7 +492,7 @@ export function CompilerErrorBanner({
                 Helpful Tip
               </span>
               <p className="leading-relaxed">
-                <HighlightedSyntaxSymbols text={parsed.smartTip} />
+                <HighlightedSyntaxSymbols text={parsed.smartTip} variant="amber" />
               </p>
             </div>
           </div>
@@ -500,8 +507,8 @@ export function CompilerErrorBanner({
             <pre
               className={`p-2.5 rounded-lg border text-[11px] font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto ${
                 isLight
-                  ? "bg-slate-900 text-slate-200 border-slate-800"
-                  : "bg-black/70 text-slate-300 border-slate-800"
+                  ? "bg-slate-100 text-slate-900 border-slate-200"
+                  : "bg-slate-900/90 text-slate-200 border-slate-800"
               }`}
             >
               {errorText}

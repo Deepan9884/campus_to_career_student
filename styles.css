@@ -2508,4 +2508,20 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
   color: #94a3b8 !important;
 }
 
+/* ==========================================================================
+   Monaco Editor Error Line Highlighting (Soft, Non-Opaque Tint with Accent Left Border)
+   ========================================================================== */
+.monaco-editor .monaco-error-line-highlight {
+  background-color: rgba(244, 63, 94, 0.12) !important;
+  border-left: 3px solid #f43f5e !important;
+  box-sizing: border-box !important;
+}
+
+.monaco-editor.campus-dark .monaco-error-line-highlight,
+.monaco-editor.vs-dark .monaco-error-line-highlight {
+  background-color: rgba(244, 63, 94, 0.22) !important;
+  border-left: 3px solid #fb7185 !important;
+}
+
+
 

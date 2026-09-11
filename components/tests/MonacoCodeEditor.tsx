@@ -502,7 +502,7 @@ export function MonacoCodeEditor({
           range: new monaco.Range(line, 1, line, model.getLineMaxColumn(line)),
           options: {
             isWholeLine: true,
-            className: isLight ? "bg-rose-500/15" : "bg-rose-500/20",
+            className: "monaco-error-line-highlight",
             glyphMarginClassName: "bg-rose-500 rounded-full",
             hoverMessage: { value: `**Compilation Error**: ${displayMsg}` },
           },
