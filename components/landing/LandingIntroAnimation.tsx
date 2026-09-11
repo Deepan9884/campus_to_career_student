@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap } from "lucide-react";
 
 interface LandingIntroAnimationProps {
   onComplete: () => void;
@@ -273,7 +272,7 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
             }}
             className="relative z-30 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto"
           >
-            {/* 1. Sleek Brand Vector Emblem */}
+            {/* 1. Official Brand Logo Emblem */}
             <motion.div
               initial={{ scale: 0, rotate: -20, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
@@ -281,79 +280,19 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
               className="mb-6 relative"
             >
               {/* Outer Glow Halo */}
-              <div className="absolute -inset-2 bg-gradient-to-r from-indigo-300 via-sky-300 to-purple-300 rounded-2xl blur-lg opacity-60 animate-pulse" />
+              <div className="absolute -inset-2 bg-gradient-to-r from-indigo-300 via-sky-300 to-amber-300 rounded-2xl blur-lg opacity-60 animate-pulse" />
 
-              {/* Crisp White Emblem Frame */}
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white p-3 border border-indigo-200 shadow-xl shadow-indigo-100/60 flex items-center justify-center">
-                <svg
-                  viewBox="0 0 36 36"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-full h-full drop-shadow-sm"
-                >
-                  {/* Graduation Cap */}
-                  <path
-                    d="M5 14L18 7L31 14L18 21L5 14Z"
-                    fill="url(#cap-intro-light)"
-                    stroke="#312E81"
-                    strokeWidth="1.4"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M10 17V22.5C10 24.5 13.5 26.5 18 26.5C22.5 26.5 26 24.5 26 22.5V17"
-                    stroke="#4F46E5"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M31 14V21.5"
-                    stroke="#0284C7"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                  {/* Ascending Career Arrow */}
-                  <path
-                    d="M11 25L17 19L22 23L29 11"
-                    stroke="url(#arrow-intro-light)"
-                    strokeWidth="2.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M24 11H29V16"
-                    stroke="#0284C7"
-                    strokeWidth="2.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <defs>
-                    <linearGradient id="cap-intro-light" x1="5" y1="7" x2="31" y2="21" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#4F46E5" />
-                      <stop offset="1" stopColor="#312E81" />
-                    </linearGradient>
-                    <linearGradient id="arrow-intro-light" x1="11" y1="25" x2="29" y2="11" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#4F46E5" />
-                      <stop offset="0.5" stopColor="#6366F1" />
-                      <stop offset="1" stopColor="#0284C7" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+              {/* Crisp White Emblem Frame with User's Official Logo Icon */}
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white p-3 border border-slate-200/80 shadow-xl shadow-indigo-100/60 flex items-center justify-center">
+                <img
+                  src="/logo-icon.png"
+                  alt="Campus to Career"
+                  className="w-full h-full object-contain select-none drop-shadow-xs"
+                />
               </div>
             </motion.div>
 
-            {/* 2. Top Kicker Pill Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-indigo-200 text-indigo-700 text-xs sm:text-sm font-bold tracking-wider uppercase mb-4 shadow-sm"
-            >
-              <Zap className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Next-Gen Career Intelligence</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            </motion.div>
-
-            {/* 3. BIG BEAUTIFUL DISPLAY TEXT: CAMPUS TO CAREER AI */}
+            {/* 2. BIG BEAUTIFUL DISPLAY TEXT: CAMPUS TO CAREER */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -368,16 +307,10 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
               </span>{" "}
               <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent">
                 CAREER
-              </span>{" "}
-              {/* Glowing AI badge inline */}
-              <span className="inline-block align-middle ml-2 sm:ml-3">
-                <span className="relative inline-flex items-center justify-center px-3 sm:px-4 py-1 text-xl sm:text-3xl md:text-4xl font-black rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-600 text-white shadow-lg shadow-indigo-500/25 border border-indigo-400/40 tracking-wider">
-                  AI
-                </span>
               </span>
             </motion.h1>
 
-            {/* 4. Elegant Tagline */}
+            {/* 3. Elegant Tagline */}
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -396,7 +329,7 @@ export const LandingIntroAnimation: React.FC<LandingIntroAnimationProps> = ({
                 {phase === "rising"
                   ? "Initializing Career Engine..."
                   : phase === "shimmer"
-                  ? "Syncing AI Intelligence..."
+                  ? "Syncing Intelligence..."
                   : "Opening Experience..."}
               </span>
             </div>
