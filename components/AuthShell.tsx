@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { FileText, Mic, Trophy, Share2, GitBranch, Compass, Sparkles } from "lucide-react";
+import { FileText, Mic, Trophy, Share2, GitBranch, Compass } from "lucide-react";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
@@ -44,75 +44,15 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
               <br /> in weeks, not months.
             </h1>
 
-            {/* Cohesive Glassmorphic Career Studio Showcase Card */}
-            <div className="relative rounded-2xl border border-slate-200/90 bg-white/75 backdrop-blur-md p-4 shadow-lg shadow-indigo-500/5 overflow-hidden transition-all duration-300 hover:border-indigo-200">
-              {/* Subtle ambient accent glow */}
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent rounded-full blur-2xl pointer-events-none" />
-
-              {/* Top Studio Bar */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
-                  </span>
-                  <span className="text-[11px] font-bold tracking-wider uppercase text-slate-700">
-                    AI Career Studio • Live Diagnostic
-                  </span>
-                </div>
-                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100/80">
-                  Super Dream Ready
-                </span>
-              </div>
-
-              {/* Metrics Row */}
-              <div className="grid grid-cols-3 gap-3 py-3">
-                <div className="space-y-1">
-                  <div className="text-[11px] font-medium text-slate-500">ATS Match</div>
-                  <div className="text-lg font-extrabold text-slate-900 tracking-tight flex items-baseline gap-1">
-                    <span>96%</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold">Top Tier</span>
-                  </div>
-                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full w-[96%] rounded-full" />
-                  </div>
-                </div>
-
-                <div className="space-y-1 border-x border-slate-100 px-3">
-                  <div className="text-[11px] font-medium text-slate-500">Voice AI Mock</div>
-                  <div className="text-lg font-extrabold text-slate-900 tracking-tight flex items-baseline gap-1">
-                    <span>8.9</span>
-                    <span className="text-[10px] text-indigo-600 font-semibold">/ 10</span>
-                  </div>
-                  <div className="flex items-center gap-0.5 pt-0.5">
-                    <div className="w-1 h-3 bg-indigo-600 rounded-full animate-pulse" />
-                    <div className="w-1 h-2 bg-indigo-400 rounded-full" />
-                    <div className="w-1 h-3.5 bg-purple-600 rounded-full animate-pulse delay-75" />
-                    <div className="w-1 h-2 bg-indigo-300 rounded-full" />
-                    <span className="text-[10px] text-slate-500 pl-1 font-medium">STAR Verified</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1 pl-1">
-                  <div className="text-[11px] font-medium text-slate-500">GitHub Audit</div>
-                  <div className="text-lg font-extrabold text-slate-900 tracking-tight flex items-baseline gap-1">
-                    <span>A+</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold">Clean Code</span>
-                  </div>
-                  <div className="text-[10px] text-slate-500 truncate font-medium">
-                    12 Repos Audited
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Insight Strip */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-medium">
-                <span className="flex items-center gap-1 text-indigo-700">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                  Profile calibrated for FAANG & Product Startups
-                </span>
-                <span className="text-slate-400 text-[10px]">Updated 2m ago</span>
-              </div>
+            {/* Hero Artwork: Perfectly Positioned Below Headline */}
+            <div className="relative flex items-center justify-start py-1">
+              <div className="absolute -inset-2 bg-gradient-to-tr from-indigo-100/40 via-sky-100/30 to-purple-100/30 rounded-3xl blur-xl -z-10" />
+              <img
+                src="/picture.webp"
+                alt="Become Internship Ready"
+                className="w-full max-w-[340px] xl:max-w-[380px] max-h-[220px] xl:max-h-[245px] object-contain drop-shadow-sm select-none transition-transform duration-300 hover:scale-[1.02]"
+                loading="eager"
+              />
             </div>
 
             {/* Value Proposition Cards - 6 Features in a Consistent, Unified Strip */}
