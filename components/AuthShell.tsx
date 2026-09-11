@@ -1,116 +1,17 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, ShieldCheck } from "lucide-react";
-
-const PICTURE_PANELS_ROW1 = [
-  { src: "/landing/study_interview.jpg", alt: "AI Mock Interview" },
-  { src: "/landing/study_resume.jpg", alt: "ATS Resume Audit" },
-  { src: "/landing/study_github.jpg", alt: "GitHub Code Review" },
-  { src: "/landing/study_roadmap.jpg", alt: "Skill Roadmap" },
-  { src: "/landing/study_coding.jpg", alt: "Coding Practice" },
-  { src: "/landing/study_events.jpg", alt: "Tech Events" },
-];
-
-const PICTURE_PANELS_ROW2 = [
-  { src: "/landing/study_interview.jpg", alt: "Interview Preparation" },
-  { src: "/landing/study_resume.jpg", alt: "Resume Builder" },
-  { src: "/landing/study_github.jpg", alt: "Project Showcase" },
-  { src: "/landing/study_roadmap.jpg", alt: "Career Roadmap" },
-  { src: "/landing/study_coding.jpg", alt: "Interactive Coding" },
-  { src: "/landing/study_events.jpg", alt: "Hiring Drives & Hackathons" },
-];
-
-const PICTURE_PANELS_ROW3 = [
-  { src: "/landing/study_roadmap.jpg", alt: "Career Roadmap" },
-  { src: "/landing/study_interview.jpg", alt: "Mock Interview" },
-  { src: "/landing/study_resume.jpg", alt: "Resume Analysis" },
-  { src: "/landing/study_github.jpg", alt: "Code Audit" },
-  { src: "/landing/study_events.jpg", alt: "Events & Workshops" },
-  { src: "/landing/study_coding.jpg", alt: "Algorithm Prep" },
-];
+import { CheckCircle2 } from "lucide-react";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="light min-h-screen relative bg-gradient-to-br from-slate-50 via-white to-indigo-50/40 text-slate-900 overflow-hidden flex flex-col justify-between select-none auth-shell">
-      {/* ── AMBIENT SOFT LIGHTING ── */}
-      <div className="fixed top-1/4 right-1/4 w-[600px] h-[600px] bg-indigo-200/25 rounded-full blur-[180px] pointer-events-none z-0" />
-      <div className="fixed bottom-10 left-10 w-[600px] h-[600px] bg-sky-200/25 rounded-full blur-[200px] pointer-events-none z-0" />
-      <div className="fixed top-12 left-1/3 w-[450px] h-[450px] bg-purple-100/30 rounded-full blur-[160px] pointer-events-none z-0" />
+      {/* ── AMBIENT CLEAN BACKDROP ── */}
+      <div className="fixed top-[-10%] right-[-5%] w-[550px] h-[550px] bg-indigo-200/20 rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="fixed bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-sky-200/25 rounded-full blur-[160px] pointer-events-none z-0" />
+      <div className="fixed top-1/3 left-1/4 w-[400px] h-[400px] bg-purple-100/20 rounded-full blur-[140px] pointer-events-none z-0" />
 
-      {/* ── FULL-SCREEN MOVING PANELS BACKGROUND ANIMATION ── */}
-      <div className="absolute inset-0 z-0 flex flex-col justify-center gap-5 overflow-hidden pointer-events-none opacity-35">
-        {/* Row 1 */}
-        <div className="flex gap-5 animate-panels-left">
-          {[...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1].map((panel, idx) => (
-            <div
-              key={`r1-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-slate-200/90 shadow-lg shadow-slate-200/50 bg-white relative group"
-            >
-              <img
-                src={panel.src}
-                alt={panel.alt}
-                className="w-full h-full object-cover filter contrast-[1.05] brightness-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-white/10 to-transparent" />
-            </div>
-          ))}
-        </div>
-
-        {/* Row 2 */}
-        <div className="flex gap-5 animate-panels-left-slow">
-          {[...PICTURE_PANELS_ROW2, ...PICTURE_PANELS_ROW2, ...PICTURE_PANELS_ROW2].map((panel, idx) => (
-            <div
-              key={`r2-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-slate-200/90 shadow-lg shadow-slate-200/50 bg-white relative group"
-            >
-              <img
-                src={panel.src}
-                alt={panel.alt}
-                className="w-full h-full object-cover filter contrast-[1.05] brightness-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-white/10 to-transparent" />
-            </div>
-          ))}
-        </div>
-
-        {/* Row 3 */}
-        <div className="flex gap-5 animate-panels-left-fast">
-          {[...PICTURE_PANELS_ROW3, ...PICTURE_PANELS_ROW3, ...PICTURE_PANELS_ROW3].map((panel, idx) => (
-            <div
-              key={`r3-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-slate-200/90 shadow-lg shadow-slate-200/50 bg-white relative group"
-            >
-              <img
-                src={panel.src}
-                alt={panel.alt}
-                className="w-full h-full object-cover filter contrast-[1.05] brightness-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-white/10 to-transparent" />
-            </div>
-          ))}
-        </div>
-
-        {/* Row 4 (for tall screens) */}
-        <div className="flex gap-5 animate-panels-left-slow">
-          {[...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1, ...PICTURE_PANELS_ROW1].map((panel, idx) => (
-            <div
-              key={`r4-${idx}`}
-              className="w-80 h-48 flex-shrink-0 rounded-2xl overflow-hidden border border-slate-200/90 shadow-lg shadow-slate-200/50 bg-white relative group"
-            >
-              <img
-                src={panel.src}
-                alt={panel.alt}
-                className="w-full h-full object-cover filter contrast-[1.05] brightness-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-white/10 to-transparent" />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── CRISP LIGHT VIGNETTE OVERLAY ── */}
-      <div className="absolute inset-0 z-0 bg-white/60 backdrop-blur-[2px] pointer-events-none" />
-      <div className="absolute inset-0 z-0 bg-gradient-to-r from-white/95 via-white/80 to-white/90 pointer-events-none" />
+      {/* Subtle Dot Matrix Texture */}
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:28px_28px] opacity-45 pointer-events-none" />
 
       {/* ── FOREGROUND CONTENT GRID ── */}
       <div className="relative z-10 min-h-screen grid lg:grid-cols-12 items-center">
@@ -122,19 +23,20 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
               <img
                 src="/logo.png"
                 alt="Campus to Career"
-                className="block dark:hidden h-10 md:h-12 w-auto max-w-[220px] object-contain drop-shadow-sm"
+                className="block dark:hidden h-10 md:h-12 w-auto max-w-[220px] object-contain drop-shadow-xs"
               />
               <img
                 src="/logo-dark.png"
                 alt="Campus to Career"
-                className="hidden dark:block h-10 md:h-12 w-auto max-w-[220px] object-contain drop-shadow-sm"
+                className="hidden dark:block h-10 md:h-12 w-auto max-w-[220px] object-contain drop-shadow-xs"
               />
             </Link>
           </div>
 
-          {/* Hero Content */}
-          <div className="my-auto py-10 max-w-xl space-y-6">
-            <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.15] text-slate-900 drop-shadow-xs">
+          {/* Hero Content Area */}
+          <div className="my-auto py-6 max-w-xl space-y-6">
+            {/* Catchy & Bold Headline */}
+            <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.18] text-slate-900 drop-shadow-xs">
               Become{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-sky-600 to-blue-600">
                 internship-ready
@@ -142,34 +44,52 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
               <br /> in weeks, not months.
             </h1>
 
-            <p className="text-slate-600 text-base font-normal leading-relaxed">
-              Step into an intelligent studio designed to score ATS resumes, simulate voice technical interviews, and build recruiter-ready GitHub portfolios.
-            </p>
+            {/* Edited Artwork: Perfectly Placed Below the Catchy Line */}
+            <div className="relative flex items-center justify-start py-2">
+              <div className="absolute -inset-2 bg-gradient-to-tr from-indigo-100/40 via-sky-100/30 to-amber-50/40 rounded-3xl blur-xl -z-10" />
+              <img
+                src="/picture.webp"
+                alt="Become Internship Ready"
+                className="w-full max-w-[380px] xl:max-w-[420px] max-h-[280px] xl:max-h-[320px] object-contain drop-shadow-sm select-none transition-transform duration-300 hover:scale-[1.02]"
+                loading="eager"
+              />
+            </div>
 
-            {/* Feature Checklist */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center space-x-3 text-sm text-slate-700 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Instant ATS resume diagnosis and bullet point rewriter</span>
+            {/* Value Proposition Cards - Utilizing Horizontal Space Well */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white">
+                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-semibold text-slate-800 leading-snug">
+                  Instant ATS Resume Diagnosis
+                </span>
               </div>
-              <div className="flex items-center space-x-3 text-sm text-slate-700 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Live voice AI mock coach with STAR feedback scorecards</span>
+
+              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white">
+                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-semibold text-slate-800 leading-snug">
+                  Live Voice AI Mock Coach
+                </span>
               </div>
-              <div className="flex items-center space-x-3 text-sm text-slate-700 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Automated GitHub repository audit and student leaderboard</span>
+
+              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white">
+                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-semibold text-slate-800 leading-snug">
+                  GitHub Audit & Rank
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between text-xs text-slate-500 font-medium border-t border-slate-200/90 pt-4">
+          {/* Clean Footer */}
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium border-t border-slate-200/80 pt-4 max-w-xl">
             <span>© 2026 Campus to Career AI</span>
-            <span className="flex items-center gap-1.5 text-emerald-600 font-semibold">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Enterprise Grade Security</span>
-            </span>
+            <span>All rights reserved</span>
           </div>
         </div>
 
