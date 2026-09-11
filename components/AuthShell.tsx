@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { Linkedin, Github, Compass } from "lucide-react";
+import { CheckCircle2, Linkedin, Github, Compass } from "lucide-react";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
@@ -45,39 +45,72 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             </h1>
 
             {/* Edited Artwork: Perfectly Placed Below the Catchy Line */}
-            <div className="relative flex items-center justify-start py-2">
+            <div className="relative flex items-center justify-start py-1">
               <div className="absolute -inset-2 bg-gradient-to-tr from-indigo-100/40 via-sky-100/30 to-amber-50/40 rounded-3xl blur-xl -z-10" />
               <img
                 src="/picture.webp"
                 alt="Become Internship Ready"
-                className="w-full max-w-[380px] xl:max-w-[420px] max-h-[280px] xl:max-h-[320px] object-contain drop-shadow-sm select-none transition-transform duration-300 hover:scale-[1.02]"
+                className="w-full max-w-[340px] xl:max-w-[380px] max-h-[210px] xl:max-h-[235px] object-contain drop-shadow-sm select-none transition-transform duration-300 hover:scale-[1.02]"
                 loading="eager"
               />
             </div>
 
-            {/* Value Proposition Cards - Utilizing Horizontal Space Well */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-blue-200 hover:bg-white min-h-[54px]">
-                <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 shrink-0">
-                  <Linkedin className="w-4 h-4" />
+            {/* Value Proposition Cards - 6 Features Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 pt-1 max-w-xl">
+              {/* 1. Instant ATS Resume Diagnosis */}
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs backdrop-blur-xs transition hover:border-emerald-200 hover:bg-white min-h-[48px]">
+                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-semibold text-slate-800 leading-snug">
+                  Instant ATS Resume Diagnosis
+                </span>
+              </div>
+
+              {/* 2. Live Voice AI Mock Coach */}
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs backdrop-blur-xs transition hover:border-emerald-200 hover:bg-white min-h-[48px]">
+                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-semibold text-slate-800 leading-snug">
+                  Live Voice AI Mock Coach
+                </span>
+              </div>
+
+              {/* 3. GitHub Audit & Rank */}
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs backdrop-blur-xs transition hover:border-emerald-200 hover:bg-white min-h-[48px]">
+                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-semibold text-slate-800 leading-snug">
+                  GitHub Audit & Rank
+                </span>
+              </div>
+
+              {/* 4. LinkedIn Post Generator */}
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs backdrop-blur-xs transition hover:border-blue-200 hover:bg-white min-h-[48px]">
+                <div className="p-1 rounded-lg bg-blue-50 text-blue-600 shrink-0">
+                  <Linkedin className="w-3.5 h-3.5" />
                 </div>
                 <span className="text-xs font-semibold text-slate-800 leading-snug">
                   LinkedIn Post Generator
                 </span>
               </div>
 
-              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-slate-300 hover:bg-white min-h-[54px]">
-                <div className="p-1.5 rounded-lg bg-slate-100 text-slate-800 shrink-0">
-                  <Github className="w-4 h-4" />
+              {/* 5. GitHub Analyzer */}
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs backdrop-blur-xs transition hover:border-slate-300 hover:bg-white min-h-[48px]">
+                <div className="p-1 rounded-lg bg-slate-100 text-slate-800 shrink-0">
+                  <Github className="w-3.5 h-3.5" />
                 </div>
                 <span className="text-xs font-semibold text-slate-800 leading-snug">
                   GitHub Analyzer
                 </span>
               </div>
 
-              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white min-h-[54px]">
-                <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
-                  <Compass className="w-4 h-4" />
+              {/* 6. Learning Roadmap */}
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs backdrop-blur-xs transition hover:border-indigo-200 hover:bg-white min-h-[48px]">
+                <div className="p-1 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                  <Compass className="w-3.5 h-3.5" />
                 </div>
                 <span className="text-xs font-semibold text-slate-800 leading-snug">
                   Learning Roadmap
