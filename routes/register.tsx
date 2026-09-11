@@ -97,7 +97,7 @@ function RegisterPage() {
   };
 
   return (
-    <AuthShell>
+    <AuthShell mode="signup">
       <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Create your account</h1>
       <p className="text-slate-500 mt-1 text-sm">Start your prep journey in 60 seconds.</p>
       <form onSubmit={submit} className="mt-6 space-y-3">

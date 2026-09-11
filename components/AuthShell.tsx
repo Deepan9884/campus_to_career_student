@@ -1,8 +1,13 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { FileText, Mic, Trophy, Share2, GitBranch, Compass } from "lucide-react";
+import { FileText, Mic, Trophy, Share2, GitBranch, Compass, Sparkles } from "lucide-react";
 
-export function AuthShell({ children }: { children: React.ReactNode }) {
+interface AuthShellProps {
+  children: React.ReactNode;
+  mode?: "signin" | "signup";
+}
+
+export function AuthShell({ children, mode = "signin" }: AuthShellProps) {
   return (
     <div className="light min-h-screen relative bg-gradient-to-br from-slate-50 via-white to-indigo-50/40 text-slate-900 overflow-hidden flex flex-col justify-between select-none auth-shell">
       {/* ── AMBIENT CLEAN BACKDROP (Navy + Cyan/Purple Identity) ── */}
@@ -36,20 +41,28 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           {/* Hero Content Area - Tight & Intentional Spacing */}
           <div className="my-auto py-2 max-w-lg space-y-4">
             {/* Catchy & Bold Headline (Unified Navy/Blue/Purple Gradient) */}
-            <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.15] text-slate-900 drop-shadow-xs">
-              Become{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-                internship-ready
-              </span>
-              <br /> in weeks, not months.
-            </h1>
+            <div className="space-y-1.5">
+              {mode === "signup" && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50/90 border border-indigo-200/80 text-xs font-bold text-indigo-700 tracking-wide shadow-2xs">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                  Welcome to Campus to Career
+                </div>
+              )}
+              <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.15] text-slate-900 drop-shadow-xs">
+                Become{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                  internship-ready
+                </span>
+                <br /> in weeks, not months.
+              </h1>
+            </div>
 
             {/* Hero Artwork: Perfectly Positioned Below Headline */}
             <div className="relative flex items-center justify-start py-1">
               <div className="absolute -inset-2 bg-gradient-to-tr from-indigo-100/40 via-sky-100/30 to-purple-100/30 rounded-3xl blur-xl -z-10" />
               <img
-                src="/picture.webp"
-                alt="Become Internship Ready"
+                src={mode === "signup" ? "/signup.png" : "/picture.webp"}
+                alt={mode === "signup" ? "Welcome to Campus to Career - Get Hired" : "Become Internship Ready"}
                 className="w-full max-w-[340px] xl:max-w-[380px] max-h-[220px] xl:max-h-[245px] object-contain drop-shadow-sm select-none transition-transform duration-300 hover:scale-[1.02]"
                 loading="eager"
               />
