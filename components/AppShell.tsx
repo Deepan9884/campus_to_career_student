@@ -72,6 +72,7 @@ const nav = [
   { to: "/roadmap", label: "Learning Roadmap", icon: Map },
   { to: "/coding-platforms", label: "Coding Platforms", icon: Terminal },
   { to: "/analytics", label: "Analytics", icon: TrendingUp },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export interface SuperDreamSubItem {
@@ -342,7 +343,7 @@ export function AppShell() {
   // Filter navigation modules according to user's sidebar visibility preferences
   const hiddenModules = user?.preferences?.hiddenModules || [];
   const filteredNav = nav.filter(
-    (item) => item.to === "/dashboard" || !hiddenModules.includes(item.to)
+    (item) => item.to === "/dashboard" || item.to === "/settings" || !hiddenModules.includes(item.to)
   );
 
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
@@ -522,7 +523,7 @@ export function AppShell() {
           </div>
         )}
 
-        <nav className="mt-4 flex-1 space-y-2 w-full overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <nav className="mt-4 flex-1 space-y-2 w-full overflow-y-auto pr-1.5 custom-sidebar-scrollbar">
           {isSuperDreamActive ? (
             /* Super Dream Reorganized 4-Branch Progressive Navigation */
             <SuperDreamSidebarAccordion
@@ -576,23 +577,7 @@ export function AppShell() {
           )}
         </nav>
 
-        <div className="pt-3 border-t border-slate-200/80 dark:border-white/10 w-full space-y-1">
-          {/* Settings Navigation */}
-          <Link
-            to="/settings"
-            title={sidebarCollapsed ? "Settings" : undefined}
-            className={cn(
-              "flex w-full items-center gap-3 rounded-xl text-[13.5px] font-semibold transition-all cursor-pointer",
-              sidebarCollapsed ? "justify-center p-2.5" : "px-3.5 py-2.5",
-              pathname.startsWith("/settings")
-                ? "bg-indigo-50 dark:bg-white/10 text-indigo-700 dark:text-[var(--foreground)] font-bold border border-indigo-200/80 dark:border-transparent shadow-xs"
-                : "text-slate-600 dark:text-[var(--muted-foreground)] hover:bg-black/5 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-[var(--foreground)]"
-            )}
-          >
-            <Settings className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" />
-            {!sidebarCollapsed && <span>Settings</span>}
-          </Link>
-
+        <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 w-full space-y-1.5">
           {/* Atmosphere Studio Trigger */}
           <button
             onClick={() => setAmbientCustomizerOpen(true)}
@@ -672,7 +657,7 @@ export function AppShell() {
               </button>
             )}
 
-            <nav className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1">
+            <nav className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1.5 custom-sidebar-scrollbar">
               {isSuperDreamActive ? (
                 <SuperDreamSidebarAccordion
                   sidebarCollapsed={false}
@@ -719,20 +704,7 @@ export function AppShell() {
               )}
             </nav>
 
-            {/* Mobile Settings Link */}
-            <Link
-              to="/settings"
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition mb-1",
-                pathname.startsWith("/settings")
-                  ? "bg-white/10 text-[var(--foreground)] font-semibold"
-                  : "text-[var(--muted-foreground)] hover:bg-white/5 hover:text-[var(--foreground)]"
-              )}
-            >
-              <Settings className="h-4 w-4 shrink-0 text-slate-400" />
-              <span>Settings</span>
-            </Link>
+
 
             <button
               onClick={() => {
