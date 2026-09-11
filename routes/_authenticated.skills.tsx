@@ -41,8 +41,8 @@ import { useAuth } from "@/stores";
 import { getRoadmapByGapAnalysis } from "@/lib/roadmap-api";
 import type { UserSkill, Suggestion, SkillGapAnalysis, AnalysisHistoryItem } from "@/types/skills";
 import { QuizDialog } from "@/components/QuizDialog";
-import { CodingPlatformAnalyticsCharts } from "@/components/CodingPlatformAnalyticsCharts";
 import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/skills")({
   head: () => ({ meta: [{ title: "Skill Gap — Campus to Career AI" }] }),
@@ -51,6 +51,7 @@ export const Route = createFileRoute("/_authenticated/skills")({
 
 function SkillsPage() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [skills, setSkills] = useState<UserSkill[]>([]);
   const [targetRole, setTargetRole] = useState(user?.profile?.targetRole || user?.targetRole || "");
   const [input, setInput] = useState("");
@@ -154,6 +155,9 @@ function SkillsPage() {
       });
       setInput("");
       toast.success(`Added ${created.name}`);
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["analyticsOverview"] });
+      fetchLatestAndGrowth();
     } catch (err: unknown) {
       const apiErr = err as { message?: string };
       toast.error(apiErr.message || "Failed to add skill");
@@ -166,6 +170,9 @@ function SkillsPage() {
       await deleteSkill(deleteSkillId);
       setSkills((prev) => prev.filter((s) => s._id !== deleteSkillId));
       toast.success("Skill removed");
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["analyticsOverview"] });
+      fetchLatestAndGrowth();
     } catch {
       toast.error("Failed to delete skill");
     } finally {
@@ -207,6 +214,8 @@ function SkillsPage() {
       const result = await analyzeGap({ targetRole });
       setAnalysis(result);
       toast.success("Analysis complete");
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["analyticsOverview"] });
       fetchLatestAndGrowth();
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
@@ -239,6 +248,9 @@ function SkillsPage() {
     try {
       await deleteGapAnalysis(deleteId);
       toast.success("Analysis deleted");
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["analyticsOverview"] });
+      fetchLatestAndGrowth();
       setHistory((prev) => prev.filter((a) => a._id !== deleteId));
       setHistoryPagination((prev) => ({ ...prev, total: prev.total - 1 }));
       if (analysis?._id === deleteId) {

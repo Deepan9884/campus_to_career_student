@@ -64,6 +64,8 @@ function Dashboard() {
   const { data, isLoading: loadingData, isError: errorData, refetch: refetchStats } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: getDashboardStats,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   const { data: badgesRes, isLoading: loadingBadges } = useQuery({

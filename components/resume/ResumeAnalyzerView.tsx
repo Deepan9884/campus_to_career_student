@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { ScoreRing } from "@/components/Score";
@@ -51,6 +52,13 @@ export function ResumeAnalyzerView({
   const [errorMsg, setErrorMsg] = useState("");
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const invalidatePlacementQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+    queryClient.invalidateQueries({ queryKey: ["latestAnalysis"] });
+    queryClient.invalidateQueries({ queryKey: ["analyticsOverview"] });
+  };
 
   // History
   const [history, setHistory] = useState<Resume[]>([]);
@@ -104,6 +112,7 @@ export function ResumeAnalyzerView({
       if (result.status === "completed") {
         setMode("completed");
         toast.success("Resume analyzed successfully");
+        invalidatePlacementQueries();
         onAnalysisComplete?.(result);
       } else if (result.status === "processing" && (result._id || (result as unknown as { resumeId: string }).resumeId)) {
         const resumeId = result._id || (result as unknown as { resumeId: string }).resumeId;
@@ -118,6 +127,7 @@ export function ResumeAnalyzerView({
               setCurrentAnalysis(updated);
               setMode("completed");
               toast.success("Resume analyzed successfully");
+              invalidatePlacementQueries();
               onAnalysisComplete?.(updated);
               fetchHistory(1);
             } else if (updated.status === "failed" || attempts > 30) {
@@ -169,6 +179,7 @@ export function ResumeAnalyzerView({
     try {
       await deleteResume(id);
       toast.success("Resume analysis deleted");
+      invalidatePlacementQueries();
       if (viewingId === id) {
         setViewingId(null);
         setViewingAnalysis(null);
