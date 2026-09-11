@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { FileText, Mic, Trophy, Share2, GitBranch, Compass, Sparkles } from "lucide-react";
+import { FileText, Mic, Trophy, Share2, GitBranch, Compass } from "lucide-react";
 
 interface AuthShellProps {
   children: React.ReactNode;
@@ -42,19 +42,31 @@ export function AuthShell({ children, mode = "signin" }: AuthShellProps) {
           <div className="my-auto py-2 max-w-lg space-y-4">
             {/* Catchy & Bold Headline (Unified Navy/Blue/Purple Gradient) */}
             <div className="space-y-1.5">
-              {mode === "signup" && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50/90 border border-indigo-200/80 text-xs font-bold text-indigo-700 tracking-wide shadow-2xs">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                  Welcome to Campus to Career
-                </div>
+              {mode === "signup" ? (
+                <>
+                  <h1 className="text-3xl sm:text-4xl xl:text-[42px] font-extrabold tracking-tight leading-[1.12] text-slate-900 drop-shadow-xs">
+                    Welcome to{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                      Campus to Career
+                    </span>
+                  </h1>
+                  <p className="text-xl sm:text-2xl xl:text-[26px] font-bold tracking-tight text-slate-700 leading-snug">
+                    Become{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                      internship-ready
+                    </span>{" "}
+                    in weeks, not months.
+                  </p>
+                </>
+              ) : (
+                <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.15] text-slate-900 drop-shadow-xs">
+                  Become{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                    internship-ready
+                  </span>
+                  <br /> in weeks, not months.
+                </h1>
               )}
-              <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-[1.15] text-slate-900 drop-shadow-xs">
-                Become{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-                  internship-ready
-                </span>
-                <br /> in weeks, not months.
-              </h1>
             </div>
 
             {/* Hero Artwork: Perfectly Positioned Below Headline */}
