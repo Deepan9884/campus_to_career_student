@@ -683,7 +683,19 @@ export function ComprehensiveResumeReport({ display }: ComprehensiveResumeReport
               </div>
             </div>
 
-            {filteredProjects.length === 0 ? (
+            {projects.length === 0 ? (
+              <div className="p-6 rounded-2xl border border-dashed border-purple-500/30 bg-purple-500/5 text-center space-y-3">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto text-purple-500">
+                  <Code2 className="h-6 w-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground">No Projects Detected on Resume</h4>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-lg mx-auto">
+                    Technical hiring managers heavily evaluate self-driven personal projects and capstones. Add 2-3 production-ready projects with public GitHub repository links and live URLs.
+                  </p>
+                </div>
+              </div>
+            ) : filteredProjects.length === 0 ? (
               <div className="p-6 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 text-center space-y-2">
                 <p className="text-xs text-muted-foreground">No projects matching the selected filter.</p>
               </div>
