@@ -23,7 +23,6 @@ import {
   Eye,
   Check,
   ShieldCheck,
-  Play,
   Bot,
 } from "lucide-react";
 import { useAuth } from "@/stores";
@@ -282,11 +281,11 @@ export const LandingPage: React.FC = () => {
             />
           </div>
 
-          {/* Center Nav — Spacious, Readable, Beautifully Padded Glass Capsule */}
-          <nav className="hidden lg:flex items-center gap-1.5 bg-slate-100/90 dark:bg-[#111827]/75 px-3 py-1.5 rounded-full border border-slate-200/80 dark:border-[#2F4B6B]/60 text-xs sm:text-sm font-medium backdrop-blur-xl shadow-lg shadow-slate-200/50 dark:shadow-xl dark:shadow-black/40">
+          {/* Center Nav — Spacious, Balanced, Clean Glass Capsule */}
+          <nav className="hidden lg:flex items-center gap-2 bg-slate-100/90 dark:bg-[#111827]/75 px-4 py-1.5 rounded-full border border-slate-200/80 dark:border-[#2F4B6B]/60 text-xs sm:text-sm font-medium backdrop-blur-xl shadow-lg shadow-slate-200/50 dark:shadow-xl dark:shadow-black/40">
             <button
               onClick={() => scrollToSection("hero")}
-              className="px-3.5 py-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 transition-all whitespace-nowrap"
+              className="px-4 py-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-white/10 transition-all whitespace-nowrap font-medium"
             >
               Overview
             </button>
@@ -294,20 +293,11 @@ export const LandingPage: React.FC = () => {
               <button
                 key={sec.id}
                 onClick={() => scrollToSection(sec.id)}
-                className="px-3.5 py-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 transition-all whitespace-nowrap"
+                className="px-4 py-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-white/10 transition-all whitespace-nowrap font-medium"
               >
                 {sec.navTitle}
               </button>
             ))}
-            {/* Replay Intro Trigger */}
-            <button
-              onClick={() => setShowIntro(true)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-indigo-600 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 transition-all whitespace-nowrap text-xs font-semibold"
-              title="Watch Opening Animation"
-            >
-              <Play className="w-3.5 h-3.5 text-indigo-500 dark:text-sky-400" />
-              <span>Intro</span>
-            </button>
           </nav>
 
           {/* Right Action */}
@@ -386,16 +376,6 @@ export const LandingPage: React.FC = () => {
                   {sec.navTitle}
                 </button>
               ))}
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setShowIntro(true);
-                }}
-                className="text-left px-4 py-2 rounded-xl text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-[#1B2740] flex items-center gap-2 transition-all"
-              >
-                <Play className="w-4 h-4 text-indigo-500 dark:text-sky-400" />
-                <span>Replay Opening Animation</span>
-              </button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -609,7 +589,6 @@ export const LandingPage: React.FC = () => {
       {/* ── DETAILED FEATURE SECTIONS ── */}
       <section className="relative z-10 py-16 px-4 md:px-8 max-w-7xl mx-auto space-y-28">
         {SECTIONS.map((sec, idx) => {
-          const Icon = sec.icon;
           const isEven = idx % 2 === 0;
 
           return (
@@ -624,11 +603,6 @@ export const LandingPage: React.FC = () => {
             >
               {/* Text Content */}
               <div className={`lg:col-span-6 space-y-5 ${isEven ? "order-1" : "order-1 lg:order-2"}`}>
-                <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/25 text-indigo-600 dark:text-indigo-400 text-xs font-bold shadow-sm">
-                  <Icon className="w-4 h-4" />
-                  <span>{sec.badge}</span>
-                </div>
-
                 <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
                   {sec.title}
                 </h2>
