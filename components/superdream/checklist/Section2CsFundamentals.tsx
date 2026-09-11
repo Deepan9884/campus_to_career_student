@@ -203,58 +203,6 @@ export function Section2CsFundamentals() {
         </div>
       </div>
 
-      {/* Main Section Tabs: 1. Top Courses & Subjects | 2. 200 Quizzes Hub | 3. Knowledge Matrix */}
-      <div className="flex items-center justify-between p-1.5 rounded-2xl panel-slot flex-wrap gap-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
-          <button
-            onClick={() => setActiveTab("courses")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer flex items-center gap-2 shrink-0 border",
-              activeTab === "courses"
-                ? "bg-white/8 text-[var(--primary)] border-[var(--primary)]/30 shadow-sm"
-                : "bg-transparent border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/8/40"
-            )}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>1. Subjects & Top Courses</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("quizzes")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer flex items-center gap-2 shrink-0 border",
-              activeTab === "quizzes"
-                ? "bg-white/8 text-[var(--primary)] border-[var(--primary)]/30 shadow-sm"
-                : "bg-transparent border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/8/40"
-            )}
-          >
-            <Zap className="w-3.5 h-3.5" />
-            <span>2. 200 Quizzes Hub</span>
-            <span className="px-1.5 py-0.2 rounded bg-white/10 text-[10px] font-semibold text-[var(--foreground)]/90">
-              200 Qs
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("matrix")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer flex items-center gap-2 shrink-0 border",
-              activeTab === "matrix"
-                ? "bg-white/8 text-purple-200 border-purple-500/30 shadow-sm"
-                : "bg-transparent border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/8/40"
-            )}
-          >
-            <Award className="w-3.5 h-3.5" />
-            <span>3. Knowledge Matrix & Faculty Remarks</span>
-          </button>
-        </div>
-
-        {activeTab === "quizzes" && (
-          <div className="text-xs text-[var(--muted-foreground)] font-medium px-2 hidden sm:block">
-            Showing <strong className="text-[var(--foreground)]">{filteredQuizzes.length}</strong> / 200 Quizzes
-          </div>
-        )}
-      </div>
 
       {/* ──────────────────────────────────────────────────────────────────────── */}
       {/* TAB 1: SUBJECTS & TOP COURSES SHOWCASE */}

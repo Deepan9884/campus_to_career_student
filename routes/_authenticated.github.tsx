@@ -953,15 +953,6 @@ const [analyzing, setAnalyzing] = useState(false);
                     </p>
                   </div>
                 </div>
-
-                {/* Recruiter Trust Footnote */}
-                <div className="p-3.5 rounded-2xl bg-muted/50 border border-border flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                    <span>10,000+ student repositories audited for campus placement drives</span>
-                  </span>
-                  <span className="text-primary font-semibold">100% Free & Open-Source Friendly</span>
-                </div>
               </div>
             </div>
           )}

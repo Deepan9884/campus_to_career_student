@@ -308,9 +308,6 @@ function SkillsPage() {
           {/* Live Strategy Recommendations */}
           {growthMetrics.liveStrategy.length > 0 && (
             <div className="mt-6 pt-4 border-t border-border dark:border-white/10 relative z-10">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Zap className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" /> Real-time Live Strategy & Growth Guidance
-              </p>
               <div className="grid md:grid-cols-3 gap-3">
                 {growthMetrics.liveStrategy.map((strat, i) => (
                   <div key={i} className="p-3.5 rounded-xl liquid-glass-card flex flex-col justify-between hover:bg-muted dark:hover:bg-white/10 transition shadow-xs card-hover-lift">

@@ -364,14 +364,6 @@ function Dashboard() {
                 <span className="text-ember-gradient">{overallScore}% ready</span> for campus placements.
               </h2>
 
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                {overallScore >= 80
-                  ? "Amazing work! You are in great shape for upcoming campus drives and technical interviews."
-                  : overallScore >= 50
-                    ? "Great progress so far. Complete today's practice tasks to boost your interview score and confidence."
-                    : "Welcome to your preparation hub! Upload your resume and take a practice interview to get started."}
-              </p>
-
               <div className="flex items-center gap-2 pt-1">
                 <span className="text-[11px] font-medium text-foreground bg-muted/70 px-3 py-1 rounded-xl border border-border">
                   Target Track: <strong className="text-foreground">{user?.profile?.targetRole || user?.targetRole || "Software Engineer"}</strong>
@@ -381,9 +373,6 @@ function Dashboard() {
 
             {/* Right: Quick Action Buttons */}
             <div className="lg:col-span-3 flex flex-col gap-2">
-              <span className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                <Zap className="w-3.5 h-3.5 text-primary" /> Quick Study Tools
-              </span>
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   to="/resume"
