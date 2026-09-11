@@ -1,7 +1,7 @@
 :root {
-  --auth-navy: #0f1a3d;
+  --auth-navy: #6366f1;
   --auth-cyan: #22d3ee;
-  --auth-purple: #7c3aed;
+  --auth-purple: #a855f7;
 }
 
 .auth-bg {
@@ -26,7 +26,9 @@
   height: 520px;
   top: -160px;
   left: -120px;
-  background: var(--auth-navy);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(56, 189, 248, 0.18));
+  opacity: 0.9;
+  filter: blur(80px);
   animation: auth-drift-1 22s ease-in-out infinite alternate;
 }
 
@@ -46,7 +48,7 @@
   top: 10%;
   right: -220px;
   background: var(--auth-purple);
-  opacity: 0.18;
+  opacity: 0.16;
   animation: auth-drift-3 30s ease-in-out infinite alternate;
 }
 
@@ -59,8 +61,8 @@
   transform: translate(-50%, -50%);
   background: radial-gradient(
     circle,
-    rgba(124, 58, 237, 0.16) 0%,
-    rgba(34, 211, 238, 0.08) 45%,
+    rgba(168, 85, 247, 0.12) 0%,
+    rgba(34, 211, 238, 0.06) 45%,
     rgba(255, 255, 255, 0) 70%
   );
 }
@@ -68,7 +70,7 @@
 .auth-bg__grid {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(15, 26, 61, 0.14) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
   background-size: 28px 28px;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 40%, transparent 90%);
 }
@@ -115,4 +117,9 @@
 .auth-shell > .fixed,
 .auth-shell > .absolute.inset-0.z-0 {
   display: none !important;
+}
+
+/* Clean, modern card shadow without any harsh black shadow */
+.auth-shell .rounded-3xl {
+  box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.08), 0 8px 24px -6px rgba(148, 163, 184, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
 }
