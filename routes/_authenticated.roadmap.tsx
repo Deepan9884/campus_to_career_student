@@ -233,7 +233,7 @@ function RoadmapPage() {
       ) : null}
 
       {!loadingLatest && (
-        <>
+        <div data-tour="roadmap-main-card" className="space-y-6">
 
       {/* Generate View */}
       {view === "generate" && (
@@ -399,7 +399,7 @@ function RoadmapPage() {
           </GlassCard>
         </div>
       )}
-        </>
+        </div>
       )}
     </div>
   );

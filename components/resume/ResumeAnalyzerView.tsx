@@ -420,7 +420,7 @@ export function ResumeAnalyzerView({
                   <Upload className="h-7 w-7" />
                 </div>
                 <h4 className="text-base font-semibold text-foreground">
-                  Drag & drop your resume here, or <span className="text-indigo-600 dark:text-indigo-400 underline underline-offset-4">browse files</span>
+                  Drag & drop your resume here, or <span data-tour="resume-upload-btn" className="text-indigo-600 dark:text-indigo-400 underline underline-offset-4">browse files</span>
                 </h4>
                 <p className="text-xs text-muted-foreground mt-2">
                   Supports PDF and DOCX files up to 5MB.
