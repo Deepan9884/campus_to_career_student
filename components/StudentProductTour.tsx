@@ -396,64 +396,96 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     }
   }, [open, currentStep, current, pathname, navigate]);
 
-  // Centered, comfortable target locating with smooth scroll into view
-  const updateTargetLocation = useCallback(() => {
+  // Prevent background page from scrolling or jumping while tour modal is active
+  useEffect(() => {
+    if (!open) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
+
+  // Target element locator with safe viewport positioning (runs ONCE per step change)
+  const locateTargetElement = useCallback(() => {
     if (!open || !current || isNavigating) return;
 
     const el = document.querySelector(current.targetSelector) as HTMLElement | null;
+    if (!el) {
+      setTargetRect(null);
+      return;
+    }
 
-    if (el) {
-      const elRect = el.getBoundingClientRect();
-      const isComfortablyVisible =
-        elRect.top >= 90 &&
-        elRect.bottom <= window.innerHeight - 90 &&
-        elRect.left >= 20 &&
-        elRect.right <= window.innerWidth - 20;
+    // Check if element is inside sticky sidebar or fixed header
+    const isFixedOrSticky = Boolean(
+      el.closest("aside") ||
+      el.closest("header") ||
+      window.getComputedStyle(el).position === "fixed" ||
+      window.getComputedStyle(el).position === "sticky"
+    );
 
-      // Scroll smoothly to center the element if outside comfortable range
-      if (!isComfortablyVisible) {
-        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-      }
+    const elRect = el.getBoundingClientRect();
+    const inViewport =
+      elRect.top >= 20 &&
+      elRect.bottom <= window.innerHeight - 20 &&
+      elRect.left >= 0 &&
+      elRect.right <= window.innerWidth;
 
-      const timer = setTimeout(() => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        setTargetRect({
+    // Only scroll into view once if NOT fixed/sticky and NOT already in viewport
+    if (!isFixedOrSticky && !inViewport) {
+      try {
+        el.scrollIntoView({ behavior: "auto", block: "center", inline: "nearest" });
+      } catch (_) {}
+    }
+
+    const rect = el.getBoundingClientRect();
+    setTargetRect({
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+    });
+  }, [open, current, isNavigating]);
+
+  // Update target rect stably on step change or route navigation
+  useEffect(() => {
+    if (!open || isNavigating) return;
+
+    locateTargetElement();
+    const settleTimer = setTimeout(locateTargetElement, 120);
+    return () => clearTimeout(settleTimer);
+  }, [open, currentStep, pathname, isNavigating, locateTargetElement]);
+
+  // Window resize listener to re-measure target without scrolling
+  useEffect(() => {
+    if (!open || isNavigating || !current) return;
+
+    const handleResize = () => {
+      const el = document.querySelector(current.targetSelector) as HTMLElement | null;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setTargetRect((prev) => {
+        if (
+          prev &&
+          Math.abs(prev.left - rect.left) < 1 &&
+          Math.abs(prev.top - rect.top) < 1 &&
+          Math.abs(prev.width - rect.width) < 1 &&
+          Math.abs(prev.height - rect.height) < 1
+        ) {
+          return prev;
+        }
+        return {
           left: rect.left,
           top: rect.top,
           width: rect.width,
           height: rect.height,
-        });
-      }, 250);
-
-      return () => clearTimeout(timer);
-    } else {
-      setTargetRect(null);
-    }
-  }, [open, current, isNavigating]);
-
-  // Periodic position updates & window resize listeners
-  useEffect(() => {
-    if (!open || isNavigating) return;
-
-    const timeout = setTimeout(() => {
-      updateTargetLocation();
-    }, 350);
-
-    const interval = setInterval(() => {
-      updateTargetLocation();
-    }, 900);
-
-    window.addEventListener("resize", updateTargetLocation);
-    window.addEventListener("scroll", updateTargetLocation, true);
-
-    return () => {
-      clearTimeout(timeout);
-      clearInterval(interval);
-      window.removeEventListener("resize", updateTargetLocation);
-      window.removeEventListener("scroll", updateTargetLocation, true);
+        };
+      });
     };
-  }, [open, currentStep, pathname, isNavigating, updateTargetLocation]);
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
+  }, [open, isNavigating, current]);
 
   // Dynamic Zero-Overlap Placement Solver with Strict Viewport Clamping
   const calculateCardPosition = useCallback(() => {
@@ -593,11 +625,21 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
       arrowOffset = Math.max(28, Math.min(cardWidth - 28, targetCenterX - chosenLeft));
     }
 
-    setCardPosition({
-      top: chosenTop,
-      left: chosenLeft,
-      arrowPlacement,
-      arrowOffset,
+    setCardPosition((prev) => {
+      if (
+        Math.abs(prev.top - chosenTop) < 1 &&
+        Math.abs(prev.left - chosenLeft) < 1 &&
+        prev.arrowPlacement === arrowPlacement &&
+        prev.arrowOffset === arrowOffset
+      ) {
+        return prev;
+      }
+      return {
+        top: chosenTop,
+        left: chosenLeft,
+        arrowPlacement,
+        arrowOffset,
+      };
     });
   }, [targetRect, current]);
 
@@ -658,10 +700,10 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
   const padding = 16;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 overflow-hidden font-sans select-none">
       {/* Dark Backdrop Spotlight with Generous Spacious SVG Cutout */}
       {targetRect && !isNavigating ? (
-        <svg className="fixed inset-0 w-full h-full pointer-events-auto z-40 transition-all duration-500 ease-in-out">
+        <svg className="fixed inset-0 w-full h-full pointer-events-auto z-40 transition-all duration-200 ease-out">
           <defs>
             <mask id="spotlight-cutout">
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
@@ -699,7 +741,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
         </div>
       )}
 
-      {/* Pulsing Neon Beacon Ring around Target Element */}
+      {/* Sleek Stationary Beacon Ring around Target Element */}
       {targetRect && !isNavigating && (
         <div
           style={{
@@ -708,7 +750,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
             width: `${targetRect.width + padding * 2}px`,
             height: `${targetRect.height + padding * 2}px`,
           }}
-          className="fixed z-40 pointer-events-none rounded-2xl border-2 border-indigo-400 ring-4 ring-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.5)] transition-all duration-500 ease-in-out animate-pulse"
+          className="fixed z-40 pointer-events-none rounded-2xl border-2 border-indigo-400 ring-2 ring-indigo-500/40 shadow-[0_0_25px_rgba(99,102,241,0.35)] transition-all duration-200 ease-out"
         />
       )}
 
