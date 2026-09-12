@@ -237,7 +237,7 @@ function RoadmapPage() {
 
       {/* Generate View */}
       {view === "generate" && (
-        <GlassCard variant="strong">
+        <GlassCard variant="strong" data-tour="roadmap-generate-card">
           <h2 className="text-lg font-bold mb-4 text-foreground">Generate Learning Roadmap</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Select a completed skill gap analysis to generate a structured learning roadmap.

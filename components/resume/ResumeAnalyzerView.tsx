@@ -383,7 +383,7 @@ export function ResumeAnalyzerView({
             className="space-y-6"
           >
             {/* Top: Upload Resume Hero Card */}
-            <GlassCard variant="strong" data-tour="resume-upload-zone" className="relative overflow-visible">
+            <GlassCard variant="strong" className="relative overflow-visible">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
@@ -397,6 +397,7 @@ export function ResumeAnalyzerView({
 
               {/* Large interactive drop zone */}
               <div
+                data-tour="resume-upload-zone"
                 onClick={() => inputRef.current?.click()}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -685,7 +686,7 @@ export function ResumeAnalyzerView({
             <div className="grid lg:grid-cols-[320px_1fr] xl:grid-cols-[340px_1fr] 2xl:grid-cols-[360px_1fr] min-w-0 gap-6 items-start">
               {/* Left Column: Upload & History Sidebar */}
               <div className="min-w-0 w-full">
-                <GlassCard variant="strong" data-tour="resume-upload-zone" className="space-y-5">
+                <GlassCard variant="strong" className="space-y-5">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-sm text-foreground">Upload Resume</h3>
                     <button
@@ -704,6 +705,7 @@ export function ResumeAnalyzerView({
                   ) : (
                     <>
                       <div
+                        data-tour="resume-upload-zone"
                         onClick={() => inputRef.current?.click()}
                         onDragOver={(e) => {
                           e.preventDefault();

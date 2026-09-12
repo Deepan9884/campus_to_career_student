@@ -451,7 +451,7 @@ const [analyzing, setAnalyzing] = useState(false);
             }}
             className="w-full space-y-4 shrink-0 transition-[width] duration-75 lg:pr-3"
           >
-            <GlassCard className="space-y-4 overflow-hidden p-5">
+            <GlassCard data-tour="github-connection-card" className="space-y-4 overflow-hidden p-5">
               <h3 className="font-semibold flex items-center gap-2 text-foreground">
                 <Github className="h-4 w-4 text-[color:var(--color-primary)]" /> GitHub Connection
               </h3>

@@ -545,7 +545,7 @@ function SetupView({
   const roundCount = selectedRounds.size;
 
   return (
-    <GlassCard variant="strong">
+    <GlassCard variant="strong" data-tour="interview-setup-card">
       <h3 className="font-semibold mb-4 text-lg text-foreground">Interview Setup</h3>
       <div className="grid md:grid-cols-3 gap-4">
         <div className="relative z-20">
@@ -689,7 +689,7 @@ function SetupView({
       <button
         onClick={handleStart}
         disabled={loading}
-        data-tour="interview-setup-card"
+        data-tour="interview-start-btn"
         className="mt-6 btn-gradient btn-gradient-hover rounded-xl px-6 py-3 font-semibold flex items-center gap-2 disabled:opacity-50 cursor-pointer"
       >
         {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}

@@ -815,7 +815,7 @@ function AnalyticsPage() {
       </div>
 
       {/* ─── Section 4: Gamified Achievement Medals ─── */}
-      <GlassCard className="p-6 border-primary/20">
+      <GlassCard data-tour="analytics-trophy-card" className="p-6 border-primary/20">
         <div className="flex items-center justify-between mb-5">
           <div>
             <h3 className="font-bold text-base text-foreground flex items-center gap-2">
