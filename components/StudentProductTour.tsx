@@ -256,7 +256,11 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
       if (el) {
         if (!isMounted) return;
         setIsNavigating(false);
-        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        const navOffset = 90;
+        const elRect = el.getBoundingClientRect();
+        const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+        const targetScrollY = Math.max(0, currentScrollY + elRect.top - navOffset);
+        window.scrollTo({ top: targetScrollY, behavior: "smooth" });
         setTimeout(() => {
           if (!isMounted) return;
           setTargetRect(el.getBoundingClientRect());
@@ -381,57 +385,83 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
 
   // Placement calculation
   let popoverStyle: React.CSSProperties = {};
-  let placement: "bottom" | "top" | "center" = "center";
+  let placement: "bottom" | "top" | "left" | "right" | "center" = "center";
   let arrowOffsetLeft = 220; // relative to popover card in px
-  let beaconPoint: { x: number; y: number } | null = null;
+  let arrowOffsetTop = 180; // for side placements
 
   const cardWidth = typeof window !== "undefined" ? Math.min(window.innerWidth - 32, 450) : 450;
-  const actualHeight = cardHeight || 380;
+  const actualHeight = cardHeight || 360;
 
   if (paddedRect && typeof window !== "undefined") {
     const spaceBelow = window.innerHeight - paddedRect.bottom;
     const spaceAbove = paddedRect.top;
+    const spaceRight = window.innerWidth - paddedRect.right;
+    const spaceLeft = paddedRect.left;
     const targetCenterX = paddedRect.left + paddedRect.width / 2;
+    const targetCenterY = paddedRect.top + paddedRect.height / 2;
 
-    // Horizontal positioning: align card center with target center, clamped to screen margins
+    // Default horizontal alignment: center card on target, clamp within screen margins
     const left = Math.max(
       16,
       Math.min(window.innerWidth - cardWidth - 16, targetCenterX - cardWidth / 2),
     );
-    // Pointer arrow position on card: points directly at targetCenterX
     arrowOffsetLeft = Math.max(32, Math.min(cardWidth - 32, targetCenterX - left));
 
-    if (spaceBelow >= actualHeight + 24) {
+    if (spaceBelow >= actualHeight + 14) {
       placement = "bottom";
       popoverStyle = {
-        top: `${paddedRect.bottom + 18}px`,
+        top: `${paddedRect.bottom + 14}px`,
         left: `${left}px`,
         width: `${cardWidth}px`,
       };
-      beaconPoint = {
-        x: Math.max(paddedRect.left + 16, Math.min(paddedRect.right - 16, targetCenterX)),
-        y: paddedRect.bottom,
-      };
-    } else if (spaceAbove >= actualHeight + 24) {
+    } else if (spaceAbove >= actualHeight + 14) {
       placement = "top";
       popoverStyle = {
-        top: `${Math.max(16, paddedRect.top - actualHeight - 18)}px`,
+        top: `${Math.max(16, paddedRect.top - actualHeight - 14)}px`,
         left: `${left}px`,
         width: `${cardWidth}px`,
       };
-      beaconPoint = {
-        x: Math.max(paddedRect.left + 16, Math.min(paddedRect.right - 16, targetCenterX)),
-        y: paddedRect.top,
-      };
-    } else {
-      // Centered fallback if element covers entire screen height
-      placement = "center";
+    } else if (spaceRight >= cardWidth + 24 && window.innerWidth >= 1024) {
+      placement = "right";
+      const top = Math.max(
+        16,
+        Math.min(window.innerHeight - actualHeight - 16, targetCenterY - actualHeight / 2),
+      );
+      arrowOffsetTop = Math.max(32, Math.min(actualHeight - 32, targetCenterY - top));
       popoverStyle = {
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
+        top: `${top}px`,
+        left: `${paddedRect.right + 14}px`,
         width: `${cardWidth}px`,
       };
+    } else if (spaceLeft >= cardWidth + 24 && window.innerWidth >= 1024) {
+      placement = "left";
+      const top = Math.max(
+        16,
+        Math.min(window.innerHeight - actualHeight - 16, targetCenterY - actualHeight / 2),
+      );
+      arrowOffsetTop = Math.max(32, Math.min(actualHeight - 32, targetCenterY - top));
+      popoverStyle = {
+        top: `${top}px`,
+        left: `${paddedRect.left - cardWidth - 14}px`,
+        width: `${cardWidth}px`,
+      };
+    } else {
+      // Non-overlapping vertical fallback: place on side with more room so button is never covered
+      if (spaceBelow >= spaceAbove) {
+        placement = "bottom";
+        popoverStyle = {
+          top: `${Math.max(paddedRect.bottom + 8, window.innerHeight - actualHeight - 14)}px`,
+          left: `${left}px`,
+          width: `${cardWidth}px`,
+        };
+      } else {
+        placement = "top";
+        popoverStyle = {
+          top: `${Math.min(paddedRect.top - actualHeight - 8, 16)}px`,
+          left: `${left}px`,
+          width: `${cardWidth}px`,
+        };
+      }
     }
   } else {
     // Default centered modal when target is loading or not present
@@ -512,21 +542,6 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
               <span>{step.targetBadge}</span>
             </div>
           </div>
-
-          {/* Precision Focal Point Beacon */}
-          {beaconPoint && placement !== "center" && (
-            <div
-              style={{
-                left: `${beaconPoint.x}px`,
-                top: `${beaconPoint.y}px`,
-              }}
-              className="fixed z-25 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center transition-all duration-300"
-            >
-              <span className="absolute w-8 h-8 rounded-full bg-indigo-500/30 animate-ping" />
-              <span className="absolute w-5 h-5 rounded-full bg-cyan-400/40 animate-pulse" />
-              <span className="w-3 h-3 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-400 border-2 border-white dark:border-slate-900 shadow-[0_0_12px_rgba(99,102,241,1)]" />
-            </div>
-          )}
         </>
       )}
 
@@ -539,7 +554,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           placement === "center" && "max-h-[90vh] overflow-y-auto",
         )}
       >
-        {/* Directional Callout Pointer Arrow pointing directly to target center */}
+        {/* Directional Callout Pointer Arrow pointing directly to target */}
         {placement === "bottom" && (
           <div
             style={{ left: `${arrowOffsetLeft}px` }}
@@ -550,6 +565,18 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           <div
             style={{ left: `${arrowOffsetLeft}px` }}
             className="absolute -bottom-2.5 -translate-x-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-b border-r border-indigo-500/40 rotate-45 z-30 shadow-[3px_3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+          />
+        )}
+        {placement === "right" && (
+          <div
+            style={{ top: `${arrowOffsetTop}px` }}
+            className="absolute -left-2.5 -translate-y-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-b border-l border-indigo-500/40 rotate-45 z-30 shadow-[-3px_3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+          />
+        )}
+        {placement === "left" && (
+          <div
+            style={{ top: `${arrowOffsetTop}px` }}
+            className="absolute -right-2.5 -translate-y-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-t border-r border-indigo-500/40 rotate-45 z-30 shadow-[3px_-3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
           />
         )}
 
