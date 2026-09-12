@@ -62,7 +62,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     step: 2,
     route: "/resume",
-    targetSelector: '[data-tour="resume-upload-btn"], [data-tour="resume-upload-zone"]',
+    targetSelector: '[data-tour="resume-upload-zone"], [data-tour="resume-upload-btn"]',
     badge: "RESUME STUDIO",
     targetBadge: "UPLOAD / BROWSE RESUME",
     title: "ATS Resume Studio & Upload Zone",
@@ -152,7 +152,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     step: 7,
     route: "/roadmap",
-    targetSelector: '[data-tour="roadmap-main-card"], [data-tour="roadmap-generate-card"]',
+    targetSelector: '[data-tour="roadmap-generate-card"], [data-tour="roadmap-main-card"]',
     badge: "CAREER ROADMAP",
     targetBadge: "LEARNING SPRINT",
     title: "Personalized Career Learning Roadmap",
@@ -195,6 +195,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [cardHeight, setCardHeight] = useState(380);
   const popoverRef = useRef<HTMLDivElement | null>(null);
 
   const step = TOUR_STEPS[currentStepIndex];
@@ -235,13 +236,13 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
 
     let isMounted = true;
     let pollInterval: ReturnType<typeof setInterval> | null = null;
-    let pollTimeout: ReturnType<typeof setTimeout> | null = null;
 
     setTargetRect(null);
 
     // If route doesn't match, navigate there first
     if (!currentPath.startsWith(step.route)) {
       setIsNavigating(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       navigate({ to: step.route as any });
     }
 
@@ -279,9 +280,16 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     return () => {
       isMounted = false;
       if (pollInterval) clearInterval(pollInterval);
-      if (pollTimeout) clearTimeout(pollTimeout);
     };
-  }, [open, currentStepIndex, step.route, step.targetSelector, currentPath, navigate, locateTarget]);
+  }, [
+    open,
+    currentStepIndex,
+    step.route,
+    step.targetSelector,
+    currentPath,
+    navigate,
+    locateTarget,
+  ]);
 
   // Continuously track scroll/resize to keep spotlight pinned to element
   useEffect(() => {
@@ -318,7 +326,14 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, currentStepIndex]);
 
-  if (!open) return null;
+  useEffect(() => {
+    if (popoverRef.current) {
+      const h = popoverRef.current.offsetHeight;
+      if (h > 0 && Math.abs(h - cardHeight) > 5) {
+        setCardHeight(h);
+      }
+    }
+  }, [currentStepIndex, step, open, cardHeight]);
 
   const handleFinish = () => {
     try {
@@ -347,10 +362,12 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     setCurrentStepIndex((prev) => Math.max(0, prev - 1));
   };
 
+  if (!open) return null;
+
   const Icon = step.icon;
 
   // Calculate popover positioning relative to targetRect
-  const padding = 12;
+  const padding = 10;
   const paddedRect = targetRect
     ? {
         top: Math.max(0, targetRect.top - padding),
@@ -365,33 +382,49 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
   // Placement calculation
   let popoverStyle: React.CSSProperties = {};
   let placement: "bottom" | "top" | "center" = "center";
-  const cardWidth = typeof window !== "undefined" ? Math.min(window.innerWidth - 32, 440) : 440;
-  const cardHeightEstimate = 360;
+  let arrowOffsetLeft = 220; // relative to popover card in px
+  let beaconPoint: { x: number; y: number } | null = null;
+
+  const cardWidth = typeof window !== "undefined" ? Math.min(window.innerWidth - 32, 450) : 450;
+  const actualHeight = cardHeight || 380;
 
   if (paddedRect && typeof window !== "undefined") {
     const spaceBelow = window.innerHeight - paddedRect.bottom;
     const spaceAbove = paddedRect.top;
+    const targetCenterX = paddedRect.left + paddedRect.width / 2;
 
-    if (spaceBelow >= cardHeightEstimate + 20) {
+    // Horizontal positioning: align card center with target center, clamped to screen margins
+    const left = Math.max(
+      16,
+      Math.min(window.innerWidth - cardWidth - 16, targetCenterX - cardWidth / 2),
+    );
+    // Pointer arrow position on card: points directly at targetCenterX
+    arrowOffsetLeft = Math.max(32, Math.min(cardWidth - 32, targetCenterX - left));
+
+    if (spaceBelow >= actualHeight + 24) {
       placement = "bottom";
-      const targetCenter = paddedRect.left + paddedRect.width / 2;
-      const left = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, targetCenter - cardWidth / 2));
       popoverStyle = {
-        top: `${paddedRect.bottom + 14}px`,
+        top: `${paddedRect.bottom + 18}px`,
         left: `${left}px`,
         width: `${cardWidth}px`,
       };
-    } else if (spaceAbove >= cardHeightEstimate + 20) {
+      beaconPoint = {
+        x: Math.max(paddedRect.left + 16, Math.min(paddedRect.right - 16, targetCenterX)),
+        y: paddedRect.bottom,
+      };
+    } else if (spaceAbove >= actualHeight + 24) {
       placement = "top";
-      const targetCenter = paddedRect.left + paddedRect.width / 2;
-      const left = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, targetCenter - cardWidth / 2));
       popoverStyle = {
-        top: `${Math.max(16, paddedRect.top - cardHeightEstimate - 14)}px`,
+        top: `${Math.max(16, paddedRect.top - actualHeight - 18)}px`,
         left: `${left}px`,
         width: `${cardWidth}px`,
+      };
+      beaconPoint = {
+        x: Math.max(paddedRect.left + 16, Math.min(paddedRect.right - 16, targetCenterX)),
+        y: paddedRect.top,
       };
     } else {
-      // Centered fallback if element covers entire screen
+      // Centered fallback if element covers entire screen height
       placement = "center";
       popoverStyle = {
         top: "50%",
@@ -413,7 +446,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
 
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-auto select-none">
-      {/* ─── SVG Spotlight Mask ─── */}
+      {/* ─── Clear, Non-Dull Backdrop ─── */}
       {paddedRect ? (
         <svg className="fixed inset-0 w-full h-full pointer-events-none z-10 transition-all duration-300">
           <defs>
@@ -424,8 +457,8 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
                 y={paddedRect.top}
                 width={paddedRect.width}
                 height={paddedRect.height}
-                rx="18"
-                ry="18"
+                rx="16"
+                ry="16"
                 fill="black"
               />
             </mask>
@@ -433,50 +466,98 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           <rect
             width="100%"
             height="100%"
-            fill="rgba(10, 15, 30, 0.78)"
+            fill="rgba(15, 23, 42, 0.08)"
             mask="url(#tour-spotlight-mask)"
-            className="backdrop-blur-[2px] transition-all duration-300 pointer-events-auto"
+            className="transition-all duration-300 pointer-events-auto cursor-default"
             onClick={handleNext}
           />
         </svg>
       ) : (
         <div
-          className="fixed inset-0 bg-slate-950/75 dark:bg-black/80 backdrop-blur-sm z-10 animate-in fade-in transition-all"
+          className="fixed inset-0 bg-slate-950/10 dark:bg-black/15 z-10 animate-in fade-in transition-all duration-300 cursor-default"
           onClick={handleNext}
         />
       )}
 
-      {/* ─── Target Spotlight Ring & Pointer Reticle ─── */}
+      {/* ─── Target Spotlight Ring with Sonar Pulse & Precision Anchor ─── */}
       {paddedRect && (
-        <div
-          style={{
-            top: `${paddedRect.top}px`,
-            left: `${paddedRect.left}px`,
-            width: `${paddedRect.width}px`,
-            height: `${paddedRect.height}px`,
-          }}
-          className="fixed z-20 pointer-events-none rounded-2xl ring-4 ring-indigo-500/40 border-2 border-indigo-400 shadow-[0_0_35px_rgba(99,102,241,0.55)] transition-all duration-300 animate-pulse"
-        >
-          {/* Animated Target Beacon Badge */}
-          <div className="absolute -top-3.5 left-4 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 text-white text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5 animate-bounce">
-            <Sparkles className="w-3 h-3 text-amber-300" />
-            <span>{step.targetBadge}</span>
+        <>
+          {/* Sonar expanding wave ripple */}
+          <div
+            style={{
+              top: `${paddedRect.top}px`,
+              left: `${paddedRect.left}px`,
+              width: `${paddedRect.width}px`,
+              height: `${paddedRect.height}px`,
+            }}
+            className="fixed z-15 pointer-events-none rounded-2xl ring-2 ring-indigo-400/40 animate-ping opacity-25 transition-all duration-300 ease-out"
+          />
+
+          {/* Active Glowing Spotlight Ring */}
+          <div
+            style={{
+              top: `${paddedRect.top}px`,
+              left: `${paddedRect.left}px`,
+              width: `${paddedRect.width}px`,
+              height: `${paddedRect.height}px`,
+            }}
+            className="fixed z-20 pointer-events-none rounded-2xl ring-2 ring-indigo-500/70 border-2 border-cyan-400/90 shadow-[0_0_25px_rgba(99,102,241,0.5),0_0_50px_rgba(34,211,238,0.25)] transition-all duration-300 ease-out"
+          >
+            {/* Animated Target Beacon Badge */}
+            <div className="absolute -top-3.5 left-4 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 animate-bounce">
+              <Sparkles
+                className="w-3 h-3 text-amber-300 animate-spin"
+                style={{ animationDuration: "6s" }}
+              />
+              <span>{step.targetBadge}</span>
+            </div>
           </div>
-        </div>
+
+          {/* Precision Focal Point Beacon */}
+          {beaconPoint && placement !== "center" && (
+            <div
+              style={{
+                left: `${beaconPoint.x}px`,
+                top: `${beaconPoint.y}px`,
+              }}
+              className="fixed z-25 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center transition-all duration-300"
+            >
+              <span className="absolute w-8 h-8 rounded-full bg-indigo-500/30 animate-ping" />
+              <span className="absolute w-5 h-5 rounded-full bg-cyan-400/40 animate-pulse" />
+              <span className="w-3 h-3 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-400 border-2 border-white dark:border-slate-900 shadow-[0_0_12px_rgba(99,102,241,1)]" />
+            </div>
+          )}
+        </>
       )}
 
-      {/* ─── Floating Tour Card ─── */}
+      {/* ─── Floating Tour Card with Accurate Pointer Arrow ─── */}
       <div
         ref={popoverRef}
         style={popoverStyle}
         className={cn(
-          "fixed z-30 rounded-3xl bg-card dark:bg-[#0f172a] border border-border/80 dark:border-indigo-500/30 p-5 sm:p-6 shadow-2xl space-y-4 text-foreground relative overflow-hidden ring-1 ring-primary/20 animate-in zoom-in-95 transition-all duration-200",
-          placement === "center" && "max-h-[90vh] overflow-y-auto"
+          "fixed z-30 rounded-3xl bg-card/95 dark:bg-[#0f172a]/95 backdrop-blur-xl border border-indigo-500/30 p-5 sm:p-6 shadow-2xl space-y-4 text-foreground relative ring-1 ring-primary/25 transition-all duration-300 ease-out",
+          placement === "center" && "max-h-[90vh] overflow-y-auto",
         )}
       >
-        {/* Subtle Ambient Glow */}
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Directional Callout Pointer Arrow pointing directly to target center */}
+        {placement === "bottom" && (
+          <div
+            style={{ left: `${arrowOffsetLeft}px` }}
+            className="absolute -top-2.5 -translate-x-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-t border-l border-indigo-500/40 rotate-45 z-30 shadow-[-3px_-3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+          />
+        )}
+        {placement === "top" && (
+          <div
+            style={{ left: `${arrowOffsetLeft}px` }}
+            className="absolute -bottom-2.5 -translate-x-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-b border-r border-indigo-500/40 rotate-45 z-30 shadow-[3px_3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+          />
+        )}
+
+        {/* Ambient Glow accents contained within card bounds */}
+        <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+          <div className="absolute -top-16 -right-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl" />
+        </div>
 
         {/* Close Button */}
         <button
@@ -487,52 +568,63 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           <X className="w-4 h-4" />
         </button>
 
-        {/* Header */}
-        <div className="flex items-start gap-3.5 pr-8">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/25 grid place-items-center shrink-0 shadow-md shadow-primary/10">
-            <Icon className={cn("w-6 h-6", step.iconColor)} />
-          </div>
-
-          <div className="space-y-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25 font-mono">
-                {step.badge}
-              </span>
-              <span className="text-xs text-muted-foreground font-mono font-medium">
-                Step {step.step} of {TOUR_STEPS.length}
-              </span>
+        {/* Animated Step Content container */}
+        <div
+          key={step.step}
+          className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300"
+        >
+          {/* Header */}
+          <div className="flex items-start gap-3.5 pr-8">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-cyan-500/15 border border-indigo-500/30 grid place-items-center shrink-0 shadow-md shadow-indigo-500/10">
+              <Icon className={cn("w-6 h-6", step.iconColor)} />
             </div>
-            <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-snug">
-              {step.title}
-            </h3>
-            <p className="text-xs text-muted-foreground font-medium">{step.subtitle}</p>
-          </div>
-        </div>
 
-        {/* Dynamic Navigation Indicator */}
-        {isNavigating && (
-          <div className="py-2 px-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-400 flex items-center gap-2">
-            <span className="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full" />
-            <span>Navigating to {step.route}...</span>
-          </div>
-        )}
-
-        {/* Highlights List */}
-        <div className="space-y-2 py-1 text-xs text-muted-foreground">
-          {step.highlights.map((h, i) => (
-            <div key={i} className="flex items-start gap-2">
-              <CheckCircle2 className="h-3.5 w-3.5 text-indigo-500 shrink-0 mt-0.5" />
-              <span className="leading-relaxed text-slate-700 dark:text-slate-300">{h}</span>
+            <div className="space-y-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 font-mono">
+                  {step.badge}
+                </span>
+                <span className="text-xs text-muted-foreground font-mono font-medium">
+                  Step {step.step} of {TOUR_STEPS.length}
+                </span>
+              </div>
+              <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-snug">
+                {step.title}
+              </h3>
+              <p className="text-xs text-muted-foreground font-medium">{step.subtitle}</p>
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Pointer Tip Callout */}
-        <div className={cn("p-3 rounded-2xl border text-xs font-medium flex items-start gap-2.5", step.accentBg)}>
-          <Zap className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
-          <div className="space-y-0.5">
-            <strong className="block text-foreground font-bold">Pointer Focus:</strong>
-            <span className="leading-relaxed">{step.tip}</span>
+          {/* Dynamic Navigation Indicator */}
+          {isNavigating && (
+            <div className="py-2 px-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-400 flex items-center gap-2 animate-pulse">
+              <span className="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full" />
+              <span>Navigating to {step.route}...</span>
+            </div>
+          )}
+
+          {/* Highlights List */}
+          <div className="space-y-2 py-1 text-xs text-muted-foreground">
+            {step.highlights.map((h, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <span className="leading-relaxed text-slate-700 dark:text-slate-300">{h}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Pointer Tip Callout */}
+          <div
+            className={cn(
+              "p-3 rounded-2xl border text-xs font-medium flex items-start gap-2.5 transition-colors",
+              step.accentBg,
+            )}
+          >
+            <Zap className="w-4 h-4 shrink-0 mt-0.5 text-amber-500 animate-pulse" />
+            <div className="space-y-0.5">
+              <strong className="block text-foreground font-bold">Pointer Focus:</strong>
+              <span className="leading-relaxed">{step.tip}</span>
+            </div>
           </div>
         </div>
 
@@ -552,12 +644,12 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
                 key={idx}
                 onClick={() => setCurrentStepIndex(idx)}
                 className={cn(
-                  "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
+                  "h-2 rounded-full transition-all duration-300 cursor-pointer",
                   idx === currentStepIndex
-                    ? "w-5 bg-primary shadow-sm shadow-primary/50"
+                    ? "w-6 bg-gradient-to-r from-indigo-500 to-cyan-500 shadow-sm shadow-indigo-500/50"
                     : idx < currentStepIndex
-                    ? "w-1.5 bg-primary/50"
-                    : "w-1.5 bg-muted hover:bg-muted-foreground/30"
+                      ? "w-2 bg-indigo-500/50"
+                      : "w-2 bg-muted hover:bg-muted-foreground/30",
                 )}
                 title={`Jump to step ${idx + 1}`}
               />
@@ -568,7 +660,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
             <button
               disabled={isFirst}
               onClick={handlePrev}
-              className="p-2 rounded-xl bg-muted/60 hover:bg-muted text-foreground border border-border/60 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+              className="p-2 rounded-xl bg-muted/60 hover:bg-muted text-foreground border border-border/60 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer active:scale-95"
               title="Previous Step"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -576,14 +668,14 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
 
             <button
               onClick={handleNext}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-primary/90 active:scale-98 text-primary-foreground transition-all flex items-center gap-1.5 shadow-lg shadow-primary/25 cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 active:scale-95 text-white transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 cursor-pointer group"
             >
               {isLast ? (
                 <>Finish & Launch 🚀</>
               ) : (
                 <>
                   <span>Next</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
                 </>
               )}
             </button>
