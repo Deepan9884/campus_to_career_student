@@ -312,6 +312,33 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     };
   }, [open, updateRect]);
 
+  const handleFinish = useCallback(() => {
+    try {
+      localStorage.setItem("cf-student-tour-done", "true");
+      confetti({
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"],
+      });
+    } catch {
+      // silent
+    }
+    onClose();
+  }, [onClose]);
+
+  const handleNext = useCallback(() => {
+    if (isLast) {
+      handleFinish();
+    } else {
+      setCurrentStepIndex((prev) => prev + 1);
+    }
+  }, [isLast, handleFinish]);
+
+  const handlePrev = useCallback(() => {
+    setCurrentStepIndex((prev) => Math.max(0, prev - 1));
+  }, []);
+
   // Keyboard navigation
   useEffect(() => {
     if (!open) return;
@@ -328,7 +355,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, currentStepIndex]);
+  }, [open, handleNext, handlePrev, handleFinish]);
 
   useEffect(() => {
     if (popoverRef.current) {
@@ -338,33 +365,6 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
       }
     }
   }, [currentStepIndex, step, open, cardHeight]);
-
-  const handleFinish = () => {
-    try {
-      localStorage.setItem("cf-student-tour-done", "true");
-      confetti({
-        particleCount: 100,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"],
-      });
-    } catch {
-      // silent
-    }
-    onClose();
-  };
-
-  const handleNext = () => {
-    if (isLast) {
-      handleFinish();
-    } else {
-      setCurrentStepIndex((prev) => prev + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    setCurrentStepIndex((prev) => Math.max(0, prev - 1));
-  };
 
   if (!open) return null;
 
@@ -386,11 +386,13 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
   // Placement calculation
   let popoverStyle: React.CSSProperties = {};
   let placement: "bottom" | "top" | "left" | "right" | "center" = "center";
-  let arrowOffsetLeft = 220; // relative to popover card in px
-  let arrowOffsetTop = 180; // for side placements
+  let showArrow = false;
+  let arrowOffsetLeft = 210; // relative to popover card in px
+  let arrowOffsetTop = 160; // for side placements
 
-  const cardWidth = typeof window !== "undefined" ? Math.min(window.innerWidth - 32, 450) : 450;
-  const actualHeight = cardHeight || 360;
+  const cardWidth = typeof window !== "undefined" ? Math.min(window.innerWidth - 32, 420) : 420;
+  const actualHeight = Math.max(280, cardHeight || 340);
+  const viewportPadding = 16;
 
   if (paddedRect && typeof window !== "undefined") {
     const spaceBelow = window.innerHeight - paddedRect.bottom;
@@ -400,64 +402,73 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
     const targetCenterX = paddedRect.left + paddedRect.width / 2;
     const targetCenterY = paddedRect.top + paddedRect.height / 2;
 
-    // Default horizontal alignment: center card on target, clamp within screen margins
+    // Horizontal clamp within viewport margins
     const left = Math.max(
-      16,
-      Math.min(window.innerWidth - cardWidth - 16, targetCenterX - cardWidth / 2),
+      viewportPadding,
+      Math.min(window.innerWidth - cardWidth - viewportPadding, targetCenterX - cardWidth / 2),
     );
-    arrowOffsetLeft = Math.max(32, Math.min(cardWidth - 32, targetCenterX - left));
+    arrowOffsetLeft = Math.max(28, Math.min(cardWidth - 28, targetCenterX - left));
 
-    if (spaceBelow >= actualHeight + 14) {
+    // Guaranteed top limit so bottom of card is NEVER clipped off screen
+    const maxTop = Math.max(viewportPadding, window.innerHeight - actualHeight - viewportPadding);
+
+    // 1. Can we place cleanly BELOW the target?
+    if (spaceBelow >= actualHeight + 18) {
       placement = "bottom";
+      showArrow = true;
       popoverStyle = {
-        top: `${paddedRect.bottom + 14}px`,
+        top: `${Math.min(maxTop, paddedRect.bottom + 8)}px`,
         left: `${left}px`,
         width: `${cardWidth}px`,
       };
-    } else if (spaceAbove >= actualHeight + 14) {
+    }
+    // 2. Can we place cleanly ABOVE the target?
+    else if (spaceAbove >= actualHeight + 18) {
       placement = "top";
+      showArrow = true;
       popoverStyle = {
-        top: `${Math.max(16, paddedRect.top - actualHeight - 14)}px`,
+        bottom: `${Math.max(viewportPadding, window.innerHeight - paddedRect.top + 8)}px`,
         left: `${left}px`,
         width: `${cardWidth}px`,
       };
-    } else if (spaceRight >= cardWidth + 24 && window.innerWidth >= 1024) {
+    }
+    // 3. Can we place to the RIGHT on desktop?
+    else if (spaceRight >= cardWidth + 20 && window.innerWidth >= 1024) {
       placement = "right";
-      const top = Math.max(
-        16,
-        Math.min(window.innerHeight - actualHeight - 16, targetCenterY - actualHeight / 2),
-      );
-      arrowOffsetTop = Math.max(32, Math.min(actualHeight - 32, targetCenterY - top));
+      showArrow = true;
+      const top = Math.max(viewportPadding, Math.min(maxTop, targetCenterY - actualHeight / 2));
+      arrowOffsetTop = Math.max(28, Math.min(actualHeight - 28, targetCenterY - top));
       popoverStyle = {
         top: `${top}px`,
-        left: `${paddedRect.right + 14}px`,
+        left: `${paddedRect.right + 10}px`,
         width: `${cardWidth}px`,
       };
-    } else if (spaceLeft >= cardWidth + 24 && window.innerWidth >= 1024) {
+    }
+    // 4. Can we place to the LEFT on desktop?
+    else if (spaceLeft >= cardWidth + 20 && window.innerWidth >= 1024) {
       placement = "left";
-      const top = Math.max(
-        16,
-        Math.min(window.innerHeight - actualHeight - 16, targetCenterY - actualHeight / 2),
-      );
-      arrowOffsetTop = Math.max(32, Math.min(actualHeight - 32, targetCenterY - top));
+      showArrow = true;
+      const top = Math.max(viewportPadding, Math.min(maxTop, targetCenterY - actualHeight / 2));
+      arrowOffsetTop = Math.max(28, Math.min(actualHeight - 28, targetCenterY - top));
       popoverStyle = {
         top: `${top}px`,
-        left: `${paddedRect.left - cardWidth - 14}px`,
+        left: `${paddedRect.left - cardWidth - 10}px`,
         width: `${cardWidth}px`,
       };
-    } else {
-      // Non-overlapping vertical fallback: place on side with more room so button is never covered
-      if (spaceBelow >= spaceAbove) {
-        placement = "bottom";
+    }
+    // 5. Fallback for tall targets: Dock strictly inside viewport without off-screen clipping
+    else {
+      placement = spaceAbove >= spaceBelow ? "top" : "bottom";
+      showArrow = false;
+      if (placement === "top") {
         popoverStyle = {
-          top: `${Math.max(paddedRect.bottom + 8, window.innerHeight - actualHeight - 14)}px`,
+          top: `${viewportPadding}px`,
           left: `${left}px`,
           width: `${cardWidth}px`,
         };
       } else {
-        placement = "top";
         popoverStyle = {
-          top: `${Math.min(paddedRect.top - actualHeight - 8, 16)}px`,
+          bottom: `${viewportPadding}px`,
           left: `${left}px`,
           width: `${cardWidth}px`,
         };
@@ -466,6 +477,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
   } else {
     // Default centered modal when target is loading or not present
     placement = "center";
+    showArrow = false;
     popoverStyle = {
       top: "50%",
       left: "50%",
@@ -509,7 +521,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
         />
       )}
 
-      {/* ─── Target Spotlight Ring with Sonar Pulse & Precision Anchor ─── */}
+      {/* ─── Target Spotlight Ring with Sonar Pulse ─── */}
       {paddedRect && (
         <>
           {/* Sonar expanding wave ripple */}
@@ -541,38 +553,38 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
         ref={popoverRef}
         style={popoverStyle}
         className={cn(
-          "fixed z-30 rounded-3xl bg-card/95 dark:bg-[#0f172a]/95 backdrop-blur-xl border border-indigo-500/30 p-5 sm:p-6 shadow-2xl space-y-4 text-foreground relative ring-1 ring-primary/25 transition-all duration-300 ease-out",
-          placement === "center" && "max-h-[90vh] overflow-y-auto",
+          "fixed z-30 rounded-2xl sm:rounded-3xl bg-card/98 dark:bg-[#0f172a]/98 backdrop-blur-2xl border border-indigo-500/30 p-4 sm:p-5 shadow-2xl space-y-3 text-foreground relative ring-1 ring-primary/25 transition-all duration-300 ease-out max-h-[calc(100vh-2rem)] flex flex-col justify-between overflow-visible",
+          placement === "center" && "max-h-[90vh]",
         )}
       >
         {/* Directional Callout Pointer Arrow pointing directly to target */}
-        {placement === "bottom" && (
+        {showArrow && placement === "bottom" && (
           <div
             style={{ left: `${arrowOffsetLeft}px` }}
-            className="absolute -top-2.5 -translate-x-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-t border-l border-indigo-500/40 rotate-45 z-30 shadow-[-3px_-3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+            className="absolute -top-2 -translate-x-1/2 w-4 h-4 bg-card dark:bg-[#0f172a] border-t border-l border-indigo-500/30 rotate-45 z-30 shadow-[-2px_-2px_4px_rgba(0,0,0,0.04)]"
           />
         )}
-        {placement === "top" && (
+        {showArrow && placement === "top" && (
           <div
             style={{ left: `${arrowOffsetLeft}px` }}
-            className="absolute -bottom-2.5 -translate-x-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-b border-r border-indigo-500/40 rotate-45 z-30 shadow-[3px_3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+            className="absolute -bottom-2 -translate-x-1/2 w-4 h-4 bg-card dark:bg-[#0f172a] border-b border-r border-indigo-500/30 rotate-45 z-30 shadow-[2px_2px_4px_rgba(0,0,0,0.04)]"
           />
         )}
-        {placement === "right" && (
+        {showArrow && placement === "right" && (
           <div
             style={{ top: `${arrowOffsetTop}px` }}
-            className="absolute -left-2.5 -translate-y-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-b border-l border-indigo-500/40 rotate-45 z-30 shadow-[-3px_3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+            className="absolute -left-2 -translate-y-1/2 w-4 h-4 bg-card dark:bg-[#0f172a] border-b border-l border-indigo-500/30 rotate-45 z-30 shadow-[-2px_2px_4px_rgba(0,0,0,0.04)]"
           />
         )}
-        {placement === "left" && (
+        {showArrow && placement === "left" && (
           <div
             style={{ top: `${arrowOffsetTop}px` }}
-            className="absolute -right-2.5 -translate-y-1/2 w-5 h-5 bg-card dark:bg-[#0f172a] border-t border-r border-indigo-500/40 rotate-45 z-30 shadow-[3px_-3px_6px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out"
+            className="absolute -right-2 -translate-y-1/2 w-4 h-4 bg-card dark:bg-[#0f172a] border-t border-r border-indigo-500/30 rotate-45 z-30 shadow-[2px_-2px_4px_rgba(0,0,0,0.04)]"
           />
         )}
 
         {/* Ambient Glow accents contained within card bounds */}
-        <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 rounded-2xl sm:rounded-3xl overflow-hidden pointer-events-none">
           <div className="absolute -top-16 -right-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl" />
         </div>
@@ -580,49 +592,51 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
         {/* Close Button */}
         <button
           onClick={handleFinish}
-          className="absolute top-4 right-4 p-2 rounded-xl bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer border border-border/60 z-10"
+          className="absolute top-3.5 right-3.5 p-1.5 rounded-xl bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer border border-border/60 z-10"
           title="Close Tour"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
 
         {/* Animated Step Content container */}
         <div
           key={step.step}
-          className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          className="space-y-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-y-auto max-h-[calc(100vh-10rem)] pr-0.5"
         >
           {/* Header */}
-          <div className="flex items-start gap-3.5 pr-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-cyan-500/15 border border-indigo-500/30 grid place-items-center shrink-0 shadow-md shadow-indigo-500/10">
-              <Icon className={cn("w-6 h-6", step.iconColor)} />
+          <div className="flex items-start gap-3 pr-7">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/15 to-cyan-500/15 border border-indigo-500/30 grid place-items-center shrink-0 shadow-md shadow-indigo-500/10">
+              <Icon className={cn("w-5 h-5", step.iconColor)} />
             </div>
 
-            <div className="space-y-1 min-w-0">
+            <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 font-mono">
+                <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 font-mono">
                   {step.badge}
                 </span>
-                <span className="text-xs text-muted-foreground font-mono font-medium">
+                <span className="text-[11px] text-muted-foreground font-mono font-medium">
                   Step {step.step} of {TOUR_STEPS.length}
                 </span>
               </div>
-              <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-snug">
+              <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground leading-snug">
                 {step.title}
               </h3>
-              <p className="text-xs text-muted-foreground font-medium">{step.subtitle}</p>
+              <p className="text-xs text-muted-foreground font-medium line-clamp-2">
+                {step.subtitle}
+              </p>
             </div>
           </div>
 
           {/* Dynamic Navigation Indicator */}
           {isNavigating && (
-            <div className="py-2 px-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-400 flex items-center gap-2 animate-pulse">
+            <div className="py-1.5 px-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-400 flex items-center gap-2 animate-pulse">
               <span className="animate-spin inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full" />
               <span>Navigating to {step.route}...</span>
             </div>
           )}
 
           {/* Highlights List */}
-          <div className="space-y-2 py-1 text-xs text-muted-foreground">
+          <div className="space-y-1.5 py-0.5 text-xs text-muted-foreground">
             {step.highlights.map((h, i) => (
               <div key={i} className="flex items-start gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
@@ -634,20 +648,22 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           {/* Pointer Tip Callout */}
           <div
             className={cn(
-              "p-3 rounded-2xl border text-xs font-medium flex items-start gap-2.5 transition-colors",
+              "p-2.5 rounded-xl border text-xs font-medium flex items-start gap-2 transition-colors",
               step.accentBg,
             )}
           >
-            <Zap className="w-4 h-4 shrink-0 mt-0.5 text-amber-500 animate-pulse" />
+            <Zap className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500 animate-pulse" />
             <div className="space-y-0.5">
-              <strong className="block text-foreground font-bold">Pointer Focus:</strong>
-              <span className="leading-relaxed">{step.tip}</span>
+              <strong className="block text-foreground font-bold text-[11px]">
+                Pointer Focus:
+              </strong>
+              <span className="leading-relaxed text-[11px]">{step.tip}</span>
             </div>
           </div>
         </div>
 
         {/* Footer Navigation */}
-        <div className="flex items-center justify-between pt-3 border-t border-border/70">
+        <div className="flex items-center justify-between pt-2.5 border-t border-border/70 shrink-0">
           <button
             onClick={handleFinish}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors font-medium px-2 py-1 rounded-lg hover:bg-muted/50 cursor-pointer"
