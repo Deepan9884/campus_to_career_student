@@ -532,16 +532,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
               height: `${paddedRect.height}px`,
             }}
             className="fixed z-20 pointer-events-none rounded-2xl ring-2 ring-indigo-500/70 border-2 border-cyan-400/90 shadow-[0_0_25px_rgba(99,102,241,0.5),0_0_50px_rgba(34,211,238,0.25)] transition-all duration-300 ease-out"
-          >
-            {/* Animated Target Beacon Badge */}
-            <div className="absolute -top-3.5 left-4 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 animate-bounce">
-              <Sparkles
-                className="w-3 h-3 text-amber-300 animate-spin"
-                style={{ animationDuration: "6s" }}
-              />
-              <span>{step.targetBadge}</span>
-            </div>
-          </div>
+          />
         </>
       )}
 
