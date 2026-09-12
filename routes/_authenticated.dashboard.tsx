@@ -34,13 +34,66 @@ import {
   Compass,
   ArrowRight,
   ListTodo,
+  Sparkles,
+  UserCheck,
+  Code2,
+  Crown,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
+import { toast } from "sonner";
+import confetti from "canvas-confetti";
 import { getDashboardStats } from "@/lib/dashboard-api";
 import { useAuth } from "@/stores";
 import type { DashboardResponse } from "@/types/dashboard";
 import { getBadges } from "@/lib/badges-api";
-import type { BadgeId } from "@/types/badges";
+import type { BadgeId, UnifiedTrophy } from "@/types/badges";
 import { sanitizeDisplayName } from "@/lib/userUtils";
+
+const TROPHY_ICON_MAP: Record<string, any> = {
+  GraduationCap,
+  FileText,
+  Award,
+  Mic,
+  UserCheck,
+  Sparkles,
+  Target,
+  Compass,
+  Layers,
+  Code2,
+  Map,
+  Crown,
+};
+
+const TROPHY_TIER_META: Record<
+  string,
+  { label: string; badgeClass: string; cardClass: string; iconClass: string }
+> = {
+  bronze: {
+    label: "Bronze",
+    badgeClass: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30",
+    cardClass: "border-amber-500/30 bg-amber-500/[0.04]",
+    iconClass: "text-amber-600 dark:text-amber-400",
+  },
+  silver: {
+    label: "Silver",
+    badgeClass: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-400/30",
+    cardClass: "border-slate-400/30 bg-slate-400/[0.04]",
+    iconClass: "text-slate-600 dark:text-slate-300",
+  },
+  gold: {
+    label: "Gold",
+    badgeClass: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
+    cardClass: "border-yellow-500/40 bg-yellow-500/[0.06] shadow-sm shadow-yellow-500/10",
+    iconClass: "text-yellow-600 dark:text-yellow-400",
+  },
+  platinum: {
+    label: "Platinum",
+    badgeClass: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-400/30",
+    cardClass: "border-cyan-400/40 bg-cyan-500/[0.06] shadow-sm shadow-cyan-500/10",
+    iconClass: "text-cyan-600 dark:text-cyan-300",
+  },
+};
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Student Dashboard — Campus to Career" }] }),
@@ -60,6 +113,7 @@ const DASHBOARD_SECTIONS = [
 function Dashboard() {
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<string>("section-overview");
+  const [showAllTrophies, setShowAllTrophies] = useState<boolean>(false);
 
   const { data, isLoading: loadingData, isError: errorData, refetch: refetchStats } = useQuery({
     queryKey: ["dashboardStats"],
@@ -110,7 +164,30 @@ function Dashboard() {
   };
 
   const loading = loadingData || loadingBadges;
-  const earnedBadgeIds = new Set((badgesRes?.data?.badges || []).map((b: any) => b.badgeId));
+  const rawBadges: any = badgesRes;
+  const unifiedTrophies: UnifiedTrophy[] =
+    rawBadges?.achievements ||
+    rawBadges?.data?.achievements ||
+    [];
+  const earnedBadgeCount =
+    rawBadges?.summary?.earnedCount ??
+    unifiedTrophies.filter((t) => t.earned).length;
+  const totalTrophyCount =
+    rawBadges?.summary?.totalCount ??
+    (unifiedTrophies.length || 12);
+
+  const triggerTrophyToast = (trophy: UnifiedTrophy) => {
+    if (trophy.earned) {
+      confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+      toast.success(`Trophy Unlocked: ${trophy.name}`, {
+        description: `${trophy.desc} — Tier: ${trophy.tier.toUpperCase()}`,
+      });
+    } else {
+      toast.info(`${trophy.name} (${trophy.tier.toUpperCase()}): ${trophy.progress}%`, {
+        description: `${trophy.desc} — Progress: ${trophy.currentValue ?? 0} / ${trophy.targetValue ?? 0}`,
+      });
+    }
+  };
 
   const readiness = data?.readiness;
   const stats = data?.stats;
@@ -777,43 +854,94 @@ function Dashboard() {
             <GlassCard variant="strong" className="p-5">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-primary" />
+                  <Trophy className="w-4 h-4 text-[var(--warning)]" />
                   <h3 className="text-sm font-bold text-foreground">Earned Badges & Trophies</h3>
                 </div>
-                <span className="text-xs text-primary font-semibold">
-                  {earnedBadgeIds.size} / 9 Earned
+                <span className="text-xs font-bold text-[var(--warning)] bg-[var(--warning)]/10 px-2.5 py-0.5 rounded-full border border-[var(--warning)]/20">
+                  {earnedBadgeCount} / {totalTrophyCount} Earned
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: "First Steps", label: "First Steps", icon: GraduationCap, color: "text-emerald-500 dark:text-emerald-400" },
-                  { id: "Resume Ready", label: "ATS Pro", icon: FileText, color: "text-primary" },
-                  { id: "Interview Warmup", label: "Voice Coach", icon: Mic, color: "text-sky-500 dark:text-sky-400" },
-                  { id: "Code Explorer", label: "GitHub Scout", icon: Github, color: "text-purple-500 dark:text-purple-400" },
-                  { id: "Gap Closer", label: "Skill Closer", icon: Target, color: "text-rose-500 dark:text-rose-400" },
-                  { id: "Roadmap Builder", label: "Strategist", icon: Map, color: "text-primary" },
-                ].map((badge) => {
-                  const Icon = badge.icon;
-                  const isEarned = earnedBadgeIds.has(badge.id);
-                  return (
-                    <div
-                      key={badge.id}
-                      className={`p-2.5 rounded-xl flex flex-col items-center text-center transition-all border ${
-                        isEarned
-                          ? "bg-card border-primary/40 shadow-sm"
-                          : "bg-muted/40 border-border opacity-40 grayscale"
-                      }`}
+              {unifiedTrophies.length === 0 ? (
+                <div className="text-center py-6 text-xs text-muted-foreground">
+                  Complete assessments and practice modules to earn milestone trophies!
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {(showAllTrophies ? unifiedTrophies : unifiedTrophies.slice(0, 6)).map((trophy) => {
+                      const Icon = TROPHY_ICON_MAP[trophy.icon || ""] || Trophy;
+                      const meta = TROPHY_TIER_META[trophy.tier] || TROPHY_TIER_META.bronze;
+                      return (
+                        <div
+                          key={trophy.id}
+                          onClick={() => triggerTrophyToast(trophy)}
+                          className={`p-3 rounded-xl flex flex-col items-center text-center transition-all border cursor-pointer select-none relative group ${
+                            trophy.earned
+                              ? `${meta.cardClass} shadow-sm hover:-translate-y-0.5 hover:shadow-md`
+                              : "bg-muted/30 border-border/80 opacity-55 hover:opacity-85"
+                          }`}
+                        >
+                          <div
+                            className={`p-2 rounded-xl transition-all ${
+                              trophy.earned ? "bg-background/80 shadow-sm" : "bg-muted"
+                            }`}
+                          >
+                            <Icon className={`w-5 h-5 ${trophy.earned ? meta.iconClass : "text-muted-foreground"}`} />
+                          </div>
+
+                          <span className="text-[11px] font-bold text-foreground mt-2 line-clamp-1">
+                            {trophy.name}
+                          </span>
+
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span
+                              className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${meta.badgeClass}`}
+                            >
+                              {meta.label}
+                            </span>
+                            <span className="text-[9px] text-muted-foreground font-medium">
+                              {trophy.earned ? "Unlocked" : `${trophy.progress}%`}
+                            </span>
+                          </div>
+
+                          {!trophy.earned && (
+                            <div className="w-full mt-2 h-1 bg-muted rounded-full overflow-hidden border border-border/40">
+                              <div
+                                className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-300"
+                                style={{ width: `${trophy.progress}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {unifiedTrophies.length > 6 && (
+                    <button
+                      onClick={() => setShowAllTrophies((prev) => !prev)}
+                      className="w-full mt-3 py-1.5 rounded-lg bg-muted/40 hover:bg-muted text-[11px] font-semibold text-muted-foreground hover:text-foreground border border-border/60 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
-                      <div className={`p-1.5 rounded-lg ${isEarned ? "bg-primary/10" : "bg-transparent"}`}>
-                        <Icon className={`w-5 h-5 ${badge.color}`} />
-                      </div>
-                      <span className="text-[10px] font-bold text-foreground mt-1 line-clamp-1">{badge.label}</span>
-                      <span className="text-[8px] text-muted-foreground">{isEarned ? "Unlocked" : "Locked"}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                      <span>{showAllTrophies ? "Show Top 6 Trophies" : `Show All ${unifiedTrophies.length} Trophies`}</span>
+                      {showAllTrophies ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+                  )}
+
+                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
+                    <span className="text-[11px] text-muted-foreground">
+                      Unified across Dashboard & Analytics
+                    </span>
+                    <Link
+                      to="/analytics"
+                      className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-0.5"
+                    >
+                      <span>Milestone Showcase</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </>
+              )}
             </GlassCard>
           </div>
         </div>

@@ -335,9 +335,13 @@ function AnalyticsPage() {
   const triggerAchievementCelebration = (achievement: any) => {
     if (achievement.earned) {
       confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
-      toast.success(`Achievement Unlocked: ${achievement.name}`);
+      toast.success(`Achievement Unlocked: ${achievement.name}`, {
+        description: `${achievement.desc} — Tier: ${achievement.tier?.toUpperCase()}`,
+      });
     } else {
-      toast.info(`${achievement.name}: ${achievement.progress}% completed — ${achievement.desc}`);
+      toast.info(`${achievement.name} (${achievement.tier?.toUpperCase()}): ${achievement.progress}%`, {
+        description: `${achievement.desc} — Progress: ${achievement.currentValue ?? 0} / ${achievement.targetValue ?? 0}`,
+      });
     }
   };
 

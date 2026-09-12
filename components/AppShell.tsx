@@ -157,13 +157,34 @@ export const SUPER_DREAM_BRANCHES: SuperDreamBranch[] = [
 ];
 
 const ALL_BADGE_IDS: BadgeId[] = [
+  "first_steps",
+  "first_resume",
+  "score_80",
+  "interview_rookie",
+  "interview_5",
+  "star_communicator",
+  "skill_explorer",
+  "gap_closer",
+  "skill_collector",
+  "project_pro",
+  "roadmap_builder",
+  "placement_ready",
   "First Steps",
   "Resume Ready",
+  "Score Above 80",
+  "Interview Rookie",
   "Interview Warmup",
+  "Interview Veteran",
   "Interview Pro",
-  "Code Explorer",
+  "STAR Communicator",
+  "Skill Explorer",
   "Gap Closer",
+  "Skill Collector",
+  "Code Explorer",
+  "Project Pro",
   "Roadmap Builder",
+  "Career Strategist",
+  "Placement Ready",
   "Quiz Streak",
   "High Scorer",
 ];
@@ -355,11 +376,11 @@ export function AppShell() {
 
     async function bootstrap() {
       try {
-        const res = await getBadges();
+        const res: any = await getBadges();
         if (!isMounted) return;
-        const list = res.data.badges || [];
+        const list: EarnedBadge[] = res?.badges || res?.data?.badges || [];
         setEarnedBadges(list);
-        earnedBadgeIdsRef.current = new Set(list.map((b) => b.badgeId));
+        earnedBadgeIdsRef.current = new Set(list.map((b: any) => b.badgeId));
       } catch {
         // silent
       }
@@ -382,9 +403,9 @@ export function AppShell() {
 
     const t = setTimeout(async () => {
       try {
-        const res = await getBadges();
-        const list = res.data.badges || [];
-        const newIds = new Set(list.map((b) => b.badgeId));
+        const res: any = await getBadges();
+        const list: EarnedBadge[] = res?.badges || res?.data?.badges || [];
+        const newIds = new Set(list.map((b: any) => b.badgeId));
 
         const prevIds = earnedBadgeIdsRef.current;
         const newlyEarned = ALL_BADGE_IDS.filter((id) => newIds.has(id) && !prevIds.has(id));
@@ -405,7 +426,7 @@ export function AppShell() {
 
           // Toast
           toast.success(badgeId, {
-            description: "New badge unlocked!",
+            description: "New milestone badge unlocked!",
           });
         } else {
           earnedBadgeIdsRef.current = newIds;
