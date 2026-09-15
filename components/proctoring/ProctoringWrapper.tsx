@@ -130,32 +130,35 @@ export function ProctoringWrapper({
   // 2. Pre-Exam Check-In & Fullscreen Launch Gate (Before questions appear)
   if (!isExamStarted) {
     return createPortal(
-      <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto select-none font-sans">
+      <div
+        data-theme="dark"
+        className="dark fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto select-none font-sans"
+      >
         <div className="p-6 max-w-xl w-full mx-auto space-y-6 animate-in fade-in duration-200">
           <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-[color:var(--color-primary)]/10 border border-[color:var(--color-primary)]/30 flex items-center justify-center mx-auto text-[color:var(--color-primary)]">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center mx-auto text-indigo-400">
               <ShieldCheck className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold">Interview Assessment Check-In</h2>
-            <p className="text-xs text-muted-foreground">
+            <h2 className="text-xl font-bold !text-white">Interview Assessment Check-In</h2>
+            <p className="text-xs !text-slate-400">
               Review the guidelines below and enter fullscreen to begin your session.
             </p>
           </div>
 
           {/* Rules Checklist */}
-          <div className="glass rounded-2xl p-4 border border-white/10 space-y-2.5 text-xs text-muted-foreground">
-            <p className="font-bold text-white/90 text-sm mb-2">Assessment Guidelines</p>
+          <div className="rounded-2xl p-4 border border-slate-700/60 bg-slate-900/80 backdrop-blur-md space-y-2.5 text-xs text-slate-300">
+            <p className="font-bold text-white text-sm mb-2">Assessment Guidelines</p>
             <div className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">Full Screen Enforced:</strong> The interview runs in fullscreen to help you concentrate. Exiting records a strike and gives 15 seconds to return.</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span><strong className="text-white">Full Screen Enforced:</strong> The interview runs in fullscreen to help you concentrate. Exiting records a strike and gives 15 seconds to return.</span>
             </div>
             <div className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">Focused Assessment:</strong> Tab switching, DevTools, and restricted OS shortcuts are disabled during the session.</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span><strong className="text-white">Focused Assessment:</strong> Tab switching, DevTools, and restricted OS shortcuts are disabled during the session.</span>
             </div>
             <div className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
-              <span><strong className="text-white/90">3-Strike Policy:</strong> Reaching 3 violations will temporarily suspend your session.</span>
+              <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+              <span><strong className="text-white">3-Strike Policy:</strong> Reaching 3 violations will temporarily suspend your session.</span>
             </div>
           </div>
 
@@ -163,7 +166,7 @@ export function ProctoringWrapper({
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleLaunchExam}
-              className="flex-1 btn-gradient btn-gradient-hover rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/20"
+              className="flex-1 btn-gradient btn-gradient-hover rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/20 text-white cursor-pointer"
             >
               <Maximize className="h-4 w-4" />
               Enter Fullscreen & Begin Session
@@ -171,7 +174,7 @@ export function ProctoringWrapper({
             {onExit && (
               <button
                 onClick={handleExit}
-                className="glass rounded-xl px-5 py-3 text-sm hover:bg-white/10"
+                className="rounded-xl px-5 py-3 text-sm font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -185,7 +188,10 @@ export function ProctoringWrapper({
 
   // 3. Active Exam in Progress (Portal to document.body, entirely replacing the platform viewport)
   return createPortal(
-    <div className="fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col h-screen w-screen overflow-hidden select-none font-sans p-0 m-0">
+    <div
+      data-theme="dark"
+      className="dark fixed inset-0 z-[999999] bg-[#0b1120] text-slate-100 flex flex-col h-screen w-screen overflow-hidden select-none font-sans p-0 m-0"
+    >
       {/* If exited fullscreen during exam, overlay with 15s countdown timer */}
       {proctoringState.fullscreenCountdown !== null && !isActuallyBlocked && (
         <FullscreenCountdownModal
@@ -205,23 +211,23 @@ export function ProctoringWrapper({
         <div
           style={{
             position: "fixed",
-            bottom: "24px",
+            bottom: "80px",
             right: "24px",
             zIndex: 9999999,
           }}
           className="flex flex-col items-end gap-2 font-sans select-none pointer-events-auto"
         >
           <div
-            className={`glass rounded-full px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 border shadow-lg ${
+            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 border shadow-xl backdrop-blur-md ${
               proctoringState.violationCount === 1
-                ? "border-yellow-500/50 bg-yellow-500/20 text-yellow-300"
+                ? "border-yellow-500/60 bg-yellow-950/90 text-yellow-300 shadow-yellow-500/10"
                 : proctoringState.violationCount === 2
-                ? "border-orange-500/50 bg-orange-500/20 text-orange-300 animate-pulse"
-                : "border-red-500/50 bg-red-500/20 text-red-300"
+                ? "border-orange-500/60 bg-orange-950/90 text-orange-300 shadow-orange-500/10 animate-pulse"
+                : "border-red-500/60 bg-red-950/90 text-red-300 shadow-red-500/10"
             }`}
           >
-            <AlertTriangle className="h-3.5 w-3.5" />
-            {proctoringState.violationCount}/3 Strikes
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            <span>{proctoringState.violationCount}/3 Strikes</span>
           </div>
         </div>
       )}

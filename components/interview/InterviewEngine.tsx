@@ -188,7 +188,10 @@ export function InterviewEngine({
     <div className="space-y-6 relative z-10">
       {/* If mode is active, render full-viewport isolated exam environment without navbars */}
       {mode === "active" && session ? (
-        <div className="fixed inset-0 z-[9999] h-screen w-screen bg-[#0b1120] overflow-y-auto p-4 sm:p-6 flex flex-col justify-between">
+        <div
+          data-theme="dark"
+          className="dark fixed inset-0 z-[9999] h-screen w-screen bg-[#0b1120] overflow-y-auto p-4 sm:p-6 flex flex-col justify-between"
+        >
           <ActiveView
             session={session}
             setSession={setSession}
@@ -1000,7 +1003,7 @@ function StarAnswerBuilder({
             }}
             placeholder="Describe the project, team size, tools, or situation..."
             rows={3}
-            className="w-full glass-input rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-slate-100 placeholder-slate-500"
           />
         </div>
 
@@ -1021,7 +1024,7 @@ function StarAnswerBuilder({
             }}
             placeholder="What was the problem, requirement, or bottleneck you faced?"
             rows={3}
-            className="w-full glass-input rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 resize-none text-slate-100 placeholder-slate-500"
           />
         </div>
 
@@ -1042,7 +1045,7 @@ function StarAnswerBuilder({
             }}
             placeholder="What concrete code, architecture, or teamwork actions did you take?"
             rows={3}
-            className="w-full glass-input rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-slate-100 placeholder-slate-500"
           />
         </div>
 
@@ -1063,7 +1066,7 @@ function StarAnswerBuilder({
             }}
             placeholder="What was the measurable outcome (e.g. latency, users, metrics)?"
             rows={3}
-            className="w-full glass-input rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500 resize-none text-slate-100 placeholder-slate-500"
           />
         </div>
       </div>
@@ -1287,7 +1290,10 @@ function ActiveView({
       onBlocked={() => setIsExamBlocked(true)}
       onExit={onBackToSetup}
     >
-      <div className="w-full h-full flex flex-col flex-1 min-h-0 bg-[#0b1120] text-slate-100 font-sans select-none overflow-hidden">
+      <div
+        data-theme="dark"
+        className="dark w-full h-full flex flex-col flex-1 min-h-0 bg-[#0b1120] text-slate-100 font-sans select-none overflow-hidden"
+      >
         {/* ── TOP ASSESSMENT HEADER BAR ────────────────────────────────────── */}
         <header className="h-16 shrink-0 bg-[#0f172a] border-b border-slate-800 px-4 md:px-6 flex items-center justify-between shadow-sm z-30">
           {/* Left: Platform Logo & Round Info */}
@@ -1425,7 +1431,7 @@ function ActiveView({
             )}
 
             {/* Question Text */}
-            <h2 className="text-lg md:text-xl font-bold text-white leading-relaxed">
+            <h2 className="text-lg md:text-xl font-bold !text-white leading-relaxed">
               {currentItem.questionText}
             </h2>
 

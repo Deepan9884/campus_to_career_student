@@ -1608,22 +1608,22 @@ html.dark[data-bg="none"] .panel-slot {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Light mode solid / plain canvas overrides */
-html.light[data-bg="solid"] .glass,
-html.light[data-bg="solid"] .liquid-glass,
-html.light[data-bg="solid"] .liquid-glass-card,
-html.light[data-bg="solid"] .panel-card,
-html.light[data-bg="solid"] .glass-strong,
-html.light[data-bg="none"] .glass,
-html.light[data-bg="none"] .liquid-glass,
-html.light[data-bg="none"] .liquid-glass-card,
-html.light[data-bg="none"] .panel-card,
-html.light[data-bg="none"] .glass-strong,
-.light[data-bg="solid"] .glass,
-.light[data-bg="solid"] .liquid-glass,
-.light[data-bg="solid"] .liquid-glass-card,
-.light[data-bg="solid"] .panel-card,
-.light[data-bg="solid"] .glass-strong {
+/* Light mode solid / plain canvas overrides (strictly scoped only outside dark mode) */
+html.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .panel-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .glass-strong:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="none"] .glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="none"] .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="none"] .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="none"] .panel-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="none"] .glass-strong:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .glass:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .panel-card:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .glass-strong:not(.dark *):not([data-theme="dark"] *) {
   background: #FFFFFF !important;
   border: 1px solid #CBD5E1 !important;
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08), 0 1px 4px -1px rgba(15, 23, 42, 0.04) !important;
@@ -1632,9 +1632,9 @@ html.light[data-bg="none"] .glass-strong,
   -webkit-backdrop-filter: none !important;
 }
 
-html.light[data-bg="solid"] .panel-slot,
-html.light[data-bg="none"] .panel-slot,
-.light[data-bg="solid"] .panel-slot {
+html.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .panel-slot:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-bg="none"] .panel-slot:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-bg="solid"] .panel-slot:not(.dark *):not([data-theme="dark"] *) {
   background: #F1F5F9 !important;
   border: 1px solid #E2E8F0 !important;
   color: #0F172A !important;
@@ -1716,17 +1716,17 @@ html.dark[data-glass="off"] .card-hover-lift:hover,
   transform: translateY(-2px) !important;
 }
 
-/* LIGHT MODE PLAIN UI */
-html.light[data-glass="off"] .glass,
-html.light[data-glass="off"] .liquid-glass,
-html.light[data-glass="off"] .liquid-glass-card,
-html.light[data-glass="off"] .panel-card,
-html.light[data-glass="off"] .panel-slot,
-.light[data-glass="off"] .glass,
-.light[data-glass="off"] .liquid-glass,
-.light[data-glass="off"] .liquid-glass-card,
-.light[data-glass="off"] .panel-card,
-.light[data-glass="off"] .panel-slot {
+/* LIGHT MODE PLAIN UI (strictly scoped only outside dark mode) */
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-slot:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-slot:not(.dark *):not([data-theme="dark"] *) {
   background: #FFFFFF !important;
   border: 1px solid rgba(203, 213, 225, 0.85) !important;
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
@@ -1735,8 +1735,8 @@ html.light[data-glass="off"] .panel-slot,
   -webkit-backdrop-filter: none !important;
 }
 
-html.light[data-glass="off"] .glass-strong,
-.light[data-glass="off"] .glass-strong {
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass-strong:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass-strong:not(.dark *):not([data-theme="dark"] *) {
   background: #F8FAFC !important;
   border: 1px solid rgba(203, 213, 225, 0.95) !important;
   box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04) !important;
@@ -1745,14 +1745,14 @@ html.light[data-glass="off"] .glass-strong,
   -webkit-backdrop-filter: none !important;
 }
 
-html.light[data-glass="off"] .panel-card:hover,
-html.light[data-glass="off"] .liquid-glass-card:hover,
-html.light[data-glass="off"] .glass:hover,
-html.light[data-glass="off"] .glass-strong:hover,
-.light[data-glass="off"] .panel-card:hover,
-.light[data-glass="off"] .liquid-glass-card:hover,
-.light[data-glass="off"] .glass:hover,
-.light[data-glass="off"] .glass-strong:hover {
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass-strong:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass-strong:hover:not(.dark *):not([data-theme="dark"] *) {
   background: #F1F5F9 !important;
   border-color: #6366F1 !important;
   box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06) !important;
@@ -1794,12 +1794,12 @@ html.dark[data-glass="off"] .glass-input:focus,
   box-shadow: 0 0 0 3px var(--btn-glow, rgba(167, 139, 250, 0.25)), inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* ─── Global Light Mode Liquid Glass & Translucent Morphism Surfaces ─── */
+/* ─── Global Light Mode Liquid Glass & Translucent Morphism Surfaces (strictly scoped only outside dark mode) ─── */
 
 /* 1. Light Mode Liquid Glass (Refractive Hero Containers) */
-.light .liquid-glass,
-html.light .liquid-glass,
-html.light:not([data-glass="off"]) .liquid-glass {
+.light:not(.dark):not([data-theme="dark"]) .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .liquid-glass:not(.dark *):not([data-theme="dark"] *) {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.78) 0%,
@@ -1821,9 +1821,9 @@ html.light:not([data-glass="off"]) .liquid-glass {
 }
 
 /* 2. Light Mode Liquid Glass Card (Interactive Panels & Tiles) */
-.light .liquid-glass-card,
-html.light .liquid-glass-card,
-html.light:not([data-glass="off"]) .liquid-glass-card {
+.light:not(.dark):not([data-theme="dark"]) .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .liquid-glass-card:not(.dark *):not([data-theme="dark"] *) {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.75) 0%,
@@ -1844,9 +1844,9 @@ html.light:not([data-glass="off"]) .liquid-glass-card {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
 }
 
-.light .liquid-glass-card:hover,
-html.light .liquid-glass-card:hover,
-html.light:not([data-glass="off"]) .liquid-glass-card:hover {
+.light:not(.dark):not([data-theme="dark"]) .liquid-glass-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .liquid-glass-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .liquid-glass-card:hover:not(.dark *):not([data-theme="dark"] *) {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.90) 0%,
@@ -1864,9 +1864,9 @@ html.light:not([data-glass="off"]) .liquid-glass-card:hover {
 }
 
 /* 3. Light Mode Standard Glass */
-.light .glass,
-html.light .glass,
-html.light:not([data-glass="off"]) .glass {
+.light:not(.dark):not([data-theme="dark"]) .glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .glass:not(.dark *):not([data-theme="dark"] *) {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.74) 0%,
@@ -1884,9 +1884,9 @@ html.light:not([data-glass="off"]) .glass {
   color: #0F172A !important;
 }
 
-.light .glass:hover,
-html.light .glass:hover,
-html.light:not([data-glass="off"]) .glass:hover {
+.light:not(.dark):not([data-theme="dark"]) .glass:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .glass:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .glass:hover:not(.dark *):not([data-theme="dark"] *) {
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.88) 0%,
@@ -1897,12 +1897,12 @@ html.light:not([data-glass="off"]) .glass:hover {
 }
 
 /* 4. Light Mode Strong Glass & Panel Cards */
-.light .glass-strong,
-html.light .glass-strong,
-.light .panel-card,
-html.light .panel-card,
-html.light:not([data-glass="off"]) .glass-strong,
-html.light:not([data-glass="off"]) .panel-card {
+.light:not(.dark):not([data-theme="dark"]) .glass-strong:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .glass-strong:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"]) .panel-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .panel-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .glass-strong:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .panel-card:not(.dark *):not([data-theme="dark"] *) {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.82) 0%,
@@ -1922,9 +1922,9 @@ html.light:not([data-glass="off"]) .panel-card {
   color: #0F172A !important;
 }
 
-.light .panel-card:hover,
-html.light .panel-card:hover,
-html.light:not([data-glass="off"]) .panel-card:hover {
+.light:not(.dark):not([data-theme="dark"]) .panel-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .panel-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .panel-card:hover:not(.dark *):not([data-theme="dark"] *) {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.92) 0%,
@@ -1940,9 +1940,9 @@ html.light:not([data-glass="off"]) .panel-card:hover {
 }
 
 /* 5. Light Mode Panel Slot (Nested Inset Sub-boxes) */
-.light .panel-slot,
-html.light .panel-slot,
-html.light:not([data-glass="off"]) .panel-slot {
+.light:not(.dark):not([data-theme="dark"]) .panel-slot:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .panel-slot:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]):not([data-glass="off"]) .panel-slot:not(.dark *):not([data-theme="dark"] *) {
   background: rgba(255, 255, 255, 0.55) !important;
   border: 1px solid rgba(224, 231, 255, 0.70) !important;
   backdrop-filter: blur(16px) saturate(170%) !important;
@@ -1952,16 +1952,16 @@ html.light:not([data-glass="off"]) .panel-slot {
 }
 
 /* 6. Explicit Plain UI Light Mode Fallback (When Glass is Disabled) */
-html.light[data-glass="off"] .liquid-glass,
-html.light[data-glass="off"] .liquid-glass-card,
-html.light[data-glass="off"] .glass,
-html.light[data-glass="off"] .panel-card,
-html.light[data-glass="off"] .panel-slot,
-.light[data-glass="off"] .liquid-glass,
-.light[data-glass="off"] .liquid-glass-card,
-.light[data-glass="off"] .glass,
-.light[data-glass="off"] .panel-card,
-.light[data-glass="off"] .panel-slot {
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-slot:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-slot:not(.dark *):not([data-theme="dark"] *) {
   background: #FFFFFF !important;
   border: 1px solid #CBD5E1 !important;
   backdrop-filter: none !important;
@@ -1970,14 +1970,14 @@ html.light[data-glass="off"] .panel-slot,
   color: #0F172A !important;
 }
 
-html.light[data-glass="off"] .panel-card:hover,
-html.light[data-glass="off"] .liquid-glass-card:hover,
-html.light[data-glass="off"] .glass:hover,
-html.light[data-glass="off"] .glass-strong:hover,
-.light[data-glass="off"] .panel-card:hover,
-.light[data-glass="off"] .liquid-glass-card:hover,
-.light[data-glass="off"] .glass:hover,
-.light[data-glass="off"] .glass-strong:hover {
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:hover:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass-strong:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .panel-card:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .liquid-glass-card:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass:hover:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"])[data-glass="off"] .glass-strong:hover:not(.dark *):not([data-theme="dark"] *) {
   background: #F8FAFC !important;
   border-color: #94A3B8 !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
@@ -1989,33 +1989,33 @@ html.light[data-glass="off"] .glass-strong:hover,
   color-scheme: light;
 }
 
-/* Input Fields & Textareas in Light Mode */
-.light .glass-input,
-html.light .glass-input,
-.light input.glass-input,
-html.light input.glass-input,
-.light textarea.glass-input,
-html.light textarea.glass-input {
+/* Input Fields & Textareas in Light Mode (strictly scoped outside dark mode) */
+.light:not(.dark):not([data-theme="dark"]) .glass-input:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .glass-input:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"]) input.glass-input:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) input.glass-input:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"]) textarea.glass-input:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) textarea.glass-input:not(.dark *):not([data-theme="dark"] *) {
   background-color: #FFFFFF !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03) !important;
 }
 
-.light .glass-input:focus,
-html.light .glass-input:focus,
-.light input.glass-input:focus,
-html.light input.glass-input:focus,
-.light textarea.glass-input:focus,
-html.light textarea.glass-input:focus {
+.light:not(.dark):not([data-theme="dark"]) .glass-input:focus:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) .glass-input:focus:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"]) input.glass-input:focus:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) input.glass-input:focus:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"]) textarea.glass-input:focus:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) textarea.glass-input:focus:not(.dark *):not([data-theme="dark"] *) {
   border-color: #6366F1 !important;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), inset 0 1px 2px rgba(15, 23, 42, 0.03) !important;
 }
 
-.light input::placeholder,
-html.light input::placeholder,
-.light textarea::placeholder,
-html.light textarea::placeholder {
+.light:not(.dark):not([data-theme="dark"]) input::placeholder:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) input::placeholder:not(.dark *):not([data-theme="dark"] *),
+.light:not(.dark):not([data-theme="dark"]) textarea::placeholder:not(.dark *):not([data-theme="dark"] *),
+html.light:not(.dark):not([data-theme="dark"]) textarea::placeholder:not(.dark *):not([data-theme="dark"] *) {
   color: #94A3B8 !important;
   opacity: 1 !important;
 }
@@ -2293,6 +2293,13 @@ html.light:not(.dark):not([data-theme="dark"]) .text-slate-400:not(.dark *):not(
 .dark .text-rose-400, [data-theme="dark"] .text-rose-400, html.dark .text-rose-400 { color: #FB7185 !important; }
 .dark .text-cyan-300, [data-theme="dark"] .text-cyan-300, html.dark .text-cyan-300 { color: #67E8F9 !important; }
 .dark .text-cyan-400, [data-theme="dark"] .text-cyan-400, html.dark .text-cyan-400 { color: #22D3EE !important; }
+
+/* Dedicated Dark Mode Headings Protection */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6,
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+  color: #F8FAFC !important;
+}
 
 /* Light mode select dropdown options */
 .light select, html.light select {
