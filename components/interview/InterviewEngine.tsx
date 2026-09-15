@@ -189,8 +189,8 @@ export function InterviewEngine({
       {/* If mode is active, render full-viewport isolated exam environment without navbars */}
       {mode === "active" && session ? (
         <div
-          data-theme="dark"
-          className="dark fixed inset-0 z-[9999] h-screen w-screen bg-[#0b1120] overflow-y-auto p-4 sm:p-6 flex flex-col justify-between"
+          data-theme="light"
+          className="light fixed inset-0 z-[9999] h-screen w-screen bg-slate-50 overflow-y-auto p-4 sm:p-6 flex flex-col justify-between"
         >
           <ActiveView
             session={session}
@@ -773,21 +773,21 @@ function InterviewCodingWorkspace({
     <div className="mt-6 space-y-4">
       {/* Sample Test Cases if present */}
       {item.testCases && item.testCases.length > 0 && (
-        <div className="p-3.5 rounded-xl border border-white/10 bg-white/5 space-y-2">
-          <p className="text-xs font-bold text-white uppercase tracking-wider">Sample Test Cases</p>
+        <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/90 space-y-2 shadow-2xs">
+          <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">Sample Test Cases</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
             {item.testCases.map((tc, idx) => (
-              <div key={idx} className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1">
-                <span className="text-[10px] text-muted-foreground font-sans">
+              <div key={idx} className="p-2.5 rounded-lg bg-white border border-slate-200 space-y-1 shadow-2xs">
+                <span className="text-[10px] text-slate-500 font-sans">
                   Case {idx + 1} {tc.description ? `(${tc.description})` : ""}
                 </span>
                 <div>
-                  <span className="text-blue-400">Input:</span>{" "}
-                  <span className="text-slate-200">{tc.input || "(empty)"}</span>
+                  <span className="text-blue-600 font-semibold">Input:</span>{" "}
+                  <span className="text-slate-800">{tc.input || "(empty)"}</span>
                 </div>
                 <div>
-                  <span className="text-green-400">Expected:</span>{" "}
-                  <span className="text-slate-200">{tc.expectedOutput || "(empty)"}</span>
+                  <span className="text-emerald-600 font-semibold">Expected:</span>{" "}
+                  <span className="text-slate-800">{tc.expectedOutput || "(empty)"}</span>
                 </div>
               </div>
             ))}
@@ -796,10 +796,10 @@ function InterviewCodingWorkspace({
       )}
 
       {/* Editor Header Bar */}
-      <div className="flex items-center justify-between p-2.5 rounded-t-xl bg-slate-900/90 border border-white/10">
+      <div className="flex items-center justify-between p-2.5 rounded-t-xl bg-slate-100 border border-slate-200">
         <div className="flex items-center gap-2">
-          <FileCode className="h-4 w-4 text-[color:var(--color-primary)]" />
-          <span className="text-xs font-semibold text-white">Live Code Editor</span>
+          <FileCode className="h-4 w-4 text-indigo-600" />
+          <span className="text-xs font-semibold text-slate-800">Live Code Editor</span>
           <button
             type="button"
             onClick={() => {
@@ -807,7 +807,7 @@ function InterviewCodingWorkspace({
               setResult(null);
               toast.info("Coding area cleared");
             }}
-            className="text-[11px] text-slate-400 hover:text-red-400 transition ml-2 px-2 py-0.5 rounded hover:bg-slate-800 cursor-pointer"
+            className="text-[11px] text-slate-500 hover:text-red-600 transition ml-2 px-2 py-0.5 rounded hover:bg-slate-200 cursor-pointer"
           >
             Clear Code
           </button>
@@ -818,7 +818,7 @@ function InterviewCodingWorkspace({
             value={selectedLang}
             onChange={(e) => setSelectedLang(e.target.value)}
             disabled={isBlocked || isRunning}
-            className="bg-slate-800 border border-white/15 text-xs rounded-lg px-2.5 py-1 text-white font-medium focus:outline-none"
+            className="bg-white border border-slate-300 text-xs rounded-lg px-2.5 py-1 text-slate-800 font-medium focus:outline-none shadow-2xs"
           >
             {Object.entries(langConfigs).map(([key, cfg]) => (
               <option key={key} value={key}>
@@ -831,7 +831,7 @@ function InterviewCodingWorkspace({
             type="button"
             onClick={handleRunCode}
             disabled={isBlocked || isRunning}
-            className="btn-gradient btn-gradient-hover text-white px-3.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
           >
             {isRunning ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3 fill-current" />}
             <span>{isRunning ? "Running..." : "Run Test Cases"}</span>
@@ -848,7 +848,7 @@ function InterviewCodingWorkspace({
           placeholder={langConfigs[selectedLang]?.placeholder || "// Write your solution code here..."}
           rows={12}
           spellCheck={false}
-          className={`w-full bg-[#080e1e] border-x border-b border-white/10 rounded-b-xl p-4 text-xs font-mono outline-none focus:ring-1 focus:ring-[color:var(--color-primary)] leading-6 text-slate-100 resize-y ${
+          className={`w-full bg-white border-x border-b border-slate-200 rounded-b-xl p-4 text-xs font-mono outline-none focus:ring-1 focus:ring-indigo-500 leading-6 text-slate-900 resize-y shadow-xs ${
             isBlocked ? "opacity-50 cursor-not-allowed" : ""
           }`}
         />
@@ -856,21 +856,21 @@ function InterviewCodingWorkspace({
 
       {/* Output / Test Results Drawer */}
       {result && (
-        <div className="p-3.5 rounded-xl border border-white/10 bg-slate-900/80 space-y-2 font-mono text-xs">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+        <div className="p-3.5 rounded-xl border border-slate-200 bg-white shadow-xs space-y-2 font-mono text-xs text-slate-800">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div className="flex items-center gap-2">
-              <Terminal className="h-3.5 w-3.5 text-[color:var(--color-primary)]" />
-              <span className="font-semibold text-white">Compiler Output & Test Results</span>
+              <Terminal className="h-3.5 w-3.5 text-indigo-600" />
+              <span className="font-semibold text-slate-900">Compiler Output & Test Results</span>
             </div>
             <span
               className={`text-[11px] font-bold px-2 py-0.5 rounded ${
                 result.isCompilationError || result.compilationError
-                  ? "bg-red-500/20 text-red-400 border border-red-500/40"
+                  ? "bg-red-50 text-red-600 border border-red-200"
                   : result.isRuntimeError
-                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                  ? "bg-amber-50 text-amber-600 border border-amber-200"
                   : result.success
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                  : "bg-red-500/20 text-red-400 border border-red-500/40"
+                  ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                  : "bg-red-50 text-red-600 border border-red-200"
               }`}
             >
               {result.isCompilationError || result.compilationError
@@ -894,9 +894,9 @@ function InterviewCodingWorkspace({
                     className={`px-2.5 py-1 rounded text-[10px] font-bold flex items-center gap-1 transition shrink-0 cursor-pointer ${
                       selectedTestCaseIdx === idx
                         ? tc.passed
-                          ? "bg-green-500/20 text-green-400 border border-green-500/40"
-                          : "bg-red-500/20 text-red-400 border border-red-500/40"
-                        : "bg-slate-800 text-slate-400"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
+                          : "bg-red-50 text-red-700 border border-red-300"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {tc.passed ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
@@ -909,22 +909,22 @@ function InterviewCodingWorkspace({
               {(() => {
                 const activeTC = result.testCaseResults[selectedTestCaseIdx] || result.testCaseResults[0];
                 return (
-                  <div className="space-y-1.5 pt-1 text-[11px] bg-black/40 p-2.5 rounded-lg border border-white/5">
-                    <div className="flex justify-between items-center text-[10px] text-slate-400 border-b border-white/10 pb-1">
-                      <span>Status: <strong className={activeTC.passed ? "text-green-400" : "text-red-400"}>{activeTC.passed ? "PASSED" : activeTC.status || "FAILED"}</strong></span>
+                  <div className="space-y-1.5 pt-1 text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-slate-800">
+                    <div className="flex justify-between items-center text-[10px] text-slate-500 border-b border-slate-200 pb-1">
+                      <span>Status: <strong className={activeTC.passed ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>{activeTC.passed ? "PASSED" : activeTC.status || "FAILED"}</strong></span>
                       <span>Time: {activeTC.executionTimeMs}ms</span>
                     </div>
                     <div>
-                      <span className="text-blue-400 font-semibold">Input:</span>{" "}
-                      <span className="text-slate-200">{activeTC.input || "(none)"}</span>
+                      <span className="text-blue-600 font-semibold">Input:</span>{" "}
+                      <span className="text-slate-800">{activeTC.input || "(none)"}</span>
                     </div>
                     <div>
-                      <span className="text-green-400 font-semibold">Expected:</span>{" "}
-                      <span className="text-slate-200">{activeTC.expectedOutput || "(none)"}</span>
+                      <span className="text-emerald-600 font-semibold">Expected:</span>{" "}
+                      <span className="text-slate-800">{activeTC.expectedOutput || "(none)"}</span>
                     </div>
                     <div>
-                      <span className="text-amber-400 font-semibold">Actual:</span>{" "}
-                      <span className={activeTC.passed ? "text-green-400" : "text-red-400"}>
+                      <span className="text-amber-600 font-semibold">Actual:</span>{" "}
+                      <span className={activeTC.passed ? "text-emerald-600" : "text-red-600 font-bold"}>
                         {activeTC.actualOutput || "(empty)"}
                       </span>
                     </div>
@@ -936,14 +936,14 @@ function InterviewCodingWorkspace({
 
           {result.stdout && (
             <div className="pt-1">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold">[STDOUT]</span>
-              <pre className="text-green-400 whitespace-pre-wrap mt-0.5 p-2 rounded bg-black/50 border border-white/5">{result.stdout}</pre>
+              <span className="text-[10px] text-slate-500 uppercase font-bold">[STDOUT]</span>
+              <pre className="text-slate-800 whitespace-pre-wrap mt-0.5 p-2 rounded bg-slate-100 border border-slate-200">{result.stdout}</pre>
             </div>
           )}
           {result.stderr && (
             <div className="pt-1">
-              <span className="text-[10px] text-red-400 uppercase font-bold">[STDERR]</span>
-              <pre className="text-red-400 whitespace-pre-wrap mt-0.5 p-2 rounded bg-red-950/30 border border-red-900/40">{result.stderr}</pre>
+              <span className="text-[10px] text-red-600 uppercase font-bold">[STDERR]</span>
+              <pre className="text-red-700 whitespace-pre-wrap mt-0.5 p-2 rounded bg-red-50 border border-red-200">{result.stderr}</pre>
             </div>
           )}
         </div>
@@ -993,8 +993,8 @@ function StarAnswerBuilder({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Situation */}
         <div className="space-y-1">
-          <label className="text-[11px] font-bold text-indigo-400 flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-[10px]">
+          <label className="text-[11px] font-bold text-indigo-700 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
               S
             </span>
             <span>Situation (Project Background & Context)</span>
@@ -1008,14 +1008,14 @@ function StarAnswerBuilder({
             }}
             placeholder="Describe the project, team size, tools, or situation..."
             rows={3}
-            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-slate-100 placeholder-slate-500"
+            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-slate-900 placeholder-slate-400 shadow-xs"
           />
         </div>
 
         {/* Task */}
         <div className="space-y-1">
-          <label className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-blue-500/20 text-blue-300 flex items-center justify-center text-[10px]">
+          <label className="text-[11px] font-bold text-blue-700 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
               T
             </span>
             <span>Task (Specific Challenge & Objective)</span>
@@ -1029,14 +1029,14 @@ function StarAnswerBuilder({
             }}
             placeholder="What was the problem, requirement, or bottleneck you faced?"
             rows={3}
-            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 resize-none text-slate-100 placeholder-slate-500"
+            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 resize-none text-slate-900 placeholder-slate-400 shadow-xs"
           />
         </div>
 
         {/* Action */}
         <div className="space-y-1">
-          <label className="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-[10px]">
+          <label className="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold">
               A
             </span>
             <span>Action (Technical Steps & Decisions Taken)</span>
@@ -1050,14 +1050,14 @@ function StarAnswerBuilder({
             }}
             placeholder="What concrete code, architecture, or teamwork actions did you take?"
             rows={3}
-            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-slate-100 placeholder-slate-500"
+            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-slate-900 placeholder-slate-400 shadow-xs"
           />
         </div>
 
         {/* Result */}
         <div className="space-y-1">
-          <label className="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center text-[10px]">
+          <label className="text-[11px] font-bold text-amber-700 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-[10px] font-bold">
               R
             </span>
             <span>Result (Quantifiable Impact & Lessons)</span>
@@ -1071,7 +1071,7 @@ function StarAnswerBuilder({
             }}
             placeholder="What was the measurable outcome (e.g. latency, users, metrics)?"
             rows={3}
-            className="w-full bg-[#111c34] border border-slate-800 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500 resize-none text-slate-100 placeholder-slate-500"
+            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500 resize-none text-slate-900 placeholder-slate-400 shadow-xs"
           />
         </div>
       </div>
