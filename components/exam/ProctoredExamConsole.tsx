@@ -55,6 +55,7 @@ import { MonacoCodeEditor, type CodeEditorControlsHandle } from "@/components/te
 import { CompilerErrorBanner } from "@/components/tests/CompilerErrorBanner";
 import { handleCodeTextareaKeyDown } from "@/lib/codeEditorUtils";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { getInitialExamTheme, persistExamTheme } from "@/components/exam/examTheme";
 import type {
   QuizGenerationResult,
   QuizSubmissionResult,
@@ -181,13 +182,13 @@ function FormattedProblemContent({ text, isLightMode }: { text: string; isLightM
             <div
               key={idx}
               className={`rounded-2xl border ${
-                isLightMode ? "bg-slate-900 border-slate-700 text-emerald-400" : "bg-black/80 border-slate-800 text-emerald-400"
-              } p-4 font-mono text-xs overflow-x-auto shadow-inner space-y-1 my-2`}
+                isLightMode ? "bg-slate-900 border-slate-700 text-emerald-300" : "bg-[#060b16] border-slate-700 text-emerald-300"
+              } p-4 font-mono text-[13px] leading-relaxed overflow-x-auto shadow-inner space-y-1 my-2`}
             >
               {lang && (
-                <div className="text-[10px] uppercase font-bold text-slate-500 pb-1 border-b border-slate-800 flex justify-between items-center">
+                <div className="text-[10px] uppercase font-bold text-slate-400 pb-1 border-b border-slate-700 flex justify-between items-center">
                   <span>{lang}</span>
-                  <Code2 className="h-3 w-3 text-slate-500" />
+                  <Code2 className="h-3 w-3 text-slate-400" />
                 </div>
               )}
               <pre className="whitespace-pre-wrap">{code}</pre>
@@ -197,16 +198,16 @@ function FormattedProblemContent({ text, isLightMode }: { text: string; isLightM
 
         // Inline formatted paragraphs with `code` highlighting
         return (
-          <p key={idx} className={`text-xs md:text-sm ${isLightMode ? "text-slate-800" : "text-slate-200"} whitespace-pre-line`}>
+          <p key={idx} className={`text-sm md:text-[15px] leading-relaxed ${isLightMode ? "text-slate-800" : "text-slate-200"} whitespace-pre-line`}>
             {part.split(/(`[^`]+`)/g).map((sub, sIdx) => {
               if (sub.startsWith("`") && sub.endsWith("`") && sub.length > 2) {
                 return (
                   <code
                     key={sIdx}
-                    className={`px-1.5 py-0.5 rounded font-mono text-xs ${
+                    className={`px-1.5 py-0.5 rounded font-mono text-[13px] ${
                       isLightMode
-                        ? "bg-slate-200 text-blue-700 font-semibold"
-                        : "bg-slate-800 text-blue-400 font-semibold border border-slate-700"
+                        ? "bg-slate-200 text-blue-800 font-semibold"
+                        : "bg-slate-800 text-blue-300 font-semibold border border-slate-600"
                     }`}
                   >
                     {sub.slice(1, -1)}
@@ -349,7 +350,14 @@ export function ProctoredExamConsole({
   };
   const [errorLine, setErrorLine] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLightMode, setIsLightMode] = useState(false);
+  // Light mode is the default for assessments (readability-first).
+  const [isLightMode, setIsLightMode] = useState<boolean>(() => getInitialExamTheme("c2c_exam_theme"));
+  const handleThemeToggle = () => {
+    setIsLightMode((prev) => {
+      persistExamTheme(!prev, "c2c_exam_theme");
+      return !prev;
+    });
+  };
   const [isOnline, setIsOnline] = useState(true);
   const [lastSavedTime, setLastSavedTime] = useState<string>("Draft restored");
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
@@ -411,6 +419,7 @@ export function ProctoredExamConsole({
       toast.error(`Strike ${count}/3: ${typeLabels[type] || type}`, {
         duration: 6000,
         id: `proctor-strike-${count}`,
+        position: "bottom-center",
       });
     },
   });
@@ -601,7 +610,7 @@ export function ProctoredExamConsole({
         const errText = res.errorMessage || res.stderr || (res as any).output || "";
         const lineMatch = errText.match(/(?:line\s+|:\s*)(\d+)(?::|\s|,|$)/i);
         let errLineNum = res.errorLine || (lineMatch ? parseInt(lineMatch[1], 10) : null);
-        const codeLines = code.split("\n");
+        const codeLines = activeCode.split("\n");
         const totalCodeLines = codeLines.length;
 
         if (errLineNum && !isNaN(errLineNum)) {
@@ -942,10 +951,10 @@ export function ProctoredExamConsole({
               className="h-7 w-auto object-contain shrink-0"
             />
             <div className="hidden sm:block">
-              <p className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-400 leading-tight">
+              <p className={`text-[11px] font-extrabold uppercase tracking-wider leading-tight ${isLightMode ? "text-indigo-700" : "text-indigo-300"}`}>
                 AI Assessment
               </p>
-              <p className="text-[10px] text-slate-400 font-medium truncate max-w-xs">{skillName}</p>
+              <p className={`text-[10px] font-medium truncate max-w-xs ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>{skillName}</p>
             </div>
           </div>
 
@@ -953,10 +962,12 @@ export function ProctoredExamConsole({
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => handleJumpToSection(1)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
                 currentSection === 1
-                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
-                  : "bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : isLightMode
+                  ? "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
+                  : "bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white"
               }`}
               title="Jump to Section 1: Conceptual MCQs"
             >
@@ -967,10 +978,12 @@ export function ProctoredExamConsole({
 
             <button
               onClick={() => handleJumpToSection(2)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
                 currentSection === 2
-                  ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/30"
-                  : "bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  ? "bg-emerald-600 border-emerald-600 text-white shadow-sm shadow-emerald-500/30"
+                  : isLightMode
+                  ? "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
+                  : "bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white"
               }`}
               title="Jump to Section 2: Coding Challenge"
             >
@@ -981,10 +994,12 @@ export function ProctoredExamConsole({
 
             <button
               onClick={() => handleJumpToSection(3)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
                 currentSection === 3
-                  ? "bg-amber-600 text-white shadow-sm shadow-amber-500/30"
-                  : "bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  ? "bg-amber-600 border-amber-600 text-white shadow-sm shadow-amber-500/30"
+                  : isLightMode
+                  ? "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
+                  : "bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white"
               }`}
               title="Jump to Section 3: Advanced Tough MCQs"
             >
@@ -999,8 +1014,12 @@ export function ProctoredExamConsole({
         <div className="flex items-center gap-2.5 md:gap-3.5">
           {/* Real-Time Auto-Save Pill */}
           <div
-            className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium ${
-              isOnline ? "text-slate-400 bg-slate-800/40" : "text-amber-400 bg-amber-500/10 border border-amber-500/20"
+            className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${
+              isOnline
+                ? isLightMode
+                  ? "text-slate-600 bg-slate-100 border-slate-200"
+                  : "text-slate-300 bg-slate-800/60 border-slate-700"
+                : "text-amber-600 bg-amber-500/10 border border-amber-500/30"
             }`}
             title={`Saved to local session: ${lastSavedTime}`}
           >
@@ -1038,7 +1057,7 @@ export function ProctoredExamConsole({
 
           {/* Light / Dark Mode Toggle */}
           <button
-            onClick={() => setIsLightMode((prev) => !prev)}
+            onClick={handleThemeToggle}
             className={`p-2 rounded-lg border ${
               isLightMode ? "bg-slate-100 border-slate-300 text-amber-600" : "bg-slate-800/80 border-slate-700 text-amber-400"
             } hover:bg-slate-200 dark:hover:bg-slate-700 transition`}
@@ -1083,18 +1102,24 @@ export function ProctoredExamConsole({
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
                         currentSection === 1
-                          ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                          ? isLightMode
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : "bg-blue-500/20 text-blue-300 border-blue-500/40"
                           : currentSection === 2
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                          ? isLightMode
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                          : isLightMode
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-amber-500/20 text-amber-300 border-amber-500/40"
                       }`}
                     >
                       Section {currentSection}
                     </span>
-                    <span className="text-slate-400">•</span>
-                    <span className="font-bold text-white">Q{currentIdx + 1} of {quiz.questions.length}</span>
+                    <span className={isLightMode ? "text-slate-400" : "text-slate-500"}>•</span>
+                    <span className={`font-bold ${isLightMode ? "text-slate-900" : "text-white"}`}>Q{currentIdx + 1} of {quiz.questions.length}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -1103,8 +1128,12 @@ export function ProctoredExamConsole({
                       onClick={handleToggleFlag}
                       className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 border ${
                         isCurrentQFlagged
-                          ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
-                          : "bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200"
+                          ? isLightMode
+                            ? "bg-amber-50 border-amber-300 text-amber-700"
+                            : "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                          : isLightMode
+                          ? "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                          : "bg-slate-800/80 border-slate-600 text-slate-200 hover:text-white hover:bg-slate-700"
                       }`}
                       title={isCurrentQFlagged ? "Remove Flag" : "Flag Question for Review"}
                     >
@@ -1115,20 +1144,26 @@ export function ProctoredExamConsole({
                 </div>
 
                 <div
-                  className={`flex-1 overflow-y-auto p-6 space-y-6 text-sm ${
-                    isLightMode ? "text-slate-700" : "text-slate-200"
+                  className={`flex-1 overflow-y-auto p-6 space-y-6 text-[15px] ${
+                    isLightMode ? "text-slate-800" : "text-slate-200"
                   } leading-relaxed`}
                 >
                   {/* Difficulty and Section Badge */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                           currentQ?.difficulty === "hard"
-                            ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                            ? isLightMode
+                              ? "bg-red-50 text-red-700 border-red-200"
+                              : "bg-red-500/15 text-red-300 border-red-500/40"
                             : currentQ?.difficulty === "medium"
-                            ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30"
-                            : "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                            ? isLightMode
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-amber-500/15 text-amber-300 border-amber-500/40"
+                            : isLightMode
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : "bg-blue-500/15 text-blue-300 border-blue-500/40"
                         }`}
                       >
                         {currentQ?.difficulty === "hard"
@@ -1137,7 +1172,7 @@ export function ProctoredExamConsole({
                           ? "Standard Difficulty"
                           : "Foundational"}
                       </span>
-                      <span className="text-[11px] text-slate-400">{currentQ?.sectionTitle || `Section ${currentSection}`}</span>
+                      <span className={`text-[11px] font-medium ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>{currentQ?.sectionTitle || `Section ${currentSection}`}</span>
                     </div>
 
                     {/* Rich Formatted Question Statement */}
@@ -1152,28 +1187,28 @@ export function ProctoredExamConsole({
                       </p>
                       <div className="space-y-2.5">
                         {currentQ.testCases.map((tc, idx) => (
-                          <div
-                            key={idx}
-                            className={`${
-                              isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-800"
-                            } p-3 rounded-xl border text-xs font-mono space-y-1`}
-                          >
-                            <div className="text-slate-400 text-[11px] font-sans font-semibold">
-                              Test Case {idx + 1} {tc.description ? `— ${tc.description}` : ""}
+                            <div
+                              key={idx}
+                              className={`${
+                                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-700"
+                              } p-3 rounded-xl border text-xs font-mono space-y-1`}
+                            >
+                              <div className={`text-[11px] font-sans font-semibold ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>
+                                Test Case {idx + 1} {tc.description ? `— ${tc.description}` : ""}
+                              </div>
+                              <div>
+                                <span className={`font-semibold ${isLightMode ? "text-blue-700" : "text-blue-300"}`}>Input:</span>{" "}
+                                <span className={isLightMode ? "text-slate-800" : "text-slate-100"}>
+                                  {tc.input || "(none)"}
+                                </span>
+                              </div>
+                              <div>
+                                <span className={`font-semibold ${isLightMode ? "text-emerald-700" : "text-emerald-300"}`}>Expected Output:</span>{" "}
+                                <span className={isLightMode ? "text-slate-800" : "text-slate-100"}>
+                                  {tc.expectedOutput || "(none)"}
+                                </span>
+                              </div>
                             </div>
-                            <div>
-                              <span className="text-blue-400 font-semibold">Input:</span>{" "}
-                              <span className={isLightMode ? "text-slate-800" : "text-slate-200"}>
-                                {tc.input || "(none)"}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-emerald-400 font-semibold">Expected Output:</span>{" "}
-                              <span className={isLightMode ? "text-slate-800" : "text-slate-200"}>
-                                {tc.expectedOutput || "(none)"}
-                              </span>
-                            </div>
-                          </div>
                         ))}
                       </div>
                     </div>
@@ -1183,33 +1218,33 @@ export function ProctoredExamConsole({
             </ResizablePanel>
           )}
 
-          {!isEditorExpanded && <ResizableHandle withHandle className="bg-slate-800 hover:bg-blue-500 transition" />}
+          {!isEditorExpanded && <ResizableHandle withHandle className={isLightMode ? "bg-slate-200 hover:bg-blue-500 transition" : "bg-slate-700 hover:bg-blue-400 transition"} />}
 
           {/* RIGHT PANE: MCQ Selector OR Full Coding IDE */}
           <ResizablePanel defaultSize={isEditorExpanded ? 100 : 52} minSize={35}>
-            <div className={`h-full ${isLightMode ? "bg-white" : "bg-[#0b1329]"} flex flex-col overflow-hidden`}>
+            <div className={`h-full ${isLightMode ? "bg-slate-50" : "bg-[#0b1329]"} flex flex-col overflow-hidden`}>
               {isCurrentQMcq ? (
                 /* ──────────────────────────────────────────────────────────────────
                  * WORKSPACE A: MULTIPLE CHOICE QUESTION INTERACTIVE SELECTOR
                  * ────────────────────────────────────────────────────────────────── */
                 <div className="flex-1 flex flex-col p-6 overflow-y-auto">
                   <div className="max-w-2xl w-full mx-auto space-y-6 my-auto">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                    <div className={`flex items-center justify-between pb-3 border-b ${isLightMode ? "border-slate-200" : "border-slate-700"}`}>
                       <div className="space-y-0.5">
-                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <h3 className={`text-sm font-bold flex items-center gap-2 ${isLightMode ? "text-slate-900" : "text-white"}`}>
                           <span>Select the Correct Answer</span>
-                          <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">
+                          <span className={`text-[10px] font-normal hidden sm:inline ${isLightMode ? "text-slate-500" : "text-slate-400"}`}>
                             (or press keys 1-4 / A-D)
                           </span>
                         </h3>
-                        <p className="text-xs text-slate-400">
+                        <p className={`text-[13px] ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>
                           Choose one option below that best satisfies the question.
                         </p>
                       </div>
                       {currentAnswer && (
                         <button
                           onClick={handleClearAnswer}
-                          className="text-xs text-slate-400 hover:text-red-400 transition flex items-center gap-1"
+                          className={`text-xs font-medium transition flex items-center gap-1 ${isLightMode ? "text-slate-500 hover:text-red-600" : "text-slate-400 hover:text-red-300"}`}
                         >
                           <Trash2 className="h-3 w-3" /> Clear
                         </button>
@@ -1233,17 +1268,21 @@ export function ProctoredExamConsole({
                               disabled={isBlocked || submitting}
                               className={`w-full p-4 rounded-2xl border text-left transition-all duration-200 flex items-start gap-4 group ${
                                 isSelected
-                                  ? "bg-blue-600/15 border-blue-500 shadow-lg shadow-blue-500/10 ring-2 ring-blue-500/30"
+                                  ? isLightMode
+                                    ? "bg-blue-50 border-blue-600 shadow-md shadow-blue-500/10 ring-2 ring-blue-500/30"
+                                    : "bg-blue-600/20 border-blue-400 shadow-lg shadow-blue-500/10 ring-2 ring-blue-400/40"
                                   : isLightMode
-                                  ? "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800"
-                                  : "bg-[#111c34]/70 hover:bg-[#111c34] border-slate-700/60 text-slate-200"
+                                  ? "bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-xs"
+                                  : "bg-[#111c34] hover:bg-[#16203a] border-slate-600 text-slate-100"
                               }`}
                             >
                               <div
-                                className={`w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
+                                className={`w-8 h-8 rounded-xl font-bold text-[13px] flex items-center justify-center shrink-0 transition-colors border ${
                                   isSelected
-                                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
-                                    : "bg-slate-800 border border-slate-700 text-slate-300 group-hover:border-slate-600"
+                                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/30"
+                                    : isLightMode
+                                    ? "bg-slate-100 border-slate-300 text-slate-800 group-hover:border-slate-400"
+                                    : "bg-slate-700 border-slate-500 text-white group-hover:border-slate-300"
                                 }`}
                               >
                                 {letter}
@@ -1251,8 +1290,14 @@ export function ProctoredExamConsole({
 
                               <div className="flex-1 min-w-0 pt-1">
                                 <p
-                                  className={`text-xs md:text-sm leading-relaxed ${
-                                    isSelected ? "font-semibold text-white" : "text-slate-300"
+                                  className={`text-sm leading-relaxed ${
+                                    isSelected
+                                      ? isLightMode
+                                        ? "font-semibold text-blue-950"
+                                        : "font-semibold text-white"
+                                      : isLightMode
+                                      ? "font-medium text-slate-800"
+                                      : "font-medium text-slate-100"
                                   }`}
                                 >
                                   {optText.replace(/^[A-D]\)\s*/i, "")}
@@ -1260,10 +1305,12 @@ export function ProctoredExamConsole({
                               </div>
 
                               <div
-                                className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-1 transition ${
+                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition ${
                                   isSelected
-                                    ? "border-blue-500 bg-blue-600 text-white"
-                                    : "border-slate-600 bg-slate-900/50"
+                                    ? "border-blue-600 bg-blue-600 text-white"
+                                    : isLightMode
+                                    ? "border-slate-400 bg-white"
+                                    : "border-slate-400 bg-slate-900"
                                 }`}
                               >
                                 {isSelected && <CheckCircle2 className="h-3.5 w-3.5" />}
@@ -1276,8 +1323,14 @@ export function ProctoredExamConsole({
 
                     <div className="text-center pt-2">
                       <span
-                        className={`text-[11px] font-semibold ${
-                          currentAnswer ? "text-emerald-400" : "text-slate-500"
+                        className={`text-xs font-semibold ${
+                          currentAnswer
+                            ? isLightMode
+                              ? "text-emerald-700"
+                              : "text-emerald-300"
+                            : isLightMode
+                            ? "text-slate-500"
+                            : "text-slate-400"
                         }`}
                       >
                         {currentAnswer ? "✓ Option selected and saved" : "Select an option to proceed"}
@@ -1422,7 +1475,7 @@ export function ProctoredExamConsole({
 
                       <button
                         onClick={handleClearCode}
-                        className="text-[11px] text-slate-400 hover:text-red-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1 cursor-pointer"
+                        className={`text-[11px] font-medium transition px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer ${isLightMode ? "text-slate-600 hover:text-red-600 hover:bg-slate-200" : "text-slate-300 hover:text-red-300 hover:bg-slate-800"}`}
                         title="Clear all code in editor"
                       >
                         <Trash2 className="h-3 w-3" /> Clear Code
@@ -1430,7 +1483,7 @@ export function ProctoredExamConsole({
 
                       <button
                         onClick={() => setIsEditorExpanded((prev) => !prev)}
-                        className="text-[11px] text-slate-400 hover:text-blue-400 transition px-2 py-0.5 rounded hover:bg-slate-800 flex items-center gap-1 cursor-pointer"
+                        className={`text-[11px] font-medium transition px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer ${isLightMode ? "text-slate-600 hover:text-blue-700 hover:bg-slate-200" : "text-slate-300 hover:text-blue-300 hover:bg-slate-800"}`}
                         title={isEditorExpanded ? "Restore Split View" : "Maximize Code Editor (Zen Mode)"}
                       >
                         {isEditorExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
@@ -1546,10 +1599,14 @@ export function ProctoredExamConsole({
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => setActiveTab("testcases")}
-                          className={`flex items-center gap-1.5 pb-0.5 border-b-2 transition ${
+                          className={`flex items-center gap-1.5 pb-0.5 border-b-2 transition font-semibold ${
                             activeTab === "testcases"
-                              ? "border-blue-500 text-blue-400"
-                              : "border-transparent text-slate-400 hover:text-slate-200"
+                              ? isLightMode
+                                ? "border-blue-600 text-blue-700"
+                                : "border-blue-400 text-blue-300"
+                              : isLightMode
+                              ? "border-transparent text-slate-500 hover:text-slate-800"
+                              : "border-transparent text-slate-300 hover:text-white"
                           }`}
                         >
                           <Terminal className="h-3.5 w-3.5" />
@@ -1557,10 +1614,14 @@ export function ProctoredExamConsole({
                         </button>
                         <button
                           onClick={() => setActiveTab("custom")}
-                          className={`flex items-center gap-1.5 pb-0.5 border-b-2 transition ${
+                          className={`flex items-center gap-1.5 pb-0.5 border-b-2 transition font-semibold ${
                             activeTab === "custom"
-                              ? "border-blue-500 text-blue-400"
-                              : "border-transparent text-slate-400 hover:text-slate-200"
+                              ? isLightMode
+                                ? "border-blue-600 text-blue-700"
+                                : "border-blue-400 text-blue-300"
+                              : isLightMode
+                              ? "border-transparent text-slate-500 hover:text-slate-800"
+                              : "border-transparent text-slate-300 hover:text-white"
                           }`}
                         >
                           <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -1568,10 +1629,14 @@ export function ProctoredExamConsole({
                         </button>
                         <button
                           onClick={() => setActiveTab("console")}
-                          className={`flex items-center gap-1.5 pb-0.5 border-b-2 transition ${
+                          className={`flex items-center gap-1.5 pb-0.5 border-b-2 transition font-semibold ${
                             activeTab === "console"
-                              ? "border-blue-500 text-blue-400"
-                              : "border-transparent text-slate-400 hover:text-slate-200"
+                              ? isLightMode
+                                ? "border-blue-600 text-blue-700"
+                                : "border-blue-400 text-blue-300"
+                              : isLightMode
+                              ? "border-transparent text-slate-500 hover:text-slate-800"
+                              : "border-transparent text-slate-300 hover:text-white"
                           }`}
                         >
                           <span>Compiler Output</span>
@@ -1638,8 +1703,8 @@ export function ProctoredExamConsole({
                     {/* Tab 1: Official Test Cases */}
                     {activeTab === "testcases" && (
                       <div
-                        className={`flex-1 p-3 overflow-y-auto font-mono text-[11px] ${
-                          isLightMode ? "bg-white text-slate-700" : "bg-[#080e1e]/60 text-slate-300"
+                        className={`flex-1 p-3 overflow-y-auto font-mono text-xs ${
+                          isLightMode ? "bg-white text-slate-800" : "bg-[#080e1e] text-slate-200"
                         } space-y-2`}
                       >
                         {executionResult?.isCompilationError || executionResult?.compilationError ? (
