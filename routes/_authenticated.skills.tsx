@@ -41,6 +41,7 @@ import { useAuth } from "@/stores";
 import { getRoadmapByGapAnalysis } from "@/lib/roadmap-api";
 import type { UserSkill, Suggestion, SkillGapAnalysis, AnalysisHistoryItem } from "@/types/skills";
 import { QuizDialog } from "@/components/QuizDialog";
+import { CodingPlatformAnalyticsCharts } from "@/components/CodingPlatformAnalyticsCharts";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 
