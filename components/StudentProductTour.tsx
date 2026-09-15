@@ -488,7 +488,7 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
 
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-auto select-none">
-      {/* ─── Clear, Non-Dull Backdrop ─── */}
+      {/* ─── Elegant, Comfortable Dimming Backdrop ─── */}
       {paddedRect ? (
         <svg className="fixed inset-0 w-full h-full pointer-events-none z-10 transition-all duration-300">
           <defs>
@@ -499,8 +499,8 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
                 y={paddedRect.top}
                 width={paddedRect.width}
                 height={paddedRect.height}
-                rx="16"
-                ry="16"
+                rx="18"
+                ry="18"
                 fill="black"
               />
             </mask>
@@ -508,44 +508,30 @@ export function StudentProductTour({ open, onClose }: StudentProductTourProps) {
           <rect
             width="100%"
             height="100%"
-            fill="rgba(15, 23, 42, 0.08)"
+            fill="rgba(15, 23, 42, 0.42)"
             mask="url(#tour-spotlight-mask)"
-            className="transition-all duration-300 pointer-events-auto cursor-default"
+            className="transition-all duration-300 pointer-events-auto cursor-default backdrop-blur-[1px]"
             onClick={handleNext}
           />
         </svg>
       ) : (
         <div
-          className="fixed inset-0 bg-slate-950/10 dark:bg-black/15 z-10 animate-in fade-in transition-all duration-300 cursor-default"
+          className="fixed inset-0 bg-slate-950/40 dark:bg-black/60 backdrop-blur-[1px] z-10 animate-in fade-in transition-all duration-300 cursor-default"
           onClick={handleNext}
         />
       )}
 
-      {/* ─── Target Spotlight Ring with Sonar Pulse ─── */}
+      {/* ─── Elegant Spotlight Accent Ring ─── */}
       {paddedRect && (
-        <>
-          {/* Sonar expanding wave ripple */}
-          <div
-            style={{
-              top: `${paddedRect.top}px`,
-              left: `${paddedRect.left}px`,
-              width: `${paddedRect.width}px`,
-              height: `${paddedRect.height}px`,
-            }}
-            className="fixed z-15 pointer-events-none rounded-2xl ring-2 ring-indigo-400/40 animate-ping opacity-25 transition-all duration-300 ease-out"
-          />
-
-          {/* Active Glowing Spotlight Ring */}
-          <div
-            style={{
-              top: `${paddedRect.top}px`,
-              left: `${paddedRect.left}px`,
-              width: `${paddedRect.width}px`,
-              height: `${paddedRect.height}px`,
-            }}
-            className="fixed z-20 pointer-events-none rounded-2xl ring-2 ring-indigo-500/70 border-2 border-cyan-400/90 shadow-[0_0_25px_rgba(99,102,241,0.5),0_0_50px_rgba(34,211,238,0.25)] transition-all duration-300 ease-out"
-          />
-        </>
+        <div
+          style={{
+            top: `${paddedRect.top}px`,
+            left: `${paddedRect.left}px`,
+            width: `${paddedRect.width}px`,
+            height: `${paddedRect.height}px`,
+          }}
+          className="fixed z-20 pointer-events-none rounded-[18px] border-2 border-indigo-500/70 dark:border-indigo-400/80 shadow-[0_0_0_3px_rgba(99,102,241,0.22),0_8px_28px_rgba(99,102,241,0.18)] transition-all duration-300 ease-out"
+        />
       )}
 
       {/* ─── Floating Tour Card with Accurate Pointer Arrow ─── */}

@@ -538,8 +538,13 @@ function SetupView({
         resumeId: selectedResumeId || undefined,
       });
       onStart(sess);
-    } catch {
-      toast.error("Failed to initialize mock interview. Please try again.");
+    } catch (err: any) {
+      console.error("[InterviewEngine] Failed to initialize mock interview:", err);
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to initialize mock interview. Please try again.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
