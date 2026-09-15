@@ -1,6 +1,11 @@
 export interface InterviewQuestionItem {
   questionId: string | null;
   questionText: string;
+  // Aliases seen from alternate generators — getQuestionStem() resolves these.
+  question?: string | null;
+  prompt?: string | null;
+  stem?: string | null;
+  title?: string | null;
   itemType: "mcq" | "open_ended" | "coding";
   options?: string[];
   correctOptionIndex?: number | null;

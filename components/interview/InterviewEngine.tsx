@@ -75,6 +75,20 @@ export const ROUND_META: Record<
   hr: { label: "HR & Behavioral (Resume-Driven)", desc: "STAR Prompt & Project Deep-Dive", icon: Users },
 };
 
+/**
+ * Resolve the displayable question stem. Some generators/bank entries carry the
+ * stem under an alias key (`question`, `prompt`, …) — without this fallback the
+ * stem renders blank while options still show (stem and options use different keys).
+ */
+export function getQuestionStem(item: InterviewQuestionItem | null | undefined): string {
+  if (!item) return "";
+  const candidates = [item.questionText, item.question, item.prompt, item.stem, item.title];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim().length > 0) return c;
+  }
+  return "";
+}
+
 export interface InterviewEngineProps {
   title?: string;
   subtitle?: string;
@@ -749,7 +763,7 @@ function InterviewCodingWorkspace({
         code: activeCode,
         language: selectedLang,
         testCases: item.testCases || [],
-        questionText: item.questionText,
+        questionText: getQuestionStem(item) || item.questionText,
       });
       setResult(res);
       if (res.isCompilationError || res.compilationError) {
@@ -1436,9 +1450,22 @@ function ActiveView({
             )}
 
             {/* Question Text */}
-            <h2 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed">
-              {currentItem.questionText}
-            </h2>
+            {getQuestionStem(currentItem) ? (
+              <h2 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed">
+                {getQuestionStem(currentItem)}
+              </h2>
+            ) : (
+              <div
+                role="alert"
+                className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+              >
+                <p className="font-bold">Question text unavailable for this item.</p>
+                <p className="mt-1 text-amber-800">
+                  The answer options loaded but the question stem is missing. Please use “Next
+                  Question” to continue — your attempt won’t be penalized for this item.
+                </p>
+              </div>
+            )}
 
             {/* MCQ Mode */}
             {currentItem.itemType === "mcq" && currentItem.options && (
@@ -1785,7 +1812,7 @@ function ResultsView({
                                 </span>
                               )}
                               <p className="font-semibold text-foreground text-sm">
-                                Q{qIdx + 1}: {it.questionText}
+                                Q{qIdx + 1}: {getQuestionStem(it) || "(question text unavailable)"}
                               </p>
                             </div>
                             {isMcq ? (
