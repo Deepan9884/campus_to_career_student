@@ -5,19 +5,21 @@ import { useState, useRef, useEffect } from "react";
  * Handles theme, resizable panels, sidebar/console visibility
  */
 export function useExamLayoutState(storagePrefix: string = "c2c_exam") {
-  // Theme state (inherits from app theme or saved preference)
+  // Theme state (inherits from app theme or saved preference). Light is default for assessments.
   const [isLightMode, setIsLightMode] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem(`${storagePrefix}_theme`);
       if (saved) return saved === "light";
+      const legacyExam = localStorage.getItem("c2c_exam_theme");
+      if (legacyExam) return legacyExam === "light";
       const appTheme = localStorage.getItem("c2c_theme");
       if (appTheme) return appTheme === "light";
       if (typeof document !== "undefined") {
         return !document.documentElement.classList.contains("dark");
       }
-      return false;
+      return true;
     } catch {
-      return false;
+      return true;
     }
   });
 
