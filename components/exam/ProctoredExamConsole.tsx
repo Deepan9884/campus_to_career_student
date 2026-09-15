@@ -1389,7 +1389,7 @@ export function ProctoredExamConsole({
                           toast.success("Code auto-formatted");
                         }}
                         className={`text-[11px] transition px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer ${
-                          isLightMode ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200" : "text-slate-400 hover:text-blue-400 hover:bg-slate-800"
+                          isLightMode ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200" : "text-slate-300 hover:text-blue-300 hover:bg-slate-800"
                         }`}
                         title="Prettify / Format Code"
                       >
@@ -1415,7 +1415,7 @@ export function ProctoredExamConsole({
                               : "bg-indigo-500/20 border border-indigo-500/40 text-indigo-300"
                             : isLightMode
                             ? "text-slate-600 hover:text-blue-600 hover:bg-slate-200"
-                            : "text-slate-400 hover:text-blue-400 hover:bg-slate-800"
+                            : "text-slate-300 hover:text-blue-300 hover:bg-slate-800"
                         }`}
                         title="Toggle Word Wrap"
                       >
@@ -1677,7 +1677,7 @@ export function ProctoredExamConsole({
                               setIsConsoleCollapsed(false);
                             }}
                             className={`p-1 rounded transition cursor-pointer ${
-                              isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-slate-800 text-slate-400"
+                              isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-slate-800 text-slate-300"
                             }`}
                             title={isConsoleMaximized ? "Restore Console Height" : "Maximize Console Height"}
                           >
@@ -1690,7 +1690,7 @@ export function ProctoredExamConsole({
                               setIsConsoleMaximized(false);
                             }}
                             className={`p-1 rounded transition cursor-pointer ${
-                              isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-slate-800 text-slate-400"
+                              isLightMode ? "hover:bg-slate-200 text-slate-600" : "hover:bg-slate-800 text-slate-300"
                             }`}
                             title={isConsoleCollapsed ? "Expand Console Panel" : "Collapse Console Panel"}
                           >
