@@ -719,10 +719,10 @@ export function ProctoredExamConsole({
           </div>
 
           <div className="space-y-1">
-            <h2 className="text-2xl font-extrabold text-white">
+            <h2 className={`text-2xl font-extrabold ${isLightMode ? "text-slate-900" : "text-white"}`}>
               {result.passed ? "Assessment Passed Successfully!" : "Assessment Completed"}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className={`text-xs font-medium ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>
               {skillName} • {subTopicName}
             </p>
           </div>
@@ -731,11 +731,11 @@ export function ProctoredExamConsole({
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div
               className={`${
-                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-800"
+                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-700"
               } border rounded-2xl p-3.5 text-center`}
             >
-              <p className="text-[11px] text-slate-400 font-semibold uppercase">Overall Score</p>
-              <p className="text-2xl font-black text-blue-400 mt-1">{result.score}%</p>
+              <p className={`text-[11px] font-semibold uppercase ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>Overall Score</p>
+              <p className={`text-2xl font-black mt-1 ${isLightMode ? "text-blue-700" : "text-blue-300"}`}>{result.score}%</p>
               <span
                 className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
                   result.passed ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
@@ -747,63 +747,63 @@ export function ProctoredExamConsole({
 
             <div
               className={`${
-                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-800"
+                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-700"
               } border rounded-2xl p-3.5 text-center`}
             >
-              <p className="text-[11px] text-slate-400 font-semibold uppercase">Sec 1: MCQs</p>
-              <p className="text-xl font-bold text-indigo-400 mt-1">
+              <p className={`text-[11px] font-semibold uppercase ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>Sec 1: MCQs</p>
+              <p className={`text-xl font-bold mt-1 ${isLightMode ? "text-indigo-700" : "text-indigo-300"}`}>
                 {result.sectionBreakdown?.section1?.score ?? 80}%
               </p>
-              <span className="text-[10px] text-slate-500">5 Conceptual Questions</span>
+              <span className={`text-[10px] font-medium ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>5 Conceptual Questions</span>
             </div>
 
             <div
               className={`${
-                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-800"
+                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-700"
               } border rounded-2xl p-3.5 text-center`}
             >
-              <p className="text-[11px] text-slate-400 font-semibold uppercase">Sec 2: Coding</p>
-              <p className="text-xl font-bold text-emerald-400 mt-1">
+              <p className={`text-[11px] font-semibold uppercase ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>Sec 2: Coding</p>
+              <p className={`text-xl font-bold mt-1 ${isLightMode ? "text-emerald-700" : "text-emerald-300"}`}>
                 {result.sectionBreakdown?.section2?.score ?? 85}%
               </p>
-              <span className="text-[10px] text-slate-500">Hands-on Challenge</span>
+              <span className={`text-[10px] font-medium ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>Hands-on Challenge</span>
             </div>
 
             <div
               className={`${
-                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-800"
+                isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-700"
               } border rounded-2xl p-3.5 text-center`}
             >
-              <p className="text-[11px] text-slate-400 font-semibold uppercase">Sec 3: Tough MCQs</p>
-              <p className="text-xl font-bold text-amber-400 mt-1">
+              <p className={`text-[11px] font-semibold uppercase ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>Sec 3: Tough MCQs</p>
+              <p className={`text-xl font-bold mt-1 ${isLightMode ? "text-amber-700" : "text-amber-300"}`}>
                 {result.sectionBreakdown?.section3?.score ?? 75}%
               </p>
-              <span className="text-[10px] text-slate-500">Advanced Questions</span>
+              <span className={`text-[10px] font-medium ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>Advanced Questions</span>
             </div>
           </div>
 
           {/* Section Pacing Time Allocation Summary */}
           <div
             className={`p-3.5 rounded-2xl border ${
-              isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-800"
-            } flex items-center justify-between text-xs text-slate-300`}
+              isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b1329] border-slate-700"
+            } flex items-center justify-between text-xs ${isLightMode ? "text-slate-800" : "text-slate-200"}`}
           >
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-blue-400" />
+              <TrendingUp className={`h-4 w-4 ${isLightMode ? "text-blue-600" : "text-blue-300"}`} />
               <span className="font-bold">Time Allocation Pacing:</span>
             </div>
-            <div className="flex gap-4 text-[11px] text-slate-400">
-              <span>Sec 1: <strong className="text-white">{formatDuration(timeSpentBySection.sec1)}</strong></span>
-              <span>Sec 2: <strong className="text-white">{formatDuration(timeSpentBySection.sec2)}</strong></span>
-              <span>Sec 3: <strong className="text-white">{formatDuration(timeSpentBySection.sec3)}</strong></span>
+            <div className={`flex gap-4 text-[11px] font-medium ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>
+              <span>Sec 1: <strong className={isLightMode ? "text-slate-900" : "text-white"}>{formatDuration(timeSpentBySection.sec1)}</strong></span>
+              <span>Sec 2: <strong className={isLightMode ? "text-slate-900" : "text-white"}>{formatDuration(timeSpentBySection.sec2)}</strong></span>
+              <span>Sec 3: <strong className={isLightMode ? "text-slate-900" : "text-white"}>{formatDuration(timeSpentBySection.sec3)}</strong></span>
             </div>
           </div>
 
           {/* Detailed Question Review List */}
           <div className="space-y-3 text-left">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-bold text-slate-300">Detailed Section Review & Solutions</p>
-              <span className="text-[11px] text-slate-500">{result.questionResults?.length || 0} Questions Evaluated</span>
+              <p className={`text-xs font-bold ${isLightMode ? "text-slate-800" : "text-slate-200"}`}>Detailed Section Review & Solutions</p>
+              <span className={`text-[11px] font-medium ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>{result.questionResults?.length || 0} Questions Evaluated</span>
             </div>
 
             <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
@@ -836,9 +836,9 @@ export function ProctoredExamConsole({
                     </div>
 
                     {qr.userAnswerText && (
-                      <div className="text-[11px] text-slate-400">
-                        <span className="font-semibold text-slate-500">Your Answer: </span>
-                        <span className="font-mono text-slate-300 truncate max-w-md inline-block align-bottom">
+                      <div className={`text-[11px] ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>
+                        <span className={`font-semibold ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Your Answer: </span>
+                        <span className={`font-mono truncate max-w-md inline-block align-bottom ${isLightMode ? "text-slate-800" : "text-slate-200"}`}>
                           {qr.userAnswerText.slice(0, 80)}
                           {qr.userAnswerText.length > 80 ? "..." : ""}
                         </span>
@@ -846,13 +846,13 @@ export function ProctoredExamConsole({
                     )}
 
                     {qr.correctAnswer && !isCorrect && (
-                      <div className="text-[11px] text-emerald-400">
+                      <div className={`text-[11px] font-medium ${isLightMode ? "text-emerald-700" : "text-emerald-300"}`}>
                         <span className="font-semibold">Correct Answer: </span>
                         <span>{qr.correctAnswer}</span>
                       </div>
                     )}
 
-                    <p className="text-slate-400 text-[11px] bg-slate-900/40 p-2 rounded-lg border border-slate-800/60">
+                    <p className={`text-[11px] leading-relaxed p-2 rounded-lg border ${isLightMode ? "text-slate-700 bg-slate-100 border-slate-200" : "text-slate-200 bg-slate-900/60 border-slate-700"}`}>
                       {qr.feedback}
                     </p>
                   </div>
@@ -1945,13 +1945,19 @@ export function ProctoredExamConsole({
                 onClick={() => setCurrentIdx(idx)}
                 className={`w-7 h-7 md:w-8 md:h-8 rounded-lg text-xs font-bold transition flex items-center justify-center border relative ${
                   isCurr
-                    ? "bg-blue-600 border-blue-400 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-400/40"
+                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-400/40"
                     : isFlagged && hasAns
-                    ? "bg-amber-600/20 border-amber-500/50 text-amber-300"
+                    ? isLightMode
+                      ? "bg-amber-50 border-amber-400 text-amber-800"
+                      : "bg-amber-600/20 border-amber-500/50 text-amber-200"
                     : isFlagged
-                    ? "bg-amber-500/10 border-amber-500/40 text-amber-400"
+                    ? isLightMode
+                      ? "bg-amber-50 border-amber-300 text-amber-700"
+                      : "bg-amber-500/10 border-amber-500/40 text-amber-300"
                     : hasAns
-                    ? "bg-emerald-600/20 border-emerald-500/40 text-emerald-400"
+                    ? isLightMode
+                      ? "bg-emerald-50 border-emerald-400 text-emerald-800"
+                      : "bg-emerald-600/20 border-emerald-500/40 text-emerald-300"
                     : isLightMode
                     ? "bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200"
                     : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
@@ -1969,8 +1975,8 @@ export function ProctoredExamConsole({
 
         {/* Right: Next Question / Submit Action */}
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400 hidden sm:inline">
-            <strong className="text-white">{answeredCount}</strong>/{quiz.questions.length} Answered
+          <span className={`text-xs font-medium hidden sm:inline ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>
+            <strong className={isLightMode ? "text-slate-900" : "text-white"}>{answeredCount}</strong>/{quiz.questions.length} Answered
           </span>
 
           {currentIdx < quiz.questions.length - 1 ? (
@@ -2002,21 +2008,21 @@ export function ProctoredExamConsole({
               isLightMode ? "bg-white border-slate-200" : "bg-[#111c34] border-slate-700"
             } border rounded-3xl p-6 shadow-2xl space-y-6`}
           >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className={`flex items-center justify-between border-b pb-3 ${isLightMode ? "border-slate-200" : "border-slate-700"}`}>
               <div className="flex items-center gap-2">
-                <Grid className="h-5 w-5 text-blue-400" />
-                <h3 className="text-base font-bold text-white">Assessment Question Matrix</h3>
+                <Grid className={`h-5 w-5 ${isLightMode ? "text-blue-600" : "text-blue-300"}`} />
+                <h3 className={`text-base font-bold ${isLightMode ? "text-slate-900" : "text-white"}`}>Assessment Question Matrix</h3>
               </div>
               <button
                 onClick={() => setShowMatrixDrawer(false)}
-                className="text-xs text-slate-400 hover:text-white transition px-2 py-1 rounded-lg bg-slate-800"
+                className={`text-xs font-semibold transition px-2 py-1 rounded-lg ${isLightMode ? "text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200" : "text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700"}`}
               >
                 Close (ESC)
               </button>
             </div>
 
             {/* Matrix Legend */}
-            <div className="flex flex-wrap gap-4 text-xs text-slate-400 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+            <div className={`flex flex-wrap gap-4 text-xs font-medium p-3 rounded-xl border ${isLightMode ? "text-slate-700 bg-slate-50 border-slate-200" : "text-slate-300 bg-slate-900/60 border-slate-700"}`}>
               <div className="flex items-center gap-1.5">
                 <div className="w-3.5 h-3.5 rounded bg-emerald-600/30 border border-emerald-500/50" />
                 <span>Answered</span>
