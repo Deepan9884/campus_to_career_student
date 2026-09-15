@@ -24,7 +24,7 @@ function LoginPage() {
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!/^\S+@\S+\.\S+$/.test(email)) e.email = "Enter a valid email";
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) e.email = "Enter a valid email";
     if (password.length < 6) e.password = "Min 6 characters";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -34,7 +34,7 @@ function LoginPage() {
     ev.preventDefault();
     if (!validate()) return;
     try {
-      const res = await login(email, password);
+      const res = await login(email.trim(), password);
       const isNew =
         res?.isNewUser ||
         (res?.user?.createdAt && Date.now() - new Date(res.user.createdAt).getTime() < 60000);

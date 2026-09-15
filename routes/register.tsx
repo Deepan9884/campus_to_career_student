@@ -42,11 +42,14 @@ function RegisterPage() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (name.trim().length < 2) e.name = "Enter your full name";
-    if (!/^\S+@\S+\.\S+$/.test(email)) e.email = "Enter a valid email";
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) e.email = "Enter a valid email";
     if (pw.length < 8) {
       e.pw = "Password must be at least 8 characters long";
     } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(pw)) {
       e.pw = "Password must contain at least one uppercase letter, one lowercase letter, and one number";
+    } else if (!/[^A-Za-z0-9]/.test(pw)) {
+      // Mirrors backend passwordValidator: any non-alphanumeric symbol counts.
+      e.pw = "Password must contain at least one special character (e.g. @$!%*?&_#-)";
     }
     if (pw !== pw2) e.pw2 = "Passwords don't match";
     if (!terms) e.terms = "Please accept the terms";
@@ -59,13 +62,19 @@ function RegisterPage() {
     if (!validate()) return;
     let success = false;
     try {
-      await register({ name, email, password: pw });
+      await register({ name: name.trim(), email: email.trim(), password: pw });
       toast.success("Account created successfully!");
       success = true;
     } catch (err: unknown) {
       const errObj = err as any;
       let msg = "";
       const fieldErrs: Record<string, string> = {};
+
+      // Backend password middleware returns `issues` (and now also `errors`);
+      // surface the first specific issue so the user knows exactly what to fix.
+      const detailIssues: string[] = Array.isArray(errObj?.data?.issues)
+        ? errObj.data.issues.filter((i: unknown) => typeof i === "string")
+        : [];
 
       if (errObj?.errors && Array.isArray(errObj.errors) && errObj.errors.length > 0) {
         msg = errObj.errors
@@ -82,6 +91,10 @@ function RegisterPage() {
       }
       if (Object.keys(fieldErrs).length > 0) {
         setErrors((prev) => ({ ...prev, ...fieldErrs }));
+      }
+      if (!msg && detailIssues.length > 0) {
+        msg = detailIssues.join(". ");
+        setErrors((prev) => ({ ...prev, pw: prev.pw || detailIssues[0] }));
       }
       if (!msg && err instanceof Error && err.message) {
         msg = err.message;
