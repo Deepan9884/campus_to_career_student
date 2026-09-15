@@ -124,6 +124,8 @@ export interface GithubProfile {
 export interface GithubConnectResponse {
   user: { _id: string; githubUsername: string };
   github: GithubProfile;
+  rateLimited?: boolean;
+  message?: string;
 }
 
 export interface RepoListItem {
@@ -140,6 +142,8 @@ export interface RepoListItem {
 
 export interface RepoListResponse {
   repos: RepoListItem[];
+  rateLimited?: boolean;
+  message?: string;
 }
 
 export interface ConnectPayload {

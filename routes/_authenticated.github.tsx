@@ -97,6 +97,11 @@ const [analyzing, setAnalyzing] = useState(false);
   const [generatingPost, setGeneratingPost] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
+  // Rate Limiting & Direct Repo Analysis
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [customRepoInput, setCustomRepoInput] = useState("");
+
+
   // Adjustable Layout States
   const [leftWidthPercent, setLeftWidthPercent] = useState<number>(() => {
     if (typeof window !== "undefined") {
@@ -157,13 +162,17 @@ const [analyzing, setAnalyzing] = useState(false);
     try {
       const data = await listRepos(targetUsername);
       setRepos(data.repos || []);
-      if ((data.repos || []).length > 0) {
+      if (data.rateLimited) {
+        setIsRateLimited(true);
+      }
+      if ((data.repos || []).length > 0 || data.rateLimited) {
         setConnected(true);
       }
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
       if (apiErr?.statusCode === 429) {
-        toast.error(apiErr.message || "Rate limit reached. Please wait a few minutes.");
+        setIsRateLimited(true);
+        toast.info("GitHub API rate limit active. You can enter any repository name directly below to analyze it.");
       }
     } finally {
       setLoadingRepos(false);
@@ -206,8 +215,14 @@ const [analyzing, setAnalyzing] = useState(false);
           user: state.user ? { ...state.user, ...data.user, githubUsername: data.user.githubUsername } : (data.user as any),
         }));
       }
+      if (data.rateLimited) {
+        setIsRateLimited(true);
+        toast.info(`Connected as @${data.github.login}! (GitHub public rate limit active; you can analyze repos directly below)`);
+      } else {
+        setIsRateLimited(false);
+        toast.success(`Connected as @${data.github.login}`);
+      }
       await fetchRepos(data.github.login);
-      toast.success(`Connected as @${data.github.login}`);
     } catch (err: unknown) {
       const apiErr = err as { statusCode?: number; message?: string };
       toast.error(apiErr.message || "Failed to connect GitHub account");
@@ -227,6 +242,9 @@ const [analyzing, setAnalyzing] = useState(false);
           setConnected(true);
           setGithubProfile(res.github);
           setUsername(res.github.login);
+          if (res.rateLimited) {
+            setIsRateLimited(true);
+          }
           fetchRepos(res.github.login);
         })
         .catch(() => {
@@ -239,12 +257,21 @@ const [analyzing, setAnalyzing] = useState(false);
   }, [user?.githubUsername, user?.profile?.githubUsername, fetchRepos]);
 
   const handleAnalyze = async (repoFullName: string) => {
-    setSelectedRepo(repoFullName);
+    let cleanRepo = repoFullName.trim();
+    cleanRepo = cleanRepo.replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, "");
+    if (!cleanRepo.includes("/")) {
+      const activeOwner = (githubProfile?.login || username || "").trim();
+      if (activeOwner) {
+        cleanRepo = `${activeOwner}/${cleanRepo}`;
+      }
+    }
+
+    setSelectedRepo(cleanRepo);
     setAnalysis(null);
     setAnalyzing(true);
     setShowHistory(false);
     try {
-      const result = await analyzeRepo({ repoFullName });
+      const result = await analyzeRepo({ repoFullName: cleanRepo });
       setAnalysis(result);
       if (result.status === "completed") {
         toast.success("Analysis complete");
@@ -258,6 +285,12 @@ const [analyzing, setAnalyzing] = useState(false);
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const handleAnalyzeCustomRepo = () => {
+    const raw = customRepoInput.trim();
+    if (!raw) return;
+    handleAnalyze(raw);
   };
 
   const handleViewAnalysis = async (id: string) => {
@@ -559,6 +592,50 @@ const [analyzing, setAnalyzing] = useState(false);
                 )}
               </div>
 
+              {isRateLimited && (
+                <div className="flex items-start gap-2 p-2.5 mb-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
+                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
+                  <div className="space-y-0.5">
+                    <p className="font-semibold text-amber-300">GitHub API Rate Limit Active</p>
+                    <p className="text-amber-200/80">
+                      GitHub public listing is temporarily throttled. You can type any repository name below to analyze it directly.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {connected && (
+                <div className="mb-3 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-indigo-300 flex items-center gap-1.5">
+                      <Code2 className="h-3.5 w-3.5 text-indigo-400" /> Direct Repository Analysis
+                    </span>
+                    {isRateLimited && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium border border-amber-500/30">
+                        Direct Mode
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      value={customRepoInput}
+                      onChange={(e) => setCustomRepoInput(e.target.value)}
+                      placeholder="e.g. Campus_to_Career or owner/repo"
+                      disabled={analyzing}
+                      className="flex-1 min-w-0 glass-input rounded-lg px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50"
+                      onKeyDown={(e) => e.key === "Enter" && customRepoInput.trim() && handleAnalyzeCustomRepo()}
+                    />
+                    <button
+                      onClick={handleAnalyzeCustomRepo}
+                      disabled={analyzing || !customRepoInput.trim()}
+                      className="btn-gradient rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-50 shrink-0 flex items-center gap-1"
+                    >
+                      {analyzing ? <Loader2 className="h-3 w-3 animate-spin" /> : "Analyze"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="relative mb-3">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
@@ -612,8 +689,13 @@ const [analyzing, setAnalyzing] = useState(false);
                     </li>
                   ))}
                   {connected && (filteredRepos || []).length === 0 && !loadingRepos && (
-                    <li className="text-xs text-muted-foreground text-center py-8">
-                      {query ? "No matching repositories found" : "No public repositories found"}
+                    <li className="text-xs text-muted-foreground text-center py-6 px-2 space-y-1">
+                      <p className="font-medium">{query ? "No matching repositories found" : "No repositories listed via API"}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {isRateLimited
+                          ? "Enter your repository name above to analyze it directly."
+                          : "Type a repository name in Direct Repository Analysis above."}
+                      </p>
                     </li>
                   )}
                   {!connected && (
