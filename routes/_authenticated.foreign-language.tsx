@@ -62,17 +62,34 @@ function ForeignLanguageDashboard() {
 
   const handleLanguageChange = async (lang: string) => {
     if (!profile) return;
-    setIsLoading(true);
+    
     // Reset target exam to first available if language changes
     const newTarget = EXAM_LEVELS[lang]?.[0] || "General";
-    await updateLanguageProfile({ activeLanguage: lang, targetExam: newTarget });
-    await fetchDashboardData(lang);
+    
+    // Optimistic update for instant UI reaction
+    setProfile({ ...profile, activeLanguage: lang, targetExam: newTarget });
+    setMaterials([]); // Clear materials to show it's switching
+    setChatHistory([]); // Clear chat history to show it's switching
+    
+    try {
+      await updateLanguageProfile({ activeLanguage: lang, targetExam: newTarget });
+      await fetchDashboardData(lang);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleExamChange = async (exam: string) => {
     if (!profile) return;
+    
+    // Optimistic update
     setProfile({ ...profile, targetExam: exam });
-    await updateLanguageProfile({ targetExam: exam });
+    
+    try {
+      await updateLanguageProfile({ targetExam: exam });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleStartQuiz = async () => {

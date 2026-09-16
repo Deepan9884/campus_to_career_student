@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Upload, FileText, Trash2, CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { StudyMaterial, uploadStudyMaterial, toggleMaterialActive, deleteStudyMaterial } from "@/lib/foreign-language-api";
 import { GlassCard } from "@/components/GlassCard";
@@ -10,9 +10,15 @@ interface MaterialVaultProps {
 }
 
 export function MaterialVault({ materials, language, onMaterialsChanged }: MaterialVaultProps) {
+  const [localMaterials, setLocalMaterials] = useState<StudyMaterial[]>(materials);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync with props
+  useEffect(() => {
+    setLocalMaterials(materials);
+  }, [materials]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,20 +38,29 @@ export function MaterialVault({ materials, language, onMaterialsChanged }: Mater
   };
 
   const handleToggle = async (id: string, currentStatus: boolean) => {
+    // Optimistic UI for instant reaction
+    setLocalMaterials(prev => prev.map(m => m._id === id ? { ...m, isActive: !currentStatus } : m));
     try {
       await toggleMaterialActive(id, !currentStatus);
       onMaterialsChanged();
     } catch (err: any) {
+      // Revert on failure
+      setLocalMaterials(materials);
       setError(err.message || "Failed to toggle material status");
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this material?")) return;
+    
+    // Optimistic delete
+    setLocalMaterials(prev => prev.filter(m => m._id !== id));
     try {
       await deleteStudyMaterial(id);
       onMaterialsChanged();
     } catch (err: any) {
+      // Revert on failure
+      setLocalMaterials(materials);
       setError(err.message || "Failed to delete material");
     }
   };
@@ -80,14 +95,14 @@ export function MaterialVault({ materials, language, onMaterialsChanged }: Mater
       )}
 
       <div className="flex-1 overflow-y-auto space-y-3">
-        {materials.length === 0 ? (
+        {localMaterials.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
             <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
             <p>No study materials uploaded for {language} yet.</p>
             <p className="text-sm mt-1">Upload PDFs or Word Docs to start.</p>
           </div>
         ) : (
-          materials.map((mat) => (
+          localMaterials.map((mat) => (
             <div
               key={mat._id}
               className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
