@@ -76,6 +76,7 @@ import {
   submitStudentExamResponse,
   reportStudentExamBlocked,
   getStudentExamBlockStatus,
+  sendExamHeartbeat,
   type StudentExamSummary,
 } from "@/lib/exam-api";
 import type { CodeExecutionResult } from "@/types/quiz";
@@ -1243,6 +1244,36 @@ export function UnifiedExamConsole({
     }, 1000);
     return () => clearInterval(timer);
   }, [hasStartedExam, isTestFinished, timeLeftSeconds, examData?.isScheduled, examData?.scheduledEndTime]);
+
+  // Live heartbeat: proves to the admin proctoring radar that this candidate
+  // is actively writing right now (refreshed every 30s; silent on failure).
+  useEffect(() => {
+    const sessionId = examData?._id;
+    if (!hasStartedExam || isTestFinished || !sessionId) return;
+    if (proctorState.isBlocked) return;
+
+    let cancelled = false;
+    const ping = () => {
+      if (cancelled) return;
+      sendExamHeartbeat(sessionId, {
+        durationSeconds: Math.max(0, totalDurationSeconds - timeLeftSeconds),
+        violationsCount: proctorState.violationCount || 0,
+      }).catch(() => {});
+    };
+    ping();
+    const heartbeatTimer = setInterval(ping, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(heartbeatTimer);
+    };
+  }, [
+    hasStartedExam,
+    isTestFinished,
+    examData?._id,
+    proctorState.isBlocked,
+    // Re-ping immediately when a new violation lands so live warnings stay fresh.
+    proctorState.violationCount,
+  ]);
 
   // Current Question & Language-Aware Code State
   const safeIdx = allQuestions.length > 0 ? Math.max(0, Math.min(currentIdx, allQuestions.length - 1)) : 0;

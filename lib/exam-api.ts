@@ -118,6 +118,26 @@ export async function submitStudentExamResponse(
   return api.post<any>(`/exams/student/${examId}/submit`, payload);
 }
 
+export async function sendExamHeartbeat(
+  examId: string,
+  payload: {
+    durationSeconds?: number;
+    violationsCount?: number;
+    violationDetails?: string[];
+  } = {}
+): Promise<{ ok: boolean; tracked: boolean }> {
+  try {
+    const res = await api.post<{ ok: boolean; tracked: boolean }>(
+      `/exams/student/${examId}/heartbeat`,
+      payload
+    );
+    return res || { ok: true, tracked: false };
+  } catch {
+    // Heartbeats must never interrupt an ongoing exam.
+    return { ok: false, tracked: false };
+  }
+}
+
 export async function getStudentMyResults(): Promise<StudentExamResultItem[]> {
   try {
     const res = await api.get<StudentExamResultItem[]>("/exams/student/my-results");
