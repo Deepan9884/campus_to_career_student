@@ -38,6 +38,7 @@ import {
   Code2,
   Terminal,
   TrendingUp,
+  Globe2,
 } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/stores";
@@ -71,6 +72,7 @@ const nav = [
   { to: "/skills", label: "Skill Gap", icon: Target },
   { to: "/roadmap", label: "Learning Roadmap", icon: Map },
   { to: "/coding-platforms", label: "Coding Platforms", icon: Terminal },
+  { to: "/foreign-language", label: "Foreign Language", icon: Globe2 },
   { to: "/analytics", label: "Analytics", icon: TrendingUp },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
@@ -370,51 +372,124 @@ export function AppShell() {
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const earnedBadgeIdsRef = useRef<Set<string>>(new Set());
   const lastCelebrationAtRef = useRef<number>(0);
+  const bootstrappedRef = useRef<boolean>(false);
+  const bootstrappedUserIdRef = useRef<string | null>(null);
 
+  const getCelebratedKey = (uid: string) => `c2c_celebrated_badges_${uid}`;
+
+  const readCelebrated = (uid: string): Set<string> => {
+    try {
+      const raw = localStorage.getItem(getCelebratedKey(uid));
+      if (!raw) return new Set();
+      const arr = JSON.parse(raw);
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      return new Set();
+    }
+  };
+
+  const persistCelebrated = (uid: string, ids: Set<string>) => {
+    try {
+      localStorage.setItem(getCelebratedKey(uid), JSON.stringify([...ids]));
+    } catch {
+      // silent (private mode etc.)
+    }
+  };
+
+  // Bootstrap once per logged-in user. Silently syncs already-earned badges
+  // (including `first_steps`, which every existing account has) so they are
+  // never treated as "new" on a fresh login. No toast/confetti here.
   useEffect(() => {
+    const uid = user?._id;
+    if (!uid) {
+      bootstrappedRef.current = false;
+      bootstrappedUserIdRef.current = null;
+      earnedBadgeIdsRef.current = new Set();
+      setEarnedBadges([]);
+      return;
+    }
+    // Already bootstrapped for this user — don't re-seed.
+    if (bootstrappedRef.current && bootstrappedUserIdRef.current === uid) return;
+
     let isMounted = true;
 
-    async function bootstrap() {
+    async function bootstrap(userId: string) {
+      // Seed from previously celebrated badges so a reload never re-fires.
+      earnedBadgeIdsRef.current = readCelebrated(userId);
       try {
         const res: any = await getBadges();
         if (!isMounted) return;
         const list: EarnedBadge[] = res?.badges || res?.data?.badges || [];
         setEarnedBadges(list);
-        earnedBadgeIdsRef.current = new Set(list.map((b: any) => b.badgeId));
+        // Merge server-earned ids into the celebrated set SILENTLY.
+        const merged = new Set<string>(earnedBadgeIdsRef.current);
+        for (const b of list) {
+          if ((b as any)?.badgeId) merged.add((b as any).badgeId);
+        }
+        earnedBadgeIdsRef.current = merged;
+        persistCelebrated(userId, merged);
       } catch {
-        // silent
+        // silent — keep localStorage-seeded set; celebration stays gated below.
+      } finally {
+        if (isMounted) {
+          bootstrappedRef.current = true;
+          bootstrappedUserIdRef.current = userId;
+        }
       }
     }
 
-    bootstrap();
+    bootstrap(uid);
     return () => {
       isMounted = false;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [(user as any)?._id]);
 
   useEffect(() => {
     // Notifications are pushed whenever the user completes a server action.
-    if (!user) return;
+    const uid = user?._id;
+    if (!uid) return;
+    // Wait until bootstrap has silently synced pre-existing badges.
+    if (!bootstrappedRef.current || bootstrappedUserIdRef.current !== uid) return;
 
     const now = Date.now();
     if (now - lastCelebrationAtRef.current < 1500) {
-      // throttle bursty events
+      return; // throttle bursty events
     }
 
     const t = setTimeout(async () => {
       try {
         const res: any = await getBadges();
         const list: EarnedBadge[] = res?.badges || res?.data?.badges || [];
-        const newIds = new Set(list.map((b: any) => b.badgeId));
+        const byId = new globalThis.Map<string, any>();
+        for (const b of list) {
+          if ((b as any)?.badgeId) byId.set((b as any).badgeId, b);
+        }
+        const newIds = new Set<string>(byId.keys());
 
         const prevIds = earnedBadgeIdsRef.current;
         const newlyEarned = ALL_BADGE_IDS.filter((id) => newIds.has(id) && !prevIds.has(id));
 
         if (newlyEarned.length > 0) {
-          earnedBadgeIdsRef.current = newIds;
+          // Only celebrate badges earned very recently. Anything older
+          // (e.g. `first_steps` from a previous session) is synced silently.
+          const RECENT_MS = 10 * 60 * 1000;
+          const fetchTime = Date.now();
+          const fresh = newlyEarned.filter((id) => {
+            const earnedAt = byId.get(id)?.earnedAt;
+            if (!earnedAt) return true;
+            const t = new Date(earnedAt).getTime();
+            return Number.isFinite(t) && fetchTime - t < RECENT_MS;
+          });
+
+          const merged = new Set<string>([...prevIds, ...newlyEarned]);
+          earnedBadgeIdsRef.current = merged;
+          persistCelebrated(uid, merged);
           setEarnedBadges(list);
 
-          const badgeId = newlyEarned[0];
+          if (fresh.length === 0) return;
+
+          const badgeId = fresh[0];
           lastCelebrationAtRef.current = Date.now();
 
           // Confetti burst
@@ -429,7 +504,8 @@ export function AppShell() {
             description: "New milestone badge unlocked!",
           });
         } else {
-          earnedBadgeIdsRef.current = newIds;
+          const merged = new Set<string>([...prevIds, ...newIds]);
+          earnedBadgeIdsRef.current = merged;
           setEarnedBadges(list);
         }
       } catch {
@@ -438,7 +514,7 @@ export function AppShell() {
     }, 250);
 
     return () => clearTimeout(t);
-  }, [notifications, user]);
+  }, [notifications, (user as any)?._id]);
 
   const handleLogout = () => {
     logout();

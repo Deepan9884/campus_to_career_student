@@ -117,14 +117,14 @@ export function TargetRoleSelect({
         }}
         className="w-full glass-input rounded-xl px-3 py-2.5 text-sm text-left flex items-center justify-between gap-2 outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]"
       >
-        <span className={cn("truncate", !value && "text-muted-foreground")}>
+        <span className={cn("truncate min-w-0 flex-1", !value && "text-muted-foreground")}>
           {value || placeholder}
         </span>
         <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1.5 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/15 rounded-xl shadow-2xl overflow-hidden">
+        <div className="absolute z-50 top-full left-0 mt-1.5 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/15 rounded-xl shadow-2xl overflow-hidden">
           <div className="p-2 border-b border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg px-2 py-1.5">
               <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -134,7 +134,7 @@ export function TargetRoleSelect({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search roles..."
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground text-slate-900 dark:text-white"
+                className="flex-1 min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground text-slate-900 dark:text-white"
               />
             </div>
           </div>

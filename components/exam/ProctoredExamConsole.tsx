@@ -661,10 +661,14 @@ export function ProctoredExamConsole({
   const handleFinishExam = async () => {
     setShowConfirmFinish(false);
     setIsTestFinished(true);
-    if (videoElement) videoElement.srcObject = null;
-    stopAllCameraStreams();
-    sessionStorage.removeItem(STORAGE_KEY);
-    await onSubmit(answers);
+    try {
+      await onSubmit(answers);
+      if (videoElement) videoElement.srcObject = null;
+      stopAllCameraStreams();
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      setIsTestFinished(false);
+    }
   };
 
   const handleExitConsole = () => {

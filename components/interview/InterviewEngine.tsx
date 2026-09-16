@@ -1451,7 +1451,7 @@ function ActiveView({
 
             {/* Question Text */}
             {getQuestionStem(currentItem) ? (
-              <h2 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed">
+              <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 leading-relaxed">
                 {getQuestionStem(currentItem)}
               </h2>
             ) : (

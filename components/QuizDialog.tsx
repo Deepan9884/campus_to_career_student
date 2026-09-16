@@ -178,6 +178,8 @@ export function QuizDialog({
         return;
       }
       toast.error(err.message || "Failed to submit assessment answers.");
+      setPhase("taking");
+      throw err;
     }
   };
 

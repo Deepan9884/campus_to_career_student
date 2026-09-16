@@ -382,8 +382,8 @@ export function ResumeAnalyzerView({
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="space-y-6"
           >
-            {/* Top: Upload Resume Hero Card */}
-            <GlassCard variant="strong" className="relative overflow-visible">
+            {/* Top: Upload Resume Hero Card (z-10: keeps the Target Role dropdown above the cards below — glass cards form stacking contexts) */}
+            <GlassCard variant="strong" className="relative overflow-visible z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
