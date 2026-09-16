@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Upload, FileText, Trash2, CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { StudyMaterial, uploadStudyMaterial, toggleMaterialActive, deleteStudyMaterial } from "@/lib/foreign-language-api";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { GlassCard } from "@/components/GlassCard";
 
 interface MaterialVaultProps {
   materials: StudyMaterial[];

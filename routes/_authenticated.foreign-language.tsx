@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Globe2, FileText, GraduationCap, Loader2, PlayCircle } from "lucide-react";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { GlassCard } from "@/components/GlassCard";
 import { MaterialVault } from "@/components/foreign-language/MaterialVault";
 import { LanguageChat } from "@/components/foreign-language/LanguageChat";
 import {

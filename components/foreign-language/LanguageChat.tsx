@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Loader2, MessageSquare, Bot } from "lucide-react";
 import { LanguageChatMessage, sendLanguageChat } from "@/lib/foreign-language-api";
-import { GlassCard } from "@/components/ui/GlassCard";
+import { GlassCard } from "@/components/GlassCard";
 import ReactMarkdown from "react-markdown";
 
 interface LanguageChatProps {
