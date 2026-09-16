@@ -19,6 +19,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCodingPlatformsRouteImport } from './routes/_authenticated.coding-platforms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated.events'
+import { Route as AuthenticatedForeignLanguageRouteImport } from './routes/_authenticated.foreign-language'
 import { Route as AuthenticatedGithubRouteImport } from './routes/_authenticated.github'
 import { Route as AuthenticatedInterviewRouteImport } from './routes/_authenticated.interview'
 import { Route as AuthenticatedLinkedinPostsRouteImport } from './routes/_authenticated.linkedin-posts'
@@ -81,6 +82,12 @@ const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedForeignLanguageRoute =
+  AuthenticatedForeignLanguageRouteImport.update({
+    id: '/foreign-language',
+    path: '/foreign-language',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedGithubRoute = AuthenticatedGithubRouteImport.update({
   id: '/github',
   path: '/github',
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/coding-platforms': typeof AuthenticatedCodingPlatformsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/foreign-language': typeof AuthenticatedForeignLanguageRoute
   '/github': typeof AuthenticatedGithubRoute
   '/interview': typeof AuthenticatedInterviewRoute
   '/linkedin-posts': typeof AuthenticatedLinkedinPostsRoute
@@ -171,6 +179,7 @@ export interface FileRoutesByTo {
   '/coding-platforms': typeof AuthenticatedCodingPlatformsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/foreign-language': typeof AuthenticatedForeignLanguageRoute
   '/github': typeof AuthenticatedGithubRoute
   '/interview': typeof AuthenticatedInterviewRoute
   '/linkedin-posts': typeof AuthenticatedLinkedinPostsRoute
@@ -195,6 +204,7 @@ export interface FileRoutesById {
   '/_authenticated/coding-platforms': typeof AuthenticatedCodingPlatformsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
+  '/_authenticated/foreign-language': typeof AuthenticatedForeignLanguageRoute
   '/_authenticated/github': typeof AuthenticatedGithubRoute
   '/_authenticated/interview': typeof AuthenticatedInterviewRoute
   '/_authenticated/linkedin-posts': typeof AuthenticatedLinkedinPostsRoute
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/coding-platforms'
     | '/dashboard'
     | '/events'
+    | '/foreign-language'
     | '/github'
     | '/interview'
     | '/linkedin-posts'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/coding-platforms'
     | '/dashboard'
     | '/events'
+    | '/foreign-language'
     | '/github'
     | '/interview'
     | '/linkedin-posts'
@@ -264,6 +276,7 @@ export interface FileRouteTypes {
     | '/_authenticated/coding-platforms'
     | '/_authenticated/dashboard'
     | '/_authenticated/events'
+    | '/_authenticated/foreign-language'
     | '/_authenticated/github'
     | '/_authenticated/interview'
     | '/_authenticated/linkedin-posts'
@@ -359,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEventsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/foreign-language': {
+      id: '/_authenticated/foreign-language'
+      path: '/foreign-language'
+      fullPath: '/foreign-language'
+      preLoaderRoute: typeof AuthenticatedForeignLanguageRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/github': {
       id: '/_authenticated/github'
       path: '/github'
@@ -444,6 +464,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCodingPlatformsRoute: typeof AuthenticatedCodingPlatformsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
+  AuthenticatedForeignLanguageRoute: typeof AuthenticatedForeignLanguageRoute
   AuthenticatedGithubRoute: typeof AuthenticatedGithubRoute
   AuthenticatedInterviewRoute: typeof AuthenticatedInterviewRoute
   AuthenticatedLinkedinPostsRoute: typeof AuthenticatedLinkedinPostsRoute
@@ -461,6 +482,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCodingPlatformsRoute: AuthenticatedCodingPlatformsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
+  AuthenticatedForeignLanguageRoute: AuthenticatedForeignLanguageRoute,
   AuthenticatedGithubRoute: AuthenticatedGithubRoute,
   AuthenticatedInterviewRoute: AuthenticatedInterviewRoute,
   AuthenticatedLinkedinPostsRoute: AuthenticatedLinkedinPostsRoute,
