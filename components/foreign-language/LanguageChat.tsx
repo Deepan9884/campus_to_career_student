@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Loader2, MessageSquare, Bot } from "lucide-react";
 import { LanguageChatMessage, sendLanguageChat } from "@/lib/foreign-language-api";
 import { GlassCard } from "@/components/GlassCard";
-import ReactMarkdown from "react-markdown";
 
 interface LanguageChatProps {
   language: string;
@@ -75,17 +74,13 @@ export function LanguageChat({ language, history, onMessageSent, activeMaterialC
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-tr-sm"
                     : "bg-muted/50 border rounded-tl-sm prose prose-sm dark:prose-invert"
                 }`}
               >
-                {msg.role === "user" ? (
-                  msg.content
-                ) : (
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                )}
+                {msg.content}
               </div>
             </div>
           ))
