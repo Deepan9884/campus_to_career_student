@@ -7,7 +7,7 @@ function normalizeApiBase(rawUrl?: string): string {
 // Client-side uses the Vite proxy (/api -> localhost:5000) or VITE_API_URL.
 // Server-side (SSR / Nitro) must reach the backend directly.
 const isServer = typeof window === "undefined";
-const API_BASE = isServer
+export const API_BASE = isServer
   ? normalizeApiBase(
       typeof process !== "undefined" && (process.env.VITE_API_URL || process.env.API_URL)
         ? (process.env.VITE_API_URL || process.env.API_URL)

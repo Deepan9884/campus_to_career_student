@@ -176,8 +176,13 @@ function useExamAudio(locale: string) {
     void getVoicesAsync().then((all) => {
       if (!mounted) return;
       setVoices(all);
+      const short = locale.slice(0, 2).toLowerCase();
       const best = findBestVoice(all, locale);
-      if (best) setVoiceURI((prev) => prev || best.voiceURI);
+      if (best && best.lang.toLowerCase().startsWith(short)) {
+        setVoiceURI((prev) => prev || best.voiceURI);
+      } else {
+        setVoiceURI(""); // Cloud HD Voice by default
+      }
     });
     return () => {
       mounted = false;
@@ -234,9 +239,9 @@ function useExamAudio(locale: string) {
         setProgress(0);
       } else {
         setAudioError(
-          e instanceof Error && e.message === "web-audio-failed"
-            ? "Web voice could not load audio. Check your internet connection and retry — or pick “Device voice”."
-            : "Audio failed to start. Your browser may be blocking autoplay — tap Play again, or switch the Engine dropdown to “Web voice”."
+          e instanceof Error
+            ? `Audio playback notice: ${e.message}. Tap Play to retry.`
+            : "Audio failed to start. Tap Play to retry."
         );
         setProgress(0);
       }
@@ -248,8 +253,7 @@ function useExamAudio(locale: string) {
 
   const langVoices = useMemo(() => {
     const short = locale.slice(0, 2).toLowerCase();
-    const matched = voices.filter((v) => v.lang.toLowerCase().startsWith(short));
-    return matched.length ? matched : voices;
+    return voices.filter((v) => v.lang.toLowerCase().startsWith(short));
   }, [voices, locale]);
 
   const hasNativeVoice = useMemo(
@@ -516,8 +520,8 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate">◉ {script.title}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {language} • {targetExam} • {tts.engineUsed === "web" ? "🌐 Web voice" : tts.engineUsed === "device" ? "🔊 Device voice" : `AI exam voice (${locale})`}
-                      {!tts.hasNativeVoice && tts.engineUsed !== "web" ? " • no JP voice installed → auto web voice" : ""}
+                      {language} • {targetExam} • {tts.engineUsed === "web" ? "🤖 Cloud HD voice" : tts.engineUsed === "device" ? "🔊 Device voice" : `AI exam voice (${locale})`}
+                      {!tts.hasNativeVoice ? " • Cloud HD voice active" : ""}
                     </p>
                   </div>
                   <div className="flex items-end gap-[3px] h-8 shrink-0">
@@ -549,16 +553,16 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
                   <label className="space-y-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">Engine</span>
                     <select value={tts.engine} onChange={(e) => tts.setEngine(e.target.value as TTSEngineChoice)} className="w-full glass-input rounded-xl px-2 py-2 text-xs outline-none">
-                      <option value="auto">Auto (recommended)</option>
+                      <option value="auto">Auto (Cloud HD / Device)</option>
+                      <option value="web">Cloud HD voice</option>
                       <option value="device">Device voice</option>
-                      <option value="web">Web voice</option>
                     </select>
                   </label>
                   <label className="space-y-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 flex items-center gap-1"><Volume2 className="w-3 h-3" /> Voice</span>
                     <select value={tts.voiceURI} onChange={(e) => tts.setVoiceURI(e.target.value)} className="w-full glass-input rounded-xl px-2 py-2 text-xs outline-none">
-                      {tts.voices.slice(0, 12).map((v) => <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>)}
-                      {tts.voices.length === 0 && <option value="">Web voice</option>}
+                      <option value="">🤖 AI Exam Voice (Cloud HD - Recommended)</option>
+                      {tts.voices.map((v) => <option key={v.voiceURI} value={v.voiceURI}>🔊 Device: {v.name} ({v.lang})</option>)}
                     </select>
                   </label>
                   <label className="space-y-1">
