@@ -14,6 +14,11 @@ export interface CodeEditorControlsHandle {
   zoomIn?: () => void;
   zoomOut?: () => void;
   resetZoom?: () => void;
+  openFind?: () => void;
+  openReplace?: () => void;
+  toggleComment?: () => void;
+  foldAll?: () => void;
+  unfoldAll?: () => void;
 }
 
 export interface MonacoCodeEditorProps {
@@ -32,6 +37,7 @@ export interface MonacoCodeEditorProps {
   editorRef?: React.MutableRefObject<CodeEditorControlsHandle | null>;
   errorLine?: number | null;
   errorMessage?: string | null;
+  isRuntimeError?: boolean;
   onClearErrorLine?: () => void;
   onRunCode?: () => void;
   readOnly?: boolean;
@@ -187,6 +193,351 @@ function patchMonacoWhitespaceOverlay(editor: any) {
   }
 }
 
+const registeredLanguages = new Set<string>();
+
+function registerLanguageCompletions(monaco: any) {
+  if (registeredLanguages.has("initialized")) return;
+  registeredLanguages.add("initialized");
+
+  try {
+    // Java
+    monaco.languages.registerCompletionItemProvider("java", {
+      provideCompletionItems: (model: any, position: any) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+
+        const suggestions = [
+          {
+            label: "psvm",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "public static void main(String[] args) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "public static void main(String[] args)",
+            documentation: "Main method boilerplate",
+            range,
+          },
+          {
+            label: "sout",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "System.out.println($1);",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "System.out.println()",
+            range,
+          },
+          {
+            label: "Scanner",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "Scanner scanner = new Scanner(System.in);\n$0",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "Scanner scanner = new Scanner(System.in);",
+            range,
+          },
+          {
+            label: "fori",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for (int ${1:i} = 0; ${1:i} < ${2:n}; ${1:i}++) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for (int i = 0; i < n; i++)",
+            range,
+          },
+          {
+            label: "foreach",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for (${1:int} ${2:item} : ${3:arr}) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for (item : arr)",
+            range,
+          },
+          {
+            label: "while",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "while (${1:condition}) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "while loop",
+            range,
+          },
+          {
+            label: "ArrayList",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "List<${1:Integer}> ${2:list} = new ArrayList<>();",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "ArrayList instantiation",
+            range,
+          },
+          {
+            label: "HashMap",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "Map<${1:String}, ${2:Integer}> ${3:map} = new HashMap<>();",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "HashMap instantiation",
+            range,
+          },
+          {
+            label: "Arrays.sort",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "Arrays.sort(${1:arr});",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "Arrays.sort()",
+            range,
+          },
+        ];
+
+        return { suggestions };
+      },
+    });
+
+    // Python
+    monaco.languages.registerCompletionItemProvider("python", {
+      provideCompletionItems: (model: any, position: any) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+
+        const suggestions = [
+          {
+            label: "def",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "def ${1:func_name}(${2:args}):\n\t${0:pass}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "def func():",
+            range,
+          },
+          {
+            label: "main",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'if __name__ == "__main__":\n\t${0:main()}',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "if __name__ == '__main__':",
+            range,
+          },
+          {
+            label: "fori",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for ${1:i} in range(${2:n}):\n\t$0",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for i in range(n)",
+            range,
+          },
+          {
+            label: "forin",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for ${1:item} in ${2:iterable}:\n\t$0",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for item in iterable",
+            range,
+          },
+          {
+            label: "while",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "while ${1:condition}:\n\t$0",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "while condition:",
+            range,
+          },
+          {
+            label: "read_ints",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "list(map(int, input().split()))",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "list(map(int, input().split()))",
+            range,
+          },
+          {
+            label: "read_int",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "int(input().strip())",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "int(input().strip())",
+            range,
+          },
+          {
+            label: "print",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "print(${1:val})",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "print()",
+            range,
+          },
+        ];
+
+        return { suggestions };
+      },
+    });
+
+    // C++
+    monaco.languages.registerCompletionItemProvider("cpp", {
+      provideCompletionItems: (model: any, position: any) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+
+        const suggestions = [
+          {
+            label: "cout",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'cout << ${1:value} << "\\n";',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'cout << value << "\\n";',
+            range,
+          },
+          {
+            label: "cin",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "cin >> ${1:var};",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "cin >> var;",
+            range,
+          },
+          {
+            label: "fori",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for (int ${1:i} = 0; ${1:i} < ${2:n}; ++${1:i}) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for (int i = 0; i < n; ++i)",
+            range,
+          },
+          {
+            label: "vector",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "vector<${1:int}> ${2:vec};",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "vector<int> vec;",
+            range,
+          },
+          {
+            label: "sort",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "sort(${1:vec}.begin(), ${1:vec}.end());",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "sort(vec.begin(), vec.end())",
+            range,
+          },
+        ];
+
+        return { suggestions };
+      },
+    });
+
+    // C
+    monaco.languages.registerCompletionItemProvider("c", {
+      provideCompletionItems: (model: any, position: any) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+
+        const suggestions = [
+          {
+            label: "printf",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'printf("${1:%d}\\n", ${2:val});',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'printf() with newline',
+            range,
+          },
+          {
+            label: "scanf",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'scanf("${1:%d}", &${2:var});',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'scanf()',
+            range,
+          },
+          {
+            label: "fori",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for (int ${1:i} = 0; ${1:i} < ${2:n}; ${1:i}++) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for loop",
+            range,
+          },
+        ];
+
+        return { suggestions };
+      },
+    });
+
+    // JavaScript / TypeScript
+    const jsTsProvider = {
+      provideCompletionItems: (model: any, position: any) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+
+        const suggestions = [
+          {
+            label: "clg",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "console.log(${1:item});",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "console.log()",
+            range,
+          },
+          {
+            label: "fn",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "function ${1:name}(${2:params}) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "function name()",
+            range,
+          },
+          {
+            label: "afn",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "const ${1:name} = (${2:params}) => {\n\t$0\n};",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "const name = () => {}",
+            range,
+          },
+          {
+            label: "forof",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for (const ${1:item} of ${2:items}) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for...of loop",
+            range,
+          },
+          {
+            label: "fori",
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: "for (let ${1:i} = 0; ${1:i} < ${2:n}; ${1:i}++) {\n\t$0\n}",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: "for (let i = 0; i < n; i++)",
+            range,
+          },
+        ];
+
+        return { suggestions };
+      },
+    };
+
+    monaco.languages.registerCompletionItemProvider("javascript", jsTsProvider);
+    monaco.languages.registerCompletionItemProvider("typescript", jsTsProvider);
+  } catch (providerErr) {
+    console.warn("Language completions registration notice:", providerErr);
+  }
+}
+
 export function MonacoCodeEditor({
   code,
   onChange,
@@ -269,6 +620,15 @@ export function MonacoCodeEditor({
         "editorIndentGuide.background1": "#334155",
         "editorIndentGuide.activeBackground1": "#38bdf8",
         "editorWhitespace.foreground": "#94a3b8",
+        "editorBracketHighlight.foreground1": "#38bdf8",
+        "editorBracketHighlight.foreground2": "#a78bfa",
+        "editorBracketHighlight.foreground3": "#34d399",
+        "editorBracketHighlight.foreground4": "#f59e0b",
+        "editorBracketHighlight.foreground5": "#ec4899",
+        "editorBracketHighlight.foreground6": "#60a5fa",
+        "editorBracketHighlight.unexpectedBracket.foreground": "#f43f5e",
+        "editorBracketPairGuide.activeBackground1": "#38bdf880",
+        "editorBracketPairGuide.background1": "#33415560",
       },
     });
 
@@ -310,8 +670,30 @@ export function MonacoCodeEditor({
         "editorIndentGuide.background1": "#cbd5e1",
         "editorIndentGuide.activeBackground1": "#6366f1",
         "editorWhitespace.foreground": "#64748b",
+        "editorBracketHighlight.foreground1": "#2563eb",
+        "editorBracketHighlight.foreground2": "#7c3aed",
+        "editorBracketHighlight.foreground3": "#059669",
+        "editorBracketHighlight.foreground4": "#d97706",
+        "editorBracketHighlight.foreground5": "#db2777",
+        "editorBracketHighlight.foreground6": "#0284c7",
+        "editorBracketHighlight.unexpectedBracket.foreground": "#dc2626",
+        "editorBracketPairGuide.activeBackground1": "#6366f180",
+        "editorBracketPairGuide.background1": "#cbd5e160",
       },
     });
+
+    registerLanguageCompletions(monaco);
+
+    if (monaco.languages?.typescript) {
+      monaco.languages.typescript.javascriptDefaults?.setDiagnosticsOptions({
+        noSemanticValidation: false,
+        noSyntaxValidation: false,
+      });
+      monaco.languages.typescript.typescriptDefaults?.setDiagnosticsOptions({
+        noSemanticValidation: false,
+        noSyntaxValidation: false,
+      });
+    }
   };
 
   // On Editor Mount: wire up toolbar controls, keyboard shortcuts, proctoring security, and refs
@@ -368,6 +750,21 @@ export function MonacoCodeEditor({
             onFontSizeChange(15);
           }
         },
+        openFind: () => {
+          editor.getAction("actions.find")?.run();
+        },
+        openReplace: () => {
+          editor.getAction("editor.action.startFindReplaceAction")?.run();
+        },
+        toggleComment: () => {
+          editor.getAction("editor.action.commentLine")?.run();
+        },
+        foldAll: () => {
+          editor.getAction("editor.action.foldAll")?.run();
+        },
+        unfoldAll: () => {
+          editor.getAction("editor.action.unfoldAll")?.run();
+        },
       };
     }
 
@@ -407,6 +804,29 @@ export function MonacoCodeEditor({
       if (onFontSizeChange) {
         onFontSizeChange(15);
       }
+    });
+
+    // Native Find & Replace shortcuts
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {
+      editor.getAction("actions.find")?.run();
+    });
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyH, () => {
+      editor.getAction("editor.action.startFindReplaceAction")?.run();
+    });
+
+    // Toggle Line Comment (Ctrl+/ or Cmd+/)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash, () => {
+      editor.getAction("editor.action.commentLine")?.run();
+    });
+
+    // Format Document (Shift+Alt+F)
+    editor.addCommand(monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF, () => {
+      editor.getAction("editor.action.formatDocument")?.run();
+    });
+
+    // Go to Line (Ctrl+G or Cmd+G)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyG, () => {
+      editor.getAction("editor.action.gotoLine")?.run();
     });
 
     // Track cursor position & selection telemetry
@@ -479,32 +899,44 @@ export function MonacoCodeEditor({
   };
 
   // Helper to update squiggly line, line highlight, and point cursor on error
-  const updateErrorMarker = (editor: any, monaco: any, line: number | null, message?: string | null) => {
+  const updateErrorMarker = (
+    editor: any,
+    monaco: any,
+    line: number | null,
+    message?: string | null,
+    isRuntime?: boolean
+  ) => {
     const model = editor.getModel();
     if (!model) return;
 
     if (line && line >= 1 && line <= model.getLineCount()) {
-      const displayMsg = message || `Compilation / Syntax Error on Line ${line}`;
+      const errType = isRuntime ? "Runtime Error" : "Compilation Error";
+      const displayMsg = message || `${errType} on Line ${line}`;
+      const severity = isRuntime ? monaco.MarkerSeverity.Warning : monaco.MarkerSeverity.Error;
+
       monaco.editor.setModelMarkers(model, "compiler", [
         {
           startLineNumber: line,
           startColumn: 1,
           endLineNumber: line,
           endColumn: model.getLineMaxColumn(line),
-          message: displayMsg,
-          severity: monaco.MarkerSeverity.Error,
+          message: `${errType}: ${displayMsg}`,
+          severity,
         },
       ]);
 
-      // Add full-line subtle red tint decoration and gutter glyph
+      // Add full-line tint decoration and gutter glyph
+      const lineClass = isRuntime ? "monaco-runtime-line-highlight" : "monaco-error-line-highlight";
+      const glyphClass = isRuntime ? "bg-amber-500 rounded-full" : "bg-rose-500 rounded-full";
+
       decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [
         {
           range: new monaco.Range(line, 1, line, model.getLineMaxColumn(line)),
           options: {
             isWholeLine: true,
-            className: "monaco-error-line-highlight",
-            glyphMarginClassName: "bg-rose-500 rounded-full",
-            hoverMessage: { value: `**Compilation Error**: ${displayMsg}` },
+            className: lineClass,
+            glyphMarginClassName: glyphClass,
+            hoverMessage: { value: `**${errType}**: ${displayMsg}` },
           },
         },
       ]);
@@ -522,9 +954,15 @@ export function MonacoCodeEditor({
   // Update error marker and point cursor when errorLine prop changes
   useEffect(() => {
     if (editorInstanceRef.current && monacoInstanceRef.current) {
-      updateErrorMarker(editorInstanceRef.current, monacoInstanceRef.current, errorLine ?? null, errorMessage ?? null);
+      updateErrorMarker(
+        editorInstanceRef.current,
+        monacoInstanceRef.current,
+        errorLine ?? null,
+        errorMessage ?? null,
+        Boolean(isRuntimeError)
+      );
     }
-  }, [errorLine, errorMessage, isLight]);
+  }, [errorLine, errorMessage, isRuntimeError, isLight]);
 
   // Dynamically update font size and proportional line height
   useEffect(() => {
@@ -668,16 +1106,74 @@ export function MonacoCodeEditor({
             // Disable smooth scrolling on Safari for better performance
             smoothScrolling: !isSafari,
             formatOnPaste: !isCopyPasteDisabled,
-            suggestOnTriggerCharacters: true,
+            formatOnType: true,
+            autoClosingBrackets: "always",
+            autoClosingQuotes: "always",
+            autoClosingComments: "always",
+            autoSurround: "brackets",
+            autoIndent: "full",
+            bracketPairColorization: {
+              enabled: true,
+              independentColorPoolPerBracketType: true,
+            },
             matchBrackets: "always",
             guides: {
-              bracketPairs: false,
-              bracketPairsHorizontal: false,
+              bracketPairs: true,
+              bracketPairsHorizontal: true,
               highlightActiveBracketPair: true,
               indentation: true,
               highlightActiveIndentation: true,
             },
+            quickSuggestions: {
+              other: true,
+              comments: false,
+              strings: true,
+            },
+            quickSuggestionsDelay: 10,
+            suggestOnTriggerCharacters: true,
+            acceptSuggestionOnEnter: "smart",
+            tabCompletion: "on",
+            snippetSuggestions: "inline",
+            wordBasedSuggestions: "allDocuments",
+            parameterHints: {
+              enabled: true,
+              cycle: true,
+            },
+            suggest: {
+              preview: true,
+              showStatusBar: true,
+              filterGraceful: true,
+              shareSuggestSelections: true,
+              showIcons: true,
+              showSnippets: true,
+              showWords: true,
+              showClasses: true,
+              showFunctions: true,
+              showVariables: true,
+              showConstants: true,
+              showMethods: true,
+              showKeywords: true,
+            },
+            multiCursorModifier: "alt",
+            multiCursorMergeOverlapping: true,
+            selectionHighlight: true,
+            occurrencesHighlight: "singleFile",
+            hover: {
+              enabled: true,
+              delay: 250,
+              sticky: true,
+            },
+            links: true,
+            colorDecorators: true,
+            linkedEditing: true,
+            find: {
+              addExtraSpaceOnTop: true,
+              autoFindInSelection: "multiline",
+              seedSearchStringFromSelection: "selection",
+            },
+            dragAndDrop: !isCopyPasteDisabled,
             renderLineHighlight: "all",
+            renderLineHighlightOnlyWhenFocus: false,
             overviewRulerBorder: false,
             renderWhitespace: "boundary",
             // Renders full-span CodeTantra vector tab arrows and clearly visible space dots

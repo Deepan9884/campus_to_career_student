@@ -46,6 +46,29 @@ export interface QuizQuestion {
   explanation: string;
 }
 
+export interface LanguageCertificate {
+  _id: string;
+  language: string;
+  examLevel: string;
+  certificateTitle: string;
+  issuer: string;
+  status: string;
+  score?: string;
+  credentialId?: string;
+  issuedDate?: string;
+  notes?: string;
+  originalFileName?: string;
+  fileType?: string;
+  createdAt: string;
+}
+
+export interface ListeningScript {
+  title: string;
+  script: string;
+  translation: string;
+  questions: QuizQuestion[];
+}
+
 export async function getLanguageProfile(): Promise<LanguageProfile> {
   return api.get<LanguageProfile>("/foreign-language/profile");
 }
@@ -86,4 +109,48 @@ export async function getLanguageChatHistory(language: string): Promise<Language
 
 export async function generateLanguageQuiz(language: string, targetExam: string): Promise<QuizQuestion[]> {
   return api.post<QuizQuestion[]>("/foreign-language/quiz", { language, targetExam });
+}
+
+export async function generateListeningScript(
+  language: string,
+  targetExam: string,
+  topic?: string
+): Promise<ListeningScript> {
+  return api.post<ListeningScript>("/foreign-language/listening", { language, targetExam, topic });
+}
+
+export async function uploadLanguageCertificate(data: {
+  file?: File | null;
+  language: string;
+  examLevel: string;
+  certificateTitle: string;
+  issuer: string;
+  status: string;
+  score?: string;
+  credentialId?: string;
+  issuedDate?: string;
+  notes?: string;
+}): Promise<LanguageCertificate> {
+  const formData = new FormData();
+  if (data.file) formData.append("file", data.file);
+  formData.append("language", data.language);
+  formData.append("examLevel", data.examLevel);
+  formData.append("certificateTitle", data.certificateTitle);
+  formData.append("issuer", data.issuer);
+  formData.append("status", data.status);
+  if (data.score) formData.append("score", data.score);
+  if (data.credentialId) formData.append("credentialId", data.credentialId);
+  if (data.issuedDate) formData.append("issuedDate", data.issuedDate);
+  if (data.notes) formData.append("notes", data.notes);
+
+  return api.post<LanguageCertificate>("/foreign-language/certificates", formData);
+}
+
+export async function getLanguageCertificates(language?: string): Promise<LanguageCertificate[]> {
+  const qs = language ? `?language=${encodeURIComponent(language)}` : "";
+  return api.get<LanguageCertificate[]>(`/foreign-language/certificates${qs}`);
+}
+
+export async function deleteLanguageCertificate(id: string): Promise<void> {
+  return api.delete<void>(`/foreign-language/certificates/${id}`);
 }

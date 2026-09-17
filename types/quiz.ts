@@ -50,6 +50,8 @@ export interface TestCaseResult {
   status?: string;
   executionTimeMs: number;
   error?: string;
+  statement?: string;
+  errorLine?: number | null;
 }
 
 export interface CodeExecutionResult {
@@ -62,6 +64,7 @@ export interface CodeExecutionResult {
   isRuntimeError?: boolean;
   errorLine?: number | null;
   errorMessage?: string;
+  statement?: string;
   passedCount?: number;
   totalCount?: number;
   testCaseResults: TestCaseResult[];

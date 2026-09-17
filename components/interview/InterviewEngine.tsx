@@ -771,7 +771,10 @@ function InterviewCodingWorkspace({
       } else if (res.success) {
         toast.success(`✓ All ${res.totalCount || item.testCases?.length || 1} test cases passed!`);
       } else if (res.isRuntimeError) {
-        toast.error("Runtime Error occurred during test case execution");
+        const runtimeStmt = res.statement || res.errorMessage || res.testCaseResults?.find((t: any) => t.status === "Runtime Error")?.statement || "";
+        const runLine = res.errorLine || res.testCaseResults?.find((t: any) => t.status === "Runtime Error")?.errorLine || null;
+        const displayErr = runtimeStmt ? (runtimeStmt.startsWith("Line") ? runtimeStmt : (runLine ? `Line ${runLine}: ${runtimeStmt}` : runtimeStmt)) : "Runtime error occurred";
+        toast.error(`Runtime Error: ${displayErr}`);
       } else {
         toast.warning(`${res.passedCount ?? 0}/${(res.totalCount ?? item.testCases?.length) || 1} test cases passed`);
       }
@@ -942,6 +945,28 @@ function InterviewCodingWorkspace({
                         {activeTC.actualOutput || "(empty)"}
                       </span>
                     </div>
+
+                    {activeTC.status === "Runtime Error" && (
+                      <div className="p-2 rounded bg-amber-50 border border-amber-200 text-amber-900 space-y-1 mt-1">
+                        <div className="flex items-center justify-between font-bold text-[10px] text-amber-800">
+                          <span className="flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3 text-amber-600" />
+                            Runtime Error Statement:
+                          </span>
+                          {activeTC.errorLine && (
+                            <span className="px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px] font-mono">
+                              Line {activeTC.errorLine}
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-mono font-bold text-xs text-amber-950 break-words">
+                          {activeTC.statement || activeTC.error || activeTC.actualOutput}
+                        </div>
+                        <p className="text-[10px] text-slate-600 font-sans">
+                          Inspect this statement in your code above to fix the error and prevent runtime crashes.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 );
               })()}

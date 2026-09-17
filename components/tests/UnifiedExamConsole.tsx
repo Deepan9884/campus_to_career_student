@@ -1707,15 +1707,25 @@ export function UnifiedExamConsole({
           toast.success("Custom input executed successfully!");
         }
       } else {
-        setErrorLine(null);
-        setErrorMessage(null);
+        const isRunErr = Boolean(result.isRuntimeError || result.testCaseResults?.some((t: any) => t.status === "Runtime Error"));
+        const runtimeStmt = result.statement || result.errorMessage || result.testCaseResults?.find((t: any) => t.status === "Runtime Error")?.statement || result.stderr || "";
+        const runLine = result.errorLine || result.testCaseResults?.find((t: any) => t.status === "Runtime Error")?.errorLine || null;
+
+        if (isRunErr) {
+          setErrorLine(runLine);
+          setErrorMessage(runtimeStmt || "Runtime error occurred during test execution");
+          const displayErr = runtimeStmt ? (runtimeStmt.startsWith("Line") ? runtimeStmt : (runLine ? `Line ${runLine}: ${runtimeStmt}` : runtimeStmt)) : "Runtime error occurred";
+          toast.error(`Runtime Error: ${displayErr}`);
+        } else {
+          setErrorLine(null);
+          setErrorMessage(null);
+        }
+
         const passed = result.passedCount ?? 0;
         const total = result.totalCount ?? testCasesToRun.length;
         if (result.success || (passed === total && total > 0)) {
           toast.success(`All ${total} test cases passed! (Including hidden cases)`);
-        } else if (result.isRuntimeError) {
-          toast.error("Runtime error occurred during test execution");
-        } else {
+        } else if (!isRunErr) {
           toast.warning(`${passed}/${total} test cases passed.`);
         }
       }
@@ -3224,6 +3234,7 @@ export function UnifiedExamConsole({
                       editorRef={editorControlsRef}
                       errorLine={errorLine}
                       errorMessage={errorMessage}
+                      isRuntimeError={Boolean(currentExec?.isRuntimeError)}
                       onClearErrorLine={() => {
                         setErrorLine(null);
                         setErrorMessage(null);
@@ -3393,10 +3404,12 @@ export function UnifiedExamConsole({
                           </div>
                         ) : activeTab === "testcases" ? (
                           <div className="space-y-3">
-                            {(currentExec?.isCompilationError || currentExec?.compilationError) && (
+                            {(currentExec?.isCompilationError || currentExec?.compilationError || currentExec?.isRuntimeError) && (
                               <CompilerErrorBanner
-                                errorText={currentExec?.stderr || currentExec?.errorMessage || errorMessage || "Compilation error in code."}
-                                errorLine={errorLine}
+                                errorText={currentExec?.stderr || currentExec?.errorMessage || errorMessage || "Runtime / compilation error in code."}
+                                errorLine={errorLine || currentExec?.errorLine}
+                                statement={currentExec?.statement}
+                                isRuntimeError={Boolean(currentExec?.isRuntimeError)}
                                 language={currentActiveLang}
                                 isLight={isLightMode}
                                 onJumpToLine={(line) => editorControlsRef.current?.revealLine?.(line)}
@@ -3612,6 +3625,8 @@ export function UnifiedExamConsole({
                                               {isActiveHidden
                                                 ? activeTC.passed
                                                   ? "Passed - Output matches expected result \u2713"
+                                                  : activeTC.status === "Runtime Error" || activeTC.statement
+                                                  ? `Runtime Error: ${activeTC.statement || activeTC.error || "Runtime error occurred"}`
                                                   : activeTC.error
                                                   ? `Failed - Error: ${activeTC.error}`
                                                   : "Failed - Output mismatch with hidden evaluation case \u2717"
@@ -3619,6 +3634,32 @@ export function UnifiedExamConsole({
                                             </pre>
                                           </div>
                                         </div>
+
+                                        {activeTC.status === "Runtime Error" && (
+                                          <div
+                                            className={`p-3 rounded-xl border space-y-1.5 ${
+                                              isLightMode ? "bg-amber-50 border-amber-200" : "bg-amber-950/20 border-amber-800/40"
+                                            }`}
+                                          >
+                                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                                              <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                                                <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                                                Runtime Error Statement:
+                                              </span>
+                                              {activeTC.errorLine && (
+                                                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                                                  Line {activeTC.errorLine}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="font-mono font-bold text-xs text-amber-950 dark:text-amber-200 break-words">
+                                              {activeTC.statement || activeTC.error || activeTC.actualOutput}
+                                            </div>
+                                            <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans">
+                                              Inspect this statement in your code above to fix the error and prevent runtime crashes.
+                                            </p>
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>

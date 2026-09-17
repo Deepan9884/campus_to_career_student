@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
+  AlertCircle,
   Play,
   FileCode,
   Terminal,
@@ -696,14 +697,24 @@ export function ProctoredCodingTestConsole({
           toast.success("Custom run executed successfully!");
         }
       } else {
-        setErrorLine(null);
-        setErrorMessage(null);
+        const isRunErr = Boolean(res.isRuntimeError || res.testCaseResults?.some((t: any) => t.status === "Runtime Error"));
+        const runtimeStmt = res.statement || res.errorMessage || res.testCaseResults?.find((t: any) => t.status === "Runtime Error")?.statement || res.stderr || "";
+        const runLine = res.errorLine || res.testCaseResults?.find((t: any) => t.status === "Runtime Error")?.errorLine || null;
+
+        if (isRunErr) {
+          setErrorLine(runLine);
+          setErrorMessage(runtimeStmt || "Runtime error occurred during test execution");
+          const displayErr = runtimeStmt ? (runtimeStmt.startsWith("Line") ? runtimeStmt : (runLine ? `Line ${runLine}: ${runtimeStmt}` : runtimeStmt)) : "Runtime error occurred";
+          toast.error(`Runtime Error: ${displayErr}`);
+        } else {
+          setErrorLine(null);
+          setErrorMessage(null);
+        }
+
         setActiveTab("testcases");
         if (res.success) {
           toast.success(`✓ All ${res.totalCount || testCasesToRun.length} test cases passed!`);
-        } else if (res.isRuntimeError) {
-          toast.error("Runtime Error occurred during test case execution");
-        } else {
+        } else if (!isRunErr) {
           toast.warning(`${res.passedCount ?? 0}/${res.totalCount ?? testCasesToRun.length} test cases passed`);
         }
       }
@@ -1919,6 +1930,7 @@ export function ProctoredCodingTestConsole({
                   editorRef={editorRef}
                   errorLine={errorLine}
                   errorMessage={errorMessage}
+                  isRuntimeError={Boolean(currentExecResult?.isRuntimeError)}
                   onClearErrorLine={() => {
                     setErrorLine(null);
                     setErrorMessage(null);
@@ -2072,10 +2084,12 @@ export function ProctoredCodingTestConsole({
                       isLightMode ? "bg-white text-slate-800" : "bg-transparent text-slate-300"
                     }`}
                   >
-                    {(currentExecResult?.isCompilationError || currentExecResult?.compilationError) && (
+                    {(currentExecResult?.isCompilationError || currentExecResult?.compilationError || currentExecResult?.isRuntimeError) && (
                       <CompilerErrorBanner
-                        errorText={currentExecResult?.stderr || currentExecResult?.errorMessage || errorMessage || "Compilation error"}
-                        errorLine={errorLine}
+                        errorText={currentExecResult?.stderr || currentExecResult?.errorMessage || errorMessage || "Runtime / compilation error in code."}
+                        errorLine={errorLine || currentExecResult?.errorLine}
+                        statement={currentExecResult?.statement}
+                        isRuntimeError={Boolean(currentExecResult?.isRuntimeError)}
                         language={selectedLang}
                         isLight={isLightMode}
                         onJumpToLine={(line) => editorRef.current?.revealLine?.(line)}
@@ -2191,11 +2205,39 @@ export function ProctoredCodingTestConsole({
                                     {isCurrentHidden
                                       ? activeTC.passed
                                         ? "✓ Output Matched Expected Result"
+                                        : activeTC.status === "Runtime Error" || activeTC.statement
+                                        ? `Runtime Error: ${activeTC.statement || activeTC.error || "Runtime error occurred"}`
                                         : "✗ Output Mismatched Expected Result"
                                       : activeTC.actualOutput || "(empty)"}
                                   </pre>
                                 </div>
                               </div>
+
+                              {activeTC.status === "Runtime Error" && (
+                                <div
+                                  className={`p-3 rounded-xl border space-y-1.5 ${
+                                    isLightMode ? "bg-amber-50 border-amber-200" : "bg-amber-950/20 border-amber-800/40"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                                    <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                                      <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                                      Runtime Error Statement:
+                                    </span>
+                                    {activeTC.errorLine && (
+                                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                                        Line {activeTC.errorLine}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="font-mono font-bold text-xs text-amber-950 dark:text-amber-200 break-words">
+                                    {activeTC.statement || activeTC.error || activeTC.actualOutput}
+                                  </div>
+                                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans">
+                                    Inspect this statement in your code above to fix the error and prevent runtime crashes.
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           );
                         })()}
@@ -2242,10 +2284,12 @@ export function ProctoredCodingTestConsole({
                       isLightMode ? "bg-slate-900 text-slate-200" : "bg-black text-slate-200"
                     }`}
                   >
-                    {(currentExecResult?.isCompilationError || currentExecResult?.compilationError || currentExecResult?.stderr || errorMessage) && (
+                    {(currentExecResult?.isCompilationError || currentExecResult?.compilationError || currentExecResult?.isRuntimeError || currentExecResult?.stderr || errorMessage) && (
                       <CompilerErrorBanner
                         errorText={currentExecResult?.stderr || currentExecResult?.errorMessage || errorMessage || ""}
-                        errorLine={errorLine}
+                        errorLine={errorLine || currentExecResult?.errorLine}
+                        statement={currentExecResult?.statement}
+                        isRuntimeError={Boolean(currentExecResult?.isRuntimeError)}
                         language={selectedLang}
                         isLight={isLightMode}
                         onJumpToLine={(line) => editorRef.current?.revealLine?.(line)}

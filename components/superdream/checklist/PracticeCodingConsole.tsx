@@ -10,6 +10,7 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
+  AlertCircle,
   Code2,
   FileCode,
   Send,
@@ -207,6 +208,9 @@ export function PracticeCodingConsole({
       actualOutput: string;
       passed: boolean;
       timeMs: number;
+      statement?: string;
+      status?: string;
+      errorLine?: number | null;
     }>
   >([]);
   const [consoleOutput, setConsoleOutput] = useState<string | null>(null);
@@ -252,6 +256,8 @@ export function PracticeCodingConsole({
   });
   const [errorLine, setErrorLine] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorStatement, setErrorStatement] = useState<string | null>(null);
+  const [isRuntimeError, setIsRuntimeError] = useState(false);
 
   // Problem navigation
   const handleSelectProblem = (idx: number) => {
@@ -383,6 +389,9 @@ export function PracticeCodingConsole({
           actualOutput: tc.actualOutput || (tc.passed ? tc.expectedOutput : "(No output)"),
           passed: Boolean(tc.passed),
           timeMs: tc.executionTimeMs || 15,
+          statement: tc.statement,
+          status: tc.status,
+          errorLine: tc.errorLine,
         }));
 
         setTestResults(mappedResults);
@@ -411,25 +420,43 @@ export function PracticeCodingConsole({
           }
           setConsoleOutput(errText);
           setErrorMessage(errText);
+          setErrorStatement(null);
+          setIsRuntimeError(false);
           setActiveTab("console");
           toast.error(`Compilation error${errLineNum ? ` (Line ${errLineNum})` : ""}: Please fix syntax issues`);
         } else {
-          setErrorLine(null);
-          setErrorMessage(null);
+          const isRunErr = Boolean(res.isRuntimeError || mappedResults.some((t) => t.status === "Runtime Error"));
+          const runtimeStmt = res.statement || res.errorMessage || mappedResults.find((t) => t.status === "Runtime Error")?.statement || res.stderr || "";
+          const runLine = res.errorLine || mappedResults.find((t) => t.status === "Runtime Error")?.errorLine || null;
+
+          if (isRunErr) {
+            setErrorLine(runLine);
+            setErrorMessage(runtimeStmt || "Runtime error occurred during test execution");
+            setErrorStatement(runtimeStmt || null);
+            setIsRuntimeError(true);
+            const displayErr = runtimeStmt ? (runtimeStmt.startsWith("Line") ? runtimeStmt : (runLine ? `Line ${runLine}: ${runtimeStmt}` : runtimeStmt)) : "Runtime error occurred";
+            toast.error(`Runtime Error: ${displayErr}`);
+          } else {
+            setErrorLine(null);
+            setErrorMessage(null);
+            setErrorStatement(null);
+            setIsRuntimeError(false);
+          }
+
           setConsoleOutput(
             (res.stdout ? `${res.stdout}\n` : "") +
               (res.stderr ? `Compiler Notes / Errors:\n${res.stderr}\n\n` : "") +
               mappedResults
                 .map(
                   (r, i) =>
-                    `[Case ${i + 1}] Input: "${r.input}" -> ${r.passed ? "PASSED" : "FAILED"} (${r.timeMs}ms)`
+                    `[Case ${i + 1}] Input: "${r.input}" -> ${r.passed ? "PASSED" : r.status === "Runtime Error" ? `RUNTIME ERROR (${r.statement || "Runtime Error"})` : "FAILED"} (${r.timeMs}ms)`
                 )
                 .join("\n") +
-              `\n\nVerdict: ${allPass ? "ACCEPTED" : "FAILED"}`
+              `\n\nVerdict: ${allPass ? "ACCEPTED" : isRunErr ? "RUNTIME ERROR" : "FAILED"}`
           );
           if (allPass) {
             toast.success("All test cases passed!");
-          } else {
+          } else if (!isRunErr) {
             const passedCount = mappedResults.filter((r) => r.passed).length;
             toast.warning(`${passedCount}/${mappedResults.length} test cases passed`);
           }
@@ -952,6 +979,8 @@ export function PracticeCodingConsole({
             setCode(newVal);
             if (errorLine) setErrorLine(null);
             if (errorMessage) setErrorMessage(null);
+            if (errorStatement) setErrorStatement(null);
+            if (isRuntimeError) setIsRuntimeError(false);
           }}
           language={languageKey}
           isLight={isLightMode}
@@ -963,9 +992,12 @@ export function PracticeCodingConsole({
           editorRef={editorControlsRef}
           errorLine={errorLine}
           errorMessage={errorMessage}
+          isRuntimeError={isRuntimeError}
           onClearErrorLine={() => {
             setErrorLine(null);
             setErrorMessage(null);
+            setErrorStatement(null);
+            setIsRuntimeError(false);
           }}
           onRunCode={() => handleRunCode(false)}
           readOnly={isRunning || isSubmitting}
@@ -1081,10 +1113,12 @@ export function PracticeCodingConsole({
       <div className="flex-1 overflow-y-auto p-3">
         {activeTab === "testcases" && (
           <div className="space-y-3">
-            {(errorLine || errorMessage) && (
+            {(errorLine || errorMessage || isRuntimeError) && (
               <CompilerErrorBanner
-                errorText={errorMessage || consoleOutput || "Compilation error in code."}
+                errorText={errorMessage || consoleOutput || "Runtime / compilation error in code."}
                 errorLine={errorLine}
+                statement={errorStatement || undefined}
+                isRuntimeError={isRuntimeError}
                 language={languageKey}
                 isLight={isLightMode}
                 onJumpToLine={(line) => editorControlsRef.current?.revealLine?.(line)}
@@ -1144,6 +1178,11 @@ export function PracticeCodingConsole({
                         <>
                           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                           <span>Passed (Accepted)</span>
+                        </>
+                      ) : activeResult.status === "Runtime Error" ? (
+                        <>
+                          <AlertCircle className="w-4 h-4 text-amber-500" />
+                          <span className="text-amber-600 dark:text-amber-400">Runtime Error</span>
                         </>
                       ) : (
                         <>
@@ -1217,10 +1256,39 @@ export function PracticeCodingConsole({
                       "p-2 rounded-lg font-mono text-xs overflow-x-auto whitespace-pre-wrap border",
                       activeResult.passed
                         ? isLightMode ? "bg-emerald-50/50 border-emerald-200 text-emerald-900" : "bg-emerald-950/20 border-emerald-900/40 text-emerald-300"
+                        : activeResult.status === "Runtime Error"
+                        ? isLightMode ? "bg-amber-50/50 border-amber-200 text-amber-900" : "bg-amber-950/20 border-amber-900/40 text-amber-300"
                         : isLightMode ? "bg-rose-50/50 border-rose-200 text-rose-900" : "bg-rose-950/20 border-rose-900/40 text-rose-300"
                     )}>
                       {activeResult.actualOutput}
                     </pre>
+
+                    {activeResult.status === "Runtime Error" && (
+                      <div
+                        className={cn(
+                          "p-3 rounded-xl border space-y-1.5 mt-2",
+                          isLightMode ? "bg-amber-50 border-amber-200" : "bg-amber-950/20 border-amber-800/40"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                            Runtime Error Statement:
+                          </span>
+                          {activeResult.errorLine && (
+                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                              Line {activeResult.errorLine}
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-mono font-bold text-xs text-amber-950 dark:text-amber-200 break-words">
+                          {activeResult.statement || activeResult.actualOutput}
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans">
+                          Inspect this statement in your code above to fix the error and prevent runtime crashes.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1298,10 +1366,12 @@ export function PracticeCodingConsole({
 
         {activeTab === "console" && (
           <div className="space-y-3">
-            {(errorLine || errorMessage) && (
+            {(errorLine || errorMessage || isRuntimeError) && (
               <CompilerErrorBanner
-                errorText={errorMessage || consoleOutput || "Compilation error in code."}
+                errorText={errorMessage || consoleOutput || "Runtime / compilation error in code."}
                 errorLine={errorLine}
+                statement={errorStatement || undefined}
+                isRuntimeError={isRuntimeError}
                 language={languageKey}
                 isLight={isLightMode}
                 onJumpToLine={(line) => editorControlsRef.current?.revealLine?.(line)}
