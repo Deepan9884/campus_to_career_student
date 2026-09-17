@@ -18,6 +18,8 @@ import {
   Sparkles,
   Volume2,
   Gauge,
+  ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import {
@@ -28,10 +30,17 @@ import {
 } from "@/lib/foreign-language-api";
 import {
   TTS_LOCALE,
-  WEB_AUDIO_SOURCES,
   LISTENING_TOPICS,
+  EXAM_RESOURCE_LIST,
   getFallbackListening,
 } from "@/lib/foreign-language-listening";
+import {
+  TTSEngineChoice,
+  EngineUsed,
+  getVoicesAsync,
+  findBestVoice,
+  playScript,
+} from "@/lib/foreign-language-audio";
 
 interface QuizListeningLabProps {
   language: string;
@@ -149,81 +158,121 @@ function QuizRunner({
   );
 }
 
-/* ── Futuristic TTS hook ────────────────────────────── */
+/* ── Dual-engine exam audio hook (device voice → web voice) ── */
 
-function useFuturisticTTS(locale: string) {
+function useExamAudio(locale: string) {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voiceURI, setVoiceURI] = useState("");
+  const [engine, setEngine] = useState<TTSEngineChoice>("auto");
+  const [engineUsed, setEngineUsed] = useState<EngineUsed | null>(null);
   const [rate, setRate] = useState(0.95);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [audioError, setAudioError] = useState("");
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const load = () => {
-      const all = window.speechSynthesis?.getVoices() || [];
+    let mounted = true;
+    void getVoicesAsync().then((all) => {
+      if (!mounted) return;
       setVoices(all);
-      if (!voiceURI) {
-        const match = all.find((v) => v.lang === locale) || all.find((v) => v.lang.startsWith(locale.slice(0, 2)));
-        if (match) setVoiceURI(match.voiceURI);
-      }
-    };
-    load();
-    window.speechSynthesis?.addEventListener?.("voiceschanged", load);
+      const best = findBestVoice(all, locale);
+      if (best) setVoiceURI((prev) => prev || best.voiceURI);
+    });
     return () => {
-      window.speechSynthesis?.removeEventListener?.("voiceschanged", load);
-      window.speechSynthesis?.cancel();
-      if (timer.current) clearInterval(timer.current);
+      mounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale]);
 
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      try {
+        window.speechSynthesis?.cancel();
+      } catch {
+        /* noop */
+      }
+    };
+  }, []);
+
   const stop = () => {
-    window.speechSynthesis?.cancel();
+    abortRef.current?.abort();
+    abortRef.current = null;
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* noop */
+    }
     setPlaying(false);
     setProgress(0);
-    if (timer.current) clearInterval(timer.current);
   };
 
-  const speak = (text: string) => {
-    if (!("speechSynthesis" in window)) {
-      alert("Your browser does not support AI voice playback. Try Chrome or Edge.");
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = locale;
-    u.rate = rate;
-    const v = voices.find((x) => x.voiceURI === voiceURI);
-    if (v) u.voice = v;
-    const estMs = Math.max(4000, (text.length / 14 / rate) * 1000);
-    const started = Date.now();
+  const speak = async (text: string) => {
+    stop();
+    setAudioError("");
     setPlaying(true);
     setProgress(0);
-    if (timer.current) clearInterval(timer.current);
-    timer.current = setInterval(() => {
-      const p = Math.min(99, ((Date.now() - started) / estMs) * 100);
-      setProgress(p);
-    }, 200);
-    u.onend = () => {
-      setPlaying(false);
+    setEngineUsed(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      const used = await playScript({
+        text,
+        locale,
+        engine,
+        voiceURI: voiceURI || undefined,
+        rate,
+        signal: controller.signal,
+        onEngine: (u) => setEngineUsed(u),
+        onProgress: (f) => setProgress(Math.round(f * 100)),
+      });
+      setEngineUsed(used);
       setProgress(100);
-      if (timer.current) clearInterval(timer.current);
-      setTimeout(() => setProgress(0), 2500);
-    };
-    u.onerror = () => {
+      window.setTimeout(() => setProgress((p) => (p === 100 ? 0 : p)), 2500);
+    } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        setProgress(0);
+      } else {
+        setAudioError(
+          e instanceof Error && e.message === "web-audio-failed"
+            ? "Web voice could not load audio. Check your internet connection and retry — or pick “Device voice”."
+            : "Audio failed to start. Your browser may be blocking autoplay — tap Play again, or switch the Engine dropdown to “Web voice”."
+        );
+        setProgress(0);
+      }
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
       setPlaying(false);
-      if (timer.current) clearInterval(timer.current);
-    };
-    window.speechSynthesis.speak(u);
+    }
   };
 
-  const langVoices = useMemo(
-    () => voices.filter((v) => v.lang.startsWith(locale.slice(0, 2))),
+  const langVoices = useMemo(() => {
+    const short = locale.slice(0, 2).toLowerCase();
+    const matched = voices.filter((v) => v.lang.toLowerCase().startsWith(short));
+    return matched.length ? matched : voices;
+  }, [voices, locale]);
+
+  const hasNativeVoice = useMemo(
+    () => findBestVoice(voices, locale) !== undefined,
     [voices, locale]
   );
 
-  return { voices: langVoices.length ? langVoices : voices, voiceURI, setVoiceURI, rate, setRate, playing, progress, speak, stop };
+  return {
+    voices: langVoices,
+    voiceURI,
+    setVoiceURI,
+    engine,
+    setEngine,
+    engineUsed,
+    rate,
+    setRate,
+    playing,
+    progress,
+    audioError,
+    hasNativeVoice,
+    speak,
+    stop,
+  };
 }
 
 /* ── Main lab ───────────────────────────────────────── */
@@ -237,7 +286,6 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
 
   const [audioSource, setAudioSource] = useState<AudioSource>("ai-voice");
   const [topic, setTopic] = useState(LISTENING_TOPICS[0]);
-  const [webURL, setWebURL] = useState(WEB_AUDIO_SOURCES[0].url);
   const [customURL, setCustomURL] = useState("");
   const [script, setScript] = useState<ListeningScript | null>(null);
   const [scriptLoading, setScriptLoading] = useState(false);
@@ -247,20 +295,33 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
   const [dictScore, setDictScore] = useState<number | null>(null);
 
   const locale = TTS_LOCALE[language] || "en-US";
-  const tts = useFuturisticTTS(locale);
+  const tts = useExamAudio(locale);
   const webAudioRef = useRef<HTMLAudioElement>(null);
   const [webPlaying, setWebPlaying] = useState(false);
   const [webRate, setWebRate] = useState(1);
 
+  // Stop all audio + reset when context changes so clips never bleed across topics
   useEffect(() => {
     setQuiz([]);
     setQuizError("");
     setScript(null);
     setDictation("");
     setDictScore(null);
+    setCustomURL("");
     tts.stop();
+    webAudioRef.current?.pause();
+    setWebPlaying(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, targetExam]);
+
+  useEffect(() => {
+    tts.stop();
+    setDictation("");
+    setDictScore(null);
+    setHideScript(true);
+    setShowTranslation(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topic]);
 
   const handleQuiz = async (source: "ai" | "pdf") => {
     if (source === "pdf" && activeMaterialCount === 0) {
@@ -272,26 +333,32 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
     setQuizSource(source);
     try {
       const qs = await generateLanguageQuiz(language, targetExam);
-      if (!Array.isArray(qs) || qs.length === 0) throw new Error("Empty quiz returned");
+      if (!Array.isArray(qs) || qs.length === 0) throw new Error("Quiz service returned no questions.");
       setQuiz(qs);
     } catch (e: unknown) {
-      setQuizError(e instanceof Error ? e.message : "Quiz generation failed. Check AI keys / backend and retry.");
+      setQuizError(
+        e instanceof Error
+          ? `${e.message} — tap “Generate” again to retry.`
+          : "Quiz generation failed. Tap “Generate” again to retry."
+      );
     } finally {
       setQuizLoading(false);
     }
   };
 
   const handleScript = async () => {
+    tts.stop();
     setScriptLoading(true);
     try {
       const s = await generateListeningScript(language, targetExam, topic);
-      if (s && s.script) {
+      if (s && typeof s.script === "string" && s.script.trim().length >= 10) {
         setScript(s);
       } else {
-        setScript(getFallbackListening(language));
+        setScript(getFallbackListening(language, topic));
       }
     } catch {
-      setScript(getFallbackListening(language));
+      // Offline / backend unreachable → distinct local script for THIS topic
+      setScript(getFallbackListening(language, topic));
     } finally {
       setScriptLoading(false);
     }
@@ -303,26 +370,28 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
 
   const toggleWebAudio = () => {
     const el = webAudioRef.current;
-    if (!el) return;
+    if (!el || !customURL.trim()) return;
     if (webPlaying) {
       el.pause();
     } else {
       el.playbackRate = webRate;
-      void el.play();
+      void el.play().catch(() => setWebPlaying(false));
     }
   };
 
   const checkDictation = () => {
     if (!script) return;
-    const ref = script.script.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").split(/\s+/).filter(Boolean);
-    const got = dictation.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").split(/\s+/).filter(Boolean);
+    const norm = (s: string) =>
+      s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").split(/\s+/).filter(Boolean);
+    const ref = norm(script.script);
+    const got = norm(dictation);
     if (ref.length === 0) return;
     const refSet = new Set(ref);
     const hits = got.filter((w) => refSet.has(w)).length;
     setDictScore(Math.round((hits / ref.length) * 100));
   };
 
-  const effectiveWebURL = customURL.trim() || webURL;
+  const resources = EXAM_RESOURCE_LIST.filter((r) => r.language === language);
   const tabs: { id: PracticeMode; label: string; icon: typeof BrainCircuit; hint: string }[] = [
     { id: "ai-quiz", label: "AI Quiz", icon: BrainCircuit, hint: `${targetExam} auto-set` },
     { id: "pdf-quiz", label: "From PDF", icon: FileText, hint: `${activeMaterialCount} active` },
@@ -331,7 +400,6 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
 
   return (
     <GlassCard className="p-5 md:p-6 h-full flex flex-col gap-4 overflow-hidden" glow="mint">
-      {/* Header + mode dropdown-style segmented tabs */}
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-2xl bg-emerald-400/15 border border-emerald-300/30 flex items-center justify-center shrink-0">
           <BrainCircuit className="w-5 h-5 text-emerald-300" />
@@ -359,12 +427,11 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
         ))}
       </div>
 
-      {/* ── AI QUIZ ── */}
       {mode === "ai-quiz" && (
         <div className="space-y-3">
           <div className="rounded-2xl border border-border/60 bg-muted/20 p-3.5 text-xs leading-relaxed text-muted-foreground">
             <span className="font-bold text-foreground flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /> AI Quiz</span>
-            Generates a fresh 10-question {targetExam} set for {language} — vocabulary, grammar & reading. No upload needed.
+            Generates a fresh 10-question {targetExam} set for {language} — vocabulary, grammar & reading. Every tap builds a new rotated set.
           </div>
           <button onClick={() => handleQuiz("ai")} disabled={quizLoading} className="btn-gradient w-full rounded-xl px-4 py-2.5 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50">
             {quizLoading && quizSource === "ai" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
@@ -375,7 +442,6 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
         </div>
       )}
 
-      {/* ── FROM PDF ── */}
       {mode === "pdf-quiz" && (
         <div className="space-y-3">
           <div className="rounded-2xl border border-border/60 bg-muted/20 p-3.5 text-xs leading-relaxed text-muted-foreground">
@@ -391,10 +457,8 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
         </div>
       )}
 
-      {/* ── LISTENING LAB ── */}
       {mode === "listening" && (
         <div className="space-y-3">
-          {/* Source + topic dropdowns */}
           <div className="grid grid-cols-2 gap-2.5">
             <label className="space-y-1">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Audio source</span>
@@ -414,24 +478,28 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
           {audioSource === "web-surf" && (
             <div className="rounded-2xl border border-cyan-400/25 bg-cyan-400/5 p-3.5 space-y-2.5">
               <label className="block space-y-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1"><Globe2 className="w-3 h-3" /> Pick a surfaced clip</span>
-                <select value={webURL} onChange={(e) => setWebURL(e.target.value)} className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none">
-                  {WEB_AUDIO_SOURCES.map((s) => <option key={s.url} value={s.url}>{s.label}</option>)}
-                </select>
-              </label>
-              <label className="block space-y-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1"><Link2 className="w-3 h-3" /> …or paste any MP3 URL from the net</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1"><Link2 className="w-3 h-3" /> Paste any MP3 URL from the net</span>
                 <input value={customURL} onChange={(e) => setCustomURL(e.target.value)} placeholder="https://…/jlpt-n5-listening.mp3" className="w-full glass-input rounded-xl px-3 py-2.5 text-sm outline-none" />
               </label>
+              {resources.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1"><Globe2 className="w-3 h-3" /> Real {language} listening sites — surf & copy an MP3</p>
+                  {resources.map((r) => (
+                    <a key={r.url} href={r.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs rounded-xl border border-border/60 bg-muted/20 px-3 py-2 hover:border-primary/50 transition-colors">
+                      <span className="flex-1 truncate font-medium">{r.label}</span>
+                      <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-60" />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           <button onClick={handleScript} disabled={scriptLoading} className="btn-gradient w-full rounded-xl px-4 py-2.5 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50">
             {scriptLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <AudioLines className="w-4 h-4" />}
-            {audioSource === "ai-voice" ? "Generate listening passage" : "Load listening set"}
+            {audioSource === "ai-voice" ? `Generate “${topic}” passage` : "Load listening set"}
           </button>
 
-          {/* ── FUTURISTIC PLAYER ── */}
           {audioSource === "ai-voice" && script && (
             <div className="relative overflow-hidden rounded-2xl border border-fuchsia-400/25 bg-gradient-to-br from-violet-600/20 via-fuchsia-500/10 to-cyan-400/10 p-4">
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" />
@@ -439,17 +507,19 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
               <div className="relative space-y-3">
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => (tts.playing ? tts.stop() : tts.speak(script.script))}
+                    onClick={() => (tts.playing ? tts.stop() : void tts.speak(script.script))}
                     className="w-12 h-12 rounded-full btn-gradient flex items-center justify-center shrink-0 shadow-lg"
-                    title={tts.playing ? "Stop" : "Play AI voice"}
+                    title={tts.playing ? "Stop" : "Play exam audio"}
                   >
                     {tts.playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate">◉ {script.title}</p>
-                    <p className="text-[11px] text-muted-foreground">{language} • {targetExam} • AI exam voice ({locale})</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {language} • {targetExam} • {tts.engineUsed === "web" ? "🌐 Web voice" : tts.engineUsed === "device" ? "🔊 Device voice" : `AI exam voice (${locale})`}
+                      {!tts.hasNativeVoice && tts.engineUsed !== "web" ? " • no JP voice installed → auto web voice" : ""}
+                    </p>
                   </div>
-                  {/* live visualizer */}
                   <div className="flex items-end gap-[3px] h-8 shrink-0">
                     {Array.from({ length: 14 }).map((_, i) => (
                       <span
@@ -465,31 +535,42 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
                   </div>
                 </div>
 
-                {/* progress */}
                 <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-300 transition-all" style={{ width: `${tts.progress}%` }} />
                 </div>
 
-                {/* voice + speed dropdowns */}
-                <div className="grid grid-cols-2 gap-2">
+                {tts.audioError && (
+                  <p className="text-[11px] text-amber-200 bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2 flex items-start gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" /> {tts.audioError}
+                  </p>
+                )}
+
+                <div className="grid grid-cols-3 gap-2">
                   <label className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 flex items-center gap-1"><Volume2 className="w-3 h-3" /> AI Voice</span>
-                    <select value={tts.voiceURI} onChange={(e) => tts.setVoiceURI(e.target.value)} className="w-full glass-input rounded-xl px-2.5 py-2 text-xs outline-none">
+                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">Engine</span>
+                    <select value={tts.engine} onChange={(e) => tts.setEngine(e.target.value as TTSEngineChoice)} className="w-full glass-input rounded-xl px-2 py-2 text-xs outline-none">
+                      <option value="auto">Auto (recommended)</option>
+                      <option value="device">Device voice</option>
+                      <option value="web">Web voice</option>
+                    </select>
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 flex items-center gap-1"><Volume2 className="w-3 h-3" /> Voice</span>
+                    <select value={tts.voiceURI} onChange={(e) => tts.setVoiceURI(e.target.value)} className="w-full glass-input rounded-xl px-2 py-2 text-xs outline-none">
                       {tts.voices.slice(0, 12).map((v) => <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>)}
-                      {tts.voices.length === 0 && <option value="">System default</option>}
+                      {tts.voices.length === 0 && <option value="">Web voice</option>}
                     </select>
                   </label>
                   <label className="space-y-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 flex items-center gap-1"><Gauge className="w-3 h-3" /> Speed</span>
-                    <select value={tts.rate} onChange={(e) => tts.setRate(Number(e.target.value))} className="w-full glass-input rounded-xl px-2.5 py-2 text-xs outline-none">
-                      <option value={0.7}>0.7× slow (N5)</option>
-                      <option value={0.95}>1.0× exam pace</option>
+                    <select value={tts.rate} onChange={(e) => tts.setRate(Number(e.target.value))} className="w-full glass-input rounded-xl px-2 py-2 text-xs outline-none">
+                      <option value={0.7}>0.7× slow</option>
+                      <option value={0.95}>1.0× exam</option>
                       <option value={1.2}>1.2× fast</option>
                     </select>
                   </label>
                 </div>
 
-                {/* exam toggles */}
                 <div className="flex flex-wrap gap-2">
                   <button onClick={() => setHideScript(!hideScript)} className="text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 flex items-center gap-1.5">
                     {hideScript ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -510,16 +591,15 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
             </div>
           )}
 
-          {/* web audio player */}
           {audioSource === "web-surf" && (
             <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 p-4 space-y-3">
               <div className="flex items-center gap-3">
-                <button onClick={toggleWebAudio} className="w-12 h-12 rounded-full btn-gradient flex items-center justify-center shrink-0">
+                <button onClick={toggleWebAudio} disabled={!customURL.trim()} className="w-12 h-12 rounded-full btn-gradient flex items-center justify-center shrink-0 disabled:opacity-40">
                   {webPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                 </button>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold truncate">◉ Net Audio — {language} listening</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{effectiveWebURL}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{customURL.trim() || "Paste an MP3 URL above, then press play"}</p>
                 </div>
                 <div className="flex items-end gap-[3px] h-8 shrink-0">
                   {Array.from({ length: 12 }).map((_, i) => (
@@ -527,24 +607,29 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
                   ))}
                 </div>
               </div>
-              <audio
-                ref={webAudioRef}
-                src={effectiveWebURL}
-                controls
-                className="w-full h-9 rounded-xl"
-                onPlay={() => setWebPlaying(true)}
-                onPause={() => setWebPlaying(false)}
-                onEnded={() => setWebPlaying(false)}
-              />
-              <div className="flex items-center gap-2 text-xs">
-                <span className="font-bold">Speed:</span>
-                {[0.75, 1, 1.25, 1.5].map((r) => (
-                  <button key={r} onClick={() => { setWebRate(r); if (webAudioRef.current) webAudioRef.current.playbackRate = r; }}
-                    className={`px-2.5 py-1 rounded-full border text-[11px] font-bold ${webRate === r ? "btn-gradient border-transparent" : "border-border/60 hover:bg-muted/40"}`}>
-                    {r}×
-                  </button>
-                ))}
-              </div>
+              {customURL.trim() && (
+                <>
+                  <audio
+                    ref={webAudioRef}
+                    src={customURL.trim()}
+                    controls
+                    className="w-full h-9 rounded-xl"
+                    onPlay={() => setWebPlaying(true)}
+                    onPause={() => setWebPlaying(false)}
+                    onEnded={() => setWebPlaying(false)}
+                    onError={() => setWebPlaying(false)}
+                  />
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-bold">Speed:</span>
+                    {[0.75, 1, 1.25, 1.5].map((r) => (
+                      <button key={r} onClick={() => { setWebRate(r); if (webAudioRef.current) webAudioRef.current.playbackRate = r; }}
+                        className={`px-2.5 py-1 rounded-full border text-[11px] font-bold ${webRate === r ? "btn-gradient border-transparent" : "border-border/60 hover:bg-muted/40"}`}>
+                        {r}×
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
               {!script && (
                 <button onClick={handleScript} disabled={scriptLoading} className="w-full rounded-xl px-4 py-2 text-xs font-bold border border-border hover:bg-muted/40 flex items-center justify-center gap-2 disabled:opacity-50">
                   {scriptLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
@@ -554,7 +639,6 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
             </div>
           )}
 
-          {/* dictation */}
           {script && (
             <div className="rounded-2xl border border-border/60 bg-muted/20 p-3.5 space-y-2">
               <p className="text-xs font-bold">✍️ Dictation drill <span className="font-normal text-muted-foreground">— play (script hidden), type what you hear</span></p>
@@ -568,7 +652,6 @@ export function QuizListeningLab({ language, targetExam, activeMaterialCount }: 
             </div>
           )}
 
-          {/* listening comprehension */}
           {script && script.questions?.length > 0 && (
             <div className="rounded-2xl border border-border/60 bg-muted/10 p-3.5">
               <p className="text-xs font-bold mb-2.5">🎧 Listening comprehension — answer after listening twice (exam rule)</p>

@@ -79,6 +79,16 @@ interface ProctoredExamConsoleProps {
 }
 
 const LANGUAGE_CONFIGS: Record<string, { label: string; ext: string; placeholder: string }> = {
+  html: {
+    label: "HTML5",
+    ext: "html",
+    placeholder: "<!-- Write your HTML structure here -->\n<div class=\"container\">\n  <article class=\"card\">\n    <h2>Title</h2>\n    <p>Semantic markup...</p>\n  </article>\n</div>",
+  },
+  css: {
+    label: "CSS3",
+    ext: "css",
+    placeholder: "/* Write your CSS styling rules here */\n.card {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  box-sizing: border-box;\n}",
+  },
   python: {
     label: "Python 3",
     ext: "py",
@@ -108,6 +118,16 @@ const LANGUAGE_CONFIGS: Record<string, { label: string; ext: string; placeholder
 
 function getInitialLanguage(skillName: string, subTopicName: string): string {
   const combined = `${skillName} ${subTopicName}`.toLowerCase();
+  if (
+    combined.includes("html") ||
+    combined.includes("css") ||
+    combined.includes("markup") ||
+    combined.includes("styling") ||
+    combined.includes("tailwind") ||
+    combined.includes("bootstrap")
+  ) {
+    return combined.includes("css") && !combined.includes("html") ? "css" : "html";
+  }
   if (
     combined.includes("python") ||
     combined.includes("django") ||
@@ -403,10 +423,22 @@ export function ProctoredExamConsole({
     videoElement: null,
     webcamRequired: false,
     aiFaceDetection: false,
+    fullscreenEnforced: isSuperDream,
+    tabSwitchLimit: isSuperDream ? 3 : 50,
     onBlocked: () => {
-      onBlockStateChange(true);
+      if (isSuperDream) {
+        onBlockStateChange(true);
+      }
     },
     onViolation: (count, type) => {
+      if (!isSuperDream) {
+        toast.warning(`Note: Please stay on this window to complete your ${skillName} assessment.`, {
+          id: `quiz-focus-warning`,
+          duration: 3500,
+          position: "bottom-center",
+        });
+        return;
+      }
       const typeLabels: Record<string, string> = {
         mobile_phone_detected: "Mobile phone detected in camera feed",
         face_not_detected: "Candidate face not visible in camera feed",
@@ -897,8 +929,10 @@ export function ProctoredExamConsole({
     );
   }
 
-  // Auto exit on disqualification
-  const isCandidateDisqualified = isBlocked || proctorState.isBlocked || proctorState.violationCount >= 3;
+  // Auto exit on disqualification - strictly enforced for high-stakes Super Dream track
+  const isCandidateDisqualified = isSuperDream
+    ? isBlocked || proctorState.isBlocked || proctorState.violationCount >= 3
+    : isBlocked;
 
   useEffect(() => {
     if (isCandidateDisqualified) {
@@ -938,8 +972,8 @@ export function ProctoredExamConsole({
         isLightMode ? "bg-[#f8fafc] text-slate-900" : "bg-[#0b1120] text-slate-100"
       } flex flex-col h-screen w-screen overflow-hidden select-none font-sans antialiased`}
     >
-      {/* ── 15-SECOND FULLSCREEN GRACE PERIOD COUNTDOWN MODAL ── */}
-      {proctorState.fullscreenCountdown !== null && !isCandidateDisqualified && (
+      {/* ── 15-SECOND FULLSCREEN GRACE PERIOD COUNTDOWN MODAL (Strictly for Super Dream) ── */}
+      {isSuperDream && proctorState.fullscreenCountdown !== null && !isCandidateDisqualified && (
         <FullscreenCountdownModal
           countdown={proctorState.fullscreenCountdown}
           violationCount={proctorState.violationCount}
