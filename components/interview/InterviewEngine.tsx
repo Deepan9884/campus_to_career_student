@@ -80,11 +80,15 @@ export const ROUND_META: Record<
  * stem under an alias key (`question`, `prompt`, …) — without this fallback the
  * stem renders blank while options still show (stem and options use different keys).
  */
-export function getQuestionStem(item: InterviewQuestionItem | null | undefined): string {
+export function getQuestionStem(item: InterviewQuestionItem | null | undefined, roundType?: string): string {
   if (!item) return "";
   const candidates = [item.questionText, item.question, item.prompt, item.stem, item.title, (item as any).text];
   for (const c of candidates) {
     if (typeof c === "string" && c.trim().length > 0) return c.trim();
+  }
+  // For HR open-ended items: generate a context-aware fallback from projectContext
+  if ((item.itemType === "open_ended" || roundType === "hr") && item.projectContext) {
+    return `Walk me through your experience with "${item.projectContext}". What was your specific contribution, the key technical decisions you made, and the measurable impact delivered?`;
   }
   return "";
 }
@@ -1476,22 +1480,25 @@ function ActiveView({
             )}
 
             {/* Question Text */}
-            {getQuestionStem(currentItem) ? (
-              <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 leading-relaxed">
-                {getQuestionStem(currentItem)}
-              </h2>
-            ) : (
-              <div
-                role="alert"
-                className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
-              >
-                <p className="font-bold">Question text unavailable for this item.</p>
-                <p className="mt-1 text-amber-800">
-                  The answer options loaded but the question stem is missing. Please use “Next
-                  Question” to continue — your attempt won’t be penalized for this item.
-                </p>
-              </div>
-            )}
+            {(() => {
+              const stem = getQuestionStem(currentItem, roundType);
+              return stem ? (
+                <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 leading-relaxed">
+                  {stem}
+                </h2>
+              ) : (
+                <div
+                  role="alert"
+                  className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+                >
+                  <p className="font-bold">Question text unavailable for this item.</p>
+                  <p className="mt-1 text-amber-800">
+                    The answer options loaded but the question stem is missing. Please use “Next
+                    Question” to continue — your attempt won&apos;t be penalized for this item.
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* MCQ Mode */}
             {currentItem.itemType === "mcq" && currentItem.options && (
