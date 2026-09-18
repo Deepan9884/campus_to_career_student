@@ -1483,7 +1483,7 @@ function ActiveView({
             {(() => {
               const stem = getQuestionStem(currentItem, roundType);
               return stem ? (
-                <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 leading-relaxed">
+                <h2 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed whitespace-pre-wrap">
                   {stem}
                 </h2>
               ) : (
