@@ -82,12 +82,13 @@ export const ROUND_META: Record<
  */
 export function getQuestionStem(item: InterviewQuestionItem | null | undefined): string {
   if (!item) return "";
-  const candidates = [item.questionText, item.question, item.prompt, item.stem, item.title];
+  const candidates = [item.questionText, item.question, item.prompt, item.stem, item.title, (item as any).text];
   for (const c of candidates) {
-    if (typeof c === "string" && c.trim().length > 0) return c;
+    if (typeof c === "string" && c.trim().length > 0) return c.trim();
   }
   return "";
 }
+
 
 export interface InterviewEngineProps {
   title?: string;
