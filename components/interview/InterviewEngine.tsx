@@ -1480,25 +1480,17 @@ function ActiveView({
             )}
 
             {/* Question Text */}
-            {(() => {
-              const stem = getQuestionStem(currentItem, roundType);
-              return stem ? (
-                <h2 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed whitespace-pre-wrap">
-                  {stem}
-                </h2>
-              ) : (
-                <div
-                  role="alert"
-                  className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
-                >
-                  <p className="font-bold">Question text unavailable for this item.</p>
-                  <p className="mt-1 text-amber-800">
-                    The answer options loaded but the question stem is missing. Please use “Next
-                    Question” to continue — your attempt won&apos;t be penalized for this item.
-                  </p>
-                </div>
-              );
-            })()}
+            <div style={{ padding: '16px', backgroundColor: '#fff3cd', border: '3px solid #856404', borderRadius: '8px', marginBottom: '16px', color: '#856404' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#000', marginBottom: '10px' }}>
+                DEBUG QUESTION STEM: {getQuestionStem(currentItem, roundType) || "EMPTY STEM!"}
+              </h2>
+              <details>
+                <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>Show Raw Item JSON</summary>
+                <pre style={{ fontSize: '10px', overflowX: 'auto', marginTop: '10px', color: '#333' }}>
+                  {JSON.stringify(currentItem, null, 2)}
+                </pre>
+              </details>
+            </div>
 
             {/* MCQ Mode */}
             {currentItem.itemType === "mcq" && currentItem.options && (
