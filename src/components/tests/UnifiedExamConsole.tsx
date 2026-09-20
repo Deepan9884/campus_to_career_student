@@ -927,10 +927,17 @@ export function UnifiedExamConsole({
   const totalDurationSeconds = (Number(examData?.durationMinutes) || 60) * 60;
   const computeInitialTimeLeft = () => {
     const fullTestSeconds = totalDurationSeconds;
-    if (examData?.isScheduled && examData?.scheduledEndTime) {
-      const windowEndMs = new Date(examData.scheduledEndTime).getTime();
+    const effectiveEndTime = examData?.scheduledEndTime
+      ? new Date(examData.scheduledEndTime).getTime()
+      : examData?.scheduledStartTime
+      ? new Date(examData.scheduledStartTime).getTime() + totalDurationSeconds * 1000
+      : (examData as any)?.createdAt
+      ? new Date((examData as any).createdAt).getTime() + totalDurationSeconds * 1000
+      : null;
+
+    if (effectiveEndTime) {
       const nowMs = Date.now();
-      const remainingWindowSec = Math.max(0, Math.floor((windowEndMs - nowMs) / 1000));
+      const remainingWindowSec = Math.max(0, Math.floor((effectiveEndTime - nowMs) / 1000));
       return Math.min(fullTestSeconds, remainingWindowSec);
     }
     return fullTestSeconds;
@@ -1229,9 +1236,16 @@ export function UnifiedExamConsole({
           }, 0);
           return 0;
         }
-        if (examData?.isScheduled && examData?.scheduledEndTime) {
-          const windowEndMs = new Date(examData.scheduledEndTime).getTime();
-          const windowRemainingSec = Math.max(0, Math.floor((windowEndMs - Date.now()) / 1000));
+        const effectiveEndTime = examData?.scheduledEndTime
+          ? new Date(examData.scheduledEndTime).getTime()
+          : examData?.scheduledStartTime
+          ? new Date(examData.scheduledStartTime).getTime() + totalDurationSeconds * 1000
+          : (examData as any)?.createdAt
+          ? new Date((examData as any).createdAt).getTime() + totalDurationSeconds * 1000
+          : null;
+
+        if (effectiveEndTime) {
+          const windowRemainingSec = Math.max(0, Math.floor((effectiveEndTime - Date.now()) / 1000));
           if (windowRemainingSec <= 1) {
             clearInterval(timer);
             toast.warning("Assessment availability window has closed. Auto-submitting responses...", { duration: 7000 });
@@ -1246,7 +1260,7 @@ export function UnifiedExamConsole({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [hasStartedExam, isTestFinished, examData?.isScheduled, examData?.scheduledEndTime]);
+  }, [hasStartedExam, isTestFinished, examData?.isScheduled, examData?.scheduledStartTime, examData?.scheduledEndTime, (examData as any)?.createdAt, totalDurationSeconds]);
 
   // Live heartbeat: proves to the admin proctoring radar that this candidate
   // is actively writing right now (refreshed every 30s; silent on failure).

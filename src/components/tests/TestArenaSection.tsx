@@ -161,13 +161,19 @@ export function TestArenaSection() {
                   const hasAttempted = Boolean(exam.hasAttempted);
                   const isScheduled = Boolean(exam.isScheduled);
                   const scheduledStart = exam.scheduledStartTime ? new Date(exam.scheduledStartTime) : null;
-                  const scheduledEnd = exam.scheduledEndTime ? new Date(exam.scheduledEndTime) : null;
+                  const scheduledEnd = exam.scheduledEndTime
+                    ? new Date(exam.scheduledEndTime)
+                    : exam.scheduledStartTime
+                    ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
+                    : (exam as any).createdAt
+                    ? new Date(new Date((exam as any).createdAt).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
+                    : null;
                   const isLockedBySchedule = Boolean(isScheduled && scheduledStart && scheduledStart > now);
-                  const isWindowExpired = Boolean(isScheduled && scheduledEnd && scheduledEnd < now);
+                  const isWindowExpired = Boolean(scheduledEnd && scheduledEnd < now);
                   const isStopped = Boolean(exam.isExamStopped || exam.status === "stopped" || exam.status === "completed" || isWindowExpired);
                   const isBlocked = Boolean(exam.isStudentBlocked);
                   const isInProgress = Boolean(exam.isStudentInProgress);
-                  const isLiveWindow = Boolean(isScheduled && scheduledStart && scheduledEnd && scheduledStart <= now && scheduledEnd >= now);
+                  const isLiveWindow = Boolean(scheduledEnd && scheduledEnd >= now && (!scheduledStart || scheduledStart <= now));
 
                   return (
                     <GlassCard
