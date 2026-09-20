@@ -134,12 +134,14 @@ export function ExamsManagementPage() {
       ? new Date(exam.scheduledEndTime)
       : exam.scheduledStartTime
       ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
+      : exam.createdAt
+      ? new Date(new Date(exam.createdAt).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
       : null;
 
     const isStopped = exam.status === "stopped";
     const isEnded =
       exam.status === "completed" ||
-      Boolean(exam.isScheduled && effectiveEndTime && effectiveEndTime < new Date());
+      Boolean(effectiveEndTime && effectiveEndTime < new Date());
     const isScheduledFuture =
       Boolean(exam.isScheduled) &&
       Boolean(exam.scheduledStartTime) &&

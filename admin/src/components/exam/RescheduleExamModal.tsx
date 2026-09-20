@@ -238,8 +238,10 @@ export function RescheduleExamModal({
                       ? new Date(exam.scheduledEndTime)
                       : exam.scheduledStartTime
                       ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
+                      : exam.createdAt
+                      ? new Date(new Date(exam.createdAt).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
                       : null;
-                    const isConcluded = exam.status === "completed" || Boolean(exam.isScheduled && effectiveEndTime && effectiveEndTime < new Date());
+                    const isConcluded = exam.status === "completed" || Boolean(effectiveEndTime && effectiveEndTime < new Date());
                     return exam.status === "stopped" ? "Stopped" : isConcluded ? "Concluded" : exam.status || "Active";
                   })()}
                 </span>
