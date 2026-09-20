@@ -1,0 +1,383 @@
+const Resume = require("../models/Resume.model");
+const InterviewSession = require("../models/InterviewSession.model");
+const RepoAnalysis = require("../models/RepoAnalysis.model");
+const UserSkill = require("../models/UserSkill.model");
+const RoleSkill = require("../models/RoleSkill.model");
+const SkillGapAnalysis = require("../models/SkillGapAnalysis.model");
+const LearningRoadmap = require("../models/LearningRoadmap.model");
+const aiService = require("../services/ai.service");
+const { calculateStudentReadiness } = require("../services/careerReadiness.service");
+const { evaluateUserBadges } = require("../services/badge.service");
+const asyncHandler = require("../utils/asyncHandler");
+const ApiResponse = require("../utils/ApiResponse");
+const ApiError = require("../utils/ApiError");
+
+const getAnalyticsOverview = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const now = new Date();
+
+  const [
+    resumes,
+    interviews,
+    repoCount,
+    userSkills,
+    latestGapAnalysis,
+    badgeEval,
+  ] = await Promise.all([
+    Resume.find({ user: userId, status: { $ne: "failed" }, atsScore: { $ne: null } })
+      .select("atsScore targetRole createdAt")
+      .sort({ createdAt: 1 })
+      .lean(),
+    InterviewSession.find({ user: userId, status: { $ne: "failed" }, overallScore: { $ne: null } })
+      .select("overallScore targetRole createdAt")
+      .sort({ createdAt: 1 })
+      .lean(),
+    RepoAnalysis.countDocuments({ user: userId, status: { $ne: "failed" } }),
+    UserSkill.find({ user: userId }).select("name category createdAt").lean(),
+    SkillGapAnalysis.findOne({ user: userId, status: { $ne: "failed" } })
+      .select("matchPercentage targetRole createdAt")
+      .sort({ createdAt: -1 })
+      .lean(),
+    evaluateUserBadges(userId).catch(() => ({ achievements: [] })),
+  ]);
+
+  // Resume trend: chronological sequence of scores
+  const resumeTrend = resumes.map((r, i) => ({
+    iteration: `v${i + 1}`,
+    score: r.atsScore,
+    date: r.createdAt.toISOString().split("T")[0],
+    role: r.targetRole || "General",
+  }));
+
+  // Interview trend: chronological sequence of scores
+  const interviewTrend = interviews.map((iv, i) => ({
+    session: `#${i + 1}`,
+    score: iv.overallScore,
+    date: iv.createdAt.toISOString().split("T")[0],
+    role: iv.targetRole || "Technical",
+  }));
+
+  // Skill radar: user skills vs role benchmark
+  const skillRadar = await buildSkillRadar(userId, latestGapAnalysis);
+
+  // Feature usage: count across all collections
+  const featureUsage = [
+    { name: "Resume", value: resumes.length },
+    { name: "Interview", value: interviews.length },
+    { name: "Projects", value: repoCount },
+    { name: "Skills", value: userSkills.length },
+  ];
+
+  // Authoritative Unified Achievements & Trophies
+  const achievements = badgeEval.achievements || [];
+
+  // Overview stats
+  const [readinessData, activities] = await Promise.all([
+    calculateStudentReadiness(userId),
+    buildActivityTimeline(userId),
+  ]);
+
+  const daysOnPlatform = Math.max(
+    1,
+    Math.ceil((now.getTime() - new Date(req.user.createdAt).getTime()) / 86400000),
+  );
+  const featuresUsed = featureUsage.filter((f) => f.value > 0).length;
+  const readiness = readinessData.overall;
+
+  return ApiResponse.success({
+    overview: {
+      readiness,
+      daysOnPlatform,
+      featuresUsed,
+      totalFeatures: 5,
+    },
+    resumeTrend,
+    interviewTrend,
+    skillRadar,
+    featureUsage,
+    achievements,
+    activities,
+  }).send(res);
+});
+
+async function buildSkillRadar(userId, gapAnalysis) {
+  if (!gapAnalysis?.targetRole) return [];
+
+  const bankSkills = await RoleSkill.find({
+    targetRole: gapAnalysis.targetRole,
+  })
+    .select("skillName importance")
+    .lean();
+
+  if (bankSkills.length === 0) return [];
+
+  const userSkillNames = (
+    await UserSkill.find({ user: userId }).select("name").lean()
+  ).map((s) => s.name.toLowerCase());
+
+  return bankSkills.map((b) => ({
+    skill: b.skillName,
+    current: userSkillNames.includes(b.skillName.toLowerCase())
+      ? gapAnalysis.matchPercentage || 50
+      : 0,
+    target: b.importance === "core" ? 85 : 65,
+  }));
+}
+
+async function buildActivityTimeline(userId) {
+  const [resumes, interviews, gapAnalyses, roadmaps] = await Promise.all([
+    Resume.find({ user: userId, status: "completed" })
+      .select("atsScore createdAt")
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean(),
+    InterviewSession.find({ user: userId, status: "completed" })
+      .select("overallScore targetRole createdAt")
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean(),
+    SkillGapAnalysis.find({ user: userId, status: "completed" })
+      .select("targetRole matchPercentage createdAt")
+      .sort({ createdAt: -1 })
+      .limit(2)
+      .lean(),
+    LearningRoadmap.find({ user: userId, status: "completed" })
+      .select("targetRole createdAt")
+      .sort({ createdAt: -1 })
+      .limit(2)
+      .lean(),
+  ]);
+
+  const items = [];
+
+  for (const r of resumes) {
+    items.push({
+      type: "resume",
+      title: "Resume analyzed",
+      desc: `ATS score: ${r.atsScore}`,
+      date: r.createdAt,
+    });
+  }
+
+  for (const i of interviews) {
+    items.push({
+      type: "interview",
+      title: `${i.targetRole || "Interview"} session`,
+      desc: `Scored ${i.overallScore}/100`,
+      date: i.createdAt,
+    });
+  }
+
+  for (const g of gapAnalyses) {
+    items.push({
+      type: "skill",
+      title: "Gap analysis completed",
+      desc: `${g.matchPercentage}% match for ${g.targetRole}`,
+      date: g.createdAt,
+    });
+  }
+
+  for (const rm of roadmaps) {
+    items.push({
+      type: "roadmap",
+      title: "Roadmap generated",
+      desc: `Learning path for ${rm.targetRole}`,
+      date: rm.createdAt,
+    });
+  }
+
+  items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return items.slice(0, 8).map((a) => ({
+    ...a,
+    date: formatRelativeTime(a.date),
+  }));
+}
+
+function formatDate(date) {
+  const d = new Date(date);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatRelativeTime(date) {
+  const now = new Date();
+  const d = new Date(date);
+  const diffMs = now.getTime() - d.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return d.toLocaleDateString();
+}
+
+function buildPersonalizedWeeklyReport({ resumes, interviews, repos, aiDifficulty, preferredLanguage, resumePrivacy }) {
+  const resumeCount = resumes.length;
+  const avgAts = resumeCount > 0 ? Math.round(resumes.reduce((acc, r) => acc + (r.atsScore || 0), 0) / resumeCount) : 0;
+  const interviewCount = interviews.length;
+  const avgInterview = interviewCount > 0 ? Math.round(interviews.reduce((acc, i) => acc + (i.overallScore || 0), 0) / interviewCount) : 0;
+  const repoCount = repos.length;
+  const repoList = repos.map((r) => r.repoFullName).filter(Boolean);
+
+  const summaryParts = [];
+
+  if (resumeCount > 0 || interviewCount > 0 || repoCount > 0) {
+    summaryParts.push("Great progress this week across your career preparation milestones.");
+    if (resumeCount > 0) {
+      if (resumePrivacy) {
+        summaryParts.push(`You evaluated ${resumeCount} resume draft${resumeCount > 1 ? "s" : ""} in privacy mode.`);
+      } else {
+        summaryParts.push(`You refined ${resumeCount} resume iteration${resumeCount > 1 ? "s" : ""}, maintaining an average ATS benchmark score of ${avgAts}/100.`);
+      }
+    }
+    if (interviewCount > 0) {
+      summaryParts.push(`You completed ${interviewCount} mock interview session${interviewCount > 1 ? "s" : ""} with an average performance score of ${avgInterview}%.`);
+    }
+    if (repoCount > 0) {
+      summaryParts.push(`You also analyzed ${repoCount} GitHub repositor${repoCount > 1 ? "ies" : "y"}${repoList.length > 0 ? ` (${repoList.slice(0, 2).join(", ")})` : ""}.`);
+    }
+    summaryParts.push("Maintaining this deliberate consistency will rapidly compound your readiness for upcoming placement drives.");
+  } else {
+    summaryParts.push(`Welcome to your new weekly sprint! You haven't recorded any mock interviews or resume evaluations in the past 7 days, making this the perfect time to build strong preparation momentum.`);
+    summaryParts.push(`Consistent weekly coding drills in ${preferredLanguage} and mock interview practice will build measurable confidence for campus placements.`);
+  }
+
+  const recommendations = [];
+
+  // Recommendation 1: Technical / Language focus
+  if (repoCount > 0 && repoList[0]) {
+    recommendations.push(
+      `Deepen ${preferredLanguage} patterns in ${repoList[0]} by adding modular error handling, unit tests, and production-grade README architecture documentation.`
+    );
+  } else {
+    recommendations.push(
+      `Solve 3 ${aiDifficulty.toLowerCase()}-level problem-solving challenges in ${preferredLanguage} focusing on core data structures and algorithm time complexity.`
+    );
+  }
+
+  // Recommendation 2: Interview / Communication focus
+  if (interviewCount === 0) {
+    recommendations.push(
+      `Schedule your first 15-minute AI mock interview round in ${aiDifficulty} difficulty to benchmark technical explanation and communication skills.`
+    );
+  } else if (avgInterview < 70) {
+    recommendations.push(
+      `Review feedback from your recent mock sessions and practice structuring answers using the STAR framework to lift your score above 75%.`
+    );
+  } else {
+    recommendations.push(
+      `Challenge yourself with a System Design or Behavioral mock interview round to prepare for comprehensive final evaluation rounds.`
+    );
+  }
+
+  // Recommendation 3: Resume / Profile / Roadmap focus
+  if (resumeCount === 0) {
+    recommendations.push(
+      `Upload your latest resume to the Resume Analyzer to identify missing keywords and optimize your ATS scoring for targeted tech roles.`
+    );
+  } else if (avgAts < 80 && !resumePrivacy) {
+    recommendations.push(
+      `Refine your resume's bullet points with quantifiable engineering metrics and key skills to boost your ATS score beyond the 80+ target.`
+    );
+  } else {
+    recommendations.push(
+      `Explore the Skill Gap Analysis and complete at least one targeted learning roadmap topic module to close pending competencies.`
+    );
+  }
+
+  return {
+    summary: summaryParts.join(" "),
+    recommendations: recommendations.slice(0, 3),
+  };
+}
+
+const generateWeeklyReport = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const [resumes, interviews, repos] = await Promise.all([
+    Resume.find({ user: userId, status: { $ne: "failed" }, createdAt: { $gte: oneWeekAgo } }).select("atsScore").lean(),
+    InterviewSession.find({ user: userId, status: { $ne: "failed" }, createdAt: { $gte: oneWeekAgo } }).select("overallScore").lean(),
+    RepoAnalysis.find({ user: userId, status: { $ne: "failed" }, createdAt: { $gte: oneWeekAgo } }).select("repoFullName").lean(),
+  ]);
+
+  const userPrefs = req.user?.preferences || {};
+  const { aiDifficulty = "Intermediate", preferredLanguage = "Python", resumePrivacy = false } = userPrefs;
+
+  const fallbackReport = buildPersonalizedWeeklyReport({
+    resumes,
+    interviews,
+    repos,
+    aiDifficulty,
+    preferredLanguage,
+    resumePrivacy,
+  });
+
+  const prompt = `You are an expert AI Career Coach. Generate a highly personalized and motivating weekly report for the user.
+Candidate Experience Level: ${aiDifficulty}
+Preferred Language: ${preferredLanguage}
+${resumePrivacy ? "Note: Resume Privacy Mode is active. Focus recommendations strictly on coding drills, system design, and project architecture without exposing resume details." : ""}
+  
+Here is the user's activity in the past 7 days:
+${resumePrivacy ? `- Resumes uploaded: ${resumes.length} (Private Mode)` : `- Resumes uploaded: ${resumes.length} (Average score: ${resumes.length ? Math.round(resumes.reduce((a, b) => a + (b.atsScore || 0), 0) / resumes.length) : 0})`}
+- Mock interviews completed: ${interviews.length} (Average score: ${interviews.length ? Math.round(interviews.reduce((a, b) => a + (b.overallScore || 0), 0) / interviews.length) : 0})
+- GitHub Repositories analyzed: ${repos.length} (${repos.map(r => r.repoFullName).filter(Boolean).join(", ")})
+
+Based on this data, provide:
+1. A short, encouraging summary of their week (2-3 sentences).
+2. 3 concrete, high-yield recommendations tailored to their experience level (${aiDifficulty}) and preferred language (${preferredLanguage}) for what they should focus on next week to improve job placement readiness.
+
+Return your response as a JSON object matching this schema exactly:
+{
+  "summary": "string",
+  "recommendations": ["string", "string", "string"]
+}`;
+
+  try {
+    const aiPromise = aiService.generateContent({
+      prompt,
+      responseSchema: {
+        type: "object",
+        properties: {
+          summary: { type: "string" },
+          recommendations: { type: "array", items: { type: "string" } },
+        },
+        required: ["summary", "recommendations"],
+      },
+      feature: "analytics_weekly_report",
+      userId,
+    });
+
+    // 12s timeout guard to protect user experience against network or model stalls
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("AI response timeout")), 12000)
+    );
+
+    const result = await Promise.race([aiPromise, timeoutPromise]);
+
+    if (result && result.success && result.data && typeof result.data === "object") {
+      const summary = typeof result.data.summary === "string" && result.data.summary.trim()
+        ? result.data.summary.trim()
+        : fallbackReport.summary;
+      const rawRecs = Array.isArray(result.data.recommendations) ? result.data.recommendations : [];
+      const validRecs = rawRecs.filter((r) => typeof r === "string" && r.trim()).slice(0, 3);
+      const recommendations = validRecs.length > 0 ? validRecs : fallbackReport.recommendations;
+
+      return ApiResponse.success({
+        summary,
+        recommendations,
+      }).send(res);
+    }
+  } catch (error) {
+    console.warn(`[Analytics] Weekly report AI call failed/timed out: ${error.message}. Serving personalized fallback report.`);
+  }
+
+  // Guaranteed fallback ensures zero failed requests for the student
+  return ApiResponse.success(fallbackReport).send(res);
+});
+
+module.exports = { getAnalyticsOverview, generateWeeklyReport };

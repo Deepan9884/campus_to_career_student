@@ -1,0 +1,85 @@
+const User = require("../models/User.model");
+const asyncHandler = require("../utils/asyncHandler");
+const ApiError = require("../utils/ApiError");
+const ApiResponse = require("../utils/ApiResponse");
+
+const updateProfile = asyncHandler(async (req, res) => {
+  const update = {};
+  
+  const topAllowed = ["name", "avatar", "targetRole", "githubUsername", "bio", "location", "linkedinUrl"];
+  for (const key of topAllowed) {
+    if (req.body[key] !== undefined) {
+      const val = typeof req.body[key] === "string" ? req.body[key].trim() : req.body[key];
+      update[key] = val;
+      if (key === "targetRole" || key === "githubUsername" || key === "bio" || key === "location") {
+        update[`profile.${key}`] = val;
+      }
+    }
+  }
+
+  if (req.body.profile && typeof req.body.profile === "object") {
+    const profileFields = [
+      "githubUsername",
+      "targetRole",
+      "bio",
+      "location",
+      "registerNumber",
+      "department",
+      "batch",
+      "currentSemester",
+      "facultyMentor",
+    ];
+    for (const f of profileFields) {
+      if (req.body.profile[f] !== undefined) {
+        const val = typeof req.body.profile[f] === "string" ? req.body.profile[f].trim() : req.body.profile[f];
+        update[`profile.${f}`] = val;
+        if (f === "githubUsername" || f === "targetRole" || f === "bio" || f === "location") {
+          update[f] = val;
+        }
+      }
+    }
+  }
+
+  // If there's nothing to update, just return the current user
+  if (Object.keys(update).length === 0) {
+    return ApiResponse.success(req.user).send(res);
+  }
+
+  // If facultyMentor is provided, attempt to auto-associate with matching mentor account
+  if (update["profile.facultyMentor"]) {
+    const mentorQuery = update["profile.facultyMentor"];
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const matchingMentor = await User.findOne({
+      role: { $in: ["mentor", "admin"] },
+      $or: [
+        { email: new RegExp(`^${escapeRegex(mentorQuery)}$`, "i") },
+        { name: new RegExp(`^${escapeRegex(mentorQuery)}$`, "i") },
+      ],
+    });
+    if (matchingMentor && matchingMentor._id.toString() !== req.user._id.toString()) {
+      update["assignedMentor"] = matchingMentor._id;
+      await User.findByIdAndUpdate(matchingMentor._id, {
+        $addToSet: { mentees: req.user._id },
+      });
+    }
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: update },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken");
+
+  if (!user) {
+    throw ApiError.notFound("User not found");
+  }
+
+  const { invalidateUserCache } = require("../middleware/auth.middleware");
+  invalidateUserCache(req.user._id);
+
+  return ApiResponse.success(user).send(res);
+});
+
+module.exports = {
+  updateProfile,
+};
