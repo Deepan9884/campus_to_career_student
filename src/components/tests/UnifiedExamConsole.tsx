@@ -1054,7 +1054,7 @@ export function UnifiedExamConsole({
           toast.warning("Assessment concluded by administrator. Finalizing and grading responses...", {
             duration: 8000,
           });
-          handleFinalSubmit();
+          submitHandlerRef.current?.();
         }
       } catch (err) {
         console.warn("Exam stopped check error:", err);
@@ -1214,10 +1214,7 @@ export function UnifiedExamConsole({
   }, [hasStartedExam, isTestFinished, proctorState.isBlocked, isCopyPasteDisabled]);
 
   // Ref to always hold latest submit handler to prevent timer stale closures
-  const submitHandlerRef = useRef(handleFinalSubmit);
-  useEffect(() => {
-    submitHandlerRef.current = handleFinalSubmit;
-  });
+  const submitHandlerRef = useRef<(() => Promise<void>) | null>(null);
 
   // Countdown Timer (Only runs after exam has started)
   useEffect(() => {
@@ -1802,6 +1799,10 @@ export function UnifiedExamConsole({
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    submitHandlerRef.current = handleFinalSubmit;
+  });
 
   const handleExit = () => {
     if (videoElement) videoElement.srcObject = null;
