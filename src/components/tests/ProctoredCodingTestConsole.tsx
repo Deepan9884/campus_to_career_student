@@ -560,9 +560,11 @@ export function ProctoredCodingTestConsole({
       setTimeLeftSeconds((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          if (latestSubmitRef.current) {
-            latestSubmitRef.current();
-          }
+          setTimeout(() => {
+            if (latestSubmitRef.current) {
+              latestSubmitRef.current();
+            }
+          }, 0);
           return 0;
         }
         if (prev === 300) {

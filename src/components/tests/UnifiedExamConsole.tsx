@@ -1208,42 +1208,45 @@ export function UnifiedExamConsole({
     };
   }, [hasStartedExam, isTestFinished, proctorState.isBlocked, isCopyPasteDisabled]);
 
+  // Ref to always hold latest submit handler to prevent timer stale closures
+  const submitHandlerRef = useRef(handleFinalSubmit);
+  useEffect(() => {
+    submitHandlerRef.current = handleFinalSubmit;
+  });
+
   // Countdown Timer (Only runs after exam has started)
   useEffect(() => {
     if (!hasStartedExam || isTestFinished) return;
-
-    if (timeLeftSeconds <= 0) {
-      toast.warning("Time has elapsed. Automatically submitting assessment...", { duration: 6000 });
-      handleFinalSubmit();
-      return;
-    }
-
-    // Auto-submit if scheduled window closing timestamp is reached
-    if (examData?.isScheduled && examData?.scheduledEndTime) {
-      const windowEndMs = new Date(examData.scheduledEndTime).getTime();
-      if (Date.now() >= windowEndMs) {
-        toast.warning("Assessment availability window has closed. Auto-submitting responses...", { duration: 7000 });
-        handleFinalSubmit();
-        return;
-      }
-    }
 
     const timer = setInterval(() => {
       setTimeLeftSeconds((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
+          toast.warning("Time has elapsed. Automatically submitting assessment...", { duration: 6000 });
+          // Use timeout to push the submission to the next tick, avoiding state updater side-effect issues
+          setTimeout(() => {
+            if (submitHandlerRef.current) submitHandlerRef.current();
+          }, 0);
           return 0;
         }
         if (examData?.isScheduled && examData?.scheduledEndTime) {
           const windowEndMs = new Date(examData.scheduledEndTime).getTime();
           const windowRemainingSec = Math.max(0, Math.floor((windowEndMs - Date.now()) / 1000));
+          if (windowRemainingSec <= 1) {
+            clearInterval(timer);
+            toast.warning("Assessment availability window has closed. Auto-submitting responses...", { duration: 7000 });
+            setTimeout(() => {
+              if (submitHandlerRef.current) submitHandlerRef.current();
+            }, 0);
+            return 0;
+          }
           return Math.min(prev - 1, windowRemainingSec);
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [hasStartedExam, isTestFinished, timeLeftSeconds, examData?.isScheduled, examData?.scheduledEndTime]);
+  }, [hasStartedExam, isTestFinished, examData?.isScheduled, examData?.scheduledEndTime]);
 
   // Live heartbeat: proves to the admin proctoring radar that this candidate
   // is actively writing right now (refreshed every 30s; silent on failure).
