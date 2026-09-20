@@ -493,10 +493,8 @@ export function ProctoredExamConsole({
   }, [answers, flaggedQuestions, timeSpentBySection, isTestFinished, result, STORAGE_KEY]);
 
   // Ref to hold latest submit handler to avoid stale closures in the interval
-  const submitHandlerRef = useRef(handleFinishExam);
-  useEffect(() => {
-    submitHandlerRef.current = handleFinishExam;
-  });
+  const submitHandlerRef = useRef<(() => Promise<void>) | null>(null);
+
 
   // Section time tracking & countdown timer
   useEffect(() => {
@@ -721,6 +719,10 @@ export function ProctoredExamConsole({
       setIsTestFinished(false);
     }
   };
+
+  useEffect(() => {
+    submitHandlerRef.current = handleFinishExam;
+  });
 
   const handleExitConsole = () => {
     if (videoElement) videoElement.srcObject = null;
