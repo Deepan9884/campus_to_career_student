@@ -804,7 +804,7 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
     try {
       const parsedProblem = await parseCodingLink(url);
       
-      const diffMap: Record<string, string> = {
+      const diffMap: Record<string, "Easy" | "Medium" | "Hard" | "FAANG Tier"> = {
         easy: "Easy",
         medium: "Medium",
         hard: "Hard",
@@ -847,7 +847,7 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
     setGeneratingSlotKey(key);
     try {
       const topic = sec.topics.length > slotIdx ? sec.topics[slotIdx] : sec.topics[0] || "Algorithms";
-      const diffMap: Record<string, string> = {
+      const diffMap: Record<string, "Easy" | "Medium" | "Hard" | "FAANG Tier"> = {
         easy: "Easy",
         medium: "Medium",
         hard: "Hard",
