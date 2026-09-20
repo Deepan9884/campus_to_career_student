@@ -803,8 +803,17 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
     setParsingSlotKey(key);
     try {
       const parsedProblem = await parseCodingLink(url);
+      
+      const diffMap: Record<string, string> = {
+        easy: "Easy",
+        medium: "Medium",
+        hard: "Hard",
+        faang: "FAANG Tier"
+      };
+
       const sanitizedProblem = {
         ...parsedProblem,
+        difficulty: diffMap[parsedProblem.difficulty?.toLowerCase() || ""] || "Medium",
         title: formatMathText(parsedProblem.title || ""),
         problemStatement: formatMathText(parsedProblem.problemStatement || ""),
         constraints: Array.isArray(parsedProblem.constraints)
@@ -838,9 +847,17 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
     setGeneratingSlotKey(key);
     try {
       const topic = sec.topics.length > slotIdx ? sec.topics[slotIdx] : sec.topics[0] || "Algorithms";
-      const generated = await generateAiCoding(topic, sec.difficulty as any);
+      const diffMap: Record<string, string> = {
+        easy: "Easy",
+        medium: "Medium",
+        hard: "Hard",
+        faang: "FAANG Tier"
+      };
+      const requestedDiff = diffMap[sec.difficulty?.toLowerCase() || "medium"] || "Medium";
+      const generated = await generateAiCoding(topic, requestedDiff);
       const sanitizedGenerated = {
         ...generated,
+        difficulty: diffMap[generated.difficulty?.toLowerCase() || ""] || requestedDiff,
         title: formatMathText(generated.title || ""),
         problemStatement: formatMathText(generated.problemStatement || ""),
         constraints: Array.isArray(generated.constraints)
@@ -1015,7 +1032,13 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
       setCreatedExamRecord(created);
       onSuccess(created);
     } catch (err: any) {
-      toast.error(err.message || "Failed to create exam");
+      if (err.errors && Array.isArray(err.errors) && err.errors.length > 0) {
+        const msg = err.errors.map((e: any) => `${e.field}: ${e.message}`).join("\n");
+        toast.error(`Validation Failed:\n${msg}`);
+        console.error("Validation errors:", err.errors);
+      } else {
+        toast.error(err.message || "Failed to create exam");
+      }
     } finally {
       setIsSubmitting(false);
     }
