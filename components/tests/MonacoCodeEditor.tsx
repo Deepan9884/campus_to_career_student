@@ -554,6 +554,7 @@ export function MonacoCodeEditor({
   editorRef,
   errorLine,
   errorMessage,
+  isRuntimeError = false,
   onClearErrorLine,
   onRunCode,
   readOnly = false,
