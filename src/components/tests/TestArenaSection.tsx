@@ -165,8 +165,6 @@ export function TestArenaSection() {
                     ? new Date(exam.scheduledEndTime)
                     : exam.scheduledStartTime
                     ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
-                    : (exam as any).createdAt
-                    ? new Date(new Date((exam as any).createdAt).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
                     : null;
                   const isLockedBySchedule = Boolean(isScheduled && scheduledStart && scheduledStart > now);
                   const isWindowExpired = Boolean(scheduledEnd && scheduledEnd < now);

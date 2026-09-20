@@ -931,8 +931,6 @@ export function UnifiedExamConsole({
       ? new Date(examData.scheduledEndTime).getTime()
       : examData?.scheduledStartTime
       ? new Date(examData.scheduledStartTime).getTime() + totalDurationSeconds * 1000
-      : (examData as any)?.createdAt
-      ? new Date((examData as any).createdAt).getTime() + totalDurationSeconds * 1000
       : null;
 
     if (effectiveEndTime) {
@@ -1240,8 +1238,6 @@ export function UnifiedExamConsole({
           ? new Date(examData.scheduledEndTime).getTime()
           : examData?.scheduledStartTime
           ? new Date(examData.scheduledStartTime).getTime() + totalDurationSeconds * 1000
-          : (examData as any)?.createdAt
-          ? new Date((examData as any).createdAt).getTime() + totalDurationSeconds * 1000
           : null;
 
         if (effectiveEndTime) {

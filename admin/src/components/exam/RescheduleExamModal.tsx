@@ -160,14 +160,19 @@ export function RescheduleExamModal({
       }
     }
 
+    const now = new Date();
+    const durationMin = Number(durationMinutes) || 60;
     const payload = {
       isScheduled: scheduleMode === "scheduled",
-      scheduledStartTime: scheduleMode === "scheduled" ? new Date(startTime).toISOString() : null,
+      scheduledStartTime:
+        scheduleMode === "scheduled"
+          ? new Date(startTime).toISOString()
+          : now.toISOString(),
       scheduledEndTime:
         scheduleMode === "scheduled" && computedEndTime
           ? computedEndTime.toISOString()
-          : null,
-      durationMinutes: Number(durationMinutes) || 60,
+          : new Date(now.getTime() + durationMin * 60 * 1000).toISOString(),
+      durationMinutes: durationMin,
       resetSubmissions,
       notifyStudents,
       reason: reason.trim(),
@@ -238,8 +243,6 @@ export function RescheduleExamModal({
                       ? new Date(exam.scheduledEndTime)
                       : exam.scheduledStartTime
                       ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
-                      : exam.createdAt
-                      ? new Date(new Date(exam.createdAt).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
                       : null;
                     const isConcluded = exam.status === "completed" || Boolean(effectiveEndTime && effectiveEndTime < new Date());
                     return exam.status === "stopped" ? "Stopped" : isConcluded ? "Concluded" : exam.status || "Active";

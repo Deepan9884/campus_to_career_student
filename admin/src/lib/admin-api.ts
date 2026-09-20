@@ -736,6 +736,17 @@ export async function rescheduleAdminExam(
   );
 }
 
+export async function makeAdminExamLive(
+  examId: string,
+  durationMinutes?: number,
+  resetSubmissions: boolean = false
+): Promise<{ message: string; exam: ExamItem; resetSubmissionsCount?: number }> {
+  return api.patch<{ message: string; exam: ExamItem; resetSubmissionsCount?: number }>(
+    `/exams/admin/${examId}/make-live`,
+    { durationMinutes, resetSubmissions }
+  );
+}
+
 export async function toggleAdminExamDisclosure(
   examId: string,
   isResultDisclosed?: boolean
