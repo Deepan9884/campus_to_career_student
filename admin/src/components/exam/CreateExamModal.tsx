@@ -630,6 +630,10 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
           toast.error("Please select a Scheduled Start Date & Time.");
           return false;
         }
+        if (scheduledEndTime && new Date(scheduledEndTime) <= new Date(scheduledStartTime)) {
+          toast.error("Window Closes time must be after Window Opens time.");
+          return false;
+        }
       }
       return true;
     }
@@ -971,13 +975,9 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
     isResultDisclosed: false,
     allowRetakes,
     isPublished: true,
-    isScheduled,
-    scheduledStartTime: isScheduled && scheduledStartTime ? scheduledStartTime : null,
-    scheduledEndTime: isScheduled && scheduledStartTime
-      ? scheduledEndTime
-        ? scheduledEndTime
-        : new Date(new Date(scheduledStartTime).getTime() + Number(durationMinutes) * 60 * 1000).toISOString()
-      : null,
+    isScheduled: Boolean(isScheduled && scheduledStartTime),
+    scheduledStartTime: isScheduled && scheduledStartTime ? new Date(scheduledStartTime).toISOString() : null,
+    scheduledEndTime: isScheduled && scheduledStartTime && scheduledEndTime ? new Date(scheduledEndTime).toISOString() : null,
     status: isScheduled && scheduledStartTime && new Date(scheduledStartTime) > new Date() ? "scheduled" : "active",
     createdAt: new Date().toISOString(),
   };
@@ -990,10 +990,11 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
 
     setIsSubmitting(true);
     try {
-      const computedEndTime = isScheduled && scheduledStartTime
-        ? scheduledEndTime
-          ? new Date(scheduledEndTime).toISOString()
-          : new Date(new Date(scheduledStartTime).getTime() + Number(durationMinutes) * 60 * 1000).toISOString()
+      const computedStartTime = isScheduled && scheduledStartTime
+        ? new Date(scheduledStartTime).toISOString()
+        : null;
+      const computedEndTime = isScheduled && scheduledStartTime && scheduledEndTime
+        ? new Date(scheduledEndTime).toISOString()
         : null;
 
       const payload: Partial<ExamItem> = {
@@ -1019,7 +1020,7 @@ export function CreateExamModal({ open, onClose, onSuccess }: CreateExamModalPro
         allowRetakes,
         isPublished: true,
         isScheduled: Boolean(isScheduled && scheduledStartTime),
-        scheduledStartTime: isScheduled && scheduledStartTime ? scheduledStartTime : null,
+        scheduledStartTime: computedStartTime,
         scheduledEndTime: computedEndTime,
       };
 

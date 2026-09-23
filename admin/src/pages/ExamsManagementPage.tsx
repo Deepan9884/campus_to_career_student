@@ -146,10 +146,8 @@ export function ExamsManagementPage() {
 
   // Helper to determine accurate status
   const getExamStatusInfo = (exam: ExamItem) => {
-    const effectiveEndTime = exam.scheduledEndTime
+    const effectiveEndTime = exam.isScheduled && exam.scheduledEndTime
       ? new Date(exam.scheduledEndTime)
-      : exam.scheduledStartTime
-      ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
       : null;
 
     const isStopped = exam.status === "stopped";
@@ -389,9 +387,9 @@ export function ExamsManagementPage() {
                       <span className="truncate">
                         Starts: {new Date(exam.scheduledStartTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                         {" → "}
-                        Auto-ends: {exam.scheduledEndTime
-                          ? new Date(exam.scheduledEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                          : new Date(new Date(exam.scheduledStartTime).getTime() + (exam.durationMinutes || 60) * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        Ends: {exam.scheduledEndTime
+                          ? new Date(exam.scheduledEndTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })
+                          : "Window Open"}
                       </span>
                     </div>
                   )}

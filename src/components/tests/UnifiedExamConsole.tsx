@@ -926,22 +926,46 @@ export function UnifiedExamConsole({
   // Timer & Window Enforcement
   const totalDurationSeconds = (Number(examData?.durationMinutes) || 60) * 60;
   const computeInitialTimeLeft = () => {
+    // 1. Prioritize backend sessionRemainingSeconds (accounts for candidate's actual start time)
+    if (
+      typeof examData?.sessionRemainingSeconds === "number" &&
+      examData.sessionRemainingSeconds >= 0
+    ) {
+      return examData.sessionRemainingSeconds;
+    }
+
     const fullTestSeconds = totalDurationSeconds;
-    const effectiveEndTime = examData?.scheduledEndTime
-      ? new Date(examData.scheduledEndTime).getTime()
-      : examData?.scheduledStartTime
-      ? new Date(examData.scheduledStartTime).getTime() + totalDurationSeconds * 1000
+
+    // 2. Strict availability window end (ONLY applies if scheduled and scheduledEndTime is explicitly provided)
+    const hasScheduledWindowEnd = Boolean(
+      examData?.isScheduled && examData?.scheduledEndTime
+    );
+    const windowEndTime = hasScheduledWindowEnd
+      ? new Date(examData!.scheduledEndTime!).getTime()
       : null;
 
-    if (effectiveEndTime) {
+    if (windowEndTime && !isNaN(windowEndTime)) {
       const nowMs = Date.now();
-      const remainingWindowSec = Math.max(0, Math.floor((effectiveEndTime - nowMs) / 1000));
+      const remainingWindowSec = Math.max(0, Math.floor((windowEndTime - nowMs) / 1000));
       return Math.min(fullTestSeconds, remainingWindowSec);
     }
     return fullTestSeconds;
   };
 
   const [timeLeftSeconds, setTimeLeftSeconds] = useState<number>(computeInitialTimeLeft);
+
+  // Sync initial time left whenever examData loads before the candidate starts
+  useEffect(() => {
+    if (!hasStartedExam) {
+      setTimeLeftSeconds(computeInitialTimeLeft());
+    }
+  }, [
+    examData?.sessionRemainingSeconds,
+    examData?.durationMinutes,
+    examData?.isScheduled,
+    examData?.scheduledEndTime,
+    hasStartedExam,
+  ]);
   const [isTestFinished, setIsTestFinished] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
@@ -1231,29 +1255,28 @@ export function UnifiedExamConsole({
           }, 0);
           return 0;
         }
-        const effectiveEndTime = examData?.scheduledEndTime
-          ? new Date(examData.scheduledEndTime).getTime()
-          : examData?.scheduledStartTime
-          ? new Date(examData.scheduledStartTime).getTime() + totalDurationSeconds * 1000
-          : null;
 
-        if (effectiveEndTime) {
-          const windowRemainingSec = Math.max(0, Math.floor((effectiveEndTime - Date.now()) / 1000));
-          if (windowRemainingSec <= 1) {
-            clearInterval(timer);
-            toast.warning("Assessment availability window has closed. Auto-submitting responses...", { duration: 7000 });
-            setTimeout(() => {
-              if (submitHandlerRef.current) submitHandlerRef.current();
-            }, 0);
-            return 0;
+        // Only enforce window cutoff if this is an explicitly scheduled exam with an explicit scheduledEndTime
+        if (examData?.isScheduled && examData?.scheduledEndTime) {
+          const windowEndTime = new Date(examData.scheduledEndTime).getTime();
+          if (!isNaN(windowEndTime)) {
+            const windowRemainingSec = Math.max(0, Math.floor((windowEndTime - Date.now()) / 1000));
+            if (windowRemainingSec <= 1) {
+              clearInterval(timer);
+              toast.warning("Assessment availability window has closed. Auto-submitting responses...", { duration: 7000 });
+              setTimeout(() => {
+                if (submitHandlerRef.current) submitHandlerRef.current();
+              }, 0);
+              return 0;
+            }
+            return Math.min(prev - 1, windowRemainingSec);
           }
-          return Math.min(prev - 1, windowRemainingSec);
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [hasStartedExam, isTestFinished, examData?.isScheduled, examData?.scheduledStartTime, examData?.scheduledEndTime, (examData as any)?.createdAt, totalDurationSeconds]);
+  }, [hasStartedExam, isTestFinished, examData?.isScheduled, examData?.scheduledEndTime, totalDurationSeconds]);
 
   // Live heartbeat: proves to the admin proctoring radar that this candidate
   // is actively writing right now (refreshed every 30s; silent on failure).
