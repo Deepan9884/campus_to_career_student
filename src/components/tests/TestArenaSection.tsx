@@ -160,18 +160,14 @@ export function TestArenaSection() {
                   const now = new Date();
                   const hasAttempted = Boolean(exam.hasAttempted);
                   const isScheduled = Boolean(exam.isScheduled);
-                  const scheduledStart = exam.scheduledStartTime ? new Date(exam.scheduledStartTime) : null;
-                  const scheduledEnd = exam.scheduledEndTime
-                    ? new Date(exam.scheduledEndTime)
-                    : exam.scheduledStartTime
-                    ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
-                    : null;
+                  const scheduledStart = isScheduled && exam.scheduledStartTime ? new Date(exam.scheduledStartTime) : null;
+                  const scheduledEnd = isScheduled && exam.scheduledEndTime ? new Date(exam.scheduledEndTime) : null;
                   const isLockedBySchedule = Boolean(isScheduled && scheduledStart && scheduledStart > now);
-                  const isWindowExpired = Boolean(scheduledEnd && scheduledEnd < now);
+                  const isWindowExpired = Boolean(isScheduled && scheduledEnd && scheduledEnd < now);
                   const isStopped = Boolean(exam.isExamStopped || exam.status === "stopped" || exam.status === "completed" || isWindowExpired);
                   const isBlocked = Boolean(exam.isStudentBlocked);
                   const isInProgress = Boolean(exam.isStudentInProgress);
-                  const isLiveWindow = Boolean(scheduledEnd && scheduledEnd >= now && (!scheduledStart || scheduledStart <= now));
+                  const isLiveWindow = Boolean(isScheduled && scheduledEnd && scheduledEnd >= now && (!scheduledStart || scheduledStart <= now));
 
                   return (
                     <GlassCard
@@ -246,7 +242,7 @@ export function TestArenaSection() {
                             <Calendar className="w-3.5 h-3.5 shrink-0" />
                             <span className="truncate">
                               {isLockedBySchedule
-                                ? `Window: ${scheduledStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – ${scheduledEnd ? scheduledEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'End'}`
+                                ? `Window: ${scheduledStart ? scheduledStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Soon'} – ${scheduledEnd ? scheduledEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Open'}`
                                 : isLiveWindow
                                 ? `Window Active: Closes at ${scheduledEnd ? scheduledEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Soon'}`
                                 : `Window expired on ${scheduledEnd ? scheduledEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Concluded'}`}

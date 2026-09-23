@@ -28,7 +28,9 @@ import {
   Calendar,
   Timer,
   ShieldAlert,
+  RotateCcw,
   Sparkles,
+  Play,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,6 +39,7 @@ import {
   getAdminExams,
   deleteAdminExam,
   stopAdminExam,
+  makeAdminExamLive,
   toggleAdminExamDisclosure,
   toggleAdminExamRetakes,
   assignExamStudents,
@@ -116,6 +119,19 @@ export function ExamsManagementPage() {
     },
   });
 
+  // Make live mutation
+  const makeLiveMutation = useMutation({
+    mutationFn: ({ examId, durationMinutes, resetSubmissions }: { examId: string; durationMinutes?: number; resetSubmissions?: boolean }) =>
+      makeAdminExamLive(examId, durationMinutes, resetSubmissions),
+    onSuccess: (res) => {
+      toast.success(res.message || "Exam is now LIVE! Testing window open.");
+      queryClient.invalidateQueries({ queryKey: ["admin-exams"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to make exam live");
+    },
+  });
+
   // Delete exam mutation
   const deleteMutation = useMutation({
     mutationFn: (examId: string) => deleteAdminExam(examId),
@@ -130,16 +146,14 @@ export function ExamsManagementPage() {
 
   // Helper to determine accurate status
   const getExamStatusInfo = (exam: ExamItem) => {
-    const effectiveEndTime = exam.scheduledEndTime
+    const effectiveEndTime = exam.isScheduled && exam.scheduledEndTime
       ? new Date(exam.scheduledEndTime)
-      : exam.scheduledStartTime
-      ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
       : null;
 
     const isStopped = exam.status === "stopped";
     const isEnded =
       exam.status === "completed" ||
-      Boolean(exam.isScheduled && effectiveEndTime && effectiveEndTime < new Date());
+      Boolean(effectiveEndTime && effectiveEndTime < new Date());
     const isScheduledFuture =
       Boolean(exam.isScheduled) &&
       Boolean(exam.scheduledStartTime) &&
@@ -373,9 +387,9 @@ export function ExamsManagementPage() {
                       <span className="truncate">
                         Starts: {new Date(exam.scheduledStartTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                         {" → "}
-                        Auto-ends: {exam.scheduledEndTime
-                          ? new Date(exam.scheduledEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                          : new Date(new Date(exam.scheduledStartTime).getTime() + (exam.durationMinutes || 60) * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        Ends: {exam.scheduledEndTime
+                          ? new Date(exam.scheduledEndTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })
+                          : "Window Open"}
                       </span>
                     </div>
                   )}
@@ -546,6 +560,35 @@ export function ExamsManagementPage() {
 
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2 flex-wrap">
+                      {/* Make Live Button (for stopped or concluded exams) */}
+                      {(isStopped || isEnded) && (
+                        <button
+                          onClick={() => {
+                            if (
+                              confirm(
+                                `Make "${exam.title}" LIVE now? This will open an immediate testing window for ${exam.durationMinutes || 60} minutes and allow candidates to take the assessment right away.`
+                              )
+                            ) {
+                              makeLiveMutation.mutate({
+                                examId: exam._id,
+                                durationMinutes: exam.durationMinutes,
+                                resetSubmissions: false,
+                              });
+                            }
+                          }}
+                          disabled={makeLiveMutation.isPending && makeLiveMutation.variables?.examId === exam._id}
+                          className="px-3 py-1 rounded-xl text-[11px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-500/30 flex items-center gap-1.5 transition cursor-pointer shadow-xs disabled:opacity-50"
+                          title="Make this assessment live immediately for candidates"
+                        >
+                          {makeLiveMutation.isPending && makeLiveMutation.variables?.examId === exam._id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Play className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 fill-current" />
+                          )}
+                          <span>Make Live</span>
+                        </button>
+                      )}
+
                       {/* Reschedule Exam Button */}
                       <button
                         onClick={() => setSelectedExamForReschedule(exam)}

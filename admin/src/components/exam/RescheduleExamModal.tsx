@@ -47,13 +47,13 @@ export function RescheduleExamModal({
 
   // Initial states derived from current exam
   const [scheduleMode, setScheduleMode] = useState<"scheduled" | "immediate">(() =>
-    exam.isScheduled ? "scheduled" : "scheduled"
+    exam.isScheduled ? "scheduled" : "immediate"
   );
 
   const [startTime, setStartTime] = useState<string>(() => {
     if (exam.scheduledStartTime) {
       const d = new Date(exam.scheduledStartTime);
-      if (d > new Date()) {
+      if (!isNaN(d.getTime())) {
         return toDateTimeLocalString(d);
       }
     }
@@ -66,7 +66,7 @@ export function RescheduleExamModal({
   const [endTime, setEndTime] = useState<string>(() => {
     if (exam.scheduledEndTime) {
       const d = new Date(exam.scheduledEndTime);
-      if (d > new Date()) {
+      if (!isNaN(d.getTime())) {
         return toDateTimeLocalString(d);
       }
     }
@@ -160,14 +160,18 @@ export function RescheduleExamModal({
       }
     }
 
+    const durationMin = Number(durationMinutes) || 60;
     const payload = {
       isScheduled: scheduleMode === "scheduled",
-      scheduledStartTime: scheduleMode === "scheduled" ? new Date(startTime).toISOString() : null,
+      scheduledStartTime:
+        scheduleMode === "scheduled" && startTime
+          ? new Date(startTime).toISOString()
+          : null,
       scheduledEndTime:
         scheduleMode === "scheduled" && computedEndTime
           ? computedEndTime.toISOString()
           : null,
-      durationMinutes: Number(durationMinutes) || 60,
+      durationMinutes: durationMin,
       resetSubmissions,
       notifyStudents,
       reason: reason.trim(),
@@ -234,12 +238,10 @@ export function RescheduleExamModal({
                 Current Status:{" "}
                 <span className="font-bold text-slate-900 dark:text-white capitalize">
                   {(() => {
-                    const effectiveEndTime = exam.scheduledEndTime
+                    const effectiveEndTime = exam.isScheduled && exam.scheduledEndTime
                       ? new Date(exam.scheduledEndTime)
-                      : exam.scheduledStartTime
-                      ? new Date(new Date(exam.scheduledStartTime).getTime() + (Number(exam.durationMinutes) || 60) * 60 * 1000)
                       : null;
-                    const isConcluded = exam.status === "completed" || Boolean(exam.isScheduled && effectiveEndTime && effectiveEndTime < new Date());
+                    const isConcluded = exam.status === "completed" || Boolean(effectiveEndTime && effectiveEndTime < new Date());
                     return exam.status === "stopped" ? "Stopped" : isConcluded ? "Concluded" : exam.status || "Active";
                   })()}
                 </span>
