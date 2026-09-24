@@ -1435,6 +1435,9 @@ export function UnifiedExamConsole({
   const cleanExpectedOutput = (raw: any): string => {
     if (!raw) return "";
     let str = String(raw).trim();
+    if ((str.includes("+") && str.includes("-")) || str.includes("|")) {
+      return str;
+    }
     str = str.replace(/^(?:Output\s*:\s*)+/i, "").trim();
     str = str.replace(/,\s*[a-zA-Z_]\w*\s*=\s*\[[^\]]*\]/gi, "").trim();
     str = str.replace(/,\s*[a-zA-Z_]\w*\s*=\s*[^,\n\r]+/gi, "").trim();
@@ -1475,6 +1478,16 @@ export function UnifiedExamConsole({
   const cleanStdinInput = (raw: any): string => {
     if (!raw) return "";
     let str = String(raw).trim();
+    if (
+      str.includes("|") ||
+      (str.includes("+") && str.includes("-")) ||
+      str.toLowerCase().includes("table:") ||
+      str.toLowerCase().startsWith("select ") ||
+      str.toLowerCase().startsWith("insert ") ||
+      str.toLowerCase().startsWith("create ")
+    ) {
+      return str;
+    }
     str = str.replace(/^(?:Input\s*:\s*)+/i, "").trim();
     const varRegex = /(?:^|,|\n)\s*([a-zA-Z_]\w*)\s*=\s*(\[[^\]]*\]|'[^']*'|"[^"]*"|[^,\n]+)/g;
     const matches = [...str.matchAll(varRegex)];
